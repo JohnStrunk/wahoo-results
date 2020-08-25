@@ -1,0 +1,29 @@
+name: "Test"
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
+  schedule:
+    - cron: '43 16 * * 5'
+
+jobs:
+  test:
+    name: Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize virtualenv
+        shell: cmd
+        run: make-venv.bat
+
+      - name: Run tests
+        shell: cmd
+        run: |
+          call venv\Scripts\activate.bat
+          pytest -v
