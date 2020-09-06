@@ -1,4 +1,7 @@
 /__pycache__/
 /.mypy_cache/
 /.pytest_cache/
+/.vscode/
 /venv/
+/wahoo-results.exe
+/wahoo-results.ini

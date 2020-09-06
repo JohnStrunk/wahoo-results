@@ -2,4 +2,8 @@ mypy
 pyinstaller
 pylint
 pytest
+pytest-pylint
 pytest-mypy
+
+pillow
+watchdog
