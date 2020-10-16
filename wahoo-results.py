@@ -16,7 +16,6 @@
 
 import configparser
 import os
-import threading
 import time
 from tkinter import font, StringVar, Tk, Widget
 from tkinter import filedialog
@@ -90,7 +89,7 @@ class ScoreboardResults():
     num_lanes: int
 
     @classmethod
-    def format_time(cls, time: float) -> str:
+    def format_time(cls, time_seconds: float) -> str:
         """
         >>> ScoreboardResults.format_time(1.2)
         '01.20'
@@ -101,8 +100,8 @@ class ScoreboardResults():
         >>> ScoreboardResults.format_time(120.0)
         '2:00.00'
         """
-        minutes = int(time//60)
-        seconds = time - minutes*60.0
+        minutes = int(time_seconds//60)
+        seconds = time_seconds - minutes*60.0
         if minutes == 0:
             return f"{seconds:05.2f}"
         return f"{minutes}:{seconds:05.2f}"
@@ -349,7 +348,7 @@ def settings_dolphin(container: Widget, options: configparser.ConfigParser) -> W
     dolphin_dir_label.grid(column=1, row=0, sticky="ew")
     return lf_dolphin
 
-def settings_general(container: Widget, options: configparser.ConfigParser) -> Widget:
+def settings_general(container: Widget, _: configparser.ConfigParser) -> Widget:
     """General settings portion of the settings screen."""
     # labelframe to hold general settings
     # lf_general is vertical
@@ -415,9 +414,9 @@ def scoreboard_window(root: Tk, options: configparser.ConfigParser) -> Widget:
     return content
 
 def main():
-    global sb
-    global do4_handler
-    global file_watcher
+    global sb  # pylint: disable=W0603
+    global do4_handler  # pylint: disable=W0603
+    global file_watcher  # pylint: disable=W0603
 
     config = config_load()
 
