@@ -56,14 +56,17 @@ class Scoreboard(tk.Canvas):
     _border_pct = 0.05
     _header_gap_pct = 0.05
     _font: tkfont.Font
+    _font_times: tkfont.Font
     _line_height: int
 
     def __init__(self, container: TkContainer, **kwargs):
         super().__init__(container, kwargs)
         self.create_image(0, 0, image=None, tag="bg_image")
         self._font = tkfont.Font()
+        self._font_times = tkfont.Font()
         for i in ["event_heat", "event_desc", "hdr_lane", "hdr_name", "hdr_time"]:
-            self._text_items[i] = BoundedText(self, 0, 0, fill=self._text_color, width=1)
+            self._text_items[i] = BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font")
+        self.create_line(0, 0, 0, 0, tags="header_line")
         self.bind("<Configure>", self._reconfigure)
         self.set_lanes(9999)
         self._reconfigure(None)
@@ -205,79 +208,90 @@ class Scoreboard(tk.Canvas):
         line_height = int(self.winfo_height() *
                           (1 - 2*self._border_pct - self._header_gap_pct) /
                           (self._num_lanes + 2))
-        self._font = tkfont.Font(family="Overpass", weight="bold", size=int(-0.75 * line_height))
+        font_size = int(-0.67 * line_height)
+        self._font = tkfont.Font(family="Overpass", weight="bold", size=font_size)
+        self._font_times = tkfont.Font(family="Overpass Mono", weight="bold", size=font_size)
         self._line_height = line_height
         for i in self._text_items.values():
-            i.font = self._font
+            if "time_font" in self.gettags(i.id):
+                i.font = self._font_times
+            else:
+                i.font = self._font
 
     def _draw_header(self):
-        eh_pct = 0.33  # fraction of width for event/heat number
-        desc_pct = 0.66  # fraction of width for event description
-        lpos = int(self.winfo_width() * self._border_pct)
-        rpos = int(self.winfo_width() * (1-self._border_pct))
-        vpos = int(self.winfo_height() * self._border_pct + self._line_height)
-        self._text_items["event_heat"].configure(anchor="sw")
-        self._text_items["event_heat"].move_to(lpos, vpos)
-        self._text_items["event_heat"].width = (rpos-lpos)*eh_pct
-        self._text_items["event_desc"].configure(anchor="se")
-        self._text_items["event_desc"].move_to(rpos, vpos)
-        self._text_items["event_desc"].width = (rpos-lpos)*desc_pct
-
-    def _draw_lanes(self):
-        idx_pct = 0.12  # fraction of width for lane number
-        pl_pct = 0.10  # fraction of width for heat place
-        name_pct = 0.55  # fraction of width for name
-        time_pct = 0.20  # fraction of width for finish time
         lpos = int(self.winfo_width() * self._border_pct)
         rpos = int(self.winfo_width() * (1-self._border_pct))
         width = rpos - lpos
+        eh_width = self._font.measure("E: MMM / H: MM")
+        desc_width = width - eh_width
+        vpos = int(self.winfo_height() * self._border_pct + self._line_height)
+        self._text_items["event_heat"].configure(anchor="sw")
+        self._text_items["event_heat"].move_to(lpos, vpos)
+        self._text_items["event_heat"].width = eh_width
+        self._text_items["event_desc"].configure(anchor="se")
+        self._text_items["event_desc"].move_to(rpos, vpos)
+        self._text_items["event_desc"].width = desc_width
+
+    def _draw_lanes(self): #pylint: disable=too-many-statements
+        lpos = int(self.winfo_width() * self._border_pct)
+        rpos = int(self.winfo_width() * (1-self._border_pct))
+        width = rpos - lpos
+        time_width = int(self._font_times.measure("00:00.00") * 1.2)
+        idx_width = self._font.measure("Lane")
+        pl_width = self._font.measure("MMM")
+        name_width = width - time_width - idx_width - pl_width
         lane_top = int(self.winfo_height() * (self._border_pct + self._header_gap_pct) +
                        2 * self._line_height)
         self._text_items["hdr_lane"].configure(anchor="s")
-        self._text_items["hdr_lane"].move_to(lpos + idx_pct/3 * width, lane_top)
-        self._text_items["hdr_lane"].width = idx_pct * width
+        self._text_items["hdr_lane"].move_to(lpos + idx_width/3, lane_top)
+        self._text_items["hdr_lane"].width = idx_width
         self._text_items["hdr_lane"].text = "Lane"
         self._text_items["hdr_name"].configure(anchor="sw")
-        self._text_items["hdr_name"].move_to(lpos + (idx_pct + pl_pct) * width, lane_top)
-        self._text_items["hdr_name"].width = name_pct * width
+        self._text_items["hdr_name"].move_to(lpos + idx_width + pl_width, lane_top)
+        self._text_items["hdr_name"].width = name_width
         self._text_items["hdr_name"].text = "Name"
         self._text_items["hdr_time"].configure(anchor="se")
         self._text_items["hdr_time"].move_to(rpos, lane_top)
-        self._text_items["hdr_time"].width = time_pct * width
+        self._text_items["hdr_time"].width = time_width
         self._text_items["hdr_time"].text = "Time"
+        self.itemconfigure("header_line", width=int(0.05 * self._line_height),
+                            capstyle="round", fill="white")
+        (hlx1, _, _, _) = self.bbox(self._text_items["hdr_lane"].id)
+        (_, _, hlx2, _) = self.bbox(self._text_items["hdr_time"].id)
+        self.coords("header_line", hlx1, lane_top, hlx2, lane_top)
         for i in range(self._max_lanes):
             # Lane number
             txt = self._text_items.setdefault(f"lane_{i}_idx",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1))
+                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font"))
             txt.configure(anchor="s")
-            txt.move_to(lpos + idx_pct/3 * width, lane_top + (i+1) * self._line_height)
-            txt.width = idx_pct * width
+            txt.move_to(lpos + idx_width/3, lane_top + (i+1) * self._line_height)
+            txt.width = idx_width
             if i < self._num_lanes:
                 txt.text = f"{i+1}"
             else:
                 txt.text = ""
             # Place
             txt = self._text_items.setdefault(f"lane_{i}_pl",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1))
+                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font"))
             txt.configure(anchor="sw")
-            txt.move_to(lpos + idx_pct * width, lane_top + (i+1) * self._line_height)
-            txt.width = pl_pct * width
+            txt.move_to(lpos + idx_width, lane_top + (i+1) * self._line_height)
+            txt.width = pl_width
             if i >= self._num_lanes:
                 txt.text = ""
             # Name
             txt = self._text_items.setdefault(f"lane_{i}_name",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1))
+                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font"))
             txt.configure(anchor="sw")
-            txt.move_to(lpos + (idx_pct + pl_pct) * width, lane_top + (i+1) * self._line_height)
-            txt.width = name_pct * width
+            txt.move_to(lpos + idx_width + pl_width, lane_top + (i+1) * self._line_height)
+            txt.width = name_width
             if i >= self._num_lanes:
                 txt.text = ""
             # Time
             txt = self._text_items.setdefault(f"lane_{i}_time",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1))
+                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="time_font"))
             txt.configure(anchor="se")
             txt.move_to(rpos, lane_top + (i+1) * self._line_height)
-            txt.width = time_pct * width
+            txt.width = time_width
             if i >= self._num_lanes:
                 txt.text = ""
 
