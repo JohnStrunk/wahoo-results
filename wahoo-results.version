@@ -34,7 +34,7 @@ VSVersionInfo(
         StringStruct(u'LegalTrademarks', u'Licensed under GNU Affero General Public License v3 or later'),
         StringStruct(u'FileVersion', u'v0.5.0'),
         StringStruct(u'ProductVersion', u'v0.5.0'),
-        StringStruct(u'InternalName', u'wahoo-results.py'),
+        StringStruct(u'InternalName', u'wahoo_results.py'),
         StringStruct(u'OriginalFilename', u'https://github.com/JohnStrunk/wahoo-results')
         ])
       ]), 
