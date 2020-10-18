@@ -1,8 +1,3 @@
-'''
-TKinter code to display the scoreboard
-
-This file can be directly executed to display a mockup of the scoreboard.
-'''
 # Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
 # Copyright (C) 2020 - John D. Strunk
 #
@@ -18,6 +13,12 @@ This file can be directly executed to display a mockup of the scoreboard.
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+'''
+TKinter code to display the scoreboard
+
+This file can be directly executed to display a mockup of the scoreboard.
+'''
 
 import tkinter as tk
 import tkinter.font as tkfont

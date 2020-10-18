@@ -1,5 +1,3 @@
-'''Wahoo! Results scoreboard'''
-
 # Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
 # Copyright (C) 2020 - John D. Strunk
 #
@@ -15,6 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+'''Wahoo! Results scoreboard'''
 
 import configparser
 import os
