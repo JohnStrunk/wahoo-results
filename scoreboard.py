@@ -52,7 +52,7 @@ class Scoreboard(tk.Canvas):
     _event_num: Union[int, str] = ""
     _event_description: str = ""
     _heat_num: int = 0
-    _text_items: Dict[str, BoundedText] = {}
+    _text_items: Dict[str, BoundedText]
     _border_pct = 0.05
     _header_gap_pct = 0.05
     _font: tkfont.Font
@@ -64,8 +64,10 @@ class Scoreboard(tk.Canvas):
         self.create_image(0, 0, image=None, tag="bg_image")
         self._font = tkfont.Font()
         self._font_times = tkfont.Font()
+        self._text_items = {}
         for i in ["event_heat", "event_desc", "hdr_lane", "hdr_name", "hdr_time"]:
-            self._text_items[i] = BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font")
+            self._text_items[i] = BoundedText(self, 0, 0, fill=self._text_color,
+                                              width=1, tags="normal_font")
         self.create_line(0, 0, 0, 0, tags="header_line")
         self.bind("<Configure>", self._reconfigure)
         self.set_lanes(9999)
@@ -327,8 +329,8 @@ def show_mockup(board: Scoreboard):
     board.lane(1, "SWIMMER, FIRST", "TEAM1", 30.02, 1)
     board.lane(2, "SWIMMER, ANOTHER", "TEAM2", 900.47, 3)
     board.lane(3, "REALLYREALLYLONGNAME, IMA", "TEAM2", 1000.00, 4)
-    board.lane(4, "SWIMMER, ANOTHER", "TEAM2", -900.47)
-    board.lane(5, "VACANT", "NOTEAM", 0)
+    board.lane(4, "TIME, INCONSISTENT", "TEAM2", -900.47)
+    board.lane(5, "SWIM, NO", "NOTEAM", 0)
     board.lane(6, "SWIMMER, THELAST", "TEAM1", 90.30, 2)
 
 def main():

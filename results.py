@@ -32,7 +32,7 @@ class FileParseError(Exception):
 
 def _truncate_hundredths(num: float) -> float:
     return math.floor(num * 100.0) / 100.0
-    
+
 class Event:
     """
     Event represents a swimming event.
@@ -42,12 +42,14 @@ class Event:
     num_heats: int
 
     def from_scb(self, filename: str) -> None:
+        '''Parse event information from an .scb file'''
         file = open(filename, "r")
         lines = file.readlines()
         file.close()
         return self.from_lines(lines)
 
     def from_lines(self, lines: List[str]) -> None:
+        '''Parse event information'''
         match = re.match(r"^#(\w+)\s+(.*)$", lines[0])
         if not match:
             raise FileParseError("", "Unable to parse header")
@@ -162,7 +164,7 @@ class Heat:
         try:
             self._parse_do4(lines)
         except FileParseError as err:
-            raise FileParseError(filename, err.error)
+            raise FileParseError(filename, err.error) from err
 
     def _parse_do4(self, lines) -> None:
         # Ensure the file is the expected number of lines
@@ -180,7 +182,7 @@ class Heat:
         # Parse the lane results
         for i in range(1, 11):
             fields = lines[i].strip().split(';')
-            times = [_truncate_hundredths(float(x)) for x in fields[1:] if x != '' and x != '0']
+            times = [_truncate_hundredths(float(x)) for x in fields[1:] if x not in ('', '0')]
             self.lanes[i-1].times = times
 
     def load_scb(self, filename: str) -> None:
@@ -194,7 +196,7 @@ class Heat:
         try:
             self._parse_scb(lines)
         except FileParseError as err:
-            raise FileParseError(filename, err.error)
+            raise FileParseError(filename, err.error) from err
 
     def _parse_scb(self, lines) -> None:
         # Ensure file has the expected # of lines

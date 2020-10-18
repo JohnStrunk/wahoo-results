@@ -18,14 +18,14 @@ Lane10;0;0;0
 F679E29E3D8A4CC4""".split("\n")
 
     res = results.Heat()
-    res._parse_do4(lines)
+    res._parse_do4(lines)  # pylint: disable=protected-access
     assert res.event == "129"
     assert res.heat == 4
     assert res.num_expected_times() == 2
     assert len(res.lanes[0].times) == 0
     assert len(res.lanes[1].times) == 2
-    assert res.lanes[0].is_empty() == True
-    assert res.lanes[3].is_empty() == False
+    assert res.lanes[0].is_empty()
+    assert not res.lanes[3].is_empty()
 
 def test_parse_scb():
     """Ensure we can parse the scb format correctly"""
@@ -52,7 +52,7 @@ AAAAA, B            --X
                     --                """.split("\n")
     assert len(lines) == 21
     res = results.Heat(event="18", heat=1)
-    res._parse_scb(lines)
+    res._parse_scb(lines)  # pylint: disable=protected-access
     assert res.event_desc == "BOYS 10&U 50 FLY"
     assert res.lanes[3].name == "PERSON, JUST A"
     assert res.lanes[3].team == "TEAM"
@@ -62,7 +62,7 @@ AAAAA, B            --X
     assert res.lanes[4].is_empty()
 
     res = results.Heat(event="18", heat=2)
-    res._parse_scb(lines)
+    res._parse_scb(lines)  # pylint: disable=protected-access
     assert res.event_desc == "BOYS 10&U 50 FLY"
     assert res.lanes[3].name == "XXXXXXX, YYYYYY Z"
     assert res.lanes[3].team == ""
