@@ -31,6 +31,7 @@ class FileParseError(Exception):
         super().__init__(self, filename, error)
 
 def _truncate_hundredths(num: float) -> float:
+    '''Truncates a float to two decimal places'''
     return math.floor(num * 100.0) / 100.0
 
 class Event:
@@ -110,12 +111,18 @@ class Lane:
         9.1
         >>> Lane(times=[7.13, 6.1]).final_time()
         6.61
+        >>> Lane(times=[139.19, 139.17]).final_time()
+        139.18
+        >>> Lane(times=[154.37, 154.29]).final_time() # showed floating point errors
+        154.33
         """
+        EPSILON = 1e-6 # pylint: disable=invalid-name
         if len(self.times) == 3:
             self.times.sort()
             return self.times[1]
         if len(self.times) == 2:
-            return _truncate_hundredths((self.times[0] + self.times[1]) / 2)
+            # Epsilon is used to correct for floating point inaccuracy
+            return _truncate_hundredths((self.times[0] + self.times[1]) / 2 + EPSILON)
         if len(self.times) == 1:
             return self.times[0]
         return 0.0
