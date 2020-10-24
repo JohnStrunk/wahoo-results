@@ -16,12 +16,9 @@
 
 '''Wahoo! Results scoreboard'''
 
-import configparser
 import os
 import time
-from tkinter import StringVar, Tk, Widget
-from tkinter import filedialog
-from tkinter import ttk
+from tkinter import Tk
 from typing import List
 from PIL import Image  #type: ignore
 from PIL.ImageEnhance import Brightness  #type: ignore
@@ -29,33 +26,11 @@ import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
 
 import results
+import settings
+from config import WahooConfig
 from scoreboard import Scoreboard
 
-# Name of the configuration file
-CONFIG_FILE = "wahoo-results.ini"
-# Name of the section we use in the ini file
-INI_HEADING = "wahoo-results"
-# Configuration defaults if not present in the config file
-CONFIG_DEFAULTS = {INI_HEADING: {
-    "dolphin_dir": "c:\\CTSDolphin",
-    "start_list_dir": "c:\\swmeets8",
-    "num_lanes": "10",
-    "color_bg": "black",
-    "color_fg": "white",
-}}
 FILE_WATCHER: watchdog.observers.Observer
-
-def config_load() -> configparser.ConfigParser:
-    """Load values from the configuration file."""
-    config = configparser.ConfigParser()
-    config.read_dict(CONFIG_DEFAULTS)
-    config.read(CONFIG_FILE)
-    return config
-
-def config_save(options: configparser.ConfigParser) -> None:
-    """Save the configuration"""
-    with open(CONFIG_FILE, 'w') as configfile:
-        options.write(configfile)
 
 def eventlist_to_csv(events: List[results.Event]) -> List[str]:
     '''Converts a list of events into CSV format'''
@@ -64,12 +39,11 @@ def eventlist_to_csv(events: List[results.Event]) -> List[str]:
         lines.append(f"{i.event},{i.event_desc},{i.num_heats},1,A\n")
     return lines
 
-def generate_dolphin_csv(directory: str) -> str:
+def generate_dolphin_csv(filename: str, directory: str) -> int:
     """
     Write the events from the scb files in the given directory into a CSV
     for Dolphin.
     """
-    filename = "dolphin_events.csv"
     files = os.scandir(directory)
     events = []
     for file in files:
@@ -83,113 +57,25 @@ def generate_dolphin_csv(directory: str) -> str:
     csv = open(outfile, "w")
     csv.writelines(csv_lines)
     csv.close()
-    if len(events) == 0:
-        return "WARNING: No events were found. Check your directory."
-    return f'Wrote {len(events)} events to {filename}'
+    return len(events)
 
 class Do4Handler(watchdog.events.PatternMatchingEventHandler):
     '''Handler to process Dolphin .do4 files'''
     _sb: Scoreboard
-    _options: configparser.ConfigParser
-    def __init__(self, scoreboard: Scoreboard, options: configparser.ConfigParser):
+    _options: WahooConfig
+    def __init__(self, scoreboard: Scoreboard, options: WahooConfig):
         self._sb = scoreboard
         self._options = options
         super().__init__(patterns=["*.do4"], ignore_directories=True)
     def on_created(self, event):
-        print(f"Triggered by: {event.src_path}")
         time.sleep(1)
         heat = results.Heat()
         heat.load_do4(event.src_path)
         scb_filename = f"E{heat.event}.scb"
-        heat.load_scb(os.path.join(self._options[INI_HEADING]["start_list_dir"], scb_filename))
+        heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
         display(self._sb, heat)
 
-def settings_start_list(container: Widget, options: configparser.ConfigParser) -> Widget:
-    """Elements for the Start List portion of the settings screen."""
-
-    # The directory containing the scb start lists
-    scb_directory = StringVar(value=options[INI_HEADING]["start_list_dir"])
-    # The status line
-    csv_status = StringVar(value="")
-
-    def handle_scb_browse():
-        directory = filedialog.askdirectory()
-        if len(directory) == 0:
-            return
-        directory = os.path.normpath(directory)
-        options[INI_HEADING]["start_list_dir"] = directory
-        scb_directory.set(options[INI_HEADING]["start_list_dir"])
-        csv_status.set("") # clear status line if we change directory
-    def handle_write_csv():
-        csv_status.set(generate_dolphin_csv(scb_directory.get()))
-
-    # labelframe to hold start list settings
-    # lf_startlist is vertical
-    lf_startlist = ttk.Labelframe(container, text='CTS Start list configuration', padding=5)
-    lf_startlist.columnconfigure(0, weight=1)
-
-    lbl1 = ttk.Label(lf_startlist, text="Directory for CTS Start List files:")
-    lbl1.grid(column=0, row=0, sticky="ws")
-
-    # f1 holds browse button & current dir
-    # f1 is horizontal
-    fr1 = ttk.Frame(lf_startlist)
-    fr1.rowconfigure(0, weight=1)
-    fr1.grid(column=0, row=1, sticky="news")
-
-    scb_dir_label = ttk.Label(fr1, textvariable=scb_directory)
-    scb_dir_label.grid(column=1, row=0, sticky="ew")
-
-    btn1 = ttk.Button(fr1, text="Browse", command=handle_scb_browse)
-    btn1.grid(column=0, row=0)
-
-    btn2 = ttk.Button(lf_startlist, text="Write dolphin_events.csv", command=handle_write_csv)
-    btn2.grid(column=0, row=2, sticky="ew")
-    lbl2 = ttk.Label(lf_startlist, textvariable=csv_status, borderwidth=2,
-                     relief="sunken", padding=2)
-    lbl2.grid(column=0, row=3, sticky="news")
-    return lf_startlist
-
-def settings_dolphin(container: Widget, options: configparser.ConfigParser) -> Widget:
-    """Dolphin configuration portion of the settings screen."""
-    dolphin_directory = StringVar(value=options[INI_HEADING]["dolphin_dir"])
-    def handle_do4_browse():
-        directory = filedialog.askdirectory()
-        if len(directory) == 0:
-            return
-        directory = os.path.normpath(directory)
-        options[INI_HEADING]["dolphin_dir"] = directory
-        dolphin_directory.set(options[INI_HEADING]["dolphin_dir"])
-
-    # labelframe to hold Dolphin settings
-    # lf_dolphin is vertical
-    lf_dolphin = ttk.Labelframe(container, text='CTS Dolphin configuration', padding=5)
-    lf_dolphin.columnconfigure(0, weight=1)
-    lbl2 = ttk.Label(lf_dolphin, text="Directory for CTS Dolphin do4 files:")
-    lbl2.grid(column=0, row=0, sticky="ws")
-
-    # f2 holds browse button & current data dir
-    # f2 is horizontal
-    fr2 = ttk.Frame(lf_dolphin)
-    fr2.rowconfigure(0, weight=1)
-    fr2.grid(column=0, row=1, sticky="news")
-    btn2 = ttk.Button(fr2, text="Browse", command=handle_do4_browse)
-    btn2.grid(column=0, row=0)
-    dolphin_dir_label = ttk.Label(fr2, textvariable=dolphin_directory)
-    dolphin_dir_label.grid(column=1, row=0, sticky="ew")
-    return lf_dolphin
-
-def settings_general(container: Widget, _: configparser.ConfigParser) -> Widget:
-    """General settings portion of the settings screen."""
-    # labelframe to hold general settings
-    # lf_general is vertical
-    lf_general = ttk.LabelFrame(container, text="General settings", padding=5)
-    lf_general.columnconfigure(0, weight=1)
-    lbl3 = ttk.Label(lf_general, text="This is too complicated")
-    lbl3.grid(column=0, row=0, sticky="ws")
-    return lf_general
-
-def settings_window(root: Tk, options: configparser.ConfigParser) -> Widget:
+def settings_window(root: Tk, options: WahooConfig) -> None:
     '''Display the settings window'''
     # don't watch for new results while in settings menu
     FILE_WATCHER.unschedule_all()
@@ -198,43 +84,29 @@ def settings_window(root: Tk, options: configparser.ConfigParser) -> Widget:
     root.resizable(False, False)
     root.geometry("400x300")
 
+    def sb_run_cb():
+        board = scoreboard_window(root, options)
+        # Start watching for new results
+        do4_handler = Do4Handler(board, options)
+        FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
+
+    def sb_test_cb():
+        board = scoreboard_window(root, options)
+        _set_test_data(board)
+
     # Invisible container that holds all content
-    content = ttk.Frame(root, padding=5)
+    content = settings.Settings(root, generate_dolphin_csv, sb_run_cb, sb_test_cb, options)
     content.grid(column=0, row=0, sticky="news")
-    content.columnconfigure(0, weight=1)
-    content.rowconfigure(1, weight=1)
-    content.rowconfigure(3, weight=1)
-    content.rowconfigure(5, weight=1)
 
-    startlist = settings_start_list(content, options)
-    startlist.grid(column=0, row=0, sticky="news")
-
-    dolphin = settings_dolphin(content, options)
-    dolphin.grid(column=0, row=2, sticky="news")
-
-    general = settings_general(content, options)
-    general.grid(column=0, row=4, sticky="news")
-
-    def handle_scoreboard() -> None:
-        content.destroy()
-        scoreboard_window(root, options)
-
-    scoreboard = ttk.Button(content, text="Run scoreboard", command=handle_scoreboard)
-    scoreboard.grid(column=0, row=6, sticky="news")
-
-    return content
-
-def scoreboard_window(root: Tk, options: configparser.ConfigParser) -> Widget:
+def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     """Displays the scoreboard window."""
     # Scoreboard is varible size
     root.resizable(True, True)
     content = Scoreboard(root)
     content.grid(column=0, row=0, sticky="news")
-    content.columnconfigure(0, weight=1)
-    content.rowconfigure(0, weight=1)
     image = Image.open('rsa2.png')
     content.bg_image(Brightness(image).enhance(0.25), "fit")
-    content.set_lanes(int(options[INI_HEADING]["num_lanes"]))
+    content.set_lanes(options.get_int("num_lanes"))
 
     def return_to_settings(_) -> None:
         root.unbind('<Double-1>')
@@ -242,11 +114,6 @@ def scoreboard_window(root: Tk, options: configparser.ConfigParser) -> Widget:
         root.state('normal') # Un-maximize
         settings_window(root, options)
     root.bind('<Double-1>', return_to_settings)
-
-    # Start watching for new results
-    do4_handler = Do4Handler(content, options)
-    FILE_WATCHER.schedule(do4_handler, options[INI_HEADING]["dolphin_dir"])
-
     return content
 
 def display(board: Scoreboard, heat: results.Heat) -> None:
@@ -265,13 +132,28 @@ def display(board: Scoreboard, heat: results.Heat) -> None:
                 ftime = -ftime
                 place = 0
             board.lane(i+1, heat.lanes[i].name, heat.lanes[i].team, ftime, place)
-    heat.dump()
+    # heat.dump()
+
+def _set_test_data(board: Scoreboard):
+    board.clear()
+    board.event(432, "GIRLS 13&O 1650 FREE")
+    board.heat(56)
+    board.lane(1, "NUMBERONE, SWIMMER", "TEAM1", 16*60 + 31.03, 4)
+    board.lane(2, "WINNER, IMTHE", "TEAM1", 48.00, 1)
+    board.lane(3, "NUMBERONE, SWIMMER", "TEAM1", 10*60 + 00.20, 3)
+    board.lane(4, "NOSHOW, IMA", "TEAM1")
+    board.lane(5, "", "", 60*5 + 12.34, 2)
+    board.lane(6, "TIMES, INCONSISTENT", "TEAM1", -678.12)
+    board.lane(7, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
+    board.lane(8, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
+    board.lane(9, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
+    board.lane(10, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
 
 def main():
     '''Runs the Wahoo! Results scoreboard'''
     global FILE_WATCHER  # pylint: disable=W0603
 
-    config = config_load()
+    config = WahooConfig()
 
     root = Tk()
     root.title("Wahoo! Results")
@@ -284,7 +166,7 @@ def main():
     settings_window(root, config)
     root.mainloop()
 
-    config_save(config)
+    config.save()
     FILE_WATCHER.stop()
     FILE_WATCHER.join()
 
