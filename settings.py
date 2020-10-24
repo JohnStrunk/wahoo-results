@@ -22,6 +22,7 @@ from tkinter import filedialog, ttk, StringVar
 from typing import Any, Callable
 
 from config import WahooConfig
+from tooltip import ToolTip
 
 tkContainer = Any
 
@@ -52,9 +53,13 @@ class _StartList(ttk.LabelFrame):   # pylint: disable=too-many-ancestors
         scb_dir_label.grid(column=1, row=0, sticky="ew")
         btn1 = ttk.Button(fr1, text="Browse", command=self._handle_scb_browse)
         btn1.grid(column=0, row=0)
+        ToolTip(btn1, text="Select the directory containing start list files "
+        "that have been exported from Meet Manager")
         # row 2: write csv button
         btn2 = ttk.Button(self, text="Write dolphin_events.csv", command=self._handle_write_csv)
         btn2.grid(column=0, row=2, sticky="ew")
+        ToolTip(btn2, text="Write a csv file with event information that can "
+        "be imported into the Dolphin software")
         # row 3: status line
         lbl2 = ttk.Label(self, textvariable=self._csv_status, borderwidth=2,
                          relief="sunken", padding=2)
@@ -97,6 +102,8 @@ class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
         fr2.grid(column=0, row=1, sticky="news")
         btn2 = ttk.Button(fr2, text="Browse", command=self._handle_do4_browse)
         btn2.grid(column=0, row=0)
+        ToolTip(btn2, text="Choose the directory where the Dolphin software "
+        "will write race results. The Dolphin software must be configured to use the .do4 format.")
         dolphin_dir_label = ttk.Label(fr2, textvariable=self._dolphin_directory)
         dolphin_dir_label.grid(column=1, row=0, sticky="ew")
 
@@ -149,8 +156,10 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         fr6.columnconfigure(1, weight=1)
         test_btn = ttk.Button(fr6, text="Test", command=self._handle_test_btn)
         test_btn.grid(column=0, row=0, sticky="news")
+        ToolTip(test_btn, text="Display a mockup to show the current scoreboard style")
         run_btn = ttk.Button(fr6, text="Run scoreboard", command=self._handle_run_scoreboard_btn)
         run_btn.grid(column=1, row=0, sticky="news")
+        ToolTip(run_btn, text="Start the scoreboard and watch for results")
 
     def _handle_run_scoreboard_btn(self) -> None:
         self.destroy()
