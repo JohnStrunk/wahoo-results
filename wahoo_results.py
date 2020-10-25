@@ -17,6 +17,7 @@
 '''Wahoo! Results scoreboard'''
 
 import os
+import sys
 import time
 from tkinter import Tk
 from typing import List
@@ -155,11 +156,14 @@ def _set_test_data(board: Scoreboard):
 def main():
     '''Runs the Wahoo! Results scoreboard'''
     global FILE_WATCHER  # pylint: disable=W0603
+    bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
     config = WahooConfig()
 
     root = Tk()
     root.title("Wahoo! Results")
+    icon_file = os.path.abspath(os.path.join(bundle_dir, 'wahoo-results.ico'))
+    root.iconbitmap(icon_file)
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
