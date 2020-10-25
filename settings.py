@@ -172,7 +172,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         bgi_text=os.path.basename(self._config.get_str("image_bg"))
         if bgi_text == "":
             bgi_text = "-None-"
-        self._set_btn = ttk.Button(frame, text=bgi_text, command=self._browse_bg_image)
+        self._set_btn = ttk.Button(frame, text=bgi_text[0:20], command=self._browse_bg_image)
         self._set_btn.grid(column=1, row=0, sticky="news")
         ToolTip(self._set_btn, "Set the scoreboard background image")
         clear_btn = ttk.Button(frame, text="Clear", command=self._clear_bg_image)
@@ -188,7 +188,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
             return
         image = os.path.normpath(image)
         self._config.set_str("image_bg", image)
-        self._set_btn.configure(text=os.path.basename(image))
+        self._set_btn.configure(text=os.path.basename(image)[0:20])
     def _bg_brightness(self) -> ttk.Widget:
         frame = ttk.Frame(self, padding=1)
         frame.rowconfigure(0, weight=1)
