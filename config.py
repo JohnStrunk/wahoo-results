@@ -32,10 +32,12 @@ class WahooConfig:
         "num_lanes": "10",      # Number of lanes on the board
         "color_bg": "black",    # Window background
         "color_fg": "white",    # Main text color
+        "color_ehd": "white",   # Event/descr text color
         "place_1": "#00FFFF",   # 1st place marker
         "place_2": "#FF0000",   # 2nd place marker
         "place_3": "#FFFF00",   # 3rd place marker
         "image_bg": "",         # background image
+        "image_scale": "fit",   # how to scale the bg image
         "image_bright": "0.3",  # bg image brightness (0-1)
         "normal_font": "Helvetica",  # Main font
         "time_font": "Helvetica",    # Font for times

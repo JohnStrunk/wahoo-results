@@ -66,7 +66,10 @@ class Scoreboard(tk.Canvas):
         self._font = tkfont.Font()
         self._font_times = tkfont.Font()
         self._text_items = {}
-        for i in ["event_heat", "event_desc", "hdr_lane", "hdr_name", "hdr_time"]:
+        for i in ["event_heat", "event_desc"]:
+            self._text_items[i] = BoundedText(self, 0, 0, fill=self._config.get_str("color_ehd"),
+                                              width=1, tags="normal_font")
+        for i in ["hdr_lane", "hdr_name", "hdr_time"]:
             self._text_items[i] = BoundedText(self, 0, 0, fill=self._config.get_str("color_fg"),
                                               width=1, tags="normal_font")
         self.create_line(0, 0, 0, 0, tags="header_line")

@@ -131,6 +131,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         self.rowconfigure(3, weight=1)
         self.rowconfigure(4, weight=1)
         self.rowconfigure(5, weight=1)
+        self.rowconfigure(6, weight=1)
         self._color_swatch("1st place:", "place_1",
                            "Color of 1st place marker text").grid(column=0, row=0, sticky="es")
         self._lanes().grid(column=1, row=0, sticky="es")
@@ -142,14 +143,17 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
                            "Scoreboard background color").grid(column=2, row=1, sticky="es")
         self._color_swatch("3rd place:", "place_3",
                            "Color of 3rd place marker text").grid(column=0, row=2, sticky="es")
-        self._bg_brightness().grid(column=1, row=2, columnspan=2, sticky="es")
+        self._color_swatch("Title color:", "color_ehd",
+            "Scoreboard event, heat, and description text color").grid(column=2, row=2, sticky="es")
         self._bg_img().grid(column=0, row=3, columnspan=3, sticky="news")
+        self._bg_brightness().grid(column=0, row=4, columnspan=2, sticky="ws")
+        self._bg_scale().grid(column=2, row=4, sticky="news")
         self._font_chooser("Normal font:", "normal_font",
-            "Font for the scoreboard text").grid(column=0, row=4, columnspan=2, sticky="news")
+            "Font for the scoreboard text").grid(column=0, row=5, columnspan=2, sticky="news")
+        self._font_scale().grid(column=2, row=5, sticky="es")
         self._font_chooser("Time font:", "time_font",
             "Font for result times (recommend fixed width font)").grid(column=0,
-            row=5, columnspan=2, sticky="news")
-        self._font_scale().grid(column=2, row=4, sticky="es")
+            row=6, columnspan=2, sticky="news")
 
     def _color_swatch(self, label_text: str, config_item: str, tip_text: str = "") -> ttk.Widget:
         frame = ttk.Frame(self, padding=1)
@@ -193,7 +197,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         frame = ttk.Frame(self, padding=1)
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
-        ttk.Label(frame, text="Background image brightness:").grid(column=0, row=0, sticky="nes")
+        ttk.Label(frame, text="Image brightness:").grid(column=0, row=0, sticky="nes")
         self._bg_spin_var = StringVar(frame, value=str(self._config.get_float("image_bright")))
         self._bg_spin_var.trace_add("write", self._handle_bg_spin)
         spin = ttk.Spinbox(frame, from_=0, to=1, increment=0.05, width=5,
@@ -208,6 +212,21 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
                 self._config.set_float("image_bright", value)
         except ValueError:
             pass
+    def _bg_scale(self) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        ttk.Label(frame, text="Scale:").grid(column=0, row=0, sticky="nes")
+        self._bg_scale_var = StringVar(frame, value=str(self._config.get_str("image_scale")))
+        self._bg_scale_var.trace_add("write", self._handle_bg_scale)
+        box = ttk.Combobox(frame, state="readonly", textvariable=self._bg_scale_var,
+                           values=["none", "cover", "fit", "stretch"], width=7)
+        box.grid(column=1, row=0, sticky="news")
+        ToolTip(box, "How to scale the background image\nnone: as-is\n"
+            "cover: cover screen\nfit: fit within screen\nstretch: stretch all dimensions")
+        return frame
+    def _handle_bg_scale(self, *_arg):
+        self._config.set_str("image_scale", self._bg_scale_var.get())
 
     def _lanes(self) -> ttk.Widget:
         frame = ttk.Frame(self, padding=1)

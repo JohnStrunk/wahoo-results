@@ -106,7 +106,8 @@ def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     content.grid(column=0, row=0, sticky="news")
     if options.get_str("image_bg") != "":
         image = Image.open(options.get_str("image_bg"))
-        content.bg_image(Brightness(image).enhance(options.get_float("image_bright")), "fit")
+        content.bg_image(Brightness(image).enhance(options.get_float("image_bright")),
+                         options.get_str("image_scale"))
     content.set_lanes(options.get_int("num_lanes"))
 
     def return_to_settings(_) -> None:
@@ -139,16 +140,17 @@ def _set_test_data(board: Scoreboard):
     board.clear()
     board.event(432, "GIRLS 13&O 1650 FREE")
     board.heat(56)
-    board.lane(1, "NUMBERONE, SWIMMER", "TEAM1", 16*60 + 31.03, 4)
-    board.lane(2, "WINNER, IMTHE", "TEAM1", 48.00, 1)
-    board.lane(3, "NUMBERONE, SWIMMER", "TEAM1", 10*60 + 00.20, 3)
-    board.lane(4, "NOSHOW, IMA", "TEAM1")
+    # Names from https://www.name-generator.org.uk/
+    board.lane(1, "MILLER, STEPHANIE", "TEAM1", 16*60 + 31.03, 4)
+    board.lane(2, "DAVIS, SARAH", "TEAM1", 48.00, 1)
+    board.lane(3, "GARCIA, ASHLEY", "TEAM1", 10*60 + 00.20, 3)
+    board.lane(4, "WILSON, JESSICA", "TEAM1")
     board.lane(5, "", "", 60*5 + 12.34, 2)
-    board.lane(6, "TIMES, INCONSISTENT", "TEAM1", -678.12)
-    board.lane(7, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
-    board.lane(8, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
-    board.lane(9, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
-    board.lane(10, "NUMBERONE, SWIMMER", "TEAM1", 1000.03)
+    board.lane(6, "MOORE, SAMANTHA", "TEAM1", -678.12)
+    board.lane(7, "JACKSON, AMBER", "TEAM1", 1000.03)
+    board.lane(8, "TAYLOR, MELISSA", "TEAM1", 1000.03)
+    board.lane(9, "ANDERSON, RACHEL", "TEAM1", 1000.03)
+    board.lane(10, "WHITE, MEGAN", "TEAM1", 1000.03)
 
 def main():
     '''Runs the Wahoo! Results scoreboard'''
