@@ -27,6 +27,7 @@ from PIL import Image, ImageTk  #type: ignore
 from PIL.ImageEnhance import Brightness  #type: ignore
 
 from bounded_text import BoundedText
+from config import WahooConfig
 
 TkContainer = Any
 
@@ -41,8 +42,6 @@ class Scoreboard(tk.Canvas):
     '''
 
     # Background for the scoreboard
-    _bg_color = "black"
-    _text_color = "white"
     _bg_image: Image = None
     _bg_image_fill: str
     _bg_image_pimage: ImageTk.PhotoImage
@@ -60,14 +59,15 @@ class Scoreboard(tk.Canvas):
     _font_times: tkfont.Font
     _line_height: int
 
-    def __init__(self, container: TkContainer, **kwargs):
+    def __init__(self, container: TkContainer, config: WahooConfig, **kwargs):
         super().__init__(container, kwargs)
+        self._config = config
         self.create_image(0, 0, image=None, tag="bg_image")
         self._font = tkfont.Font()
         self._font_times = tkfont.Font()
         self._text_items = {}
         for i in ["event_heat", "event_desc", "hdr_lane", "hdr_name", "hdr_time"]:
-            self._text_items[i] = BoundedText(self, 0, 0, fill=self._text_color,
+            self._text_items[i] = BoundedText(self, 0, 0, fill=self._config.get_str("color_fg"),
                                               width=1, tags="normal_font")
         self.create_line(0, 0, 0, 0, tags="header_line")
         self.bind("<Configure>", self._reconfigure)
@@ -161,13 +161,13 @@ class Scoreboard(tk.Canvas):
         pl_txt = self._text_items[f"lane_{lane_num-1}_pl"]
         pl_txt.text = self.format_place(place)
         if place == 1:
-            pl_txt.configure(fill="#00FFFF")
+            pl_txt.configure(fill=self._config.get_str("place_1"))
         elif place == 2:
-            pl_txt.configure(fill="#FF0000")
+            pl_txt.configure(fill=self._config.get_str("place_2"))
         elif place == 3:
-            pl_txt.configure(fill="#FFFF00")
+            pl_txt.configure(fill=self._config.get_str("place_3"))
         else:
-            pl_txt.configure(fill=self._text_color)
+            pl_txt.configure(fill=self._config.get_str("color_fg"))
         if time == 0.0:
             self._text_items[f"lane_{lane_num-1}_time"].text = ""
         elif time < 0.0:
@@ -211,9 +211,11 @@ class Scoreboard(tk.Canvas):
         line_height = int(self.winfo_height() *
                           (1 - 2*self._border_pct - self._header_gap_pct) /
                           (self._num_lanes + 2))
-        font_size = int(-0.67 * line_height)
-        self._font = tkfont.Font(family="Overpass", weight="bold", size=font_size)
-        self._font_times = tkfont.Font(family="Overpass Mono", weight="bold", size=font_size)
+        font_size = int(-self._config.get_float("font_scale") * line_height)
+        self._font = tkfont.Font(family=self._config.get_str("normal_font"),
+                                 weight="bold", size=font_size)
+        self._font_times = tkfont.Font(family=self._config.get_str("time_font"),
+                                       weight="bold", size=font_size)
         self._line_height = line_height
         for i in self._text_items.values():
             if "time_font" in self.gettags(i.id):
@@ -265,7 +267,8 @@ class Scoreboard(tk.Canvas):
         for i in range(self._max_lanes):
             # Lane number
             txt = self._text_items.setdefault(f"lane_{i}_idx",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font"))
+                BoundedText(self, 0, 0, fill=self._config.get_str("color_fg"),
+                            width=1, tags="normal_font"))
             txt.configure(anchor="s")
             txt.move_to(lpos + idx_width/3, lane_top + (i+1) * self._line_height)
             txt.width = idx_width
@@ -275,7 +278,8 @@ class Scoreboard(tk.Canvas):
                 txt.text = ""
             # Place
             txt = self._text_items.setdefault(f"lane_{i}_pl",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font"))
+                BoundedText(self, 0, 0, fill=self._config.get_str("color_fg"),
+                            width=1, tags="normal_font"))
             txt.configure(anchor="sw")
             txt.move_to(lpos + idx_width, lane_top + (i+1) * self._line_height)
             txt.width = pl_width
@@ -283,7 +287,8 @@ class Scoreboard(tk.Canvas):
                 txt.text = ""
             # Name
             txt = self._text_items.setdefault(f"lane_{i}_name",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="normal_font"))
+                BoundedText(self, 0, 0, fill=self._config.get_str("color_fg"),
+                            width=1, tags="normal_font"))
             txt.configure(anchor="sw")
             txt.move_to(lpos + idx_width + pl_width, lane_top + (i+1) * self._line_height)
             txt.width = name_width
@@ -291,7 +296,8 @@ class Scoreboard(tk.Canvas):
                 txt.text = ""
             # Time
             txt = self._text_items.setdefault(f"lane_{i}_time",
-                BoundedText(self, 0, 0, fill=self._text_color, width=1, tags="time_font"))
+                BoundedText(self, 0, 0, fill=self._config.get_str("color_fg"),
+                            width=1, tags="time_font"))
             txt.configure(anchor="se")
             txt.move_to(rpos, lane_top + (i+1) * self._line_height)
             txt.width = time_width
@@ -299,7 +305,7 @@ class Scoreboard(tk.Canvas):
                 txt.text = ""
 
     def _draw_bg(self, _):
-        self.configure(bg=self._bg_color)
+        self.configure(bg=self._config.get_str("color_bg"))
         if self._bg_image is not None:
             i_size = self._bg_image.size
             c_size = (self.winfo_width(), self.winfo_height())
@@ -338,7 +344,7 @@ def main():
     '''Display a scoreboard mockup'''
     root = tk.Tk()
     root.geometry("1366x768")
-    board = Scoreboard(root)
+    board = Scoreboard(root, WahooConfig())
     board.pack(fill='both', expand='yes')
     show_mockup(board)
     root.mainloop()

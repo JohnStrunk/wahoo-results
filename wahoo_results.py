@@ -82,7 +82,7 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
 
     # Settings window is fixed size
     root.resizable(False, False)
-    root.geometry("400x300")
+    root.geometry("")  # allow automatic size
 
     def sb_run_cb():
         board = scoreboard_window(root, options)
@@ -102,10 +102,11 @@ def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     """Displays the scoreboard window."""
     # Scoreboard is varible size
     root.resizable(True, True)
-    content = Scoreboard(root)
+    content = Scoreboard(root, options)
     content.grid(column=0, row=0, sticky="news")
-    image = Image.open('rsa2.png')
-    content.bg_image(Brightness(image).enhance(0.25), "fit")
+    if options.get_str("image_bg") != "":
+        image = Image.open(options.get_str("image_bg"))
+        content.bg_image(Brightness(image).enhance(options.get_float("image_bright")), "fit")
     content.set_lanes(options.get_int("num_lanes"))
 
     def return_to_settings(_) -> None:

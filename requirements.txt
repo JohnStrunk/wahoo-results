@@ -6,4 +6,5 @@ pytest-pylint
 pytest-mypy
 
 pillow
+ttkwidgets
 watchdog

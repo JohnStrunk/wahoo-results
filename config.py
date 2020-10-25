@@ -29,9 +29,17 @@ class WahooConfig:
     _CONFIG_DEFAULTS = {_INI_HEADING: {
         "dolphin_dir": "c:\\CTSDolphin",
         "start_list_dir": "c:\\swmeets8",
-        "num_lanes": "10",
-        "color_bg": "black",
-        "color_fg": "white",
+        "num_lanes": "10",      # Number of lanes on the board
+        "color_bg": "black",    # Window background
+        "color_fg": "white",    # Main text color
+        "place_1": "#00FFFF",   # 1st place marker
+        "place_2": "#FF0000",   # 2nd place marker
+        "place_3": "#FFFF00",   # 3rd place marker
+        "image_bg": "",         # background image
+        "image_bright": "0.3",  # bg image brightness (0-1)
+        "normal_font": "Helvetica",  # Main font
+        "time_font": "Helvetica",    # Font for times
+        "font_scale": 0.67,     # scale of font relative to line height
     }}
 
     def __init__(self):
@@ -59,7 +67,7 @@ class WahooConfig:
 
     def set_float(self, name: str, value: float) -> float:
         '''Set a float option'''
-        self._config.set(self._INI_HEADING, name, value)
+        self._config.set(self._INI_HEADING, name, str(value))
         return self.get_float(name)
 
     def get_int(self, name: str) -> int:
@@ -68,5 +76,5 @@ class WahooConfig:
 
     def set_int(self, name: str, value: int) -> int:
         '''Set an integer option'''
-        self._config.set(self._INI_HEADING, name, value)
+        self._config.set(self._INI_HEADING, name, str(value))
         return self.get_int(name)

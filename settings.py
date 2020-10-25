@@ -20,9 +20,11 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk, StringVar
 from typing import Any, Callable
+import ttkwidgets.font  #type: ignore
 
 from config import WahooConfig
 from tooltip import ToolTip
+from color_button import ColorButton
 
 tkContainer = Any
 
@@ -121,8 +123,144 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         super().__init__(container, text="General Settings", padding=5)
         self._config = config
         self.columnconfigure(0, weight=1)
-        lbl3 = ttk.Label(self, text="more stuff here...")
-        lbl3.grid(column=0, row=0, sticky="ws")
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
+        self.rowconfigure(5, weight=1)
+        self._color_swatch("1st place:", "place_1",
+                           "Color of 1st place marker text").grid(column=0, row=0, sticky="es")
+        self._lanes().grid(column=1, row=0, sticky="es")
+        self._color_swatch("Text color:", "color_fg",
+                           "Scoreboard foreground text color").grid(column=2, row=0, sticky="es")
+        self._color_swatch("2nd place:", "place_2",
+                           "Color of 2nd place marker text").grid(column=0, row=1, sticky="es")
+        self._color_swatch("Background:", "color_bg",
+                           "Scoreboard background color").grid(column=2, row=1, sticky="es")
+        self._color_swatch("3rd place:", "place_3",
+                           "Color of 3rd place marker text").grid(column=0, row=2, sticky="es")
+        self._bg_brightness().grid(column=1, row=2, columnspan=2, sticky="es")
+        self._bg_img().grid(column=0, row=3, columnspan=3, sticky="news")
+        self._font_chooser("Normal font:", "normal_font",
+            "Font for the scoreboard text").grid(column=0, row=4, columnspan=2, sticky="news")
+        self._font_chooser("Time font:", "time_font",
+            "Font for result times (recommend fixed width font)").grid(column=0,
+            row=5, columnspan=2, sticky="news")
+        self._font_scale().grid(column=2, row=4, sticky="es")
+
+    def _color_swatch(self, label_text: str, config_item: str, tip_text: str = "") -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        label = ttk.Label(frame, text=label_text)
+        label.grid(column=0, row=0, sticky="news")
+        cbtn = ColorButton(frame, self._config, config_item)
+        cbtn.grid(column=1, row=0, sticky="news")
+        if tip_text != "":
+            ToolTip(label, tip_text)
+            ToolTip(cbtn, tip_text)
+        return frame
+
+    def _bg_img(self) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=1)
+        ttk.Label(frame, text="Background image:").grid(column=0, row=0, sticky="news")
+        bgi_text=os.path.basename(self._config.get_str("image_bg"))
+        if bgi_text == "":
+            bgi_text = "-None-"
+        self._set_btn = ttk.Button(frame, text=bgi_text, command=self._browse_bg_image)
+        self._set_btn.grid(column=1, row=0, sticky="news")
+        ToolTip(self._set_btn, "Set the scoreboard background image")
+        clear_btn = ttk.Button(frame, text="Clear", command=self._clear_bg_image)
+        clear_btn.grid(column=2, row=0, sticky="news")
+        ToolTip(clear_btn, "Remove the scoreboard background image")
+        return frame
+    def _clear_bg_image(self):
+        self._set_btn.configure(text="-None-")
+        self._config.set_str("image_bg", "")
+    def _browse_bg_image(self):
+        image = filedialog.askopenfilename(filetypes=[("image", "*.gif *.jpg *.jpeg *.png")])
+        if len(image) == 0:
+            return
+        image = os.path.normpath(image)
+        self._config.set_str("image_bg", image)
+        self._set_btn.configure(text=os.path.basename(image))
+    def _bg_brightness(self) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        ttk.Label(frame, text="Background image brightness:").grid(column=0, row=0, sticky="nes")
+        self._bg_spin_var = StringVar(frame, value=str(self._config.get_float("image_bright")))
+        self._bg_spin_var.trace_add("write", self._handle_bg_spin)
+        spin = ttk.Spinbox(frame, from_=0, to=1, increment=0.05, width=5,
+                           textvariable=self._bg_spin_var)
+        spin.grid(column=1, row=0, sticky="news")
+        ToolTip(spin, "Brightness of background image [0.0, 1.0]")
+        return frame
+    def _handle_bg_spin(self, *_arg):
+        try:
+            value = float(self._bg_spin_var.get())
+            if 0 <= value <= 1:
+                self._config.set_float("image_bright", value)
+        except ValueError:
+            pass
+
+    def _lanes(self) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        ttk.Label(frame, text="Lane count:").grid(column=0, row=0, sticky="news")
+        self._lane_spin_var = StringVar(frame, value=str(self._config.get_int("num_lanes")))
+        self._lane_spin_var.trace_add("write", self._handle_lane_spin)
+        spin = ttk.Spinbox(frame, from_=6, to=10, increment=1, width=3,
+                           textvariable=self._lane_spin_var)
+        spin.grid(column=1, row=0, sticky="news")
+        ToolTip(spin, "Number of lanes to display on the scoreboard")
+        return frame
+    def _handle_lane_spin(self, *_arg):
+        try:
+            value = int(self._lane_spin_var.get())
+            if 6 <= value <= 10:
+                self._config.set_int("num_lanes", value)
+        except ValueError:
+            pass
+
+    def _font_chooser(self, text, config_option, tooltip) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=0)
+        ttk.Label(frame, text=text).grid(column=0, row=0, sticky="nws")
+        def callback(fontname):
+            self._config.set_str(config_option, fontname)
+        dropdown = ttkwidgets.font.FontFamilyDropdown(frame, callback)
+        dropdown.set(self._config.get_str(config_option))
+        dropdown.grid(column=1, row=0, sticky="news")
+        ToolTip(dropdown, tooltip)
+        return frame
+
+    def _font_scale(self) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        ttk.Label(frame, text="Font scale:").grid(column=0, row=0, sticky="nes")
+        self._font_spin_var = StringVar(frame, value=str(self._config.get_float("font_scale")))
+        self._font_spin_var.trace_add("write", self._handle_font_spin)
+        spin = ttk.Spinbox(frame, from_=0, to=1, increment=0.01, width=5,
+                           textvariable=self._font_spin_var)
+        spin.grid(column=1, row=0, sticky="news")
+        ToolTip(spin, "Scale of font relative to line height [0.0, 1.0]")
+        return frame
+    def _handle_font_spin(self, *_arg):
+        try:
+            value = float(self._font_spin_var.get())
+            if 0 <= value <= 1:
+                self._config.set_float("font_scale", value)
+        except ValueError:
+            pass
 
 class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
     '''Main settings window'''
@@ -176,7 +314,6 @@ def main():
     root.rowconfigure(0, weight=1)
 
     root.resizable(False, False)
-    root.geometry("400x300")
     options = WahooConfig()
     settings = Settings(root, None, None, None, options)
     settings.grid(column=0, row=0, sticky="news")
