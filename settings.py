@@ -20,7 +20,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk, StringVar
 from typing import Any, Callable
-import ttkwidgets
+import ttkwidgets  #type: ignore
 import ttkwidgets.font  #type: ignore
 
 from config import WahooConfig
@@ -286,7 +286,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
 class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
     '''Main settings window'''
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-locals
     def __init__(self, container: tkContainer, csv_cb: CSVGenFn,
                  scoreboard_run_cb: NoneFn, test_run_cb: NoneFn, config: WahooConfig):
         super().__init__(container, padding=5)
@@ -329,7 +329,8 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
             link="https://github.com/JohnStrunk/wahoo-results", relief="sunken",
             padding=2)
         link_label.grid(column=0, row=0, sticky="news")
-        version_label = ttk.Label(fr8, text=WAHOO_RESULTS_VERSION, justify="right", padding=2, relief="sunken")
+        version_label = ttk.Label(fr8, text=WAHOO_RESULTS_VERSION, justify="right",
+                                  padding=2, relief="sunken")
         version_label.grid(column=1, row=0, sticky="nes")
 
     def _handle_run_scoreboard_btn(self) -> None:
