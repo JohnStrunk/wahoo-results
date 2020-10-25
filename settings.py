@@ -20,11 +20,13 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk, StringVar
 from typing import Any, Callable
+import ttkwidgets
 import ttkwidgets.font  #type: ignore
 
 from config import WahooConfig
 from tooltip import ToolTip
 from color_button import ColorButton
+from version import WAHOO_RESULTS_VERSION
 
 tkContainer = Any
 
@@ -294,7 +296,7 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         self.grid(column=0, row=0, sticky="news")
         self.columnconfigure(0, weight=1)
         # Odd rows are empty filler to distribute vertical whitespace
-        for i in [1, 3, 5]:
+        for i in [1, 3, 5, 7, 9]:
             self.rowconfigure(i, weight=1)
         # row 0: Start list settings
         startlist = _StartList(self, csv_cb, self._config)
@@ -317,6 +319,18 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         run_btn = ttk.Button(fr6, text="Run scoreboard", command=self._handle_run_scoreboard_btn)
         run_btn.grid(column=1, row=0, sticky="news")
         ToolTip(run_btn, text="Start the scoreboard and watch for results")
+        fr8 = ttk.Frame(self)
+        fr8.grid(column=0, row=8, sticky="news")
+        fr8.rowconfigure(0, weight=1)
+        fr8.columnconfigure(0, weight=1)
+        fr8.columnconfigure(1, weight=0)
+        link_label = ttkwidgets.LinkLabel(fr8,
+            text="https://github.com/JohnStrunk/wahoo-results",
+            link="https://github.com/JohnStrunk/wahoo-results", relief="sunken",
+            padding=2)
+        link_label.grid(column=0, row=0, sticky="news")
+        version_label = ttk.Label(fr8, text=WAHOO_RESULTS_VERSION, justify="right", padding=2, relief="sunken")
+        version_label.grid(column=1, row=0, sticky="nes")
 
     def _handle_run_scoreboard_btn(self) -> None:
         self.destroy()
