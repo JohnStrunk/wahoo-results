@@ -77,11 +77,13 @@ class Lane:
     name: str  # Swimmer's name
     team: str  # Swimmer's team
     times: List[float]  # List of individual measured times
+    allow_inconsistent: bool # allow times w/ >0.3s spread
 
     def __init__(self, **kwargs):
         self.name = kwargs.get("name", "")
         self.team = kwargs.get("team", "")
         self.times = kwargs.get("times", [])
+        self.allow_inconsistent = kwargs.get("allow_inconsistent", False)
 
     def is_empty(self) -> bool:
         """
@@ -104,10 +106,15 @@ class Lane:
         True
         >>> Lane(times=[7.34, 7.02, 7.20]).times_are_valid()
         False
+        >>> Lane(times=[7.34, 7.02, 7.20], allow_inconsistent=True).times_are_valid()
+        True
         >>> Lane().times_are_valid()
         False
+        >>> Lane(allow_inconsistent=True).times_are_valid()
+        False
         """
-        return len(self.times) > 0 and max(self.times) - min(self.times) <= 0.3
+        return len(self.times) > 0 and (
+            max(self.times) - min(self.times) <= 0.3 or self.allow_inconsistent)
 
     def final_time(self) -> float:
         """
@@ -165,12 +172,15 @@ class Heat:
     event_desc: str # Event description
     heat: int  # Heat number
     lanes: List[Lane]  # Lane information
+    allow_inconsistent: bool  # Permit times w/ >0.3s spread
 
     def __init__(self, **kwargs):
         self.event = kwargs.get("event", "")
         self.event_desc = kwargs.get("event_desc","")
         self.heat = kwargs.get("heat", 0)
-        self.lanes = kwargs.get("lanes", [Lane() for i in range(0, 10)])
+        self.allow_inconsistent = kwargs.get("allow_inconsistent", False)
+        self.lanes = kwargs.get("lanes", [
+            Lane(allow_inconsistent=self.allow_inconsistent) for i in range(0, 10)])
 
     def load_do4(self, filename: str) -> None:
         """

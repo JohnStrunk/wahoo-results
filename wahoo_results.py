@@ -70,7 +70,7 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
         super().__init__(patterns=["*.do4"], ignore_directories=True)
     def on_created(self, event):
         time.sleep(1)
-        heat = results.Heat()
+        heat = results.Heat(allow_inconsistent=not self._options.get_bool("inhibit_inconsistent"))
         heat.load_do4(event.src_path)
         scb_filename = f"E{heat.event}.scb"
         try:

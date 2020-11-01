@@ -18,7 +18,7 @@
 
 import os
 import tkinter as tk
-from tkinter import filedialog, ttk, StringVar
+from tkinter import filedialog, ttk, BooleanVar, StringVar
 from typing import Any, Callable
 import ttkwidgets  #type: ignore
 import ttkwidgets.font  #type: ignore
@@ -141,6 +141,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
                            "Scoreboard foreground text color").grid(column=2, row=0, sticky="es")
         self._color_swatch("2nd place:", "place_2",
                            "Color of 2nd place marker text").grid(column=0, row=1, sticky="es")
+        self._inhibit().grid(column=1, row=1, sticky="es")
         self._color_swatch("Background:", "color_bg",
                            "Scoreboard background color").grid(column=2, row=1, sticky="es")
         self._color_swatch("3rd place:", "place_3",
@@ -282,6 +283,19 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
                 self._config.set_float("font_scale", value)
         except ValueError:
             pass
+
+    def _inhibit(self) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        ttk.Label(frame, text="Suppress >0.3s:").grid(column=0, row=0, sticky="nes")
+        self._inhibit_var = BooleanVar(frame, value=self._config.get_bool("inhibit_inconsistent"))
+        check = ttk.Checkbutton(frame, variable=self._inhibit_var, command=self._handle_inhibit)
+        check.grid(column=1, row=0, sticky="news")
+        ToolTip(check, "Select to suppress final time if times differ by more than 0.3s")
+        return frame
+    def _handle_inhibit(self, *_arg):
+        self._config.set_bool("inhibit_inconsistent", self._inhibit_var.get())
 
 class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
     '''Main settings window'''

@@ -54,6 +54,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+#### Added
+
+- :sparkles: Option whether to suppress final time if the individual times have >0.3s spread
+
 #### Fixed
 
 - :bug: Properly display results when start list file is missing

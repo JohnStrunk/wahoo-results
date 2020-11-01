@@ -42,6 +42,7 @@ class WahooConfig:
         "normal_font": "Helvetica",  # Main font
         "time_font": "Helvetica",    # Font for times
         "font_scale": 0.67,     # scale of font relative to line height
+        "inhibit_inconsistent": "False"  # Suppress results w/ >0.3s difference
     }}
 
     def __init__(self):
@@ -80,3 +81,12 @@ class WahooConfig:
         '''Set an integer option'''
         self._config.set(self._INI_HEADING, name, str(value))
         return self.get_int(name)
+
+    def get_bool(self, name: str) -> bool:
+        '''Get a boolean option'''
+        return self._config.getboolean(self._INI_HEADING, name)
+
+    def set_bool(self, name: str, value: bool) -> bool:
+        '''Set a boolean option'''
+        self._config.set(self._INI_HEADING, name, str(value))
+        return self.get_bool(name)
