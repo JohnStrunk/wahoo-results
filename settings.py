@@ -162,13 +162,10 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         frame = ttk.Frame(self, padding=1)
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
-        label = ttk.Label(frame, text=label_text)
-        label.grid(column=0, row=0, sticky="news")
-        cbtn = ColorButton(frame, self._config, config_item)
-        cbtn.grid(column=1, row=0, sticky="news")
+        ttk.Label(frame, text=label_text).grid(column=0, row=0, sticky="news")
+        ColorButton(frame, self._config, config_item).grid(column=1, row=0, sticky="news")
         if tip_text != "":
-            ToolTip(label, tip_text)
-            ToolTip(cbtn, tip_text)
+            ToolTip(frame, tip_text)
         return frame
 
     def _bg_img(self) -> ttk.Widget:
@@ -203,10 +200,9 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         ttk.Label(frame, text="Image brightness:").grid(column=0, row=0, sticky="nes")
         self._bg_spin_var = StringVar(frame, value=str(self._config.get_float("image_bright")))
         self._bg_spin_var.trace_add("write", self._handle_bg_spin)
-        spin = ttk.Spinbox(frame, from_=0, to=1, increment=0.05, width=5,
-                           textvariable=self._bg_spin_var)
-        spin.grid(column=1, row=0, sticky="news")
-        ToolTip(spin, "Brightness of background image [0.0, 1.0]")
+        ttk.Spinbox(frame, from_=0, to=1, increment=0.05, width=5,
+                    textvariable=self._bg_spin_var).grid(column=1, row=0, sticky="news")
+        ToolTip(frame, "Brightness of background image [0.0, 1.0]")
         return frame
     def _handle_bg_spin(self, *_arg):
         try:
@@ -222,10 +218,10 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         ttk.Label(frame, text="Scale:").grid(column=0, row=0, sticky="nes")
         self._bg_scale_var = StringVar(frame, value=str(self._config.get_str("image_scale")))
         self._bg_scale_var.trace_add("write", self._handle_bg_scale)
-        box = ttk.Combobox(frame, state="readonly", textvariable=self._bg_scale_var,
-                           values=["none", "cover", "fit", "stretch"], width=7)
-        box.grid(column=1, row=0, sticky="news")
-        ToolTip(box, "How to scale the background image\nnone: as-is\n"
+        ttk.Combobox(frame, state="readonly", textvariable=self._bg_scale_var,
+                     values=["none", "cover", "fit", "stretch"],
+                     width=7).grid(column=1, row=0, sticky="news")
+        ToolTip(frame, "How to scale the background image\nnone: as-is\n"
             "cover: cover screen\nfit: fit within screen\nstretch: stretch all dimensions")
         return frame
     def _handle_bg_scale(self, *_arg):
@@ -238,10 +234,9 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         ttk.Label(frame, text="Lane count:").grid(column=0, row=0, sticky="news")
         self._lane_spin_var = StringVar(frame, value=str(self._config.get_int("num_lanes")))
         self._lane_spin_var.trace_add("write", self._handle_lane_spin)
-        spin = ttk.Spinbox(frame, from_=6, to=10, increment=1, width=3,
-                           textvariable=self._lane_spin_var)
-        spin.grid(column=1, row=0, sticky="news")
-        ToolTip(spin, "Number of lanes to display on the scoreboard")
+        ttk.Spinbox(frame, from_=6, to=10, increment=1, width=3,
+                    textvariable=self._lane_spin_var).grid(column=1, row=0, sticky="news")
+        ToolTip(frame, "Number of lanes to display on the scoreboard")
         return frame
     def _handle_lane_spin(self, *_arg):
         try:
@@ -261,7 +256,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         dropdown = ttkwidgets.font.FontFamilyDropdown(frame, callback)
         dropdown.set(self._config.get_str(config_option))
         dropdown.grid(column=1, row=0, sticky="news")
-        ToolTip(dropdown, tooltip)
+        ToolTip(frame, tooltip)
         return frame
 
     def _font_scale(self) -> ttk.Widget:
@@ -271,10 +266,9 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         ttk.Label(frame, text="Font scale:").grid(column=0, row=0, sticky="nes")
         self._font_spin_var = StringVar(frame, value=str(self._config.get_float("font_scale")))
         self._font_spin_var.trace_add("write", self._handle_font_spin)
-        spin = ttk.Spinbox(frame, from_=0, to=1, increment=0.01, width=5,
-                           textvariable=self._font_spin_var)
-        spin.grid(column=1, row=0, sticky="news")
-        ToolTip(spin, "Scale of font relative to line height [0.0, 1.0]")
+        ttk.Spinbox(frame, from_=0, to=1, increment=0.01, width=5,
+                           textvariable=self._font_spin_var).grid(column=1, row=0, sticky="news")
+        ToolTip(frame, "Scale of font relative to line height [0.0, 1.0]")
         return frame
     def _handle_font_spin(self, *_arg):
         try:
@@ -290,9 +284,9 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         frame.columnconfigure(0, weight=1)
         ttk.Label(frame, text="Suppress >0.3s:").grid(column=0, row=0, sticky="nes")
         self._inhibit_var = BooleanVar(frame, value=self._config.get_bool("inhibit_inconsistent"))
-        check = ttk.Checkbutton(frame, variable=self._inhibit_var, command=self._handle_inhibit)
-        check.grid(column=1, row=0, sticky="news")
-        ToolTip(check, "Select to suppress final time if times differ by more than 0.3s")
+        ttk.Checkbutton(frame, variable=self._inhibit_var,
+            command=self._handle_inhibit).grid(column=1, row=0, sticky="news")
+        ToolTip(frame, "Select to suppress final time if times differ by more than 0.3s")
         return frame
     def _handle_inhibit(self, *_arg):
         self._config.set_bool("inhibit_inconsistent", self._inhibit_var.get())
