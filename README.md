@@ -54,22 +54,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+#### Fixed
+
+- :bug: Properly display results when start list file is missing
+
 ### [0.2.0] - 2020-10-25
 
 #### Added
 
-- Number of lanes can be customized within the application
-- Many new scoreboard configuration options: Fonts, colors, and background image
-- Custom colors for 1st-3rd place
-- Test button to show a scoreboard mockup demonstrating the current customization settings
+- :sparkles: Number of lanes can be customized within the application
+- :sparkles: Many new scoreboard configuration options: Fonts, colors, and background image
+- :sparkles: Custom colors for 1st-3rd place
+- :sparkles: Test button to show a scoreboard mockup demonstrating the current customization settings
 
 #### Changed
 
-- (internal) Switched from using widgets for the scoreboard to placing text on a Canvas object
+- :information_source: (internal) Switched from using widgets for the scoreboard to placing text on a Canvas object
 
 #### Fixed
 
-- There were instances where the incorrect final time was calculated due to imprecision in floating point arithmetic
+- :bug: There were instances where the incorrect final time was calculated due to imprecision in floating point arithmetic
 
 ### [0.1.0] - 2020-09-06
 

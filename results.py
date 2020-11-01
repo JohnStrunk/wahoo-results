@@ -31,7 +31,18 @@ class FileParseError(Exception):
         super().__init__(self, filename, error)
 
 def _truncate_hundredths(num: float) -> float:
-    '''Truncates a float to two decimal places'''
+    '''
+    Truncates a float to two decimal places.
+
+    >>> _truncate_hundredths(100.00)
+    100.0
+    >>> _truncate_hundredths(99.999)
+    99.99
+    >>> _truncate_hundredths(10.987)
+    10.98
+    >>> _truncate_hundredths(100.123)
+    100.12
+    '''
     return math.floor(num * 100.0) / 100.0
 
 class Event:

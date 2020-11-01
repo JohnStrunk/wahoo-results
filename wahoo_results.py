@@ -73,7 +73,12 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
         heat = results.Heat()
         heat.load_do4(event.src_path)
         scb_filename = f"E{heat.event}.scb"
-        heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
+        try:
+            heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
+        except results.FileParseError:
+            pass
+        except FileNotFoundError:
+            pass
         display(self._sb, heat)
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
