@@ -18,9 +18,11 @@
 This file defines the result classes.
 """
 
-import math
+import decimal
 import re
 from typing import List
+
+Time = decimal.Decimal
 
 class FileParseError(Exception):
     """Execption for when a file cannot be parsed."""
@@ -30,20 +32,20 @@ class FileParseError(Exception):
         self.error = error
         super().__init__(self, filename, error)
 
-def _truncate_hundredths(num: float) -> float:
+def _truncate_hundredths(time: Time) -> Time:
     '''
-    Truncates a float to two decimal places.
+    Truncates a Time to two decimal places.
 
-    >>> _truncate_hundredths(100.00)
-    100.0
-    >>> _truncate_hundredths(99.999)
-    99.99
-    >>> _truncate_hundredths(10.987)
-    10.98
-    >>> _truncate_hundredths(100.123)
-    100.12
+    >>> _truncate_hundredths(Time('100.00'))
+    Decimal('100.00')
+    >>> _truncate_hundredths(Time('99.999'))
+    Decimal('99.99')
+    >>> _truncate_hundredths(Time('10.987'))
+    Decimal('10.98')
+    >>> _truncate_hundredths(Time('100.123'))
+    Decimal('100.12')
     '''
-    return math.floor(num * 100.0) / 100.0
+    return time.quantize(decimal.Decimal("0.01"), rounding=decimal.ROUND_DOWN)
 
 class Event:
     """
@@ -76,7 +78,7 @@ class Lane:
     """
     name: str  # Swimmer's name
     team: str  # Swimmer's team
-    times: List[float]  # List of individual measured times
+    times: List[Time]  # List of individual measured times
     allow_inconsistent: bool # allow times w/ >0.3s spread
 
     def __init__(self, **kwargs):
@@ -114,36 +116,34 @@ class Lane:
         False
         """
         return len(self.times) > 0 and (
-            max(self.times) - min(self.times) <= 0.3 or self.allow_inconsistent)
+            max(self.times) - min(self.times) <= Time("0.3") or self.allow_inconsistent)
 
-    def final_time(self) -> float:
+    def final_time(self) -> Time:
         """
         Calculates the final time based on the individual times according to
         USA-S rules.
 
-        >>> Lane(times=[7.0, 4.0, 6.2]).final_time()
-        6.2
-        >>> Lane(times=[7.0, 6.2]).final_time()
-        6.6
-        >>> Lane(times=[9.1]).final_time()
-        9.1
-        >>> Lane(times=[7.13, 6.1]).final_time()
-        6.61
-        >>> Lane(times=[139.19, 139.17]).final_time()
-        139.18
-        >>> Lane(times=[154.37, 154.29]).final_time() # showed floating point errors
-        154.33
+        >>> Lane(times=[Time("7.0"), Time("4.0"), Time("6.2")]).final_time()
+        Decimal('6.20')
+        >>> Lane(times=[Time("7.0"), Time("6.2")]).final_time()
+        Decimal('6.60')
+        >>> Lane(times=[Time("9.1")]).final_time()
+        Decimal('9.10')
+        >>> Lane(times=[Time("7.13"), Time("6.1")]).final_time()
+        Decimal('6.61')
+        >>> Lane(times=[Time("139.19"), Time("139.17")]).final_time()
+        Decimal('139.18')
+        >>> Lane(times=[Time("154.37"), Time("154.29")]).final_time() # showed floating point errors
+        Decimal('154.33')
         """
-        EPSILON = 1e-6 # pylint: disable=invalid-name
         if len(self.times) == 3:
             self.times.sort()
-            return self.times[1]
+            return _truncate_hundredths(self.times[1])
         if len(self.times) == 2:
-            # Epsilon is used to correct for floating point inaccuracy
-            return _truncate_hundredths((self.times[0] + self.times[1]) / 2 + EPSILON)
+            return _truncate_hundredths((self.times[0] + self.times[1]) / 2)
         if len(self.times) == 1:
-            return self.times[0]
-        return 0.0
+            return _truncate_hundredths(self.times[0])
+        return _truncate_hundredths(Time("0"))
 
     def dump(self):
         """
@@ -210,7 +210,7 @@ class Heat:
         # Parse the lane results
         for i in range(1, 11):
             fields = lines[i].strip().split(';')
-            times = [_truncate_hundredths(float(x)) for x in fields[1:] if x not in ('', '0')]
+            times = [Time(x) for x in fields[1:] if x not in ('', '0')]
             self.lanes[i-1].times = times
 
     def load_scb(self, filename: str) -> None:

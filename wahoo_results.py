@@ -139,7 +139,7 @@ def display(board: Scoreboard, heat: results.Heat) -> None:
             if not heat.lanes[i].times_are_valid():
                 ftime = -ftime
                 place = 0
-            board.lane(i+1, heat.lanes[i].name, heat.lanes[i].team, ftime, place)
+            board.lane(i+1, heat.lanes[i].name, heat.lanes[i].team, float(ftime), place)
     # heat.dump()
 
 def _set_test_data(board: Scoreboard):
