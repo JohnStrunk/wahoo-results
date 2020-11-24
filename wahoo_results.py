@@ -87,6 +87,7 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     FILE_WATCHER.unschedule_all()
 
     # Settings window is fixed size
+    root.overrideredirect(False)  # show titlebar
     root.resizable(False, False)
     root.geometry("")  # allow automatic size
 
@@ -106,8 +107,13 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
 
 def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     """Displays the scoreboard window."""
-    # Scoreboard is varible size
-    root.resizable(True, True)
+    if options.get_bool("fullscreen"):
+        root.resizable(False, False)
+        root.overrideredirect(True)  # hide titlebar
+        root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}+0+0")
+    else:
+        # Scoreboard is varible size
+        root.resizable(True, True)
     content = Scoreboard(root, options)
     content.grid(column=0, row=0, sticky="news")
     if options.get_str("image_bg") != "":

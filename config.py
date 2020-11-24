@@ -42,7 +42,8 @@ class WahooConfig:
         "normal_font": "Helvetica",  # Main font
         "time_font": "Helvetica",    # Font for times
         "font_scale": 0.67,     # scale of font relative to line height
-        "inhibit_inconsistent": "False"  # Suppress results w/ >0.3s difference
+        "inhibit_inconsistent": "False",  # Suppress results w/ >0.3s difference
+        "fullscreen": "False",  # Run the scoreboard in fullscreen mode
     }}
 
     def __init__(self):

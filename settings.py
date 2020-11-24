@@ -119,7 +119,7 @@ class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
         self._config.set_str("dolphin_dir", directory)
         self._dolphin_directory.set(directory)
 
-class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
+class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors,too-many-instance-attributes
     '''Miscellaneous settings'''
     def __init__(self, container: tkContainer, config: WahooConfig):
         super().__init__(container, text="General Settings", padding=5)
@@ -146,6 +146,7 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
                            "Scoreboard background color").grid(column=2, row=1, sticky="es")
         self._color_swatch("3rd place:", "place_3",
                            "Color of 3rd place marker text").grid(column=0, row=2, sticky="es")
+        self._fullscreen().grid(column=1, row=2, sticky="es")
         self._color_swatch("Title color:", "color_ehd",
             "Scoreboard event, heat, and description text color").grid(column=2, row=2, sticky="es")
         self._bg_img().grid(column=0, row=3, columnspan=3, sticky="news")
@@ -290,6 +291,19 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         return frame
     def _handle_inhibit(self, *_arg):
         self._config.set_bool("inhibit_inconsistent", self._inhibit_var.get())
+
+    def _fullscreen(self) -> ttk.Widget:
+        frame = ttk.Frame(self, padding=1)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        ttk.Label(frame, text="fullscreen:").grid(column=0, row=0, sticky="nes")
+        self._fullscreen_var = BooleanVar(frame, value=self._config.get_bool("fullscreen"))
+        ttk.Checkbutton(frame, variable=self._fullscreen_var,
+            command=self._handle_fullscreen).grid(column=1, row=0, sticky="news")
+        ToolTip(frame, "Select to run scoreboard in fullscreen mode; deselect for windowed")
+        return frame
+    def _handle_fullscreen(self, *_arg):
+        self._config.set_bool("fullscreen", self._fullscreen_var.get())
 
 class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
     '''Main settings window'''
