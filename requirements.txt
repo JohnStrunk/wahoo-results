@@ -8,3 +8,7 @@ pytest-mypy
 pillow
 ttkwidgets
 watchdog
+
+plantweb
+rstcheck
+sphinx_rtd_theme
