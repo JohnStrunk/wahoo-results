@@ -347,9 +347,11 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         fr8.columnconfigure(0, weight=1)
         fr8.columnconfigure(1, weight=0)
         link_label = ttkwidgets.LinkLabel(fr8,
-            text="https://github.com/JohnStrunk/wahoo-results",
-            link="https://github.com/JohnStrunk/wahoo-results", relief="sunken",
-            padding=2)
+            text="Documentation: https://wahoo-results.readthedocs.io/",
+            link="https://wahoo-results.readthedocs.io/?utm_source=wahoo_results&"
+                 "utm_medium=config_screen&utm_campaign=docs_link",
+            relief="sunken",
+            padding=[5, 2])
         link_label.grid(column=0, row=0, sticky="news")
         version_label = ttk.Label(fr8, text=WAHOO_RESULTS_VERSION, justify="right",
                                   padding=2, relief="sunken")

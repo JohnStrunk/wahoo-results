@@ -17,6 +17,7 @@
 '''Config parsing'''
 
 import configparser
+import uuid
 
 class WahooConfig:
     '''Get/Set program options'''
@@ -44,6 +45,8 @@ class WahooConfig:
         "font_scale": 0.67,     # scale of font relative to line height
         "inhibit_inconsistent": "False",  # Suppress results w/ >0.3s difference
         "fullscreen": "False",  # Run the scoreboard in fullscreen mode
+        "client_id": str(uuid.uuid4()),  # Generate a unique analytics ID
+        "analytics": "True",  # Enable/disable analytics reporting
     }}
 
     def __init__(self):

@@ -26,6 +26,7 @@ from PIL.ImageEnhance import Brightness  #type: ignore
 import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
 
+import analytics
 import results
 import settings
 from config import WahooConfig
@@ -83,6 +84,7 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
     '''Display the settings window'''
+    analytics.screen_view("settings_window")
     # don't watch for new results while in settings menu
     FILE_WATCHER.unschedule_all()
 
@@ -107,6 +109,10 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
 
 def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     """Displays the scoreboard window."""
+    analytics.screen_view("scoreboard", {
+        "fullscreen": options.get_bool("fullscreen"),
+        "lanes": options.get_int("num_lanes"),
+    })
     if options.get_bool("fullscreen"):
         root.resizable(False, False)
         root.overrideredirect(True)  # hide titlebar
@@ -134,6 +140,9 @@ def display(board: Scoreboard, heat: results.Heat) -> None:
     """
     Display the results of a heat.
     """
+    analytics.send_event("race_result", {
+        "has_description": (heat.event_desc != ""),
+    })
     board.clear()
     board.event(heat.event, heat.event_desc)
     board.heat(heat.heat)
@@ -149,6 +158,7 @@ def display(board: Scoreboard, heat: results.Heat) -> None:
     # heat.dump()
 
 def _set_test_data(board: Scoreboard):
+    analytics.screen_view("test_data")
     board.clear()
     board.event(432, "GIRLS 13&O 1650 FREE")
     board.heat(56)
@@ -169,9 +179,12 @@ def main():
     global FILE_WATCHER  # pylint: disable=W0603
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
-    config = WahooConfig()
-
     root = Tk()
+
+    config = WahooConfig()
+    screen_size = f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}"
+    analytics.send_application_start(config, screen_size)
+
     root.title("Wahoo! Results")
     icon_file = os.path.abspath(os.path.join(bundle_dir, 'wahoo-results.ico'))
     root.iconbitmap(icon_file)
@@ -187,6 +200,7 @@ def main():
     config.save()
     FILE_WATCHER.stop()
     FILE_WATCHER.join()
+    analytics.send_application_stop()
 
 if __name__ == "__main__":
     main()

@@ -6,6 +6,7 @@ pytest-pylint
 pytest-mypy
 
 pillow
+requests
 ttkwidgets
 watchdog
 
