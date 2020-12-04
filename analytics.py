@@ -86,5 +86,6 @@ def send_event(event_name: str, kvparams: Dict[str, Any] = None) -> None:
 
 def _post(**args) -> None:
     requests.post(**args)
+    #print(req.request.url)
     #print(json.dumps(json.loads(req.request.body), indent=2))
     #print(json.dumps(req.json(), indent=2))

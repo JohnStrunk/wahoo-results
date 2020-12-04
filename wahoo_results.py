@@ -110,7 +110,7 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
 def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     """Displays the scoreboard window."""
     analytics.screen_view("scoreboard", {
-        "fullscreen": options.get_bool("fullscreen"),
+        "fullscreen": int(options.get_bool("fullscreen")),
         "lanes": options.get_int("num_lanes"),
     })
     if options.get_bool("fullscreen"):
@@ -141,7 +141,7 @@ def display(board: Scoreboard, heat: results.Heat) -> None:
     Display the results of a heat.
     """
     analytics.send_event("race_result", {
-        "has_description": (heat.event_desc != ""),
+        "has_description": int(heat.event_desc != ""),
     })
     board.clear()
     board.event(heat.event, heat.event_desc)
