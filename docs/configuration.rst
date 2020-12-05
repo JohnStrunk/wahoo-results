@@ -38,6 +38,8 @@ The above command will create a series of files named ``E<###>.scb``, one for
 each event in the session(s) that were exported. The start lists should all be
 placed into a directory that |wr| will be able to access.
 
+.. _set_start_list_dir:
+
 Selecting the start list directory
 ----------------------------------
 
@@ -83,6 +85,8 @@ Dolphin configuration
 The second step is to configure the Dolphin software and tell |wr| where to
 find the race results.
 
+.. _config_dolphin_sw:
+
 Dolphin software
 ----------------
 
@@ -101,6 +105,8 @@ Also make a note of the log directory that is being used. This is where the
 result files will be written, and |wr| needs to be able to locate them.
 
 |clearfloat|
+
+.. _set_results_dir:
 
 Setting the results directory
 -----------------------------

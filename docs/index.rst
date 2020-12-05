@@ -1,3 +1,4 @@
+.. include:: common.rst
 ==============
 Wahoo! Results
 ==============
@@ -15,8 +16,9 @@ Wahoo! Results
    self
    download
    configuration
+   faq
 
-Wahoo! Results is a free swimming scoreboard that you can use to display race
+|wr| is a free swimming scoreboard that you can use to display race
 results at your meets. It combines start list data from your meet management
 software (e.g., HyTek Meet Manager) with data files from a Colorado Dolphin
 timing system to produce an attractive scoreboard that keeps swimmers,
@@ -30,7 +32,7 @@ coaches, and spectators informed of race results in real-time.
 Features
 ========
 
-The Wahoo! Results scoreboard is customizable to meet the needs of your swim
+The |wr| scoreboard is customizable to meet the needs of your swim
 team.
 
 - Configurable number of lanes (6 - 10)
@@ -44,12 +46,12 @@ Requirements
 - Hy-Tek Meet Manager (or other meet management software that can generate
   scoreboard "start list" files)
 - Colorado Dolphin timing system
-- Windows 10 PC to run Wahoo! Results
+- Windows 10 PC to run |wr| (It can be shared with either of the above.)
 
 License
 =======
 
-Wahoo! Results is free, open-source software that you can download and use.
+|wr| is free, open-source software that you can download and use.
 The software is licensed under the GNU Affero General Public License, version
 3.
 
