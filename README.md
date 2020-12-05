@@ -56,6 +56,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - TBD
 
+### [0.3.1] - 2020-12-04
+
+#### Fixed
+
+- :bug: Fixed handling of bool as int
+
 ### [0.3.0] - 2020-12-03
 
 #### Added
@@ -91,7 +97,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/JohnStrunk/wahoo-results/releases/tag/v0.1.0
