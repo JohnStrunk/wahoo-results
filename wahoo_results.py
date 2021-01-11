@@ -89,6 +89,7 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     FILE_WATCHER.unschedule_all()
 
     # Settings window is fixed size
+    root.state("normal")
     root.overrideredirect(False)  # show titlebar
     root.resizable(False, False)
     root.geometry("")  # allow automatic size
@@ -116,7 +117,7 @@ def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     if options.get_bool("fullscreen"):
         root.resizable(False, False)
         root.overrideredirect(True)  # hide titlebar
-        root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}+0+0")
+        root.state("zoomed") # windows/macos only; root.attributes('-zoomed', True) on Linux
     else:
         # Scoreboard is varible size
         root.resizable(True, True)
