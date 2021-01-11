@@ -21,7 +21,7 @@ import sys
 import time
 from tkinter import Tk
 from typing import List
-from PIL import Image  #type: ignore
+from PIL import Image, UnidentifiedImageError  #type: ignore
 from PIL.ImageEnhance import Brightness  #type: ignore
 import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
@@ -124,9 +124,14 @@ def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
     content = Scoreboard(root, options)
     content.grid(column=0, row=0, sticky="news")
     if options.get_str("image_bg") != "":
-        image = Image.open(options.get_str("image_bg"))
-        content.bg_image(Brightness(image).enhance(options.get_float("image_bright")),
-                         options.get_str("image_scale"))
+        try:
+            image = Image.open(options.get_str("image_bg"))
+            content.bg_image(Brightness(image).enhance(options.get_float("image_bright")),
+                            options.get_str("image_scale"))
+        except FileNotFoundError:
+            pass
+        except UnidentifiedImageError:
+            pass
     content.set_lanes(options.get_int("num_lanes"))
 
     def return_to_settings(_) -> None:
