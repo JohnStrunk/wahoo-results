@@ -56,6 +56,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - TBD
 
+### [0.3.2] - 2021-01-16
+
+#### Fixed
+
+- :bug: Fixed fullscreen only working on primary display
+- :bug: Fixed hang when background image is not found
+
 ### [0.3.1] - 2020-12-04
 
 #### Fixed
@@ -97,7 +104,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.1.0...v0.2.0
