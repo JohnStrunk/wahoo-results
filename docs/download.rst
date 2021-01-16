@@ -6,7 +6,7 @@ Download
 
 .. admonition:: Download the latest version
 
-   Version 0.3.1 - 12/4/2020 - `wahoo-results.exe
+   Version 0.3.2 - 01/16/2021 - `wahoo-results.exe
    <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.3.2/wahoo-results.exe>`_
 
 The scoreboard is packaged as a single executable, and no installation is
