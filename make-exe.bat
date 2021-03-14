@@ -37,3 +37,11 @@ move /y version.py.save version.py
 ::: Clean up build artifacts
 del wahoo-results.spec
 rmdir /q/s build
+
+::: Create zip file
+del wahoo-results.zip
+powershell Compress-Archive wahoo-results.exe wahoo-results.zip
+
+::: Sign release artifact
+del wahoo-results.zip.asc
+gpg --detach-sign --armor --local-user BD1FF508 wahoo-results.zip
