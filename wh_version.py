@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 '''Version information'''
-from typing import List
+from typing import List, Optional
 import datetime
 import re
 
@@ -92,12 +92,17 @@ def git_semver(wrv: str) -> str:
         version += f'-dev.{commits}+{sha}'
     return version
 
-def latest() -> ReleaseInfo:
+def latest() -> Optional[ReleaseInfo]:
     """Retrieves the latest release info"""
-    return highest_semver(releases("JohnStrunk/wahoo-results"))
+    rlist = releases("JohnStrunk/wahoo-results")
+    if len(rlist) == 0:
+        return None
+    return highest_semver(rlist)
 
-def is_latest_version(latest_version: ReleaseInfo, wrv:str) -> bool:
+def is_latest_version(latest_version: Optional[ReleaseInfo], wrv:str) -> bool:
     """Returns true if the running version is the most recent"""
-    if wrv == "unrel" "eased": # break so it doesn't get substituted
+    if latest_version is None:
+        return True
+    if wrv == "unreleased":
         return False
     return semver.compare(latest_version.semver, git_semver(wrv)) <= 0
