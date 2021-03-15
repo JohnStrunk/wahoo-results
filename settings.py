@@ -20,12 +20,14 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk, BooleanVar, StringVar
 from typing import Any, Callable
+
 import ttkwidgets  #type: ignore
 import ttkwidgets.font  #type: ignore
 
 from config import WahooConfig
 from tooltip import ToolTip
 from color_button import ColorButton
+import wh_version
 from version import WAHOO_RESULTS_VERSION
 
 tkContainer = Any
@@ -341,6 +343,7 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         run_btn = ttk.Button(fr6, text="Run scoreboard", command=self._handle_run_scoreboard_btn)
         run_btn.grid(column=1, row=0, sticky="news")
         ToolTip(run_btn, text="Start the scoreboard and watch for results")
+        # row 8: doc link and version
         fr8 = ttk.Frame(self)
         fr8.grid(column=0, row=8, sticky="news")
         fr8.rowconfigure(0, weight=1)
@@ -353,9 +356,20 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
             relief="sunken",
             padding=[5, 2])
         link_label.grid(column=0, row=0, sticky="news")
-        version_label = ttk.Label(fr8, text=WAHOO_RESULTS_VERSION, justify="right",
-                                  padding=2, relief="sunken")
+        version_label = ttk.Label(fr8, text=wh_version.git_semver(WAHOO_RESULTS_VERSION),
+            justify="right", padding=[5, 2], relief="sunken")
         version_label.grid(column=1, row=0, sticky="nes")
+        # row 10: update info
+        highest_version = wh_version.latest()
+        if not wh_version.is_latest_version(highest_version, WAHOO_RESULTS_VERSION):
+            fr10 = ttk.Frame(self)
+            fr10.columnconfigure(0, weight=1)
+            fr10.grid(column=0, row=10, sticky="news")
+            update_text = f"New version available. Click to download: {highest_version.tag}"
+            update_label = ttkwidgets.LinkLabel(fr10, text=update_text,
+                link=highest_version.url,
+                justify="left", padding=[5, 2], relief="sunken")
+            update_label.grid(column=0, row=0, sticky="news")
 
     def _handle_run_scoreboard_btn(self) -> None:
         self.destroy()

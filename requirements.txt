@@ -5,8 +5,11 @@ pytest
 pytest-pylint
 pytest-mypy
 
+datetime
+python-dateutil
 pillow
 requests
+semver
 ttkwidgets
 watchdog
 
