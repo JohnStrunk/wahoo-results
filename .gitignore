@@ -5,5 +5,7 @@
 /venv/
 /wahoo-results.exe
 /wahoo-results.ini
+/wahoo-results.zip
+/wahoo-results.zip.asc
 /docs/_build/
 /docs/__pycache__/
