@@ -54,7 +54,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
-- TBD
+#### Added
+
+- :sparkles: Add update notification
 
 ### [0.3.2] - 2021-01-16
 
