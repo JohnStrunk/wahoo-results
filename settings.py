@@ -357,11 +357,12 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
             padding=[5, 2])
         link_label.grid(column=0, row=0, sticky="news")
         version_label = ttk.Label(fr8, text=wh_version.git_semver(WAHOO_RESULTS_VERSION),
-            justify="right", padding=[5, 2], relief="sunken")
+            justify="right", padding=(5, 2), relief="sunken")
         version_label.grid(column=1, row=0, sticky="nes")
         # row 10: update info
         highest_version = wh_version.latest()
-        if not wh_version.is_latest_version(highest_version, WAHOO_RESULTS_VERSION):
+        if (highest_version is not None and
+            not wh_version.is_latest_version(highest_version, WAHOO_RESULTS_VERSION)):
             fr10 = ttk.Frame(self)
             fr10.columnconfigure(0, weight=1)
             fr10.grid(column=0, row=10, sticky="news")

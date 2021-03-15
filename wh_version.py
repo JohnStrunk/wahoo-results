@@ -22,8 +22,9 @@ import re
 import dateutil.parser
 import dateutil.tz
 import requests
-import semver
+import semver  #type: ignore
 
+#pylint: disable=too-few-public-methods
 class ReleaseInfo:
     """
     ReleaseInfo describes a single release from a GitHub repository.
@@ -76,15 +77,17 @@ def git_semver(wrv: str) -> str:
     Returns a legal semver description of the Wahoo Results version
     identifier.
 
-    >>> semver('1.0.0')
+    >>> git_semver('1.0.0')
     '1.0.0'
-    >>> semver('v1.0')
+    >>> git_semver('v1.0')
     '1.0'
-    >>> semver('v0.3.2-2-g97e7a82')
+    >>> git_semver('v0.3.2-2-g97e7a82')
     '0.3.2-dev.2+g97e7a82'
     """
     # groups: tag (w/o v), commits, hash (w/ g)
     components = re.match(r'^v?([^-]+)(?:-(\d+)-(g[0-9a-f]+))?$', wrv)
+    if components is None:
+        return "0.0.1"
     version = components.group(1)
     if components.group(2) is not None:
         commits = components.group(2)
