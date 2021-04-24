@@ -42,6 +42,7 @@ def send_application_start(config: WahooConfig, screen_size: str) -> None:
     global _executor
     global _screen_size
     _config = config
+    # pylint: disable=consider-using-with
     _executor = concurrent.futures.ThreadPoolExecutor()
     _screen_size = screen_size
     send_event("application_start")
