@@ -58,6 +58,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - :sparkles: Add update notification
 
+#### Changed
+
+- :information_source: Releases will now be signed zips instead of bare exe files to avoid warnings on download and allow authentication of releases
+
 ### [0.3.2] - 2021-01-16
 
 #### Fixed
