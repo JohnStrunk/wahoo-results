@@ -200,7 +200,7 @@ class Heat:
         if not re.match(r'^[0-9A-F]{16}$', lines[-1]):
             raise FileParseError("", "EOF checksum not found")
         # Extract the event & heat from the header
-        match = re.match(r'^([^;]+);(\d+);1;.+$', lines[0])
+        match = re.match(r'^([^;]*);(\d+);1;.+$', lines[0])
         if not match:
             raise FileParseError("", "Unable to parse header")
         self.event = match.group(1)
