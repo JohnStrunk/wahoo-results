@@ -71,9 +71,9 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
     def on_created(self, event):
         time.sleep(1)
         heat = results.Heat(allow_inconsistent=not self._options.get_bool("inhibit_inconsistent"))
-        heat.load_do4(event.src_path)
-        scb_filename = f"E{heat.event}.scb"
         try:
+            heat.load_do4(event.src_path)
+            scb_filename = f"E{heat.event}.scb"
             heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
         except results.FileParseError:
             pass
