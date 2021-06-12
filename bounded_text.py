@@ -35,7 +35,7 @@ class BoundedText:
         self._full_text = kwargs.setdefault("text", "")
         self._max_width = kwargs.get("width", 0)
         kwargs["width"] = 0
-        self._id = canvas.create_text(xpos, ypos, kwargs)
+        self._id = canvas.create_text(xpos, ypos, **kwargs)
         self.update()
 
     @property

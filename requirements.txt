@@ -1,3 +1,4 @@
+# Development dependencies
 mypy
 pyinstaller
 pylint
@@ -5,14 +6,18 @@ pytest
 pytest-pylint
 pytest-mypy
 
+# Application dependencies
 datetime
 python-dateutil
+types-python-dateutil
 pillow
 requests
+types-requests
 semver
 ttkwidgets
 watchdog
 
+# Documentation dependencies
 plantweb
 rstcheck
 sphinx_rtd_theme
