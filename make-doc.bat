@@ -27,6 +27,10 @@ if errorlevel 9009 (
 )
 
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+if errorlevel 1 (
+	echo Documentation build failed
+	exit /b 1
+)
 goto end
 
 :help
