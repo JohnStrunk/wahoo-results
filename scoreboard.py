@@ -159,6 +159,7 @@ class Scoreboard(tk.Canvas):
             time: The result time from the race,
                   Zero if the lane was empty,
                   Negative if the time was inconsistent.
+            place: The swimmer's finish place in the heat
         '''
         self._text_items[f"lane_{lane_num-1}_name"].text = name
         pl_txt = self._text_items[f"lane_{lane_num-1}_pl"]
