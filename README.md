@@ -54,6 +54,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+#### Fixed
+
+- :bug: Fixed parsing of do4 file containing empty event number. This caused
+  the scoreboard to stop displaying results after an empty event number was
+  encountered.
+
 ### [0.4.0] - 2021-04-24
 
 #### Added
