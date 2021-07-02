@@ -56,7 +56,7 @@ def generate_dolphin_csv(filename: str, directory: str) -> int:
     events.sort(key=lambda e: e.event)
     csv_lines = eventlist_to_csv(events)
     outfile = os.path.join(directory, filename)
-    with open(outfile, "w") as csv:
+    with open(outfile, "w", encoding="cp1252") as csv:
         csv.writelines(csv_lines)
     return len(events)
 

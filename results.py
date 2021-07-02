@@ -57,7 +57,7 @@ class Event:
 
     def from_scb(self, filename: str) -> None:
         '''Parse event information from an .scb file'''
-        with open(filename, "r") as file:
+        with open(filename, "r", encoding="cp1252") as file:
             lines = file.readlines()
         return self.from_lines(lines)
 
@@ -185,7 +185,7 @@ class Heat:
         """
         Loads event results from a CTS Dolphin *.do4 file.
         """
-        with open(filename, "r") as file:
+        with open(filename, "r", encoding="cp1252") as file:
             lines = file.readlines()
         try:
             self._parse_do4(lines)
@@ -216,7 +216,7 @@ class Heat:
         Loads event data from a CTS start list *.scb file.
         Note: Heat should be set before calling this method.
         """
-        with open(filename, "r") as file:
+        with open(filename, "r", encoding="cp1252") as file:
             lines = file.readlines()
         try:
             self._parse_scb(lines)

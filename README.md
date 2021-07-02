@@ -54,6 +54,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+#### Fixed
+
+- :bug: The text file encoding for `scb`, `do4`, and `csv` files was left
+  unspecified, which potentially led to decoding problems when non-ASCII
+  characters were encountered. `cp1252` is now specified directly.
+
 ### [0.4.1] - 2021-04-24
 
 #### Fixed
