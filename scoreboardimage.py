@@ -20,7 +20,7 @@ Generates an image of the scoreboard from a Result object.
 
 import tkinter as tk
 from typing import Tuple
-from PIL import Image, ImageDraw, ImageFont, ImageTk #type: ignore
+from PIL import Image, ImageDraw, ImageFont, ImageTk, UnidentifiedImageError #type: ignore
 from PIL.ImageEnhance import Brightness #type: ignore
 
 from config import WahooConfig
@@ -107,7 +107,12 @@ class ScoreboardImage:
             return  # Nothing to do (no image)
 
         # Scale the image
-        bg_img = Image.open(bg_file)
+        try:
+            bg_img = Image.open(bg_file)
+        except FileNotFoundError:
+            return
+        except UnidentifiedImageError:
+            return
         mode = self._config.get_str("image_scale")
         alg = Image.BICUBIC
         if mode == "stretch":
