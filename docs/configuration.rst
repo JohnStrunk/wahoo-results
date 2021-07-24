@@ -3,19 +3,13 @@
 Configuration
 =============
 
-.. figure:: media/config.png
+The main window allows configuring the scoreboard and monitoring the latest results that are being transmitted.
+
+.. figure:: media/window.png
    :scale: 75 %
-   :align: right
+   :align: center
 
-   Configuration screen
-
-When the program is first started, the user is presented with the
-configuration screen. This screen has options for where the program should
-look for race results. It also contains options to customize the look of the
-scoreboard.
-
-This page walks through the configuration screen from top to bottom and
-explains the options.
+   Main window
 
 |clearfloat|
 
@@ -47,8 +41,8 @@ Selecting the start list directory
    :scale: 75 %
    :align: right
 
-The top section of the configuration screen is used to select the directory
-where the start lists have been saved. Click the "Browse" button and
+The top left section of the configuration screen is used to select the
+directory where the start lists have been saved. Click the "Browse" button and
 navigate to the appropriate directory. Once chosen, the directory path will
 appear on the right.
 
@@ -128,7 +122,7 @@ General options
    :scale: 75 %
    :align: right
 
-The final section of the configuration screen is used to set the general
+The upper-right section of the configuration screen is used to set the general
 options that control the look of the scoreboard. When customizing options,
 click the "Test" button to display a sample scoreboard in the chosen style.
 
@@ -145,10 +139,6 @@ Suppress >0.3s
     received for a lane differ by more than 0.3s, the time for that lane will
     not be displayed. The displayed result will be "--:--.--" instead. This
     prevents showing results where there may have been a timing anomoly.
-Fullscreen
-    Selecting this option runs the scoreboard in fullscreen (non-windowed)
-    mode. Leaving it de-selected will display the scoreboard in a normal
-    window that can be moved, resized, maximized, etc.
 Text, background, and title colors
     Clicking on the corresponding color swatch allows customizing the color
     for each of these items.
@@ -188,5 +178,12 @@ Font scale
     a larger scale factor will produce larger text, but it can also lead to
     the scoreboard text looking "crowded."
 
-**Once the scoreboard is configured, click the "Run scoreboard" button to
-begin processing and displaying race results!**
+Chromecast selection
+====================
+
+The lower-right of the window displays the names of all the Google Chromecast devices that have been discovered on the local network. Select one or more of these devices to enable them. You may need to <ctrl>-click or <shift>-click to adjust the selection. The selected Chromecast devices should immediately begin displaying the latest scoreboard image.
+
+Preview window
+==============
+
+The lower-left of the main window contains a preview of what is currently being broadcast to the enabled Chromecast devices. The "test" and "clear" buttons just below this preview image can be used to send test data or clear the currently displayed results.
