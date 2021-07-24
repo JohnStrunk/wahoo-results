@@ -22,9 +22,15 @@ import tkinter as tk
 from typing import Tuple
 from PIL import Image, ImageDraw, ImageFont, ImageTk, UnidentifiedImageError #type: ignore
 from PIL.ImageEnhance import Brightness #type: ignore
+from matplotlib import font_manager #type: ignore
 
 from config import WahooConfig
 from results import Heat
+
+def _fontname_to_file(name: str) -> str:
+    properties = font_manager.FontProperties(family=name, weight="bold")
+    fname = font_manager.findfont(properties)
+    return fname
 
 def _format_time(time_seconds: float) -> str:
     """
@@ -65,7 +71,7 @@ def waiting_screen(size: Tuple[int, int], config: WahooConfig) -> Image.Image:
     img = Image.new(mode="RGBA", size=size,
                     color=config.get_str("color_bg"))
     center = (int(size[0]*0.5), int(size[1]*0.8))
-    normal = config.get_str("normal_font")
+    normal = _fontname_to_file(config.get_str("normal_font"))
     font_size = 72
     fnt = ImageFont.truetype(normal, font_size)
     draw = ImageDraw.Draw(img)
@@ -151,8 +157,8 @@ class ScoreboardImage:
         self._i.alpha_composite(bg_img)
 
     def _make_fonts(self) -> None:
-        normal = self._config.get_str("normal_font")
-        times = self._config.get_str("time_font")
+        normal = _fontname_to_file(self._config.get_str("normal_font"))
+        times = _fontname_to_file(self._config.get_str("time_font"))
         lanes = self._config.get_int("num_lanes")
         line_height = int(self.size[1] *
                           (1 - 2 * self._BORDER_FRACTION - self._HEADER_GAP) /

@@ -8,6 +8,7 @@ pytest-mypy
 
 # Application dependencies
 datetime
+matplotlib
 python-dateutil
 types-python-dateutil
 pillow
