@@ -97,11 +97,13 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     settings: Settings
 
     def clear_cb():
+        analytics.send_event("clear_screen")
         image = waiting_screen((1280, 720), options)
         settings.set_preview(image)
         IC.publish(image)
 
     def test_cb() -> None:
+        analytics.send_event("test_screen")
         heat = results.Heat(allow_inconsistent = not options.get_bool("inhibit_inconsistent"))
         #pylint: disable=protected-access
         heat._parse_do4("""432;1;1;All
@@ -143,6 +145,13 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
         FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
 
     def heat_cb(heat: results.Heat) -> None:
+        num_cc = len([x for x in IC.get_devices() if x["enabled"]])
+        analytics.send_event("race_result", {
+            "has_description": int(heat.event_desc != ""),
+            "lanes": options.get_int("num_lanes"),
+            "inhibit": int(options.get_bool("inhibit_inconsistent")),
+            "devices": num_cc,
+        })
         sbi = ScoreboardImage(heat, (1280, 720), options)
         settings.set_preview(sbi.image)
         IC.publish(sbi.image)
