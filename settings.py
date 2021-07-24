@@ -20,6 +20,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk, BooleanVar, StringVar
 from typing import Any, Callable, List, Optional
+from uuid import UUID
 from PIL import Image, ImageTk #type: ignore
 
 import ttkwidgets  #type: ignore
@@ -41,7 +42,9 @@ NoneFn = Callable[[], None]
 
 # Chromecast selection callback
 # SelectionFn(enabled_uuids)
-SelectionFn = Callable[[List[str]], None]
+SelectionFn = Callable[[List[UUID]], None]
+
+WatchdirFn = Callable[[str], None]
 
 class _StartList(ttk.LabelFrame):   # pylint: disable=too-many-ancestors
     '''The "start list" portion of the settings'''
@@ -98,9 +101,10 @@ class _StartList(ttk.LabelFrame):   # pylint: disable=too-many-ancestors
 
 class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
     '''Settings for Dolphin'''
-    def __init__(self, container: tkContainer, config: WahooConfig):
+    def __init__(self, container: tkContainer, watchdir_cb: WatchdirFn, config: WahooConfig):
         super().__init__(container, text="CTS Dolphin configuration", padding=5)
         self._config = config
+        self._watchdir_cb = watchdir_cb
         self._dolphin_directory = StringVar(value=self._config.get_str("dolphin_dir"))
         # self is a vertical container
         self.columnconfigure(0, weight=1)
@@ -126,6 +130,8 @@ class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
         directory = os.path.normpath(directory)
         self._config.set_str("dolphin_dir", directory)
         self._dolphin_directory.set(directory)
+        if self._watchdir_cb is not None:
+            self._watchdir_cb(directory)
 
 class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors,too-many-instance-attributes
     '''Miscellaneous settings'''
@@ -319,7 +325,7 @@ class _CCChooser(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         self._chooser.tag_bind("item", "<<TreeviewSelect>>", self._handle_selection)
 
     def _handle_selection(self, *_arg):
-        selected = self._chooser.selection()
+        selected = [UUID(u) for u in self._chooser.selection()]
         if self._selection_cb is not None:
             self._selection_cb(selected)
 
@@ -338,6 +344,9 @@ class _Preview(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         '''Set the preview image'''
         self._canvas.delete("all")
         scaled = image.resize((self.WIDTH, self.HEIGHT))
+        # Note: In order for the image to display on the canvas, we need to
+        # keep a reference to it, so it gets assigned to _pimage even though
+        # it's not used anywhere else.
         self._pimage = ImageTk.PhotoImage(scaled)
         self._canvas.create_image(0, 0, image=self._pimage, anchor="nw")
 
@@ -346,7 +355,8 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
 
     # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
     def __init__(self, container: tkContainer, csv_cb: CSVGenFn,
-                 clear_cb: NoneFn, test_cb: NoneFn, selection_cb: SelectionFn, config: WahooConfig):
+                 clear_cb: NoneFn, test_cb: NoneFn, selection_cb: SelectionFn,
+                 watchdir_cb: WatchdirFn, config: WahooConfig):
         '''
         Main settings window
 
@@ -357,6 +367,8 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
             - test_cb: Callback function to put test data on the scoreboard
             - selection_cb: Callback function to indicate a change in enabled
               Chromecast devices
+            - watchdir_cb: Callback function to indicate the do4 data dir
+              has changed.
             - config: WahooConfig configuration object
         '''
         super().__init__(container, padding=5)
@@ -377,7 +389,7 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         # row 1: spacer
         lcol.rowconfigure(1, weight=1)
         # row 2: Dolphin settings
-        dolphin = _DolphinSettings(lcol, self._config)
+        dolphin = _DolphinSettings(lcol, watchdir_cb, self._config)
         dolphin.grid(column=0, row=2, sticky="news", padx=3, pady=3)
 
         rcol = ttk.Frame(self)
@@ -469,7 +481,7 @@ def _main():
     def sel_cb(items):
         print(items)
 
-    settings = Settings(root, None, None, None, sel_cb, options)
+    settings = Settings(root, None, None, None, sel_cb, None, options)
     settings.grid(column=0, row=0, sticky="news")
     root.update()
     print(f"Root window: {root.winfo_width()}x{root.winfo_height()}")

@@ -24,6 +24,7 @@ import socket
 import threading
 import time
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 from PIL import Image # type: ignore
 import pychromecast # type: ignore
@@ -43,7 +44,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
     # _devices maps the chromecast uuid to a map of:
     #    "cast" -> its chromecast object
     #    "enabled" -> boolean indicating whether we should cast to this device
-    devices: Dict[str, Dict[str, Any]]
+    devices: Dict[UUID, Dict[str, Any]]
     _webserver_thread: Optional[threading.Thread]
     _refresh_thread: Optional[threading.Thread]
 
@@ -99,7 +100,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         '''
         self.callback_fn = func
 
-    def enable(self, uuid: str, enabled: bool) -> None:
+    def enable(self, uuid: UUID, enabled: bool) -> None:
         '''
         Set whether to include or exclude a specific Chromecast device from
         receiving the published images.
@@ -108,8 +109,10 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
             previous = self.devices[uuid]["enabled"]
             self.devices[uuid]["enabled"] = enabled
             if enabled and not previous : # enabling; send the latest image
+                print(f"Enabling: {uuid}")
                 self._publish_one(self.devices[uuid]["cast"])
             elif previous and not enabled: # disabling; disconnect
+                print(f"Disabling: {uuid}")
                 self._disconnect(self.devices[uuid]["cast"])
 
     def get_devices(self) -> List[DeviceStatus]:

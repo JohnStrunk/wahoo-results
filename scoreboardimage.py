@@ -185,12 +185,12 @@ class ScoreboardImage:
         edge_r = int(self.size[0] * (1 - self._BORDER_FRACTION))
         width = edge_r - edge_l
         time_width = int(draw.textsize("00:00.00", self._timefont)[0] * 1.2)
-        idx_width = draw.textsize("Lane", self._normalfont)[0]
+        idx_width = draw.textsize("L", self._normalfont)[0]
         pl_width = draw.textsize("MMM", self._normalfont)[0]
         name_width = width - time_width - idx_width - pl_width
         baseline = int(self.size[0] * (self._BORDER_FRACTION + self._HEADER_GAP) \
             + self._line_height)
-        draw.text((edge_l, baseline), "Lane", font=self._normalfont, anchor="ls", fill=fg_color)
+        draw.text((edge_l, baseline), "L", font=self._normalfont, anchor="ls", fill=fg_color)
         draw.text((edge_l + idx_width + pl_width, baseline), "Name",
                font=self._normalfont, anchor="ls", fill=fg_color)
         draw.text((edge_r, baseline), "Time", font=self._normalfont, anchor="rs", fill=fg_color)
