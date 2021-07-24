@@ -60,6 +60,17 @@ def _format_place(place: int) -> str:
         return "3rd"
     return f"{place}th"
 
+def waiting_screen(size: Tuple[int, int], config: WahooConfig) -> Image.Image:
+    img = Image.new(mode="RGBA", size=size,
+                    color=config.get_str("color_bg"))
+    center = (int(size[0]*0.5), int(size[1]*0.8))
+    normal = config.get_str("normal_font")
+    font_size = 72
+    fnt = ImageFont.truetype(normal, font_size)
+    draw = ImageDraw.Draw(img)
+    color = config.get_str("color_fg")
+    draw.text(center, "Waiting for results...", font=fnt, fill=color, anchor="ms")
+    return img
 
 class ScoreboardImage:
     '''

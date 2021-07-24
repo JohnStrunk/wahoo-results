@@ -30,7 +30,7 @@ import analytics
 from imagecast import ImageCast
 from config import WahooConfig
 import results
-from scoreboardimage import ScoreboardImage
+from scoreboardimage import ScoreboardImage, waiting_screen
 from settings import Settings
 
 FILE_WATCHER: watchdog.observers.Observer
@@ -98,7 +98,7 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     settings: Settings
 
     def clear_cb():
-        image = Image.new(mode="RGBA", size=(1280, 720), color=options.get_str("color_bg"))
+        image = waiting_screen((1280, 720), options)
         settings.set_preview(image)
         IC.publish(image)
 
