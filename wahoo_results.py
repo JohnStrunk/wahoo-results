@@ -22,7 +22,6 @@ import time
 import uuid
 from tkinter import Tk
 from typing import Callable, List
-from PIL import Image  #type: ignore
 import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
 

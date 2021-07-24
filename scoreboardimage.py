@@ -61,6 +61,7 @@ def _format_place(place: int) -> str:
     return f"{place}th"
 
 def waiting_screen(size: Tuple[int, int], config: WahooConfig) -> Image.Image:
+    '''Generate a "waiting" image to display on the scoreboard.'''
     img = Image.new(mode="RGBA", size=size,
                     color=config.get_str("color_bg"))
     center = (int(size[0]*0.5), int(size[1]*0.8))
