@@ -312,6 +312,8 @@ class _CCChooser(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         cc_chooser.grid(column=0, row=0, sticky="news")
         self._chooser = cc_chooser
         self._selection_cb = selection_cb
+        ToolTip(self, "Select which Chromecast devices should display the "
+                "scoreboard. Use <ctrl> or <shift> to select multiple devices.")
 
     def set_items(self, items):
         '''Set the list of chromecast devices and indicate whether they are enabled'''
@@ -339,6 +341,7 @@ class _Preview(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         canvas.grid(column=0, row=0, padx=3, pady=3)
         self._canvas = canvas
         self._pimage = None
+        ToolTip(self, "Current contents of the scoreboard")
 
     def set_image(self, image: Image.Image) -> None:
         '''Set the preview image'''
@@ -420,7 +423,7 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         ToolTip(test_btn, text="Display a mockup to show the current scoreboard style")
         clear_btn = ttk.Button(fr6, text="Clear scoreboard", command=self._handle_clear_btn)
         clear_btn.grid(column=1, row=0, sticky="news")
-        ToolTip(clear_btn, text="Start the scoreboard and watch for results")
+        ToolTip(clear_btn, text="Clear the scoreboard")
         # row 2, right side: doc link and version
         fr8 = ttk.Frame(self)
         fr8.grid(column=1, row=2, sticky="news", padx=3, pady=3)
