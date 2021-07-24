@@ -109,10 +109,8 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
             previous = self.devices[uuid]["enabled"]
             self.devices[uuid]["enabled"] = enabled
             if enabled and not previous : # enabling; send the latest image
-                print(f"Enabling: {uuid}")
                 self._publish_one(self.devices[uuid]["cast"])
             elif previous and not enabled: # disabling; disconnect
-                print(f"Disabling: {uuid}")
                 self._disconnect(self.devices[uuid]["cast"])
 
     def get_devices(self) -> List[DeviceStatus]:

@@ -134,12 +134,9 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
 
     def selection_cb(enabled_uuids: List[uuid.UUID]) -> None:
         for status in IC.get_devices():
-            print(f"checking {status['uuid']}")
             if status["uuid"] in enabled_uuids:
-                print("enabling")
                 IC.enable(status["uuid"], True)
             else:
-                print("disabling")
                 IC.enable(status["uuid"], False)
 
     def watchdir_cb(_dir: str) -> None:
@@ -170,23 +167,6 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
     IC.set_discovery_callback(cast_discovery_cb)
     IC.start()
     clear_cb()
-
-# def _set_test_data(board: Scoreboard):
-#     analytics.screen_view("test_data")
-#     board.clear()
-#     board.event(432, "GIRLS 13&O 1650 FREE")
-#     board.heat(56)
-#     # Names from https://www.name-generator.org.uk/
-#     board.lane(1, "MILLER, STEPHANIE", "TEAM1", 16*60 + 31.03, 4)
-#     board.lane(2, "DAVIS, SARAH", "TEAM1", 48.00, 1)
-#     board.lane(3, "GARCIA, ASHLEY", "TEAM1", 10*60 + 00.20, 3)
-#     board.lane(4, "WILSON, JESSICA", "TEAM1")
-#     board.lane(5, "", "", 60*5 + 12.34, 2)
-#     board.lane(6, "MOORE, SAMANTHA", "TEAM1", -678.12)
-#     board.lane(7, "JACKSON, AMBER", "TEAM1", 1000.03)
-#     board.lane(8, "TAYLOR, MELISSA", "TEAM1", 1000.03)
-#     board.lane(9, "ANDERSON, RACHEL", "TEAM1", 1000.03)
-#     board.lane(10, "WHITE, MEGAN", "TEAM1", 1000.03)
 
 def main():
     '''Runs the Wahoo! Results scoreboard'''
