@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+mypy = "*"
+pyinstaller = "*"
+pylint = "*"
+pytest = "*"
+pytest-pylint = "*"
+pytest-mypy = "*"
+matplotlib = "*"
+python-dateutil = "*"
+types-python-dateutil = "*"
+requests = "*"
+types-requests = "*"
+semver = "*"
+ttkwidgets = "*"
+watchdog = "*"
+plantweb = "*"
+rstcheck = "*"
+sphinx-rtd-theme = "*"
+DateTime = "*"
+Pillow = "*"
+PyChromecast = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
