@@ -19,20 +19,21 @@
 import os
 import sys
 import time
+import uuid
 from tkinter import Tk
-from typing import List
-from PIL import Image, UnidentifiedImageError  #type: ignore
-from PIL.ImageEnhance import Brightness  #type: ignore
+from typing import Callable, List
 import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
 
 import analytics
-import results
-import settings
+from imagecast import ImageCast
 from config import WahooConfig
-from scoreboard import Scoreboard
+import results
+from scoreboardimage import ScoreboardImage, waiting_screen
+from settings import Settings
 
 FILE_WATCHER: watchdog.observers.Observer
+IC: ImageCast
 
 def eventlist_to_csv(events: List[results.Event]) -> List[str]:
     '''Converts a list of events into CSV format'''
@@ -62,12 +63,14 @@ def generate_dolphin_csv(filename: str, directory: str) -> int:
 
 class Do4Handler(watchdog.events.PatternMatchingEventHandler):
     '''Handler to process Dolphin .do4 files'''
-    _sb: Scoreboard
+    HeatCallback = Callable[[results.Heat], None]
     _options: WahooConfig
-    def __init__(self, scoreboard: Scoreboard, options: WahooConfig):
-        self._sb = scoreboard
+
+    def __init__(self, hcb: HeatCallback, options: WahooConfig):
+        self._hcb = hcb
         self._options = options
         super().__init__(patterns=["*.do4"], ignore_directories=True)
+
     def on_created(self, event):
         time.sleep(1)
         heat = results.Heat(allow_inconsistent=not self._options.get_bool("inhibit_inconsistent"))
@@ -79,13 +82,11 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
             pass
         except FileNotFoundError:
             pass
-        display(self._sb, heat)
+        self._hcb(heat)
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
     '''Display the settings window'''
     analytics.screen_view("settings_window")
-    # don't watch for new results while in settings menu
-    FILE_WATCHER.unschedule_all()
 
     # Settings window is fixed size
     root.state("normal")
@@ -93,95 +94,92 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     root.resizable(False, False)
     root.geometry("")  # allow automatic size
 
-    def sb_run_cb():
-        board = scoreboard_window(root, options)
-        # Start watching for new results
-        do4_handler = Do4Handler(board, options)
+    settings: Settings
+
+    def clear_cb():
+        analytics.send_event("clear_screen")
+        image = waiting_screen((1280, 720), options)
+        settings.set_preview(image)
+        IC.publish(image)
+
+    def test_cb() -> None:
+        analytics.send_event("test_screen")
+        heat = results.Heat(allow_inconsistent = not options.get_bool("inhibit_inconsistent"))
+        #pylint: disable=protected-access
+        heat._parse_do4("""432;1;1;All
+Lane1;991.03;991.02;
+Lane2;48.00;48.00;
+Lane3;600.20;600.20;
+Lane4;0;0;0
+Lane5;312.34;312.34;
+Lane6;678.12;679.12;
+Lane7;1000.03;1000.03;
+Lane8;1000.03;1000.03;
+Lane9;1010.03;1010.03;
+Lane10;1000.03;1000.03;
+F679E29E3D8A4CC4""".split("\n"))
+        # Names from https://www.name-generator.org.uk/
+        #pylint: disable=protected-access
+        heat._parse_scb("""#432 GIRLS 13&O 1650 FREE
+MILLER, STEPHANIE   --TEAM1           
+DAVIS, SARAH        --TEAM1           
+GARCIA, ASHLEY      --TEAM1           
+WILSON, JESSICA     --TEAM1           
+                    --                
+MOORE, SAMANTHA     --TEAM1           
+JACKSON, AMBER      --TEAM1           
+TAYLOR, MELISSA     --TEAM1           
+ANDERSON, RACHEL    --TEAM1           
+WHITE, MEGAN        --TEAM1           """.split("\n"))
+        heat_cb(heat)
+
+    def selection_cb(enabled_uuids: List[uuid.UUID]) -> None:
+        for status in IC.get_devices():
+            if status["uuid"] in enabled_uuids:
+                IC.enable(status["uuid"], True)
+            else:
+                IC.enable(status["uuid"], False)
+
+    def watchdir_cb(_dir: str) -> None:
+        FILE_WATCHER.unschedule_all()
         FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
 
-    def sb_test_cb():
-        board = scoreboard_window(root, options)
-        _set_test_data(board)
+    def heat_cb(heat: results.Heat) -> None:
+        num_cc = len([x for x in IC.get_devices() if x["enabled"]])
+        analytics.send_event("race_result", {
+            "has_description": int(heat.event_desc != ""),
+            "lanes": options.get_int("num_lanes"),
+            "inhibit": int(options.get_bool("inhibit_inconsistent")),
+            "devices": num_cc,
+        })
+        sbi = ScoreboardImage(heat, (1280, 720), options)
+        settings.set_preview(sbi.image)
+        IC.publish(sbi.image)
 
-    # Invisible container that holds all content
-    content = settings.Settings(root, generate_dolphin_csv, sb_run_cb, sb_test_cb, options)
-    content.grid(column=0, row=0, sticky="news")
+    def cast_discovery_cb() -> None:
+        items = {}
+        for status in IC.get_devices():
+            items[status["uuid"]] = {
+                "name": status["name"],
+                "enabled": status["enabled"]
+            }
+        settings.set_items(items)
 
-def scoreboard_window(root: Tk, options: WahooConfig) -> Scoreboard:
-    """Displays the scoreboard window."""
-    analytics.screen_view("scoreboard", {
-        "fullscreen": int(options.get_bool("fullscreen")),
-        "lanes": options.get_int("num_lanes"),
-    })
-    if options.get_bool("fullscreen"):
-        root.resizable(False, False)
-        root.overrideredirect(True)  # hide titlebar
-        root.state("zoomed") # windows/macos only; root.attributes('-zoomed', True) on Linux
-    else:
-        # Scoreboard is varible size
-        root.resizable(True, True)
-    content = Scoreboard(root, options)
-    content.grid(column=0, row=0, sticky="news")
-    if options.get_str("image_bg") != "":
-        try:
-            image = Image.open(options.get_str("image_bg"))
-            content.bg_image(Brightness(image).enhance(options.get_float("image_bright")),
-                            options.get_str("image_scale"))
-        except FileNotFoundError:
-            pass
-        except UnidentifiedImageError:
-            pass
-    content.set_lanes(options.get_int("num_lanes"))
+    do4_handler = Do4Handler(heat_cb, options)
+    FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
 
-    def return_to_settings(_) -> None:
-        root.unbind('<Double-1>')
-        content.destroy()
-        root.state('normal') # Un-maximize
-        settings_window(root, options)
-    root.bind('<Double-1>', return_to_settings)
-    return content
+    settings = Settings(root, generate_dolphin_csv, clear_cb, test_cb,
+                        selection_cb, watchdir_cb, options)
+    settings.grid(column=0, row=0, sticky="news")
 
-def display(board: Scoreboard, heat: results.Heat) -> None:
-    """
-    Display the results of a heat.
-    """
-    analytics.send_event("race_result", {
-        "has_description": int(heat.event_desc != ""),
-    })
-    board.clear()
-    board.event(heat.event, heat.event_desc)
-    board.heat(heat.heat)
-
-    for i in range(0, 10):
-        if not heat.lanes[i].is_empty():
-            ftime = heat.lanes[i].final_time()
-            place = heat.place(i)
-            if not heat.lanes[i].times_are_valid():
-                ftime = -ftime
-                place = 0
-            board.lane(i+1, heat.lanes[i].name, heat.lanes[i].team, float(ftime), place)
-    # heat.dump()
-
-def _set_test_data(board: Scoreboard):
-    analytics.screen_view("test_data")
-    board.clear()
-    board.event(432, "GIRLS 13&O 1650 FREE")
-    board.heat(56)
-    # Names from https://www.name-generator.org.uk/
-    board.lane(1, "MILLER, STEPHANIE", "TEAM1", 16*60 + 31.03, 4)
-    board.lane(2, "DAVIS, SARAH", "TEAM1", 48.00, 1)
-    board.lane(3, "GARCIA, ASHLEY", "TEAM1", 10*60 + 00.20, 3)
-    board.lane(4, "WILSON, JESSICA", "TEAM1")
-    board.lane(5, "", "", 60*5 + 12.34, 2)
-    board.lane(6, "MOORE, SAMANTHA", "TEAM1", -678.12)
-    board.lane(7, "JACKSON, AMBER", "TEAM1", 1000.03)
-    board.lane(8, "TAYLOR, MELISSA", "TEAM1", 1000.03)
-    board.lane(9, "ANDERSON, RACHEL", "TEAM1", 1000.03)
-    board.lane(10, "WHITE, MEGAN", "TEAM1", 1000.03)
+    IC.set_discovery_callback(cast_discovery_cb)
+    IC.start()
+    clear_cb()
 
 def main():
     '''Runs the Wahoo! Results scoreboard'''
     global FILE_WATCHER  # pylint: disable=W0603
+    global IC  # pylint: disable=W0603
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
     root = Tk()
@@ -199,12 +197,15 @@ def main():
     FILE_WATCHER = watchdog.observers.Observer()
     FILE_WATCHER.start()
 
+    IC = ImageCast(8011)
+
     settings_window(root, config)
     root.mainloop()
 
     config.save()
     FILE_WATCHER.stop()
     FILE_WATCHER.join()
+    IC.stop()
     analytics.send_application_stop()
 
 if __name__ == "__main__":

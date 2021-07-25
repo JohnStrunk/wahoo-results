@@ -8,9 +8,11 @@ pytest-mypy
 
 # Application dependencies
 datetime
+matplotlib
 python-dateutil
 types-python-dateutil
 pillow
+pychromecast
 requests
 types-requests
 semver

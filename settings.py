@@ -19,7 +19,9 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, ttk, BooleanVar, StringVar
-from typing import Any, Callable
+from typing import Any, Callable, List, Optional
+from uuid import UUID
+from PIL import Image, ImageTk #type: ignore
 
 import ttkwidgets  #type: ignore
 import ttkwidgets.font  #type: ignore
@@ -35,7 +37,14 @@ tkContainer = Any
 # Dolphin CSV generator callback
 # num_events = CSVGenFn(outfile, dir_to_process)
 CSVGenFn = Callable[[str, str], int]
+
 NoneFn = Callable[[], None]
+
+# Chromecast selection callback
+# SelectionFn(enabled_uuids)
+SelectionFn = Callable[[List[UUID]], None]
+
+WatchdirFn = Callable[[str], None]
 
 class _StartList(ttk.LabelFrame):   # pylint: disable=too-many-ancestors
     '''The "start list" portion of the settings'''
@@ -92,9 +101,10 @@ class _StartList(ttk.LabelFrame):   # pylint: disable=too-many-ancestors
 
 class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
     '''Settings for Dolphin'''
-    def __init__(self, container: tkContainer, config: WahooConfig):
+    def __init__(self, container: tkContainer, watchdir_cb: WatchdirFn, config: WahooConfig):
         super().__init__(container, text="CTS Dolphin configuration", padding=5)
         self._config = config
+        self._watchdir_cb = watchdir_cb
         self._dolphin_directory = StringVar(value=self._config.get_str("dolphin_dir"))
         # self is a vertical container
         self.columnconfigure(0, weight=1)
@@ -120,6 +130,8 @@ class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
         directory = os.path.normpath(directory)
         self._config.set_str("dolphin_dir", directory)
         self._dolphin_directory.set(directory)
+        if self._watchdir_cb is not None:
+            self._watchdir_cb(directory)
 
 class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors,too-many-instance-attributes
     '''Miscellaneous settings'''
@@ -148,7 +160,6 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors,to
                            "Scoreboard background color").grid(column=2, row=1, sticky="es")
         self._color_swatch("3rd place:", "place_3",
                            "Color of 3rd place marker text").grid(column=0, row=2, sticky="es")
-        self._fullscreen().grid(column=1, row=2, sticky="es")
         self._color_swatch("Title color:", "color_ehd",
             "Scoreboard event, heat, and description text color").grid(column=2, row=2, sticky="es")
         self._bg_img().grid(column=0, row=3, columnspan=3, sticky="news")
@@ -294,58 +305,128 @@ class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors,to
     def _handle_inhibit(self, *_arg):
         self._config.set_bool("inhibit_inconsistent", self._inhibit_var.get())
 
-    def _fullscreen(self) -> ttk.Widget:
-        frame = ttk.Frame(self, padding=1)
-        frame.rowconfigure(0, weight=1)
-        frame.columnconfigure(0, weight=1)
-        ttk.Label(frame, text="fullscreen:").grid(column=0, row=0, sticky="nes")
-        self._fullscreen_var = BooleanVar(frame, value=self._config.get_bool("fullscreen"))
-        ttk.Checkbutton(frame, variable=self._fullscreen_var,
-            command=self._handle_fullscreen).grid(column=1, row=0, sticky="news")
-        ToolTip(frame, "Select to run scoreboard in fullscreen mode; deselect for windowed")
-        return frame
-    def _handle_fullscreen(self, *_arg):
-        self._config.set_bool("fullscreen", self._fullscreen_var.get())
+class _CCChooser(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
+    def __init__(self, container: tkContainer, selection_cb: SelectionFn):
+        super().__init__(container, padding=5, text="Chromecast devices")
+        cc_chooser = ttk.Treeview(self, selectmode="extended", show="tree")
+        cc_chooser.grid(column=0, row=0, sticky="news")
+        self._chooser = cc_chooser
+        self._selection_cb = selection_cb
+        ToolTip(self, "Select which Chromecast devices should display the "
+                "scoreboard. Use <ctrl> or <shift> to select multiple devices.")
+
+    def set_items(self, items):
+        '''Set the list of chromecast devices and indicate whether they are enabled'''
+        # items is dict[uuid]-> {"name": str, "enabled": bool}
+        for existing in self._chooser.get_children():
+            self._chooser.delete(existing)
+        for uuid, prop in items.items():
+            self._chooser.insert("", 'end', uuid, text=prop["name"], tags="item")
+            if prop["enabled"]:
+                self._chooser.selection_add(uuid)
+        self._chooser.tag_bind("item", "<<TreeviewSelect>>", self._handle_selection)
+
+    def _handle_selection(self, *_arg):
+        selected = [UUID(u) for u in self._chooser.selection()]
+        if self._selection_cb is not None:
+            self._selection_cb(selected)
+
+class _Preview(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
+    WIDTH = 320
+    HEIGHT = 180
+    _pimage: Optional[ImageTk.PhotoImage]
+    def __init__(self, container: tkContainer):
+        super().__init__(container, padding=5, text="Scoreboard preview")
+        canvas = tk.Canvas(self, width=self.WIDTH, height=self.HEIGHT)
+        canvas.grid(column=0, row=0, padx=3, pady=3)
+        self._canvas = canvas
+        self._pimage = None
+        ToolTip(self, "Current contents of the scoreboard")
+
+    def set_image(self, image: Image.Image) -> None:
+        '''Set the preview image'''
+        self._canvas.delete("all")
+        scaled = image.resize((self.WIDTH, self.HEIGHT))
+        # Note: In order for the image to display on the canvas, we need to
+        # keep a reference to it, so it gets assigned to _pimage even though
+        # it's not used anywhere else.
+        self._pimage = ImageTk.PhotoImage(scaled)
+        self._canvas.create_image(0, 0, image=self._pimage, anchor="nw")
 
 class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
     '''Main settings window'''
 
-    # pylint: disable=too-many-arguments,too-many-locals
+    # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
     def __init__(self, container: tkContainer, csv_cb: CSVGenFn,
-                 scoreboard_run_cb: NoneFn, test_run_cb: NoneFn, config: WahooConfig):
+                 clear_cb: NoneFn, test_cb: NoneFn, selection_cb: SelectionFn,
+                 watchdir_cb: WatchdirFn, config: WahooConfig):
+        '''
+        Main settings window
+
+        Parameters:
+            - container: The tk widget that will hold the settings window
+            - csv_cb: Callback function to generate the Dolphin csv
+            - clear_cb: Callback function to clear the scoreboard
+            - test_cb: Callback function to put test data on the scoreboard
+            - selection_cb: Callback function to indicate a change in enabled
+              Chromecast devices
+            - watchdir_cb: Callback function to indicate the do4 data dir
+              has changed.
+            - config: WahooConfig configuration object
+        '''
         super().__init__(container, padding=5)
         self._config = config
-        self._scoreboard_run_cb = scoreboard_run_cb
-        self._test_run_cb = test_run_cb
+        self._clear_cb = clear_cb
+        self._test_cb = test_cb
         self.grid(column=0, row=0, sticky="news")
+
         self.columnconfigure(0, weight=1)
-        # Odd rows are empty filler to distribute vertical whitespace
-        for i in [1, 3, 5, 7, 9]:
-            self.rowconfigure(i, weight=1)
+        self.columnconfigure(1, weight=1)
+
+        lcol = ttk.Frame(self)
+        lcol.grid(column=0, row=0, sticky="news")
+        lcol.columnconfigure(0, weight=1)
         # row 0: Start list settings
-        startlist = _StartList(self, csv_cb, self._config)
-        startlist.grid(column=0, row=0, sticky="news")
+        startlist = _StartList(lcol, csv_cb, self._config)
+        startlist.grid(column=0, row=0, sticky="news", padx=3, pady=3)
+        # row 1: spacer
+        lcol.rowconfigure(1, weight=1)
         # row 2: Dolphin settings
-        dolphin = _DolphinSettings(self, self._config)
-        dolphin.grid(column=0, row=2, sticky="news")
-        # row 4: General settings
-        general = _GeneralSettings(self, self._config)
-        general.grid(column=0, row=4, sticky="news")
-        # row 6: run button(s)
+        dolphin = _DolphinSettings(lcol, watchdir_cb, self._config)
+        dolphin.grid(column=0, row=2, sticky="news", padx=3, pady=3)
+
+        rcol = ttk.Frame(self)
+        rcol.grid(column=1, row=0, sticky="news")
+        rcol.columnconfigure(0, weight=1)
+        # row 0: General settings
+        general = _GeneralSettings(rcol, self._config)
+        general.grid(column=0, row=0, sticky="news", padx=3, pady=3)
+
+        # row 1: left side: preview window
+        canv = _Preview(self)
+        canv.grid(column=0, row=1, padx=3, pady=3, sticky="news")
+        self._preview = canv
+
+        # row 1: right side: cc chooser
+        cc_chooser = _CCChooser(self, selection_cb)
+        cc_chooser.grid(column=1, row=1, sticky="news", padx=3, pady=3)
+        self._cc_chooser = cc_chooser
+
+        # row 2, left side: run button(s)
         fr6 = ttk.Frame(self)
-        fr6.grid(column=0, row=6, sticky="news")
+        fr6.grid(column=0, row=2, sticky="news", padx=3, pady=3)
         fr6.rowconfigure(0, weight=1)
         fr6.columnconfigure(0, weight=0)
         fr6.columnconfigure(1, weight=1)
         test_btn = ttk.Button(fr6, text="Test", command=self._handle_test_btn)
         test_btn.grid(column=0, row=0, sticky="news")
         ToolTip(test_btn, text="Display a mockup to show the current scoreboard style")
-        run_btn = ttk.Button(fr6, text="Run scoreboard", command=self._handle_run_scoreboard_btn)
-        run_btn.grid(column=1, row=0, sticky="news")
-        ToolTip(run_btn, text="Start the scoreboard and watch for results")
-        # row 8: doc link and version
+        clear_btn = ttk.Button(fr6, text="Clear scoreboard", command=self._handle_clear_btn)
+        clear_btn.grid(column=1, row=0, sticky="news")
+        ToolTip(clear_btn, text="Clear the scoreboard")
+        # row 2, right side: doc link and version
         fr8 = ttk.Frame(self)
-        fr8.grid(column=0, row=8, sticky="news")
+        fr8.grid(column=1, row=2, sticky="news", padx=3, pady=3)
         fr8.rowconfigure(0, weight=1)
         fr8.columnconfigure(0, weight=1)
         fr8.columnconfigure(1, weight=0)
@@ -359,38 +440,63 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         version_label = ttk.Label(fr8, text=wh_version.git_semver(WAHOO_RESULTS_VERSION),
             justify="right", padding=(5, 2), relief="sunken")
         version_label.grid(column=1, row=0, sticky="nes")
-        # row 10: update info
+        # row 3: update info
         highest_version = wh_version.latest()
         if (highest_version is not None and
             not wh_version.is_latest_version(highest_version, WAHOO_RESULTS_VERSION)):
             fr10 = ttk.Frame(self)
             fr10.columnconfigure(0, weight=1)
-            fr10.grid(column=0, row=10, sticky="news")
+            fr10.grid(column=0, row=3, sticky="news", columnspan=2, padx=3)
             update_text = f"New version available. Click to download: {highest_version.tag}"
             update_label = ttkwidgets.LinkLabel(fr10, text=update_text,
                 link=highest_version.url,
                 justify="left", padding=[5, 2], relief="sunken")
             update_label.grid(column=0, row=0, sticky="news")
 
-    def _handle_run_scoreboard_btn(self) -> None:
-        self.destroy()
-        self._scoreboard_run_cb()
+    def _handle_clear_btn(self) -> None:
+        if self._clear_cb is not None:
+            self._clear_cb()
 
     def _handle_test_btn(self) -> None:
-        self.destroy()
-        self._test_run_cb()
+        if self._test_cb is not None:
+            self._test_cb()
 
-def main():
-    '''testing'''
+    def set_items(self, items) -> None:
+        '''Set the list of chromecast devices and indicate whether they are enabled'''
+        # items is dict[uuid]-> {"name": str, "enabled": bool}
+        self._cc_chooser.set_items(items)
+
+    def set_preview(self, image: Image.Image) -> None:
+        '''Set the scoreboard preview image'''
+        self._preview.set_image(image)
+
+
+
+
+def _main():
     root = tk.Tk()
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
     root.resizable(False, False)
     options = WahooConfig()
-    settings = Settings(root, None, None, None, options)
+
+    def sel_cb(items):
+        print(items)
+
+    settings = Settings(root, None, None, None, sel_cb, None, options)
     settings.grid(column=0, row=0, sticky="news")
+    root.update()
+    print(f"Root window: {root.winfo_width()}x{root.winfo_height()}")
+    items = {}
+    items["abc"] = {"name": "cc1", "enabled": True}
+    items["def"] = {"name": "cc2", "enabled": False}
+    items["ghi"] = {"name": "cc1.5", "enabled": True}
+    settings.set_items(items)
+    root.update()
+    image = Image.open("file.png")
+    settings.set_preview(image)
     tk.mainloop()
 
 if __name__ == '__main__':
-    main()
+    _main()
