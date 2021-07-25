@@ -23,6 +23,7 @@ here](https://github.com/JohnStrunk/wahoo-results/releases/latest) :arrow_left:
 - Customizable text fonts, sizes, and colors
 - Custom background images, or just use a solid color
 - Calculates final time based on multiple Dolphin watches
+- Broadcasts the scoreboard to 1 or more Chromecast devices
 
 ## Installation
 
@@ -41,7 +42,8 @@ preferences are saved into a `wahoo-results.ini` file in the same directory.
 3. Configure Wahoo! Results to watch for the Dolphin `*.do4` race result
    files.
 4. Run the scoreboard. It will display race results including both names (from
-   the start list files) and times (from the Dolphin result files).
+   the start list files) and times (from the Dolphin result files) onto
+   Chromecast devices on the local network.
 
 ## License
 
@@ -54,13 +56,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+### [0.5.0] - 2021-07-24
+
+#### Added
+
+- :sparkles: The scoreboard now has Chromecast support.
+- :sparkles: The latest results are shown in the application.
+
 #### Fixed
 
 - :bug: The text file encoding for `scb`, `do4`, and `csv` files was left
   unspecified, which potentially led to decoding problems when non-ASCII
   characters were encountered. `cp1252` is now specified directly.
 
-### [0.4.1] - 2021-04-24
+#### Removed
+
+- :skull_and_crossbones: Removed support for "windowed" and full screen (on an
+  attached monitor) scoreboard output
+
+### [0.4.1] - 2021-06-19
 
 #### Fixed
 
@@ -126,7 +140,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/JohnStrunk/wahoo-results/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/JohnStrunk/wahoo-results/compare/v0.3.1...v0.3.2
