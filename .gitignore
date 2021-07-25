@@ -1,8 +1,8 @@
 /__pycache__/
 /.mypy_cache/
 /.pytest_cache/
+/.venv/
 /.vscode/
-/venv/
 /wahoo-results.exe
 /wahoo-results.ini
 /wahoo-results.zip

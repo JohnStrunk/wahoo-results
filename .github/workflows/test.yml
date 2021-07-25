@@ -18,18 +18,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Initialize virtualenv
+      # Add Scripts directory to the path so that pipenv (and associated
+      # utilities) can be used once installed
+      - name: Add python Scripts directory to path
         shell: cmd
-        run: make-venv.bat
+        # Code-page switch is needed to write the env file as utf-8
+        run: |
+          chcp 65001
+          python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
+          chcp 1252
+
+      - name: Install pipenv
+        shell: cmd
+        run: python -m pip install --user pipenv
+
+      - name: Initialize virtual environment
+        shell: cmd
+        run: pipenv install --deploy
 
       - name: Run tests
         shell: cmd
-        run: |
-          call venv\Scripts\activate.bat
-          pytest -v
+        run: pipenv run pytest -v
 
       - name: Build docs
         shell: cmd
-        run: |
-          call venv\Scripts\activate.bat
-          make-doc.bat html
+        run: pipenv run make-doc.bat html
