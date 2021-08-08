@@ -34,8 +34,10 @@ del wahoo-results.spec
 rmdir /q/s build
 
 ::: Create zip file
+:WaitUntilAccessible
+type wahoo-results.exe >NUL || goto :WaitUntilAccessible
 del wahoo-results.zip
-powershell "Get-ChildItem -Path wahoo-results.exe | Compress-Archive -DestinationPath wahoo-results.zip"
+powershell Compress-Archive wahoo-results.exe wahoo-results.zip
 
 ::: Sign release artifact
 del wahoo-results.zip.asc

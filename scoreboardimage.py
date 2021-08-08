@@ -23,6 +23,7 @@ from typing import Tuple
 from PIL import Image, ImageDraw, ImageFont, ImageTk, UnidentifiedImageError #type: ignore
 from PIL.ImageEnhance import Brightness #type: ignore
 from matplotlib import font_manager #type: ignore
+import sentry_sdk
 
 from config import WahooConfig
 from results import Heat
@@ -100,14 +101,18 @@ class ScoreboardImage:
     def __init__(self, heat: Heat, size: Tuple[int, int],
                  config: WahooConfig):
         super().__init__()
-        self._heat = heat
-        self._config = config
-        self._i = Image.new(mode="RGBA", size=size,
-                            color=self._config.get_str("color_bg"))
-        self._add_background()
-        self._make_fonts()
-        self._draw_header()
-        self._draw_lanes()
+        with sentry_sdk.start_transaction(op="render_image", name="Render image"):
+            self._heat = heat
+            self._config = config
+            self._i = Image.new(mode="RGBA", size=size,
+                                color=self._config.get_str("color_bg"))
+            with sentry_sdk.start_span(op="render_background"):
+                self._add_background()
+            with sentry_sdk.start_span(op="size_fonts"):
+                self._make_fonts()
+            with sentry_sdk.start_span(op="draw"):
+                self._draw_header()
+                self._draw_lanes()
 
     @property
     def image(self) -> Image.Image:
@@ -202,7 +207,7 @@ class ScoreboardImage:
         edge_l = int(self.size[0] * self._BORDER_FRACTION)
         edge_r = int(self.size[0] * (1 - self._BORDER_FRACTION))
         width = edge_r - edge_l
-        time_width = int(draw.textsize("00:00.00", self._timefont)[0] * 1.2)
+        time_width = int(draw.textsize("00:00.00", self._timefont)[0] * 1.1)
         idx_width = draw.textsize("L", self._normalfont)[0]
         pl_width = draw.textsize("MMM", self._normalfont)[0]
         name_width = width - time_width - idx_width - pl_width

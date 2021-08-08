@@ -24,6 +24,7 @@ sphinx-rtd-theme = "*"
 DateTime = "*"
 Pillow = "*"
 PyChromecast = "*"
+sentry-sdk = "*"
 
 [dev-packages]
 

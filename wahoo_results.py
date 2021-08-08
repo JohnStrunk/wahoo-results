@@ -22,15 +22,21 @@ import time
 import uuid
 from tkinter import Tk
 from typing import Callable, List
+
+import sentry_sdk
+from sentry_sdk.integrations.threading import ThreadingIntegration
 import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
 
-import analytics
 from imagecast import ImageCast
 from config import WahooConfig
 import results
 from scoreboardimage import ScoreboardImage, waiting_screen
 from settings import Settings
+from version import WAHOO_RESULTS_VERSION
+
+# Sentry.io reporting token
+SENTRY_DSN = "https://a7e34ba5d40140bfb1e65779585438fb@o948149.ingest.sentry.io/5897736"
 
 FILE_WATCHER: watchdog.observers.Observer
 IC: ImageCast
@@ -73,21 +79,24 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
 
     def on_created(self, event):
         time.sleep(1)
-        heat = results.Heat(allow_inconsistent=not self._options.get_bool("inhibit_inconsistent"))
-        try:
-            heat.load_do4(event.src_path)
-            scb_filename = f"E{heat.event}.scb"
-            heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
-        except results.FileParseError:
-            pass
-        except FileNotFoundError:
-            pass
-        self._hcb(heat)
+        with sentry_sdk.start_transaction(op="new_result", name="New race result") as txn:
+            inhibit = self._options.get_bool("inhibit_inconsistent")
+            txn.set_tag("inhibit_inconsistent", inhibit)
+            heat = results.Heat(allow_inconsistent=not inhibit)
+            try:
+                heat.load_do4(event.src_path)
+                scb_filename = f"E{heat.event}.scb"
+                heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
+            except results.FileParseError:
+                pass
+            except FileNotFoundError:
+                pass
+            txn.set_tag("has_discription", heat.event_desc != "")
+            txn.set_tag("lanes", self._options.get_int("num_lanes"))
+            self._hcb(heat)
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
     '''Display the settings window'''
-    analytics.screen_view("settings_window")
-
     # Settings window is fixed size
     root.state("normal")
     root.overrideredirect(False)  # show titlebar
@@ -97,13 +106,11 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     settings: Settings
 
     def clear_cb():
-        analytics.send_event("clear_screen")
         image = waiting_screen((1280, 720), options)
         settings.set_preview(image)
         IC.publish(image)
 
     def test_cb() -> None:
-        analytics.send_event("test_screen")
         heat = results.Heat(allow_inconsistent = not options.get_bool("inhibit_inconsistent"))
         #pylint: disable=protected-access
         heat._parse_do4("""432;1;1;All
@@ -145,13 +152,6 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
         FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
 
     def heat_cb(heat: results.Heat) -> None:
-        num_cc = len([x for x in IC.get_devices() if x["enabled"]])
-        analytics.send_event("race_result", {
-            "has_description": int(heat.event_desc != ""),
-            "lanes": options.get_int("num_lanes"),
-            "inhibit": int(options.get_bool("inhibit_inconsistent")),
-            "devices": num_cc,
-        })
         sbi = ScoreboardImage(heat, (1280, 720), options)
         settings.set_preview(sbi.image)
         IC.publish(sbi.image)
@@ -178,15 +178,43 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
 
 def main():
     '''Runs the Wahoo! Results scoreboard'''
-    global FILE_WATCHER  # pylint: disable=W0603
-    global IC  # pylint: disable=W0603
+    global FILE_WATCHER  # pylint: disable=global-statement
+    global IC  # pylint: disable=global-statement
+
+    # Determine if running as a PyInstaller exe bundle
+    execution_environment = "source"
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        execution_environment = "executable"
+
+    # pylint: disable=abstract-class-instantiated
+    # https://github.com/getsentry/sentry-python/issues/1081
+    # Initialize Sentry crash reporting
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        sample_rate=1.0,
+        traces_sample_rate=1.0,
+        environment=execution_environment,
+        release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
+        with_locals=True,
+        integrations=[ThreadingIntegration(propagate_hub=True)],
+        #debug=True,
+    )
+    config = WahooConfig()
+    sentry_sdk.set_user({
+        "id": config.get_str("client_id"),
+        "ip_address": "{{auto}}",
+    })
+    hub = sentry_sdk.Hub.current
+    hub.start_session(session_mode="application")
+
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
     root = Tk()
 
-    config = WahooConfig()
     screen_size = f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}"
-    analytics.send_application_start(config, screen_size)
+    sentry_sdk.set_context("display", {
+        "size": screen_size,
+    })
 
     root.title("Wahoo! Results")
     icon_file = os.path.abspath(os.path.join(bundle_dir, 'wahoo-results.ico'))
@@ -206,7 +234,6 @@ def main():
     FILE_WATCHER.stop()
     FILE_WATCHER.join()
     IC.stop()
-    analytics.send_application_stop()
 
 if __name__ == "__main__":
     main()
