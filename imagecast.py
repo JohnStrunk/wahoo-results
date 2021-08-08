@@ -134,7 +134,9 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         '''
         Publish a new image to the currently enabled Chromecast devices.
         '''
-        with sentry_sdk.start_transaction(op="publish_image", name="Publish image"):
+        with sentry_sdk.start_transaction(op="publish_image", name="Publish image") as txn:
+            num = len([x for x in self.devices.values() if x["enabled"]])
+            txn.set_tag("enabled_cc", num)
             self.image = image
             for state in self.devices.values():
                 if state["enabled"]:

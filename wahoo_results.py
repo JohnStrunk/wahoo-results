@@ -28,7 +28,6 @@ from sentry_sdk.integrations.threading import ThreadingIntegration
 import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
 
-import analytics
 from imagecast import ImageCast
 from config import WahooConfig
 import results
@@ -80,8 +79,9 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
 
     def on_created(self, event):
         time.sleep(1)
-        with sentry_sdk.start_transaction(op="new_result", name="New race result"):
+        with sentry_sdk.start_transaction(op="new_result", name="New race result") as txn:
             inhibit = self._options.get_bool("inhibit_inconsistent")
+            txn.set_tag("inhibit_inconsistent", inhibit)
             heat = results.Heat(allow_inconsistent=not inhibit)
             try:
                 heat.load_do4(event.src_path)
@@ -91,12 +91,12 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
                 pass
             except FileNotFoundError:
                 pass
+            txn.set_tag("has_discription", heat.event_desc != "")
+            txn.set_tag("lanes", self._options.get_int("num_lanes"))
             self._hcb(heat)
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
     '''Display the settings window'''
-    analytics.screen_view("settings_window")
-
     # Settings window is fixed size
     root.state("normal")
     root.overrideredirect(False)  # show titlebar
@@ -106,13 +106,11 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     settings: Settings
 
     def clear_cb():
-        analytics.send_event("clear_screen")
         image = waiting_screen((1280, 720), options)
         settings.set_preview(image)
         IC.publish(image)
 
     def test_cb() -> None:
-        analytics.send_event("test_screen")
         heat = results.Heat(allow_inconsistent = not options.get_bool("inhibit_inconsistent"))
         #pylint: disable=protected-access
         heat._parse_do4("""432;1;1;All
@@ -154,13 +152,6 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
         FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
 
     def heat_cb(heat: results.Heat) -> None:
-        num_cc = len([x for x in IC.get_devices() if x["enabled"]])
-        analytics.send_event("race_result", {
-            "has_description": int(heat.event_desc != ""),
-            "lanes": options.get_int("num_lanes"),
-            "inhibit": int(options.get_bool("inhibit_inconsistent")),
-            "devices": num_cc,
-        })
         sbi = ScoreboardImage(heat, (1280, 720), options)
         settings.set_preview(sbi.image)
         IC.publish(sbi.image)
@@ -224,7 +215,6 @@ def main():
     sentry_sdk.set_context("display", {
         "size": screen_size,
     })
-    analytics.send_application_start(config, screen_size)
 
     root.title("Wahoo! Results")
     icon_file = os.path.abspath(os.path.join(bundle_dir, 'wahoo-results.ico'))
@@ -244,7 +234,6 @@ def main():
     FILE_WATCHER.stop()
     FILE_WATCHER.join()
     IC.stop()
-    analytics.send_application_stop()
 
 if __name__ == "__main__":
     main()
