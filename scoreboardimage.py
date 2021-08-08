@@ -207,7 +207,7 @@ class ScoreboardImage:
         edge_l = int(self.size[0] * self._BORDER_FRACTION)
         edge_r = int(self.size[0] * (1 - self._BORDER_FRACTION))
         width = edge_r - edge_l
-        time_width = int(draw.textsize("00:00.00", self._timefont)[0] * 1.2)
+        time_width = int(draw.textsize("00:00.00", self._timefont)[0] * 1.1)
         idx_width = draw.textsize("L", self._normalfont)[0]
         pl_width = draw.textsize("MMM", self._normalfont)[0]
         name_width = width - time_width - idx_width - pl_width
