@@ -29,6 +29,7 @@ from uuid import UUID
 from PIL import Image # type: ignore
 import pychromecast # type: ignore
 from pychromecast.error import NotConnected # type: ignore
+import sentry_sdk
 import zeroconf
 
 # Dict of uuid, name, enabled
@@ -88,10 +89,11 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def _disconnect(cls, cast):
-        try:
-            cast.quit_app()
-        except NotConnected:
-            pass
+        with sentry_sdk.start_span(op="disconnect"):
+            try:
+                cast.quit_app()
+            except NotConnected:
+                pass
 
     def set_discovery_callback(self, func) -> None:
         '''
@@ -105,13 +107,14 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         Set whether to include or exclude a specific Chromecast device from
         receiving the published images.
         '''
-        if self.devices[uuid] is not None:
-            previous = self.devices[uuid]["enabled"]
-            self.devices[uuid]["enabled"] = enabled
-            if enabled and not previous : # enabling; send the latest image
-                self._publish_one(self.devices[uuid]["cast"])
-            elif previous and not enabled: # disabling; disconnect
-                self._disconnect(self.devices[uuid]["cast"])
+        with sentry_sdk.start_transaction(op="enable_cc", name="Enable/disable Chromecast"):
+            if self.devices[uuid] is not None:
+                previous = self.devices[uuid]["enabled"]
+                self.devices[uuid]["enabled"] = enabled
+                if enabled and not previous : # enabling; send the latest image
+                    self._publish_one(self.devices[uuid]["cast"])
+                elif previous and not enabled: # disabling; disconnect
+                    self._disconnect(self.devices[uuid]["cast"])
 
     def get_devices(self) -> List[DeviceStatus]:
         '''
@@ -131,21 +134,23 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         '''
         Publish a new image to the currently enabled Chromecast devices.
         '''
-        self.image = image
-        for state in self.devices.values():
-            if state["enabled"]:
-                self._publish_one(state["cast"])
+        with sentry_sdk.start_transaction(op="publish_image", name="Publish image"):
+            self.image = image
+            for state in self.devices.values():
+                if state["enabled"]:
+                    self._publish_one(state["cast"])
 
     def _publish_one(self, cast) -> None:
-        if self.image is None:
-            return
-        media = cast.media_controller
-        sec = int(time.time())
-        url = f"http://{self._local_address}:{self._server_port}/image-{sec}.png"
-        try:
-            media.play_media(url, "image/png")
-        except NotConnected:
-            pass
+        with sentry_sdk.start_span(op="publish_one"):
+            if self.image is None:
+                return
+            media = cast.media_controller
+            sec = int(time.time())
+            url = f"http://{self._local_address}:{self._server_port}/image-{sec}.png"
+            try:
+                media.play_media(url, "image/png")
+            except NotConnected:
+                pass
 
     def _start_webserver(self) -> None:
         parent = self
@@ -153,10 +158,11 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
             """Handle web requests coming from the CCs"""
             def do_GET(self): # pylint: disable=invalid-name
                 """Respond to CC w/ the current image"""
-                self.send_response(200)
-                self.send_header("Content-type", "image/png")
-                self.end_headers()
-                parent.image.save(self.wfile, "PNG", optimize=True)
+                with sentry_sdk.start_transaction(op="http", name="GET"):
+                    self.send_response(200)
+                    self.send_header("Content-type", "image/png")
+                    self.end_headers()
+                    parent.image.save(self.wfile, "PNG", optimize=True)
         def _webserver_run():
             web_server = HTTPServer(("", self._server_port), WSHandler)
             web_server.serve_forever()
@@ -188,22 +194,24 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                 if parent.callback_fn is not None:
                     parent.callback_fn()
             def update_cast(self, uuid, service):
-                svcs = parent.browser.services
-                cast = pychromecast.get_chromecast_from_cast_info(svcs[uuid], parent.zconf)
-                cast.wait(timeout=2)
-                # We only care about devices that we can cast to (i.e., not
-                # audio devices)
-                if cast.device.cast_type != 'cast':
-                    return
-                if uuid not in parent.devices:
-                    parent.devices[uuid] = {
-                        "cast": cast,
-                        "enabled": False
-                    }
-                else:
-                    parent.devices[uuid]["cast"] = cast
-                if parent.callback_fn is not None:
-                    parent.callback_fn()
+                with sentry_sdk.start_transaction(op="cc_update",
+                        name="Chromecast update recieved"):
+                    svcs = parent.browser.services
+                    cast = pychromecast.get_chromecast_from_cast_info(svcs[uuid], parent.zconf)
+                    cast.wait(timeout=2)
+                    # We only care about devices that we can cast to (i.e., not
+                    # audio devices)
+                    if cast.device.cast_type != 'cast':
+                        return
+                    if uuid not in parent.devices:
+                        parent.devices[uuid] = {
+                            "cast": cast,
+                            "enabled": False
+                        }
+                    else:
+                        parent.devices[uuid]["cast"] = cast
+                    if parent.callback_fn is not None:
+                        parent.callback_fn()
         self.zconf = zeroconf.Zeroconf()
         self.browser = pychromecast.discovery.CastBrowser(Listener(), self.zconf)
         self.browser.start_discovery()

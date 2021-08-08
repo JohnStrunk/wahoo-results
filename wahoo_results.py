@@ -80,16 +80,18 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
 
     def on_created(self, event):
         time.sleep(1)
-        heat = results.Heat(allow_inconsistent=not self._options.get_bool("inhibit_inconsistent"))
-        try:
-            heat.load_do4(event.src_path)
-            scb_filename = f"E{heat.event}.scb"
-            heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
-        except results.FileParseError:
-            pass
-        except FileNotFoundError:
-            pass
-        self._hcb(heat)
+        with sentry_sdk.start_transaction(op="new_result", name="New race result"):
+            inhibit = self._options.get_bool("inhibit_inconsistent")
+            heat = results.Heat(allow_inconsistent=not inhibit)
+            try:
+                heat.load_do4(event.src_path)
+                scb_filename = f"E{heat.event}.scb"
+                heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
+            except results.FileParseError:
+                pass
+            except FileNotFoundError:
+                pass
+            self._hcb(heat)
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
     '''Display the settings window'''
