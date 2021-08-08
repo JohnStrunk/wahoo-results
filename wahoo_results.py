@@ -22,6 +22,9 @@ import time
 import uuid
 from tkinter import Tk
 from typing import Callable, List
+
+import sentry_sdk
+from sentry_sdk.integrations.threading import ThreadingIntegration
 import watchdog.events  #type: ignore
 import watchdog.observers  #type: ignore
 
@@ -31,6 +34,10 @@ from config import WahooConfig
 import results
 from scoreboardimage import ScoreboardImage, waiting_screen
 from settings import Settings
+from version import WAHOO_RESULTS_VERSION
+
+# Sentry.io reporting token
+SENTRY_DSN = "https://a7e34ba5d40140bfb1e65779585438fb@o948149.ingest.sentry.io/5897736"
 
 FILE_WATCHER: watchdog.observers.Observer
 IC: ImageCast
@@ -178,14 +185,40 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
 
 def main():
     '''Runs the Wahoo! Results scoreboard'''
-    global FILE_WATCHER  # pylint: disable=W0603
-    global IC  # pylint: disable=W0603
+    global FILE_WATCHER  # pylint: disable=global-statement
+    global IC  # pylint: disable=global-statement
+
+    # Determine if running as a PyInstaller exe bundle
+    execution_environment = "source"
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        execution_environment = "executable"
+
+    # pylint: disable=abstract-class-instantiated
+    # https://github.com/getsentry/sentry-python/issues/1081
+    # Initialize Sentry crash reporting
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        sample_rate=1.0,
+        traces_sample_rate=1.0,
+        environment=execution_environment,
+        release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
+        with_locals=True,
+        integrations=[ThreadingIntegration(propagate_hub=True)],
+    )
+    config = WahooConfig()
+    sentry_sdk.set_user({
+        "id": config.get_str("client_id"),
+        "ip_address": "{{auto}}",
+    })
+
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
     root = Tk()
 
-    config = WahooConfig()
     screen_size = f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}"
+    sentry_sdk.set_context("display", {
+        "size": screen_size,
+    })
     analytics.send_application_start(config, screen_size)
 
     root.title("Wahoo! Results")
