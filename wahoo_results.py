@@ -204,12 +204,15 @@ def main():
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
         with_locals=True,
         integrations=[ThreadingIntegration(propagate_hub=True)],
+        #debug=True,
     )
     config = WahooConfig()
     sentry_sdk.set_user({
         "id": config.get_str("client_id"),
         "ip_address": "{{auto}}",
     })
+    hub = sentry_sdk.Hub.current
+    hub.start_session(session_mode="application")
 
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
