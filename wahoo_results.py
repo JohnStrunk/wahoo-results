@@ -17,12 +17,14 @@
 '''Wahoo! Results scoreboard'''
 
 import os
+import platform
 import sys
 import time
 import uuid
 from tkinter import Tk
 from typing import Callable, List
 
+from PIL import Image  # type: ignore
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
 import watchdog.events  #type: ignore
@@ -30,6 +32,7 @@ import watchdog.observers  #type: ignore
 
 from imagecast import ImageCast
 from config import WahooConfig
+from manual import show_manual_chooser
 import results
 from scoreboardimage import ScoreboardImage, waiting_screen
 from settings import Settings
@@ -149,7 +152,9 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
 
     def watchdir_cb(_dir: str) -> None:
         FILE_WATCHER.unschedule_all()
-        FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
+        path = options.get_str("dolphin_dir")
+        if os.path.exists(path):
+            FILE_WATCHER.schedule(do4_handler, path)
 
     def heat_cb(heat: results.Heat) -> None:
         sbi = ScoreboardImage(heat, (1280, 720), options)
@@ -165,11 +170,20 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
             }
         settings.set_items(items)
 
+    def manual_publish(img: Image.Image) -> None:
+        settings.set_preview(img)
+        IC.publish(img)
+
+    def manual_btn_cb() -> None:
+        show_manual_chooser(root, manual_publish, options)
+
     do4_handler = Do4Handler(heat_cb, options)
-    FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
+    path = options.get_str("dolphin_dir")
+    if os.path.exists(path):
+        FILE_WATCHER.schedule(do4_handler, path)
 
     settings = Settings(root, generate_dolphin_csv, clear_cb, test_cb,
-                        selection_cb, watchdir_cb, options)
+                        selection_cb, watchdir_cb, manual_btn_cb, options)
     settings.grid(column=0, row=0, sticky="news")
 
     IC.set_discovery_callback(cast_discovery_cb)
@@ -182,15 +196,17 @@ def main():
     global IC  # pylint: disable=global-statement
 
     # Determine if running as a PyInstaller exe bundle
+    dsn = None
     execution_environment = "source"
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         execution_environment = "executable"
+        dsn = SENTRY_DSN  # only report if in executable mode
 
     # pylint: disable=abstract-class-instantiated
     # https://github.com/getsentry/sentry-python/issues/1081
     # Initialize Sentry crash reporting
     sentry_sdk.init(
-        dsn=SENTRY_DSN,
+        dsn=dsn,
         sample_rate=1.0,
         traces_sample_rate=1.0,
         environment=execution_environment,
@@ -199,6 +215,11 @@ def main():
         integrations=[ThreadingIntegration(propagate_hub=True)],
         #debug=True,
     )
+    uname = platform.uname()
+    sentry_sdk.set_tag("os_system", uname.system)
+    sentry_sdk.set_tag("os_release", uname.release)
+    sentry_sdk.set_tag("os_version", uname.version)
+    sentry_sdk.set_tag("os_machine", uname.machine)
     config = WahooConfig()
     sentry_sdk.set_user({
         "id": config.get_str("client_id"),
