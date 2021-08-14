@@ -331,7 +331,8 @@ class _CCChooser(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
         if self._selection_cb is not None:
             self._selection_cb(selected)
 
-class _Preview(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
+class Preview(ttk.LabelFrame):  # pylint: disable=too-many-ancestors
+    """A widget that displays a scoreboard preview image"""
     WIDTH = 320
     HEIGHT = 180
     _pimage: Optional[ImageTk.PhotoImage]
@@ -359,7 +360,7 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
     def __init__(self, container: tkContainer, csv_cb: CSVGenFn,
                  clear_cb: NoneFn, test_cb: NoneFn, selection_cb: SelectionFn,
-                 watchdir_cb: WatchdirFn, config: WahooConfig):
+                 watchdir_cb: WatchdirFn, manual_btn_cb: NoneFn, config: WahooConfig):
         '''
         Main settings window
 
@@ -372,12 +373,14 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
               Chromecast devices
             - watchdir_cb: Callback function to indicate the do4 data dir
               has changed.
+            - manual_btn_cb: Callback function when load button is pressed.
             - config: WahooConfig configuration object
         '''
         super().__init__(container, padding=5)
         self._config = config
         self._clear_cb = clear_cb
         self._test_cb = test_cb
+        self._manual_btn_cb = manual_btn_cb
         self.grid(column=0, row=0, sticky="news")
 
         self.columnconfigure(0, weight=1)
@@ -403,7 +406,7 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         general.grid(column=0, row=0, sticky="news", padx=3, pady=3)
 
         # row 1: left side: preview window
-        canv = _Preview(self)
+        canv = Preview(self)
         canv.grid(column=0, row=1, padx=3, pady=3, sticky="news")
         self._preview = canv
 
@@ -423,6 +426,9 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         ToolTip(test_btn, text="Display a mockup to show the current scoreboard style")
         clear_btn = ttk.Button(fr6, text="Clear scoreboard", command=self._handle_clear_btn)
         clear_btn.grid(column=1, row=0, sticky="news")
+        ToolTip(clear_btn, text="Clear the scoreboard")
+        load_btn = ttk.Button(fr6, text="Load...", command=self._handle_load_btn)
+        load_btn.grid(column=2, row=0, sticky="news")
         ToolTip(clear_btn, text="Clear the scoreboard")
         # row 2, right side: doc link and version
         fr8 = ttk.Frame(self)
@@ -461,6 +467,10 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         if self._test_cb is not None:
             self._test_cb()
 
+    def _handle_load_btn(self) -> None:
+        if self._manual_btn_cb is not None:
+            self._manual_btn_cb()
+
     def set_items(self, items) -> None:
         '''Set the list of chromecast devices and indicate whether they are enabled'''
         # items is dict[uuid]-> {"name": str, "enabled": bool}
@@ -484,7 +494,7 @@ def _main():
     def sel_cb(items):
         print(items)
 
-    settings = Settings(root, None, None, None, sel_cb, None, options)
+    settings = Settings(root, None, None, None, sel_cb, None, None, options)
     settings.grid(column=0, row=0, sticky="news")
     root.update()
     print(f"Root window: {root.winfo_width()}x{root.winfo_height()}")

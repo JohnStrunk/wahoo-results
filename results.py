@@ -216,6 +216,9 @@ class Heat:
         Loads event data from a CTS start list *.scb file.
         Note: Heat should be set before calling this method.
         """
+        for i in range(0, 10):
+            self.lanes[i].name = ""
+            self.lanes[i].team = ""
         with open(filename, "r", encoding="cp1252") as file:
             lines = file.readlines()
         try:
