@@ -152,7 +152,9 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
 
     def watchdir_cb(_dir: str) -> None:
         FILE_WATCHER.unschedule_all()
-        FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
+        path = options.get_str("dolphin_dir")
+        if os.path.exists(path):
+            FILE_WATCHER.schedule(do4_handler, path)
 
     def heat_cb(heat: results.Heat) -> None:
         sbi = ScoreboardImage(heat, (1280, 720), options)
@@ -176,7 +178,9 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
         show_manual_chooser(root, manual_publish, options)
 
     do4_handler = Do4Handler(heat_cb, options)
-    FILE_WATCHER.schedule(do4_handler, options.get_str("dolphin_dir"))
+    path = options.get_str("dolphin_dir")
+    if os.path.exists(path):
+        FILE_WATCHER.schedule(do4_handler, path)
 
     settings = Settings(root, generate_dolphin_csv, clear_cb, test_cb,
                         selection_cb, watchdir_cb, manual_btn_cb, options)
