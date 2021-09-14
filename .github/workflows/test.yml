@@ -15,8 +15,18 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - name: Set up Python
+        # The actions/cache step below uses this id to get the exact python version
+        id: setup-python
+        uses: actions/setup-python@v2
+
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: C:\Users\runneradmin\.virtualenvs
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
 
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
