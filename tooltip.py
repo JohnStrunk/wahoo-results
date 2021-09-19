@@ -53,7 +53,7 @@ class ToolTip: # pylint: disable=too-few-public-methods
         self._tip_win = tk.Toplevel(self.widget)
         # Leaves only the label and removes the app window
         self._tip_win.wm_overrideredirect(True)
-        self._tip_win.wm_geometry("+%d+%d" % (x, y))
+        self._tip_win.wm_geometry(f"+{x}+{y}")
         label = tk.Label(self._tip_win, text=self.text, justify='left',
                          background="#ffffff", relief='solid', borderwidth=1,
                          wraplength = self.wraplength)

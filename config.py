@@ -56,7 +56,7 @@ class WahooConfig:
 
     def save(self) -> None:
         '''Save the (updated) configuration to the ini file'''
-        with open(self._CONFIG_FILE, 'w') as configfile:
+        with open(self._CONFIG_FILE, 'w', encoding="cp1252") as configfile:
             self._config.write(configfile)
 
     def get_str(self, name: str) -> str:
