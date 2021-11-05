@@ -9,6 +9,10 @@ on:
   schedule:
     - cron: '43 16 * * 5'
 
+env:
+  # https://github.com/pypa/pipenv/releases
+  PIPENV_INSTALL_VERSION: "2021.5.29"
+
 jobs:
   test:
     name: Test
@@ -40,11 +44,11 @@ jobs:
 
       - name: Install pipenv
         shell: cmd
-        run: python -m pip install --user pipenv
+        run: python -m pip install --user pipenv==${{ env.PIPENV_INSTALL_VERSION }}
 
       - name: Initialize virtual environment
         shell: cmd
-        run: pipenv install --deploy
+        run: pipenv install --deploy --no-site-packages
 
       - name: Run tests
         shell: cmd
