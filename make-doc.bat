@@ -1,4 +1,5 @@
 @ECHO OFF
+echo %PATH%
 
 pushd %~dp0
 
