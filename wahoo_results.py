@@ -21,7 +21,7 @@ import platform
 import sys
 import time
 import uuid
-from tkinter import Tk
+from tkinter import Tk, messagebox
 from typing import Callable, List
 
 from PIL import Image  # type: ignore
@@ -249,9 +249,22 @@ def main():
     IC = ImageCast(8011)
 
     settings_window(root, config)
+
+    # Intercept the close button so we can save the config before destroying
+    # the main window and exiting the event loop in case we need to display an
+    # error dialog.
+    def close_cb():
+        try:
+            config.save()
+        except PermissionError as err:
+            messagebox.showerror(title="Error saving configuration",
+                message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
+                detail="Please ensure the working directory is writable.")
+        root.destroy()
+    root.protocol("WM_DELETE_WINDOW", close_cb)
+
     root.mainloop()
 
-    config.save()
     FILE_WATCHER.stop()
     FILE_WATCHER.join()
     IC.stop()
