@@ -9,9 +9,9 @@ pull_request_rules:
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
     actions:
-      merge:
+      queue:
         method: merge
-        strict: true
+        name: default
 
   - name: Automatic merge own PRs
     conditions:
@@ -22,6 +22,14 @@ pull_request_rules:
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
     actions:
-      merge:
+      queue:
         method: merge
-        strict: true
+        name: default
+
+queue_rules:
+  - name: default
+    conditions:
+      # Conditions to get out of the queue (= merged)
+      - check-success=Test
+      - check-success=DCO
+      - check-success=docs/readthedocs.org:wahoo-results
