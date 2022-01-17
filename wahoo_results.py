@@ -48,7 +48,7 @@ def eventlist_to_csv(events: List[results.Event]) -> List[str]:
     '''Converts a list of events into CSV format'''
     lines: List[str] = []
     for i in events:
-        lines.append(f"{i.event},{i.event_desc},{i.num_heats},1,A\n")
+        lines.append(f"{i.event_num},{i.event_desc},{i.num_heats},1,A\n")
     return lines
 
 def generate_dolphin_csv(filename: str, directory: str) -> int:
@@ -63,7 +63,7 @@ def generate_dolphin_csv(filename: str, directory: str) -> int:
             event = results.Event()
             event.from_scb(file.path)
             events.append(event)
-    events.sort(key=lambda e: e.event)
+    events.sort(key=lambda e: e.event_num)
     csv_lines = eventlist_to_csv(events)
     outfile = os.path.join(directory, filename)
     with open(outfile, "w", encoding="cp1252") as csv:
@@ -88,7 +88,7 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
             heat = results.Heat(allow_inconsistent=not inhibit)
             try:
                 heat.load_do4(event.src_path)
-                scb_filename = f"E{heat.event}.scb"
+                scb_filename = f"E{heat.event_num}.scb"
                 heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
             except results.FileParseError:
                 pass
@@ -213,7 +213,7 @@ def main():
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
         with_locals=True,
         integrations=[ThreadingIntegration(propagate_hub=True)],
-        #debug=True,
+        debug=False,
     )
     uname = platform.uname()
     sentry_sdk.set_tag("os_system", uname.system)

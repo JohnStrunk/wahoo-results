@@ -51,7 +51,7 @@ class Event:
     """
     Event represents a swimming event.
     """
-    event: str
+    event_num: str
     event_desc: str
     num_heats: int
 
@@ -66,7 +66,7 @@ class Event:
         match = re.match(r"^#(\w+)\s+(.*)$", lines[0])
         if not match:
             raise FileParseError("", "Unable to parse header")
-        self.event = match.group(1)
+        self.event_num = match.group(1)
         self.event_desc = match.group(2)
         self.num_heats = (len(lines)-1)//10
 
@@ -167,19 +167,19 @@ class Heat:
         # Load the scoreboard data
         res.load_scb("E129.scb")
     """
-    event: str  # Event number
+    event_num: str  # Event number
     event_desc: str # Event description
-    heat: int  # Heat number
+    heat_num: int  # Heat number
     lanes: List[Lane]  # Lane information
     allow_inconsistent: bool  # Permit times w/ >0.3s spread
 
     def __init__(self, **kwargs):
-        self.event = kwargs.get("event", "")
+        self.event_num = kwargs.get("event", "")
         self.event_desc = kwargs.get("event_desc","")
-        self.heat = kwargs.get("heat", 0)
+        self.heat_num = kwargs.get("heat", 0)
         self.allow_inconsistent = kwargs.get("allow_inconsistent", False)
         self.lanes = kwargs.get("lanes", [
-            Lane(allow_inconsistent=self.allow_inconsistent) for i in range(0, 10)])
+            Lane(allow_inconsistent=self.allow_inconsistent) for _ in range(0, 10)])
 
     def load_do4(self, filename: str) -> None:
         """
@@ -203,8 +203,8 @@ class Heat:
         match = re.match(r'^([^;]*);(\d+);1;.+$', lines[0])
         if not match:
             raise FileParseError("", "Unable to parse header")
-        self.event = match.group(1)
-        self.heat = int(match.group(2))
+        self.event_num = match.group(1)
+        self.heat_num = int(match.group(2))
         # Parse the lane results
         for i in range(1, 11):
             fields = lines[i].strip().split(';')
@@ -228,7 +228,7 @@ class Heat:
 
     def _parse_scb(self, lines) -> None:
         # Ensure file has the expected # of lines
-        if (len(lines)-1) % 10 or len(lines) <= self.heat * 10:
+        if (len(lines)-1) % 10 or len(lines) <= self.heat_num * 10:
             raise FileParseError("", "Unexpected number of lines in file")
         # Extract event name
         match = re.match(r'^#\w+\s+(.*)$', lines[0])
@@ -236,7 +236,7 @@ class Heat:
             raise FileParseError("", "Unable to parse event name")
         self.event_desc = match.group(1)
         # Parse heat names/teams
-        heat_start = (self.heat - 1) * 10 + 1
+        heat_start = (self.heat_num - 1) * 10 + 1
         for i in range(0, 10):
             match = re.match(r'^(.*)--(.*)$', lines[heat_start + i])
             if not match:
@@ -267,8 +267,8 @@ class Heat:
 
     def dump(self):
         """Dump the results to the screen."""
-        print(f"Event: {self.event}")
+        print(f"Event: {self.event_num}")
         print(f"Event desc: {self.event_desc}")
-        print(f"Heat: {self.heat}")
+        print(f"Heat: {self.heat_num}")
         for i in self.lanes:
             i.dump()

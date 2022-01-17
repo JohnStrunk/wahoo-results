@@ -11,7 +11,7 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2021.5.29"
+  PIPENV_INSTALL_VERSION: "2022.1.8"
 
 jobs:
   test:
@@ -48,7 +48,7 @@ jobs:
 
       - name: Initialize virtual environment
         shell: cmd
-        run: pipenv install --deploy --no-site-packages
+        run: pipenv install --deploy --no-site-packages -v
 
       - name: Run tests
         shell: cmd

@@ -53,7 +53,7 @@ class _DolphinManual(ttk.Frame):  # pylint: disable=too-many-ancestors
     _img: Image.Image
     _result: results.Heat
 
-    def __init__(self, container: tkContainer, dismissFn: Callable[[], None],
+    def __init__(self, container: tkContainer, dismiss_fn: Callable[[], None],
                  publish_fn: Callable[[Image.Image], None], config: WahooConfig):
         super().__init__(container, padding=2)
         self._config = config
@@ -69,7 +69,7 @@ class _DolphinManual(ttk.Frame):  # pylint: disable=too-many-ancestors
 
         self._preview = Preview(self)
         self._preview.grid(column=0, row=1, sticky="news")
-        row2 = _BottomRow(self, dismissFn, self._publish)
+        row2 = _BottomRow(self, dismiss_fn, self._publish)
         row2.grid(column=0, row=2, sticky="news")
     def _publish(self) -> None:
         self._publish_fn(self._img)
@@ -89,13 +89,13 @@ class _DolphinManual(ttk.Frame):  # pylint: disable=too-many-ancestors
         modified = datetime.datetime.fromtimestamp(finfo.st_mtime, tz=datetime.timezone.utc)
         self._fi.date.set(modified.date().isoformat())
         self._fi.time.set(modified.time().strftime("%I:%M:%S %p"))
-        self._fi.event.set(self._result.event)
-        self._fi.heat.set(self._result.heat)
+        self._fi.event.set(self._result.event_num)
+        self._fi.heat.set(self._result.heat_num)
         self._spin_cb()
     def _spin_cb(self) -> None:
-        self._result.event = self._fi.event.get()
-        self._result.heat = int(self._fi.heat.get())
-        scb_file = f"E{self._result.event}.scb"
+        self._result.event_num = self._fi.event.get()
+        self._result.heat_num = int(self._fi.heat.get())
+        scb_file = f"E{self._result.event_num}.scb"
         scb_path = os.path.join(self._config.get_str("start_list_dir"), scb_file)
         try:
             self._result.load_scb(scb_path)
@@ -170,16 +170,16 @@ class _FileInfo(ttk.LabelFrame): # pylint: disable=too-many-ancestors
         h_spin.grid(column=1, row=6, sticky="w")
 
 class _BottomRow(ttk.Frame):  # pylint: disable=too-many-ancestors
-    def __init__(self, container: tkContainer, dismissFn: Callable[[], None],
-                 publishFn: Callable[[],None]):
+    def __init__(self, container: tkContainer, dismiss_fn: Callable[[], None],
+                 publish_fn: Callable[[],None]):
         super().__init__(container, padding=5)
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=0)
         self.columnconfigure(2, weight=0)
-        publishbtn = ttk.Button(self, text="Publish", command=publishFn)
+        publishbtn = ttk.Button(self, text="Publish", command=publish_fn)
         publishbtn.grid(column=1, row=0, sticky="news")
         ToolTip(publishbtn, text="Publish current preview to scoreboard")
-        closebtn = ttk.Button(self, text="Close", command=dismissFn)
+        closebtn = ttk.Button(self, text="Close", command=dismiss_fn)
         closebtn.grid(column=2, row=0, sticky="news")
 
 
@@ -194,7 +194,7 @@ def _main():
     def exitfn() -> None:
         root.destroy()
     def publishfn(_: Image.Image) -> None:
-        pass
+        "Don't publish images for the mockup"
     manual = _DolphinManual(root, exitfn, publishfn, config)
     manual.grid(column=0, row=0, sticky="news")
     tk.mainloop()
