@@ -56,6 +56,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+### [0.6.1] - 2022-01-17
+
+#### Fixed
+
+- ::bug: Catch and report errors if config file isn't writable
+
 ### [0.6.0] - 2021-08-15
 
 #### Added
@@ -148,7 +154,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/JohnStrunk/wahoo-results/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/JohnStrunk/wahoo-results/compare/v0.4.0...v0.4.1
