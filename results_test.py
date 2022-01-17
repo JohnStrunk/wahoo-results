@@ -35,8 +35,8 @@ F679E29E3D8A4CC4""".split("\n")
 
     res = results.Heat()
     res._parse_do4(lines)  # pylint: disable=protected-access
-    assert res.event == "129"
-    assert res.heat == 4
+    assert res.event_num == "129"
+    assert res.heat_num == 4
     assert res.num_expected_times() == 2
     assert len(res.lanes[0].times) == 0
     assert len(res.lanes[1].times) == 2
@@ -60,8 +60,8 @@ FDDEBE8AA47C716C""".split("\n")
 
     res = results.Heat()
     res._parse_do4(lines)  # pylint: disable=protected-access
-    assert res.event == ""
-    assert res.heat == 1
+    assert res.event_num == ""
+    assert res.heat_num == 1
     assert res.num_expected_times() == 2
     assert len(res.lanes[0].times) == 1
     assert len(res.lanes[1].times) == 2

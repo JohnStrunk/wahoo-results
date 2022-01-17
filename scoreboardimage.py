@@ -193,7 +193,7 @@ class ScoreboardImage:
         txt_size = draw.textsize(sizing_string, self._normalfont)
         desc_width = width - txt_size[0]
         baseline = self.size[1] * self._BORDER_FRACTION + self._line_height
-        draw.text((edge_l, baseline), f"E: {self._heat.event} / H: {self._heat.heat}",
+        draw.text((edge_l, baseline), f"E: {self._heat.event_num} / H: {self._heat.heat_num}",
                font=self._normalfont, anchor="ls", fill=head_color)
         descr = self._heat.event_desc
         while draw.textsize(descr, self._normalfont)[0] > desc_width:
