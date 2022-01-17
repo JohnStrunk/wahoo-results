@@ -125,7 +125,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         for uuid, state in self.devices.items():
             devs.append({
                 "uuid": uuid,
-                "name": state["cast"].device.friendly_name,
+                "name": state["cast"].cast_info.friendly_name,
                 "enabled": state["enabled"]
             })
         return devs
@@ -203,7 +203,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     cast.wait(timeout=2)
                     # We only care about devices that we can cast to (i.e., not
                     # audio devices)
-                    if cast.device.cast_type != 'cast':
+                    if cast.cast_info.cast_type != 'cast':
                         return
                     if uuid not in parent.devices:
                         parent.devices[uuid] = {
