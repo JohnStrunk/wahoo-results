@@ -3,6 +3,7 @@ name: "Test"
 on:
   push:
     branches: [master]
+    tags: ["*"]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
@@ -22,10 +23,14 @@ jobs:
       - name: Set up Python
         # The actions/cache step below uses this id to get the exact python version
         id: setup-python
+        # https://github.com/actions/setup-python
         uses: actions/setup-python@v3
 
       - name: Checkout repository
+        # https://github.com/actions/checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: actions/cache@v3
         with:
@@ -57,3 +62,24 @@ jobs:
       - name: Build docs
         shell: cmd
         run: pipenv run make-doc.bat html
+
+      - name: Build executable
+        shell: cmd
+        run: make-exe.bat
+
+      - name: Save executable as artifact
+        # https://github.com/actions/upload-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wahoo-results.exe
+          path: wahoo-results.exe
+          if-no-files-found: error
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        # https://github.com/softprops/action-gh-release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: |
+            wahoo-results.exe
