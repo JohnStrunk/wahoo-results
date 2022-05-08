@@ -33,12 +33,12 @@ move /y version.py.save version.py
 del wahoo-results.spec
 rmdir /q/s build
 
-::: Create zip file
-:WaitUntilAccessible
-type wahoo-results.exe >NUL || goto :WaitUntilAccessible
-del wahoo-results.zip
-powershell Compress-Archive wahoo-results.exe wahoo-results.zip
+@REM ::: Create zip file
+@REM :WaitUntilAccessible
+@REM type wahoo-results.exe >NUL || goto :WaitUntilAccessible
+@REM del wahoo-results.zip
+@REM powershell Compress-Archive wahoo-results.exe wahoo-results.zip
 
-::: Sign release artifact
-del wahoo-results.zip.asc
-gpg --detach-sign --armor --local-user BD1FF508 wahoo-results.zip
+@REM ::: Sign release artifact
+@REM del wahoo-results.zip.asc
+@REM gpg --detach-sign --armor --local-user BD1FF508 wahoo-results.zip
