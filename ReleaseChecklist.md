@@ -4,8 +4,7 @@
 - Update download link in documentation (docs/download.rst)
 - Commit above items
 - Tag repository (vX.Y.Z)
-- Run make-exe.bat to create release binary
 - Push tag to GitHub
+- Automation will create the draft release and upload the executable
 - Create release on Github (Version X.Y.Z)
   - Copy in relevant changelog items
-  - Upload binary
