@@ -208,8 +208,6 @@ def main():
         execution_environment = "executable"
         dsn = SENTRY_DSN  # only report if in executable mode
 
-    # pylint: disable=abstract-class-instantiated
-    # https://github.com/getsentry/sentry-python/issues/1081
     # Initialize Sentry crash reporting
     sentry_sdk.init(
         dsn=dsn,
