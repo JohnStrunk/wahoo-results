@@ -195,6 +195,12 @@ def main():
     global FILE_WATCHER  # pylint: disable=global-statement
     global IC  # pylint: disable=global-statement
 
+    # logging.basicConfig(
+    #     filename=f'wahoo-results.log',
+    #     level=logging.DEBUG,
+    #     format='%(asctime)s - %(levelname)s - %(module)s:%(filename)s:%(lineno)d - %(message)s',
+    #     )
+
     # Determine if running as a PyInstaller exe bundle
     dsn = None
     execution_environment = "source"
