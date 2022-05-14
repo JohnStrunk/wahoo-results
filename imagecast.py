@@ -203,7 +203,8 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     cast.wait(timeout=2)
                     # We only care about devices that we can cast to (i.e., not
                     # audio devices)
-                    if cast.cast_info.cast_type != 'cast':
+                    if cast.cast_info.cast_type != pychromecast.CAST_TYPE_CHROMECAST:
+                        cast.disconnect(blocking=False)
                         return
                     if uuid not in parent.devices:
                         parent.devices[uuid] = {
@@ -211,7 +212,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                             "enabled": False
                         }
                     else:
-                        parent.devices[uuid]["cast"] = cast
+                        cast.disconnect(blocking=False)
                     if parent.callback_fn is not None:
                         parent.callback_fn()
         self.zconf = zeroconf.Zeroconf()
