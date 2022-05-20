@@ -21,8 +21,8 @@ pyinstaller --onefile ^
     --noconsole ^
     --distpath=. ^
     --workpath=build ^
-    --add-data wahoo-results.ico;. ^
-    --icon wahoo-results.ico ^
+    --add-data media\wr-icon.ico;media ^
+    --icon media\wr-icon.ico ^
     --name wahoo-results ^
     wahoo_results.py
 
