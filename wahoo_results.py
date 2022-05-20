@@ -242,7 +242,7 @@ def main():
     })
 
     root.title("Wahoo! Results")
-    icon_file = os.path.abspath(os.path.join(bundle_dir, 'wahoo-results.ico'))
+    icon_file = os.path.abspath(os.path.join(bundle_dir, 'media', 'wr-icon.ico'))
     root.iconbitmap(icon_file)
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
