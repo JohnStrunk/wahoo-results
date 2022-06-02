@@ -17,28 +17,7 @@ for /F "tokens=* usebackq" %%i IN (version.py.save) do (
 )
 
 pipenv run ^
-pyinstaller --onefile ^
-    --noconsole ^
-    --distpath=. ^
-    --workpath=build ^
-    --add-data media\wr-icon.ico;media ^
-    --icon media\wr-icon.ico ^
-    --name wahoo-results ^
-    wahoo_results.py
+    pyinstaller --distpath=. --workpath=build wahoo-results.spec
 
 ::: After building the exe, put the original version file back
 move /y version.py.save version.py
-
-::: Clean up build artifacts
-del wahoo-results.spec
-rmdir /q/s build
-
-@REM ::: Create zip file
-@REM :WaitUntilAccessible
-@REM type wahoo-results.exe >NUL || goto :WaitUntilAccessible
-@REM del wahoo-results.zip
-@REM powershell Compress-Archive wahoo-results.exe wahoo-results.zip
-
-@REM ::: Sign release artifact
-@REM del wahoo-results.zip.asc
-@REM gpg --detach-sign --armor --local-user BD1FF508 wahoo-results.zip
