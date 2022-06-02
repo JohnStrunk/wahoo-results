@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1280"
+   height="640"
+   viewBox="0 0 338.66666 169.33334"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   sodipodi:docname="wr-card.svg"
+   inkscape:export-filename="C:\Users\johns\Desktop\wahoo-results\media\wr-card.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title826">Wahoo Results card</title>
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     units="px"
+     inkscape:showpageshadow="true"
+     showborder="true"
+     inkscape:zoom="0.88789008"
+     inkscape:cx="657.73908"
+     inkscape:cy="323.23821"
+     inkscape:window-width="1920"
+     inkscape:window-height="1137"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient13357">
+      <stop
+         style="stop-color:#8ad4f4;stop-opacity:1;"
+         offset="0"
+         id="stop13353" />
+      <stop
+         style="stop-color:#d4f0fc;stop-opacity:1"
+         offset="1"
+         id="stop13355" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient13357"
+       id="linearGradient13359"
+       x1="6.7529295e-06"
+       y1="3.3764647e-06"
+       x2="338.66666"
+       y2="169.33333"
+       gradientUnits="userSpaceOnUse" />
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter5761"
+       x="-0.010590574"
+       y="-0.013842157"
+       width="1.0211811"
+       height="1.0276843">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.73549238"
+         id="feGaussianBlur5763" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:url(#linearGradient13359);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect7273"
+       width="338.66666"
+       height="169.33333"
+       x="6.7529295e-06"
+       y="3.3764647e-06" />
+    <g
+       id="g5821">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:2.64583;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 23.57569,84.666667 H 315.09098"
+         id="path6410" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 35.097984,76.404549 V 92.928785"
+         id="path6657" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 50.890376,76.404549 V 92.928785"
+         id="path6657-3" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 66.682774,76.404549 V 92.928785"
+         id="path6657-1" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 82.475166,76.404551 V 92.928783"
+         id="path6657-4" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 256.1915,76.404551 V 92.928783"
+         id="path6657-0" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 271.98389,76.404547 v 16.52424"
+         id="path6657-3-5" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 287.77631,76.404551 V 92.928783"
+         id="path6657-1-8" />
+      <path
+         style="fill:none;stroke:#bf1e2d;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 303.56868,76.404551 V 92.928783"
+         id="path6657-4-3" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 193.02193,76.404551 V 92.928783"
+         id="path6657-46" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 208.81432,76.404547 v 16.52424"
+         id="path6657-3-56" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 224.60671,76.404547 v 16.52424"
+         id="path6657-1-9" />
+      <path
+         style="fill:none;stroke:#e5e40e;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 240.39911,76.404551 V 92.928783"
+         id="path6657-4-4" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 129.85236,76.404551 V 92.928783"
+         id="path6657-46-2" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 145.64475,76.404547 v 16.52424"
+         id="path6657-3-56-7" />
+      <path
+         style="fill:none;stroke:#e5e40e;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 98.267563,76.404552 V 92.928783"
+         id="path6657-46-2-1" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 114.05996,76.404548 V 92.928787"
+         id="path6657-3-56-7-7" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 161.43714,76.404547 v 16.52424"
+         id="path6657-1-9-7" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:5.29167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 177.22954,76.404551 V 92.928783"
+         id="path6657-4-4-7" />
+    </g>
+    <g
+       id="g5759"
+       style="mix-blend-mode:normal;filter:url(#filter5761)"
+       transform="translate(-0.52916667,0.52916667)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;line-height:1.25;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;mix-blend-mode:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="83.788254"
+         y="149.40215"
+         id="text4852-5-2"><tspan
+           sodipodi:role="line"
+           id="tspan4850-8-2"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"
+           x="83.788254"
+           y="149.40215">Results</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;line-height:1.25;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;mix-blend-mode:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="86.506073"
+         y="59.167183"
+         id="text4852-9"><tspan
+           id="tspan4850-2"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"
+           x="86.506073"
+           y="59.167183"
+           sodipodi:role="line">Wahoo!</tspan></text>
+    </g>
+    <g
+       id="g13011"
+       transform="translate(-1.3229,-2.0769022)">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,131.86106 H 42.378503"
+         id="path11404-8"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,123.07032 V 140.6518"
+         id="path11552-6"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <g
+       id="g13011-1"
+       transform="matrix(-1,0,0,1,339.98957,-2.0769022)">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,131.86106 H 42.378503"
+         id="path11404-8-7"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,123.07032 V 140.6518"
+         id="path11552-6-87"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <g
+       id="g5745">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;line-height:1.25;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;fill:#bf1e2d;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="81.67794"
+         y="147.81815"
+         id="text4852-5"><tspan
+           sodipodi:role="line"
+           id="tspan4850-8"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583;fill:#bf1e2d;fill-opacity:1"
+           x="81.67794"
+           y="147.81815">Results</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;line-height:1.25;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;word-spacing:0px;fill:#bf1e2d;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="84.39576"
+         y="57.583183"
+         id="text4852"><tspan
+           id="tspan4850"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.8px;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583;fill:#bf1e2d;fill-opacity:1"
+           x="84.39576"
+           y="57.583183"
+           sodipodi:role="line">Wahoo!</tspan></text>
+    </g>
+    <g
+       id="g13011-2"
+       transform="translate(-1.3229,-92.311875)">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,131.86106 H 42.378503"
+         id="path11404-8-1"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,123.07032 V 140.6518"
+         id="path11552-6-8"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <g
+       id="g13011-2-2"
+       transform="matrix(-1,0,0,1,339.98957,-92.311875)">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,131.86106 H 42.378503"
+         id="path11404-8-1-9"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:7.9375;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 26.882965,123.07032 V 140.6518"
+         id="path11552-6-8-3"
+         sodipodi:nodetypes="cc" />
+    </g>
+  </g>
+  <metadata
+     id="metadata824">
+    <rdf:RDF>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+      <cc:Work
+         rdf:about="">
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
+        <dc:date>2022</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>John Strunk</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC BY-SA 4.0</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:source>https://github.com/JohnStrunk/wahoo-results</dc:source>
+        <dc:title>Wahoo Results card</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

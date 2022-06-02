@@ -267,6 +267,17 @@ def main():
         root.destroy()
     root.protocol("WM_DELETE_WINDOW", close_cb)
 
+    # Allow the root window to build, then close the splash screen if it's up
+    # and we're running in exe mode
+    try:
+        root.update()
+        #pylint: disable=import-error,import-outside-toplevel
+        import pyi_splash #type: ignore
+        if pyi_splash.is_alive():
+            pyi_splash.close()
+    except RuntimeError:
+        pass
+
     root.mainloop()
 
     FILE_WATCHER.stop()
