@@ -250,7 +250,7 @@ class Heat:
         """
         # We expect all lanes to have the same number of times, so return the
         # maximum across all lanes.
-        return max([len(l.times) for l in self.lanes])
+        return max(len(l.times) for l in self.lanes)
 
     def place(self, lane: int) -> int:
         """
