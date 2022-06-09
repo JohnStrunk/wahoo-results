@@ -65,7 +65,7 @@ jobs:
 
       - name: Build executable
         shell: cmd
-        run: make-exe.bat
+        run: pipenv run build.py
 
       - name: Save executable as artifact
         # https://github.com/actions/upload-artifact
