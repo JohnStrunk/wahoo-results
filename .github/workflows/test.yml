@@ -112,10 +112,19 @@ jobs:
           path: wahoo-results.exe
           if-no-files-found: error
 
+  success:
+    name: Successful CI
+    needs: [build, test]
+    runs-on: windows-latest
+    steps:
+      - name: Success
+        shell: cmd
+        run: echo "CI was successful"
+
   release:
     name: Publish release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build, test]
+    needs: [success]
     runs-on: windows-latest
 
     steps:
