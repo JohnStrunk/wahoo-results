@@ -25,6 +25,8 @@ import PyInstaller.utils.win32.versioninfo as vinfo
 
 import wh_version
 
+print("Starting build process...\n")
+
 # Remove any previous build artifacts
 try:
     shutil.rmtree('build')
@@ -84,6 +86,8 @@ with open('wahoo-results.fileinfo', 'w') as f:
     f.write(str(v))
     f.flush()
     f.close()
+
+print("Invoking PyInstaller to generate executable...\n")
 
 # Build it
 PyInstaller.__main__.run([
