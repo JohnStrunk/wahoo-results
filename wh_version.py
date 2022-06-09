@@ -83,7 +83,11 @@ def git_semver(wrv: str) -> str:
     '1.0'
     >>> git_semver('v0.3.2-2-g97e7a82')
     '0.3.2-dev.2+g97e7a82'
+    >>> git_semver('0.6.2-dev.7+g901dc0d')
+    '0.6.2-dev.7+g901dc0d'
     """
+    if semver.VersionInfo.isvalid(wrv):
+        return wrv
     # groups: tag (w/o v), commits, hash (w/ g)
     components = re.match(r'^v?([^-]+)(?:-(\d+)-(g[0-9a-f]+))?$', wrv)
     if components is None:
