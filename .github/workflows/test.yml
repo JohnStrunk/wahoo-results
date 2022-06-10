@@ -25,11 +25,11 @@ jobs:
     steps:
       - name: Checkout repository
         # https://github.com/actions/checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
       - name: Set up Python
         # https://github.com/actions/setup-python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@d09bd5e6005b175076f227b13d9730d56e9dcfcb
         with:
           python-version: '3.x'
           cache: 'pipenv'
@@ -67,13 +67,13 @@ jobs:
     steps:
       - name: Checkout repository
         # https://github.com/actions/checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           fetch-depth: 0
 
       - name: Set up Python
         # https://github.com/actions/setup-python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@d09bd5e6005b175076f227b13d9730d56e9dcfcb
         with:
           python-version: '3.x'
           cache: 'pipenv'
@@ -106,7 +106,7 @@ jobs:
 
       - name: Save executable as artifact
         # https://github.com/actions/upload-artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
         with:
           name: wahoo-results.exe
           path: wahoo-results.exe
@@ -130,14 +130,14 @@ jobs:
     steps:
       - name: Download executable as artifact
         # https://github.com/actions/download-artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741
         with:
           name: wahoo-results.exe
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         # https://github.com/softprops/action-gh-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
         with:
           name: Release ${{ github.ref_name }}
           draft: true
