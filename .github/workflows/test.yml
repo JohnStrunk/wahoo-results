@@ -13,6 +13,9 @@ on:
 env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2022.1.8"
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  # https://github.com/upx/upx/releases
+  UPX_VERSION: 3.96
 
 jobs:
   test:
@@ -20,22 +23,60 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Set up Python
-        # The actions/cache step below uses this id to get the exact python version
-        id: setup-python
-        # https://github.com/actions/setup-python
-        uses: actions/setup-python@v3
-
       - name: Checkout repository
         # https://github.com/actions/checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+
+      - name: Set up Python
+        # https://github.com/actions/setup-python
+        uses: actions/setup-python@d09bd5e6005b175076f227b13d9730d56e9dcfcb
+        with:
+          python-version: '3.x'
+          cache: 'pipenv'
+
+      # Add Scripts directory to the path so that pipenv (and associated
+      # utilities) can be used once installed
+      - name: Add python Scripts directory to path
+        shell: cmd
+        # Code-page switch is needed to write the env file as utf-8
+        run: |
+          chcp 65001
+          python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
+          chcp 1252
+
+      - name: Install pipenv
+        shell: cmd
+        run: python -m pip install --user pipenv==${{ env.PIPENV_INSTALL_VERSION }}
+
+      - name: Initialize virtual environment
+        shell: cmd
+        run: pipenv install --deploy --dev --no-site-packages -v
+
+      - name: Run tests
+        shell: cmd
+        run: pipenv run pytest -v
+
+      - name: Build docs
+        shell: cmd
+        run: pipenv run make-doc.bat html
+
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        # https://github.com/actions/checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           fetch-depth: 0
 
-      - uses: actions/cache@v3
+      - name: Set up Python
+        # https://github.com/actions/setup-python
+        uses: actions/setup-python@d09bd5e6005b175076f227b13d9730d56e9dcfcb
         with:
-          path: C:\Users\runneradmin\.virtualenvs
-          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
+          python-version: '3.x'
+          cache: 'pipenv'
 
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
@@ -55,31 +96,50 @@ jobs:
         shell: cmd
         run: pipenv install --deploy --no-site-packages -v
 
-      - name: Run tests
+      - name: Install UPX
         shell: cmd
-        run: pipenv run pytest -v
-
-      - name: Build docs
-        shell: cmd
-        run: pipenv run make-doc.bat html
+        run: choco install -y upx --version ${{ env.UPX_VERSION }}
 
       - name: Build executable
         shell: cmd
-        run: make-exe.bat
+        run: pipenv run python build.py
 
       - name: Save executable as artifact
         # https://github.com/actions/upload-artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
         with:
           name: wahoo-results.exe
           path: wahoo-results.exe
           if-no-files-found: error
 
+  success:
+    name: Successful CI
+    needs: [build, test]
+    runs-on: windows-latest
+    steps:
+      - name: Success
+        shell: cmd
+        run: echo "CI was successful"
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [success]
+    runs-on: windows-latest
+
+    steps:
+      - name: Download executable as artifact
+        # https://github.com/actions/download-artifact
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741
+        with:
+          name: wahoo-results.exe
+
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         # https://github.com/softprops/action-gh-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
         with:
+          name: Release ${{ github.ref_name }}
           draft: true
           files: |
             wahoo-results.exe

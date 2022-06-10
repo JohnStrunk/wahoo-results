@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 # Initially created by:
-# pipenv run pyi-makespec --onefile --noconsole --add-data media\wr-icon.ico;media --icon media\wr-icon.ico --name wahoo-results --splash media\wr-card2.png wahoo_results.py
+# pipenv run pyi-makespec --onefile --noconsole --add-data media\wr-icon.ico;media --icon media\wr-icon.ico --name wahoo-results --splash media\wr-card2.png --manifest wahoo-results.fileinfo wahoo_results.py
 
 block_cipher = None
 
@@ -56,4 +56,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='media\\wr-icon.ico',
+    version='wahoo-results.fileinfo',
 )

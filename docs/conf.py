@@ -57,4 +57,10 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# Logo at top of sidebar
+html_logo = 'media/wr-card2-150.png'
+
+# favicon
+html_favicon = 'media/wr-icon.ico'
+
 master_doc = 'index'

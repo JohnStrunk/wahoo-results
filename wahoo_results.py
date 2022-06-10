@@ -36,10 +36,7 @@ from manual import show_manual_chooser
 import results
 from scoreboardimage import ScoreboardImage, waiting_screen
 from settings import Settings
-from version import WAHOO_RESULTS_VERSION
-
-# Sentry.io reporting token
-SENTRY_DSN = "https://a7e34ba5d40140bfb1e65779585438fb@o948149.ingest.sentry.io/5897736"
+from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 
 FILE_WATCHER: watchdog.observers.Observer
 IC: ImageCast
@@ -202,15 +199,13 @@ def main():
     #     )
 
     # Determine if running as a PyInstaller exe bundle
-    dsn = None
     execution_environment = "source"
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         execution_environment = "executable"
-        dsn = SENTRY_DSN  # only report if in executable mode
 
     # Initialize Sentry crash reporting
     sentry_sdk.init(
-        dsn=dsn,
+        dsn=SENTRY_DSN,
         sample_rate=1.0,
         traces_sample_rate=1.0,
         environment=execution_environment,

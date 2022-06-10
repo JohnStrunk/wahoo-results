@@ -5,7 +5,7 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
       - "#changes-requested-reviews-by=0"
       - label!=do-not-merge
-      - check-success=Test
+      - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
       - check-success=SonarCloud Code Analysis
@@ -19,7 +19,7 @@ pull_request_rules:
       - author=JohnStrunk
       - "#changes-requested-reviews-by=0"
       - label!=do-not-merge
-      - check-success=Test
+      - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
       - check-success=SonarCloud Code Analysis
@@ -32,7 +32,7 @@ queue_rules:
   - name: default
     conditions:
       # Conditions to get out of the queue (= merged)
-      - check-success=Test
+      - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
       - check-success=SonarCloud Code Analysis
