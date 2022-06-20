@@ -270,6 +270,8 @@ def main():
         import pyi_splash #type: ignore
         if pyi_splash.is_alive():
             pyi_splash.close()
+    except ModuleNotFoundError:
+        pass
     except RuntimeError:
         pass
 
