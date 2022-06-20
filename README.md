@@ -56,6 +56,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+#### Added
+
+- :sparkles: Application now has a startup splash screen
+- :sparkles: Waiting screen now uses the specified background image
+
+#### Changed
+
+- :information_source: Application now has a new icon
+- :information_source: Executable is now built w/ UPX enabled to decrease the
+  size of the binary.
+
 ### [0.6.2] - 2022-05-14
 
 #### Fixed

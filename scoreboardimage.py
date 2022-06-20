@@ -67,10 +67,53 @@ def _format_place(place: int) -> str:
         return "3rd"
     return f"{place}th"
 
-def waiting_screen(size: Tuple[int, int], config: WahooConfig) -> Image.Image:
-    '''Generate a "waiting" image to display on the scoreboard.'''
+def _create_base_image(size: Tuple[int, int], config: WahooConfig) -> Image.Image:
     img = Image.new(mode="RGBA", size=size,
                     color=config.get_str("color_bg"))
+    bg_file = config.get_str("image_bg")
+    if bg_file == "":
+        # No bg image defined, so we're done
+        return img
+
+    try:
+        bg_img = Image.open(bg_file)
+    except FileNotFoundError:
+        # Can't load the image, we're done
+        return img
+    except UnidentifiedImageError:
+        # Can't load the image, we're done
+        return img
+
+    # Scale the image
+    mode = config.get_str("image_scale")
+    alg = Image.BICUBIC
+    if mode == "stretch":
+        bg_img = bg_img.resize(size, alg)
+    elif mode == "fit":
+        factor = min(size[0]/bg_img.size[0], size[1]/bg_img.size[1])
+        bg_img = bg_img.resize((int(bg_img.size[0]*factor),
+                                int(bg_img.size[1]*factor)), alg)
+    elif mode == "cover":
+        factor = max(size[0]/bg_img.size[0], size[1]/bg_img.size[1])
+        bg_img = bg_img.resize((int(bg_img.size[0]*factor), int(bg_img.size[1]*factor)), alg)
+
+    # Generate the crop bounding box such that the image is in the center
+    # and the size matches the size of the main image
+    left = (bg_img.size[0] - size[0]) // 2
+    right = bg_img.size[0] - left
+    top = (bg_img.size[1] - size[1]) // 2
+    bottom = bg_img.size[1] - top
+    bbox = (left, top, right, bottom)
+    bg_img = bg_img.crop(bbox)
+
+    # Adjust brightness and overlay it on the main image
+    bg_img = Brightness(bg_img).enhance(config.get_float("image_bright"))
+    img.alpha_composite(bg_img)
+    return img
+
+def waiting_screen(size: Tuple[int, int], config: WahooConfig) -> Image.Image:
+    '''Generate a "waiting" image to display on the scoreboard.'''
+    img = _create_base_image(size, config)
     center = (int(size[0]*0.5), int(size[1]*0.8))
     normal = _fontname_to_file(config.get_str("normal_font"))
     font_size = 72
@@ -104,10 +147,7 @@ class ScoreboardImage:
         with sentry_sdk.start_transaction(op="render_image", name="Render image"):
             self._heat = heat
             self._config = config
-            self._i = Image.new(mode="RGBA", size=size,
-                                color=self._config.get_str("color_bg"))
-            with sentry_sdk.start_span(op="render_background"):
-                self._add_background()
+            self._i = _create_base_image(size, config)
             with sentry_sdk.start_span(op="size_fonts"):
                 self._make_fonts()
             with sentry_sdk.start_span(op="draw"):
