@@ -6,8 +6,8 @@ Download
 
 .. admonition:: Download the latest version
 
-   Version 0.6.2 - 05/14/2022 - `wahoo-results.exe
-   <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.6.2/wahoo-results.exe>`_
+   Version 0.7.0 - 06/23/2022 - `wahoo-results.exe
+   <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.7.0/wahoo-results.exe>`_
 
 The scoreboard is packaged as a single executable, and no installation is
 necessary. The above executable is all you need to get started.
