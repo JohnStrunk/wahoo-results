@@ -34,7 +34,7 @@ except FileNotFoundError:
     pass
 
 # Determine current git tag
-git_ref = subprocess.check_output('git describe --tags --match "v*"', shell=True).decode("utf-8")
+git_ref = subprocess.check_output('git describe --tags --match "v*"', shell=True).decode("utf-8").rstrip()
 wr_version = wh_version.git_semver(git_ref)
 vdict = semver.parse(wr_version)
 
