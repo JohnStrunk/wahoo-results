@@ -56,6 +56,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+#### Fixed
+
+- :bug: Gracefully handle Chromecast removal messages from untracked devices
+
 #### Added
 
 - :sparkles: Application now has a startup splash screen

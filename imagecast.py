@@ -192,7 +192,12 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
             def add_cast(self, uuid, service):
                 self.update_cast(uuid, service)
             def remove_cast(self, uuid, service, cast_info):
-                del parent.devices[uuid]
+                try:
+                    del parent.devices[uuid]
+                except KeyError:
+                    # received a removal message for a CC we weren't tracking.
+                    # Ignore it.
+                    pass
                 if parent.callback_fn is not None:
                     parent.callback_fn()
             def update_cast(self, uuid, service):
