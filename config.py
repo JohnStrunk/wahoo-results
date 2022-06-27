@@ -52,7 +52,7 @@ class WahooConfig:
     def __init__(self):
         self._config = configparser.ConfigParser()
         self._config.read_dict(self._CONFIG_DEFAULTS)
-        self._config.read(self._CONFIG_FILE)
+        self._config.read(self._CONFIG_FILE, encoding="cp1252")
 
     def save(self) -> None:
         '''Save the (updated) configuration to the ini file'''

@@ -36,6 +36,7 @@ from manual import show_manual_chooser
 import results
 from scoreboardimage import ScoreboardImage, waiting_screen
 from settings import Settings
+import wh_analytics
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 
 FILE_WATCHER: watchdog.observers.Observer
@@ -93,6 +94,7 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
                 pass
             txn.set_tag("has_discription", heat.event_desc != "")
             txn.set_tag("lanes", self._options.get_int("num_lanes"))
+            wh_analytics.results_received(has_names = heat.event_desc != "")
             self._hcb(heat)
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
@@ -106,11 +108,13 @@ def settings_window(root: Tk, options: WahooConfig) -> None:
     settings: Settings
 
     def clear_cb():
+        wh_analytics.clear_btn()
         image = waiting_screen((1280, 720), options)
         settings.set_preview(image)
         IC.publish(image)
 
     def test_cb() -> None:
+        wh_analytics.test_btn()
         heat = results.Heat(allow_inconsistent = not options.get_bool("inhibit_inconsistent"))
         #pylint: disable=protected-access
         heat._parse_do4("""432;1;1;All
@@ -187,7 +191,7 @@ WHITE, MEGAN        --TEAM1           """.split("\n"))
     IC.start()
     clear_cb()
 
-def main():
+def main():  # pylint: disable=too-many-statements
     '''Runs the Wahoo! Results scoreboard'''
     global FILE_WATCHER  # pylint: disable=global-statement
     global IC  # pylint: disable=global-statement
@@ -231,6 +235,7 @@ def main():
 
     root = Tk()
 
+    wh_analytics.application_start(config, (root.winfo_screenwidth(), root.winfo_screenheight()))
     screen_size = f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}"
     sentry_sdk.set_context("display", {
         "size": screen_size,
@@ -280,6 +285,7 @@ def main():
     FILE_WATCHER.stop()
     FILE_WATCHER.join()
     IC.stop()
+    wh_analytics.application_stop(config)
 
 if __name__ == "__main__":
     main()

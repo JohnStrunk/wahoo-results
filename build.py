@@ -41,11 +41,27 @@ vdict = semver.parse(wr_version)
 with open ('version.py', 'w' ) as f:
     f.write("'''Version information'''\n\n")
     f.write(f'WAHOO_RESULTS_VERSION = "{wr_version}"\n')
+
+    # Sentry API key
     dsn = os.getenv("SENTRY_DSN")
     if dsn is not None:
         f.write(f'SENTRY_DSN = "{dsn}"\n')
     else:
         f.write('SENTRY_DSN = None\n')
+
+    # Segment API key
+    segment = os.getenv("SEGMENT_WRITE_KEY")
+    if segment is None:
+        segment = 'unknown'
+    f.write(f'SEGMENT_WRITE_KEY = "{segment}"\n')
+
+    # ipinfo.io
+    ipinfo = os.getenv("IPINFO_TOKEN")
+    if ipinfo is not None:
+        f.write(f'IPINFO_TOKEN = "{ipinfo}"\n')
+    else:
+        f.write('IPINFO_TOKEN = None\n')
+
     f.flush()
     f.close()
 
