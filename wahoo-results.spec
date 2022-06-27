@@ -3,14 +3,22 @@
 # Initially created by:
 # pipenv run pyi-makespec --onefile --noconsole --add-data media\wr-icon.ico;media --icon media\wr-icon.ico --name wahoo-results --splash media\wr-card2.png --manifest wahoo-results.fileinfo wahoo_results.py
 
-block_cipher = None
+# Figure out where ipinfo's data file is located
+import os.path
+import inspect
+import ipinfo
+ipinfo_dir = os.path.dirname(inspect.getsourcefile(ipinfo))
 
+block_cipher = None
 
 a = Analysis(
     ['wahoo_results.py'],
     pathex=[],
     binaries=[],
-    datas=[('media\\wr-icon.ico', 'media')],
+    datas=[
+        ('media\\wr-icon.ico', 'media'),
+        (os.path.join(ipinfo_dir, 'countries.json'), 'ipinfo')
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
