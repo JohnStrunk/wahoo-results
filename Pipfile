@@ -15,6 +15,8 @@ DateTime = "*"
 Pillow = "*"
 PyChromecast = "*"
 sentry-sdk = "*"
+segment-analytics-python = "<3.0"
+ipinfo = "*"
 
 [dev-packages]
 mypy = "*"

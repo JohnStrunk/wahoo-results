@@ -30,6 +30,7 @@ import results
 from settings import Preview
 from tooltip import ToolTip
 from scoreboardimage import ScoreboardImage
+import wh_analytics
 
 tkContainer = Any
 
@@ -72,6 +73,7 @@ class _DolphinManual(ttk.Frame):  # pylint: disable=too-many-ancestors
         row2 = _BottomRow(self, dismiss_fn, self._publish)
         row2.grid(column=0, row=2, sticky="news")
     def _publish(self) -> None:
+        wh_analytics.manual_result()
         self._publish_fn(self._img)
     def _file_cb(self) -> None:
         allow = not self._config.get_bool("inhibit_inconsistent")
