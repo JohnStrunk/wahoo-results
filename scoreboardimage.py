@@ -26,7 +26,7 @@ from matplotlib import font_manager #type: ignore
 import sentry_sdk
 
 from config import WahooConfig
-from results import Heat
+from results import Heat, NameMode, format_name
 
 def _fontname_to_file(name: str) -> str:
     properties = font_manager.FontProperties(family=name, weight="bold")
@@ -278,9 +278,10 @@ class ScoreboardImage:
             draw.text((edge_l + idx_width + pl_width/2, y_coord),
                    ptxt, font=self._normalfont, anchor="ms", fill=pl_color)
             # Name
-            name = self._heat.lanes[i].name
-            while draw.textsize(name, self._normalfont)[0] > name_width:
-                name = name[:-1]
+            name_variants = format_name(NameMode.NONE, self._heat.lanes[i].name)
+            while draw.textsize(name_variants[0], self._normalfont)[0] > name_width:
+                name_variants.pop(0)
+            name = name_variants[0]
             draw.text((edge_l + idx_width + pl_width, y_coord),
                    f"{name}", font=self._normalfont, anchor="ls", fill=fg_color)
             # Time
