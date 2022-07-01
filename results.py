@@ -292,6 +292,7 @@ class NameMode(Enum):
     LAST = auto()
     """Format name as: Last"""
 
+#pylint: disable=too-many-return-statements
 def arrange_name(how: NameMode, name: str) -> str:
     """
     Change the format of a name from a start list.
@@ -377,12 +378,12 @@ def format_name(how: NameMode, name: str) -> List[str]:
         variants = _shorter_strings(arrange_name(how, name))
     return [arrange_name(how, name)] + variants
 
-def _shorter_strings(input: str) -> List[str]:
+def _shorter_strings(string: str) -> List[str]:
     """
     >>> _shorter_strings("foobar")
     ['fooba', 'foob', 'foo', 'fo', 'f', '']
     """
-    if len(input) > 0:
-        shortened = input[:-1]
+    if len(string) > 0:
+        shortened = string[:-1]
         return [shortened] + _shorter_strings(shortened)
     return []
