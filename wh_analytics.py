@@ -29,14 +29,14 @@ import version
 
 _CONTEXT: Dict[str, Any]
 
-def application_start(config: WahooConfig, screen_size: Tuple[int, int]) -> None:
+def application_start(config: WahooConfig, screen_size: Tuple[int, int],
+    exe_environ: str) -> None:
     """Event for application startup"""
     analytics.write_key = version.SEGMENT_WRITE_KEY
     analytics.send = config.get_bool("analytics")
-    analytics.debug = True
     global _CONTEXT  # pylint: disable=global-statement
     _CONTEXT = {
-        "context": _setup_context(screen_size),
+        "context": _setup_context(screen_size, exe_environ),
         "race_count": 0,
         "race_count_with_names": 0,
         "session_start": time.time(),
@@ -44,7 +44,17 @@ def application_start(config: WahooConfig, screen_size: Tuple[int, int]) -> None
     }
 
     analytics.identify(
-        user_id = _CONTEXT["user_id"]
+        user_id = _CONTEXT["user_id"],
+        context = _CONTEXT["context"],
+        # https://segment.com/docs/connections/spec/identify/#traits
+        traits = {
+            "address": {
+                "city": _CONTEXT["context"]["location"]["city"],
+                "state": _CONTEXT["context"]["location"]["region"],
+                "country": _CONTEXT["context"]["location"]["country"],
+                "postalCode": _CONTEXT["context"]["location"]["postal"],
+            },
+        },
     )
     _send_event("Scoreboard started")
 
@@ -58,16 +68,16 @@ def application_stop(config: WahooConfig) -> None:
         "inhibit": config.get_bool("inhibit_inconsistent"),
         "bg_image": config.get_str("image_bg") != "",
     })
-    analytics.flush()
-    analytics.join()
+    analytics.shutdown()
 
-def results_received(has_names: bool) -> None:
+def results_received(has_names: bool, chromecasts: int) -> None:
     """Event for race results"""
     _CONTEXT["race_count"] += 1
     if has_names:
         _CONTEXT["race_count_with_names"] += 1
     _send_event("Results received", {
         "has_names": has_names,
+        "chromecast_count": chromecasts
     })
 
 def clear_btn() -> None:
@@ -87,14 +97,15 @@ def _send_event(name: str, kvparams: Dict[str, Any] = None) -> None:
         kvparams = {}
     analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
 
-def _setup_context(screen_size: Tuple[int, int]):
+def _setup_context(screen_size: Tuple[int, int], exe_environ: str) -> Dict[str, Any]:
     # https://segment.com/docs/connections/spec/common/#context
     uname = platform.uname()
     iphandler = ipinfo.getHandler(version.IPINFO_TOKEN)
     ipdetails = iphandler.getDetails()
     return {
         "app": {
-            "version": version.WAHOO_RESULTS_VERSION
+            "version": version.WAHOO_RESULTS_VERSION,
+            "environment": exe_environ,
         },
         "ip": ipdetails.ip,
         "locale": locale.getdefaultlocale()[0],
@@ -102,6 +113,7 @@ def _setup_context(screen_size: Tuple[int, int]):
             "city": ipdetails.city,
             "region": ipdetails.region,
             "country": ipdetails.country_name,
+            "postal": ipdetails.postal, # non-standard
             "latitude": ipdetails.latitude,
             "longitude": ipdetails.longitude,
         },

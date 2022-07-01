@@ -92,9 +92,14 @@ class Do4Handler(watchdog.events.PatternMatchingEventHandler):
                 pass
             except FileNotFoundError:
                 pass
+            num_cc = len([x for x in IC.get_devices() if x["enabled"]])
             txn.set_tag("has_discription", heat.event_desc != "")
             txn.set_tag("lanes", self._options.get_int("num_lanes"))
-            wh_analytics.results_received(has_names = heat.event_desc != "")
+            txn.set_tag("chromecasts", num_cc)
+            wh_analytics.results_received(
+                has_names = heat.event_desc != "",
+                chromecasts = num_cc,
+            )
             self._hcb(heat)
 
 def settings_window(root: Tk, options: WahooConfig) -> None:
@@ -235,7 +240,11 @@ def main():  # pylint: disable=too-many-statements
 
     root = Tk()
 
-    wh_analytics.application_start(config, (root.winfo_screenwidth(), root.winfo_screenheight()))
+    wh_analytics.application_start(
+        config = config,
+        screen_size = (root.winfo_screenwidth(), root.winfo_screenheight()),
+        exe_environ = execution_environment,
+    )
     screen_size = f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}"
     sentry_sdk.set_context("display", {
         "size": screen_size,
