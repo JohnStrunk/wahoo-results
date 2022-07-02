@@ -106,7 +106,7 @@ def _setup_context(screen_size: Tuple[int, int], exe_environ: str) -> Dict[str, 
     ipdetails = iphandler.getDetails()
 
     # https://segment.com/docs/connections/spec/identify/#traits
-    traits = {
+    traits: Dict[str, Any] = {
         "address": {
             "city": ipdetails.city,
             "state": ipdetails.region,
