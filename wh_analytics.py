@@ -92,10 +92,20 @@ def manual_result() -> None:
     """Publish a manually loaded result event"""
     _send_event("Manual result")
 
+def documentation_link() -> None:
+    """Follow link to docs event"""
+    _send_event("Documentation click")
+
+def update_link() -> None:
+    """Follow link to dl latest version event"""
+    _send_event("DownloadUpdate click")
+
 def _send_event(name: str, kvparams: Dict[str, Any] = None) -> None:
     if kvparams is None:
         kvparams = {}
     analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
+    if analytics.write_key == "unknown": # dev environment
+        print(f"Event: {name}")
 
 def _setup_context(screen_size: Tuple[int, int], exe_environ: str) -> Dict[str, Any]:
     # https://segment.com/docs/connections/spec/common/#context
