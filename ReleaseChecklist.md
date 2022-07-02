@@ -1,6 +1,6 @@
 # Checklist for releases
 
-- Update changelog in README
+- Update changelog in Changelog.md
 - Update download link in documentation (docs/download.rst)
 - Commit above items
 - Tag repository (vX.Y.Z)

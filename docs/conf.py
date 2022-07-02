@@ -20,7 +20,7 @@ import sphinx_rtd_theme  #type: ignore
 # -- Project information -----------------------------------------------------
 
 project = 'Wahoo! Results'
-copyright = '2020, John D. Strunk'
+copyright = '2020-2022, John D. Strunk'
 author = 'John D. Strunk'
 
 

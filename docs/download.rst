@@ -7,10 +7,15 @@ Download
 .. admonition:: Download the latest version
 
    Version 0.7.0 - 06/23/2022 - `wahoo-results.exe
-   <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.7.0/wahoo-results.exe>`_
+   <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.7.0/wahoo-results.exe>`_ |br|
+   See it on the  `GitHub releases page.
+   <https://github.com/JohnStrunk/wahoo-results/releases>`_
 
 The scoreboard is packaged as a single executable, and no installation is
 necessary. The above executable is all you need to get started.
+
+Want to know what's changed? `Check out the changelog!
+<https://github.com/JohnStrunk/wahoo-results/blob/master/Changelog.md>`_
 
 User preferences are saved in a ``wahoo-results.ini`` file in the same
 directory as the executable. If it doesn't exist, it will be created when the
