@@ -436,10 +436,15 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         fr8.rowconfigure(0, weight=1)
         fr8.columnconfigure(0, weight=1)
         fr8.columnconfigure(1, weight=0)
+        query_params = "&".join([
+            "utm_source=wahoo_results",
+            "utm_medium=config_screen",
+            "utm_campaign=docs_link",
+            f"ajs_uid={config.get_str('client_id')}",
+        ])
         link_label = ttkwidgets.LinkLabel(fr8,
             text="Documentation: https://wahoo-results.readthedocs.io/",
-            link="https://wahoo-results.readthedocs.io/?utm_source=wahoo_results&"
-                 "utm_medium=config_screen&utm_campaign=docs_link",
+            link="https://wahoo-results.readthedocs.io/?" + query_params,
             relief="sunken",
             padding=[5, 2])
         link_label.grid(column=0, row=0, sticky="news")
