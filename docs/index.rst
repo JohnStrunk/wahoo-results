@@ -18,11 +18,11 @@ Wahoo! Results
    configuration
    faq
 
-|wr| is a free swimming scoreboard that you can use to display race
-results at your meets. It combines start list data from your meet management
-software (e.g., HyTek Meet Manager) with data files from a Colorado Dolphin
-timing system to produce an attractive scoreboard that keeps swimmers,
-coaches, and spectators informed of race results in real-time.
+|wr| is a free swimming scoreboard that you can use to display race results at
+your meets. It combines start list data from your meet management software
+(e.g., |HMM|_ or |SMM|_) with data files from a
+Colorado Dolphin timing system to produce an attractive scoreboard that keeps
+swimmers, coaches, and spectators informed of race results in real-time.
 
 The scoreboard is transmitted to Chromecast devices, allowing the results to
 be available on many displays at your facility.
@@ -47,8 +47,8 @@ team.
 Requirements
 ============
 
-- Hy-Tek Meet Manager (or other meet management software that can generate
-  scoreboard "start list" files)
+- |HMM|, |SMM|, or other meet management
+  software that can generate scoreboard "CTS start list" files
 - Colorado Dolphin timing system
 - Windows 10 PC to run |wr| (It can be shared with either of the above.)
 - One or more Chromecast devices

@@ -20,7 +20,7 @@ import sphinx_rtd_theme  #type: ignore
 # -- Project information -----------------------------------------------------
 
 project = 'Wahoo! Results'
-copyright = '2020, John D. Strunk'
+copyright = '2020-2022, John D. Strunk'
 author = 'John D. Strunk'
 
 
@@ -34,6 +34,8 @@ extensions = [
         # https://plantweb.readthedocs.io/examples.html
         'plantweb.directive',
         'sphinx_rtd_theme',
+        # https://sphinx-tabs.readthedocs.io/en/latest/
+        'sphinx_tabs.tabs',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

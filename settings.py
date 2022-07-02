@@ -30,6 +30,7 @@ from config import WahooConfig
 from tooltip import ToolTip
 from color_button import ColorButton
 import wh_version
+import wh_analytics
 from version import WAHOO_RESULTS_VERSION
 
 tkContainer = Any
@@ -436,12 +437,22 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
         fr8.rowconfigure(0, weight=1)
         fr8.columnconfigure(0, weight=1)
         fr8.columnconfigure(1, weight=0)
+        query_params = "&".join([
+            "utm_source=wahoo_results",
+            "utm_medium=config_screen",
+            "utm_campaign=docs_link",
+            f"ajs_uid={config.get_str('client_id')}",
+        ])
         link_label = ttkwidgets.LinkLabel(fr8,
             text="Documentation: https://wahoo-results.readthedocs.io/",
-            link="https://wahoo-results.readthedocs.io/?utm_source=wahoo_results&"
-                 "utm_medium=config_screen&utm_campaign=docs_link",
+            link="https://wahoo-results.readthedocs.io/?" + query_params,
             relief="sunken",
             padding=[5, 2])
+        # interpose event tracking on click of docs link
+        def _doc_click_interposer(*args):
+            wh_analytics.documentation_link()
+            link_label.open_link(args)
+        link_label.bind("<Button-1>", _doc_click_interposer)
         link_label.grid(column=0, row=0, sticky="news")
         version_label = ttk.Label(fr8, text=wh_version.git_semver(WAHOO_RESULTS_VERSION),
             justify="right", padding=(5, 2), relief="sunken")
@@ -458,6 +469,11 @@ class Settings(ttk.Frame):  # pylint: disable=too-many-ancestors
                 link=highest_version.url,
                 justify="left", padding=[5, 2], relief="sunken")
             update_label.grid(column=0, row=0, sticky="news")
+            # interpose event tracking on click of update link
+            def _update_click_interposer(*args):
+                wh_analytics.update_link()
+                update_label.open_link(args)
+            update_label.bind("<Button-1>", _update_click_interposer)
 
     def _handle_clear_btn(self) -> None:
         if self._clear_cb is not None:
