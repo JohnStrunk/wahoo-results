@@ -3,8 +3,8 @@
 Wahoo! Results is a scoreboard for displaying swimming meet race results.
 
 If you are looking for a way to have a scoreboard to display race results and
-you use Meet Manager + a CTS Dolphin system to run your meets, this may be for
-you!
+you use either Meet Manager or Meet Maestro plus a CTS Dolphin system to run
+your meets, this may be for you!
 
 :arrow_right: [Download the latest version
 here](https://github.com/JohnStrunk/wahoo-results/releases/latest) :arrow_left:
@@ -13,7 +13,9 @@ here](https://github.com/JohnStrunk/wahoo-results/releases/latest) :arrow_left:
 
 ## Requirements
 
-- Hy-Tek Meet Manager - Used to generate the scoreboard "start list" files
+- Meet management software - Used to generate the scoreboard "start list" files
+  - Hy-Tek Meet Manager
+  - SwimTopia Meet Maestro
 - Colorado Dolphin timing - Used to gather the timing information
 - A Windows PC to run Wahoo! Results
 
@@ -37,15 +39,16 @@ Once you've downloaded the application, make sure to [read the documentation](ht
 
 ## How it works
 
-1. Once the meet has been seeded in Meet Manager, export CTS start list files
-   as you would for a normal scoreboard.
+1. Once the meet has been seeded in your meet management software, export "CTS
+   start list" files as you would for a normal scoreboard.
 2. Use Wahoo! Results to generate the event file for the Dolphin software
    based on the start list files.
 3. Configure Wahoo! Results to watch for the Dolphin `*.do4` race result
    files.
-4. Run the scoreboard. It will display race results including both names (from
-   the start list files) and times (from the Dolphin result files) onto
-   Chromecast devices on the local network.
+4. When new race result files are created by the Dolphin, Wahoo Results will
+   display race results including both names (from the start list files) and
+   times (from the Dolphin result files) onto one or more Chromecast devices
+   on the local network.
 
 ## License
 

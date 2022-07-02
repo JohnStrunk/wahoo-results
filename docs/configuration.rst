@@ -22,13 +22,30 @@ Creating start list files
 -------------------------
 
 The start lists used by |wr| are the same as the files that are used for
-scoreboards run by a Colorado System 6 or similar system. In Meet Manager,
-they can be created by selecting:
+scoreboards run by a Colorado System 6 or similar system.
 
-    File > Export > Start Lists for Scoreboard > Start Lists for CTS |br|
-    `(Click here for an example) <_static/media/mm_startlist_export.png>`_
+.. tabs::
 
-The above command will create a series of files named ``E<###>.scb``, one for
+    .. tab:: Meet Manager
+
+        In Meet Manager, start lists can be created by selecting:
+
+            File > Export > Start Lists for Scoreboard > Start Lists for CTS |br|
+            `(Click here for an example) <_static/media/mm_startlist_export.png>`__
+
+    .. tab:: Meet Maestro
+
+        The desktop version of Meet Maestro (free from Swimtopia's web site)
+        is required to generate the start list files. They cannot be exported
+        by the web version currently.
+
+        To export the start lists:
+
+        Settings (gear icon in the upper right) > Timing Setup > Scoreboards >
+        "Export start lists for CTS" |br|
+        `(Click here for an example) <_static/media/MaestroStartListExport.png>`__
+
+The above steps will create a series of files named ``E<###>.scb``, one for
 each event in the session(s) that were exported. The start lists should all be
 placed into a directory that |wr| will be able to access.
 
@@ -181,9 +198,16 @@ Font scale
 Chromecast selection
 ====================
 
-The lower-right of the window displays the names of all the Google Chromecast devices that have been discovered on the local network. Select one or more of these devices to enable them. You may need to <ctrl>-click or <shift>-click to adjust the selection. The selected Chromecast devices should immediately begin displaying the latest scoreboard image.
+The lower-right of the window displays the names of all the Google Chromecast
+devices that have been discovered on the local network. Select one or more of
+these devices to enable them. You may need to <ctrl>-click or <shift>-click to
+adjust the selection. The selected Chromecast devices should immediately begin
+displaying the latest scoreboard image.
 
 Preview window
 ==============
 
-The lower-left of the main window contains a preview of what is currently being broadcast to the enabled Chromecast devices. The "test" and "clear" buttons just below this preview image can be used to send test data or clear the currently displayed results.
+The lower-left of the main window contains a preview of what is currently
+being broadcast to the enabled Chromecast devices. The "test" and "clear"
+buttons just below this preview image can be used to send test data or clear
+the currently displayed results.

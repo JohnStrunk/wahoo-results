@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - :sparkles: Swimmer names that are too long to display are automatically
   shortened
+- :sparkles: Added documentation for using Wahoo Results with Meet Maestro
 
 ### [0.7.0] - 2022-06-23
 

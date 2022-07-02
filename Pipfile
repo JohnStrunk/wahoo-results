@@ -29,6 +29,7 @@ types-requests = "*"
 plantweb = "*"
 rstcheck = "*"
 sphinx-rtd-theme = "*"
+sphinx-tabs = "*"
 
 [requires]
 python_version = "3.9"
