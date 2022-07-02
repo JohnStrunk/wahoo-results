@@ -1,3 +1,5 @@
 plantweb
 sphinx_rtd_theme
 sphinx-tabs
+pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
+sphinx>=3.0.4 # not directly required, pinned by Snyk to avoid a vulnerability
