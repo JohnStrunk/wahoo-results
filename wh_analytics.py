@@ -60,6 +60,8 @@ def application_stop(config: WahooConfig) -> None:
         "lane_count": config.get_int("num_lanes"),
         "inhibit": config.get_bool("inhibit_inconsistent"),
         "bg_image": config.get_str("image_bg") != "",
+        "normal_font": config.get_str("normal_font"),
+        "time_font": config.get_str("time_font"),
     })
     analytics.shutdown()
 
@@ -92,6 +94,30 @@ def documentation_link() -> None:
 def update_link() -> None:
     """Follow link to dl latest version event"""
     _send_event("DownloadUpdate click")
+
+def set_cts_directory(changed: bool) -> None:
+    """Set CTS start list directory"""
+    _send_event("Browse CTS directory",{
+        "directory_changed": changed,
+    })
+
+def wrote_dolphin_csv(num_events: int) -> None:
+    """Dolphin CSV event list written"""
+    _send_event("Write Dolphin CSV", {
+        "event_count": num_events,
+    })
+
+def set_do4_directory(changed: bool) -> None:
+    """Set directory to watch for do4 files"""
+    _send_event("Browse D04 directory",{
+        "directory_changed": changed,
+    })
+
+def cc_toggle(enable: bool) -> None:
+    """Enable/disable Chromecast"""
+    _send_event("Set Chromecast state",{
+        "enable": enable,
+    })
 
 def _send_event(name: str, kvparams: Dict[str, Any] = None) -> None:
     if kvparams is None:

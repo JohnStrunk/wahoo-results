@@ -71,6 +71,21 @@ class Event:
         self.event_desc = match.group(2)
         self.num_heats = (len(lines)-1)//10
 
+    def event_number_portion(self) -> int:
+        """Return the leading numeric portion of the event number"""
+        match = re.match(r'^(\d+)(\w*)$', self.event_num)
+        if not match:
+            return 0
+        return int(match.group(1))
+
+    def event_letter_portion(self) -> str:
+        """Return the trailing alphabetic portion of the event number"""
+        match = re.match(r'^(\d+)(\w*)$', self.event_num)
+        if not match:
+            return ""
+        return match.group(2)
+
+
 
 class Lane:
     """
