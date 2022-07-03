@@ -61,7 +61,8 @@ def generate_dolphin_csv(filename: str, directory: str) -> int:
             event = results.Event()
             event.from_scb(file.path)
             events.append(event)
-    events.sort(key=lambda e: e.event_num)
+    events.sort(key=lambda e: e.event_letter_portion())
+    events.sort(key=lambda e: e.event_number_portion())
     csv_lines = eventlist_to_csv(events)
     outfile = os.path.join(directory, filename)
     with open(outfile, "w", encoding="cp1252") as csv:

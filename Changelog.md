@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   shortened
 - :sparkles: Added documentation for using Wahoo Results with Meet Maestro
 
+#### Fixed
+
+- :bug: Fix sorting of event numbers when writing dolphin CSV.
+
 ### [0.7.0] - 2022-06-23
 
 #### Fixed
