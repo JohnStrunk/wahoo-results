@@ -2,7 +2,7 @@
 
 - Update changelog in Changelog.md
 - Update download link in documentation (docs/download.rst)
-- Commit above items
+- Commit above items: "Updates for vX.Y.Z release"
 - Tag repository (vX.Y.Z)
 - Push tag to GitHub
 - Automation will create the draft release and upload the executable

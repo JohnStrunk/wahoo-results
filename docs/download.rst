@@ -6,8 +6,8 @@ Download
 
 .. admonition:: Download the latest version
 
-   Version 0.7.0 - 06/23/2022 - `wahoo-results.exe
-   <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.7.0/wahoo-results.exe>`_ |br|
+   Version 0.8.0 - 07/03/2022 - `wahoo-results.exe
+   <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.8.0/wahoo-results.exe>`_ |br|
    See it on the  `GitHub releases page.
    <https://github.com/JohnStrunk/wahoo-results/releases>`_
 
