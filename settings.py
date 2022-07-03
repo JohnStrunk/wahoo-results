@@ -85,11 +85,13 @@ class _StartList(ttk.LabelFrame):   # pylint: disable=too-many-ancestors
     def _handle_scb_browse(self) -> None:
         directory = filedialog.askdirectory()
         if len(directory) == 0:
+            wh_analytics.set_cts_directory(False)
             return
         directory = os.path.normpath(directory)
         self._config.set_str("start_list_dir", directory)
         self._scb_directory.set(directory)
         self._csv_status.set("") # clear status line if we change directory
+        wh_analytics.set_cts_directory(True)
 
     def _handle_write_csv(self) -> None:
         outfile = "dolphin_events.csv"
@@ -98,6 +100,7 @@ class _StartList(ttk.LabelFrame):   # pylint: disable=too-many-ancestors
             self._csv_status.set("WARNING: No events were found. Check your directory.")
         else:
             self._csv_status.set(f"Wrote {num_events} events to {outfile}")
+        wh_analytics.wrote_dolphin_csv(num_events)
 
 
 class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
@@ -127,12 +130,14 @@ class _DolphinSettings(ttk.Labelframe):  # pylint: disable=too-many-ancestors
     def _handle_do4_browse(self) -> None:
         directory = filedialog.askdirectory()
         if len(directory) == 0:
+            wh_analytics.set_do4_directory(False)
             return
         directory = os.path.normpath(directory)
         self._config.set_str("dolphin_dir", directory)
         self._dolphin_directory.set(directory)
         if self._watchdir_cb is not None:
             self._watchdir_cb(directory)
+        wh_analytics.set_do4_directory(True)
 
 class _GeneralSettings(ttk.LabelFrame):  # pylint: disable=too-many-ancestors,too-many-instance-attributes
     '''Miscellaneous settings'''

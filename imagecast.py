@@ -32,6 +32,8 @@ from pychromecast.error import NotConnected # type: ignore
 import sentry_sdk
 import zeroconf
 
+import wh_analytics
+
 # Dict of uuid, name, enabled
 DeviceStatus = Dict[str, Any]
 
@@ -115,6 +117,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     self._publish_one(self.devices[uuid]["cast"])
                 elif previous and not enabled: # disabling: disconnect
                     self._disconnect(self.devices[uuid]["cast"])
+                wh_analytics.cc_toggle(enabled)
 
     def get_devices(self) -> List[DeviceStatus]:
         '''
