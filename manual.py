@@ -97,7 +97,7 @@ class _DolphinManual(ttk.Frame):  # pylint: disable=too-many-ancestors
     def _spin_cb(self) -> None:
         self._result.event_num = self._fi.event.get()
         self._result.heat_num = int(self._fi.heat.get())
-        scb_file = f"E{self._result.event_num}.scb"
+        scb_file = f"E{self._result.event_num:0>3}.scb"
         scb_path = os.path.join(self._config.get_str("start_list_dir"), scb_file)
         try:
             self._result.load_scb(scb_path)
