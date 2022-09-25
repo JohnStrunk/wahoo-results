@@ -8,7 +8,8 @@ env:
   PIPENV_INSTALL_VERSION: "2022.1.8"
 
 permissions:
-  pull-requests: write
+  contents: write       # Push changes to a branch (create pr action)
+  pull-requests: write  # Create a PR (create pr action)
 
 jobs:
   test:
@@ -45,7 +46,7 @@ jobs:
         shell: cmd
         run: pipenv update --dev -v
 
-      - name: Create PR for update lockfile
+      - name: Create PR to update lockfile
         uses: peter-evans/create-pull-request@171dd555b9ab6b18fa02519fdfacbb8bf671e1b4
         with:
           add-paths: |
