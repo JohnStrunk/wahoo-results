@@ -21,6 +21,7 @@ import platform
 import sys
 import time
 import uuid
+import tkinter
 from tkinter import Tk, messagebox
 from typing import Callable, List
 
@@ -253,7 +254,11 @@ def main():  # pylint: disable=too-many-statements
 
     root.title("Wahoo! Results")
     icon_file = os.path.abspath(os.path.join(bundle_dir, 'media', 'wr-icon.ico'))
-    root.iconbitmap(icon_file)
+    try:
+        root.iconbitmap(icon_file)
+    except tkinter.TclError:
+        # On linux, we can't set a Windows icon file
+        pass
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
