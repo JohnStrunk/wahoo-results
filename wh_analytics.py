@@ -22,7 +22,7 @@ import socket
 import time
 from typing import Any, Dict, Tuple
 
-import analytics  # type: ignore
+from segment import analytics  # type: ignore
 import ipinfo  # type: ignore
 
 from config import WahooConfig
