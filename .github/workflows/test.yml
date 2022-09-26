@@ -12,7 +12,7 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2022.1.8"
+  PIPENV_INSTALL_VERSION: "2022.9.24"
   IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
   SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
   SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
