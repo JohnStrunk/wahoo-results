@@ -1,6 +1,8 @@
 name: "Update dependencies"
 
 on:
+  schedule:
+    - cron: '43 16 * * 4'
   workflow_dispatch:
 
 env:
