@@ -28,7 +28,7 @@ import ttkwidgets.font  #type: ignore
 
 from config import WahooConfig
 from tooltip import ToolTip
-from color_button import ColorButton
+from widgets import ColorButton
 import wh_version
 import wh_analytics
 from version import WAHOO_RESULTS_VERSION
