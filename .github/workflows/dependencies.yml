@@ -9,10 +9,6 @@ env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2022.9.24"
 
-permissions:
-  contents: write       # Push changes to a branch (create pr action)
-  pull-requests: write  # Create a PR (create pr action)
-
 jobs:
   test:
     name: Update dependencies
@@ -45,12 +41,25 @@ jobs:
         run: python -m pip install --user pipenv==${{ env.PIPENV_INSTALL_VERSION }}
 
       - name: Update pipenv lock file
-        shell: cmd
-        run: pipenv update --dev
+        id: updates
+        shell: bash
+        run: |
+          echo 'This is an automated update of the `Pipfile.lock` file.' > updates.txt
+          echo '' >> updates.txt
+          echo '```' >> updates.txt
+          pipenv update --dev --outdated >> updates.txt || echo "continuing..."
+          echo '```' >> updates.txt
+          pipenv update --dev
+          
+          echo 'UPDATES<<EOF' >> $GITHUB_ENV
+          echo "$(<updates.txt)" >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
       - name: Create PR to update lockfile
+        # https://github.com/peter-evans/create-pull-request
         uses: peter-evans/create-pull-request@671dc9c9e0c2d73f07fa45a3eb0220e1622f0c5f
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           add-paths: |
             Pipfile.lock
           branch: workflow/update-dependencies
@@ -59,5 +68,4 @@ jobs:
           commit-message: '[workflow] Update dependencies in Pipfile.lock'
           signoff: true
           title: '[workflow] Update dependencies in Pipfile.lock'
-          body: |
-            This is an automated update of the `Pipfile.lock` file.
+          body: ${{ env.UPDATES }}
