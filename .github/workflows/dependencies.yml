@@ -56,6 +56,7 @@ jobs:
           branch: workflow/update-dependencies
           delete-branch: true
           author: 'GitHub <noreply@github.com>'
+          commit-message: '[workflow] Update dependencies in Pipfile.lock'
           signoff: true
           title: '[workflow] Update dependencies in Pipfile.lock'
           body: |
