@@ -55,8 +55,8 @@ jobs:
             Pipfile.lock
           branch: workflow/update-dependencies
           delete-branch: true
+          author: 'GitHub <noreply@github.com>'
           signoff: true
           title: '[workflow] Update dependencies in Pipfile.lock'
           body: |
             This is an automated update of the `Pipfile.lock` file.
-
