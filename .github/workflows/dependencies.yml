@@ -50,7 +50,7 @@ jobs:
           pipenv update --dev --outdated >> updates.txt || echo "continuing..."
           echo '```' >> updates.txt
           pipenv update --dev
-          
+
           echo 'UPDATES<<EOF' >> $GITHUB_ENV
           echo "$(<updates.txt)" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
@@ -69,3 +69,5 @@ jobs:
           signoff: true
           title: '[workflow] Update dependencies in Pipfile.lock'
           body: ${{ env.UPDATES }}
+          # Create as draft to avoid auto-merge by mergify
+          draft: true
