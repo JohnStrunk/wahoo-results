@@ -85,16 +85,16 @@ class View(ttk.Frame):
         except TclError: # On linux, we can't set a Windows icon file
             pass
         # Insert ourselves into the main window
-        self.pack(side="top", fill="both")
+        self.pack(side="top", fill="both", expand=True)
         self._build_menu()
         # App close button is same as Exit menu option
         root.protocol("WM_DELETE_WINDOW", vm.do_menu_exit)
 
         n = ttk.Notebook(self)
-        n.pack(side="top", fill="both")
-        n.add(_appearanceTab(n, self._vm), text="Appearance")
-        n.add(_appearanceTab(n, self._vm), text="Configure")
-        n.add(_appearanceTab(n, self._vm), text="Run")
+        n.pack(side="top", fill="both", expand=True)
+        n.add(_appearanceTab(n, self._vm), text="Appearance", sticky="news")
+        n.add(_dirsTab(n, self._vm), text="Directories", sticky="news")
+        n.add(_appearanceTab(n, self._vm), text="Run", sticky="news")
 
     def _build_menu(self) -> None:
         '''Creates the dropdown menus'''
@@ -117,10 +117,8 @@ class _appearanceTab(ttk.Frame):
         super().__init__(parent)
         # super().__init__(parent, layouts.Orientation.VERTICAL)
         self._vm = vm
-        self.columnconfigure(0, weight=1, uniform='appCols')
-        self.columnconfigure(1, weight=1, uniform='appCols')
-        self.rowconfigure(0, weight=1, uniform='appRows')
-        self.rowconfigure(1, weight=1, uniform='appRows')
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
         self._fonts(self).grid(column=0, row=0, sticky="news")
         self._colors(self).grid(column=0, row=1, sticky="news")
         self._features(self).grid(column=1, row=0, sticky="news")
@@ -204,3 +202,16 @@ class _appearanceTab(ttk.Frame):
         frame.columnconfigure(0, weight=1)
         widgets.Preview(frame, self._vm.appearance_preview).grid(column=0, row=0, sticky="news")
         return frame
+
+class _dirsTab(ttk.Frame):
+    def __init__(self, parent: Widget, vm: ViewModel) -> None:
+        super().__init__(parent)
+        # super().__init__(parent, layouts.Orientation.VERTICAL)
+        self._vm = vm
+        # self.columnconfigure(0, weight=1)
+        # self.rowconfigure(0, weight=1)
+        # self._fonts(self).grid(column=0, row=0, sticky="news")
+        # self._colors(self).grid(column=0, row=1, sticky="news")
+        # self._features(self).grid(column=1, row=0, sticky="news")
+        # self._preview(self).grid(column=1, row=1, sticky="news")
+

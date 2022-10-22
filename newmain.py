@@ -1,6 +1,7 @@
 from tkinter import Tk, ttk
 import tkinter
 import platform
+from PIL import Image
 
 import main_window
 
@@ -17,6 +18,8 @@ def main():
 
     # Exit menu exits app
     vm.on_menu_exit = lambda: root.destroy()
+    vm.appearance_preview.set(Image.new(mode="RGBA", size=(1280, 720),
+                    color="black"))
 
     def cb(name: str, _a, _b):
         v = root.getvar(name)

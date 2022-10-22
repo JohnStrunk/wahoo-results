@@ -34,24 +34,24 @@ class ImageVar(Variable):
     """Value holder for PhotoImage variables."""
     _default = PILImage.Image()
 
-    def __init__(self, master=None, value=None, name=None):
+    def __init__(self, master=None, value=_default):
         """Construct a PhotoImage variable.
 
         MASTER can be given as master widget.
         VALUE is an optional value
-        NAME is an optional Tcl name (defaults to PY_VARnum).
-
-        If NAME matches an existing variable and VALUE is omitted
-        then the existing value is retained.
         """
-        super().__init__(master, value, name)
+        super().__init__(master, value=False)
+        self._img = value
 
     def get(self):
         """Return value of variable as Image."""
-        value = self._tk.globalgetvar(self._name)
-        if isinstance(value, Image.Image):
-            return value
-        raise TypeError("Value is not an Image")
+        _x = super().get()
+        return self._img
+
+    def set(self, value: Image):
+        """Set the variable to a new Image."""
+        self._img = value
+        super().set(not bool(super().get()))
 
 class ColorButton(Button):  # pylint: disable=too-many-ancestors
     '''Displays a button that allows choosing a color.'''
@@ -103,9 +103,9 @@ class Preview(Canvas):
         super().__init__(parent, width=self.WIDTH, height=self.HEIGHT)
         self._pimage = None
         self._image_var = image_var
-        image_var.trace_add("write", lambda _a, _b, _c: self.set_image(self._image_var.get()))
+        image_var.trace_add("write", lambda _a, _b, _c: self._set_image(self._image_var.get()))
 
-    def set_image(self, image: PILImage.Image) -> None:
+    def _set_image(self, image: PILImage.Image) -> None:
         '''Set the preview image'''
         self.delete("all")
         scaled = image.resize((self.WIDTH, self.HEIGHT))
