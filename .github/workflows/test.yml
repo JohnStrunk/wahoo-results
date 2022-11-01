@@ -13,9 +13,6 @@ on:
 env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2022.9.24"
-  IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
-  SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   # https://github.com/upx/upx/releases
   UPX_VERSION: 3.96
 
@@ -104,6 +101,10 @@ jobs:
 
       - name: Build executable
         shell: cmd
+        env:
+          IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+          SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: pipenv run python build.py
 
       - name: Save executable as artifact
