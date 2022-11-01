@@ -13,6 +13,7 @@ on:
 env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2022.9.24"
+  SNYK_VERSION: v1.1048.0
   # https://github.com/upx/upx/releases
   UPX_VERSION: 3.96
 
@@ -58,6 +59,16 @@ jobs:
       - name: Build docs
         shell: cmd
         run: pipenv run make-doc.bat html
+
+      - name: Download Snyk CLI
+        shell: cmd
+        run: curl -OsL https://github.com/snyk/cli/releases/download/${{ env.SNYK_VERSION }}/snyk-win.exe
+
+      - name: Run Snyk CLI
+        shell: cmd
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk-win test --fail-on=all
 
   build:
     name: Build
