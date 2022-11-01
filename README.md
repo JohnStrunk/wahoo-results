@@ -10,6 +10,7 @@ your meets, this may be for you!
 here](https://github.com/JohnStrunk/wahoo-results/releases/latest) :arrow_left:
 
 ![Example scoreboard](docs/media/demo1.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJohnStrunk%2Fwahoo-results.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FJohnStrunk%2Fwahoo-results?ref=badge_shield)
 
 ## Requirements
 
@@ -54,3 +55,6 @@ Once you've downloaded the application, make sure to [read the documentation](ht
 
 This software is licensed under the GNU Affero General Public License version
 3. See the [LICENSE](LICENSE) file for full details.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJohnStrunk%2Fwahoo-results.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FJohnStrunk%2Fwahoo-results?ref=badge_large)
