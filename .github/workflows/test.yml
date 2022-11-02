@@ -68,7 +68,7 @@ jobs:
         shell: cmd
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk-win test --fail-on=all
+        run: snyk-win monitor --fail-on=all --dev --print-deps --remote-repo-url=https://github.com/${{ github.repository }} --target-reference=${{ github.ref_name }} --file=Pipfile --project-name=${{ github.repository }}
 
   build:
     name: Build
