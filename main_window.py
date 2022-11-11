@@ -23,6 +23,8 @@ from tkinter import *
 import tkinter.ttk as ttk
 import ttkwidgets  #type: ignore
 import ttkwidgets.font  #type: ignore
+import PIL.Image as PILImage
+from PIL import ImageTk
 
 import widgets
 import layouts
@@ -45,6 +47,8 @@ class ViewModel:
         self.do_bg_import = lambda: self.on_bg_import() if self.on_bg_import is not None else None
         self.on_bg_clear: callback = None
         self.do_bg_clear = lambda: self.on_bg_clear() if self.on_bg_clear is not None else None
+        self.on_dolphin_export: callback = None
+        self.do_dolphin_export = lambda: self.on_dolphin_export() if self.on_dolphin_export is not None else None
         ########################################
         ## Entry fields
         self.main_text = StringVar()
@@ -65,8 +69,12 @@ class ViewModel:
         self.num_lanes = IntVar()
         self.inhibit = BooleanVar()
         # Preview
-        self.appearance_preview = widgets.ImageVar()
-
+        self.appearance_preview = widgets.ImageVar(PILImage.Image())
+        # Directories
+        self.startlist_dir = StringVar()
+        self.startlist_contents = widgets.StartListVar([])
+        self.results_dir = StringVar()
+        self.results_contents = widgets.RaceResultVar([])
 
 class View(ttk.Frame):
     def __init__(self, root: Tk, vm: ViewModel):
@@ -80,6 +88,7 @@ class View(ttk.Frame):
         root.geometry(f"{1366//2}x{768//2}")
         bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
         icon_file = os.path.abspath(os.path.join(bundle_dir, 'media', 'wr-icon.ico'))
+        root.iconphoto(True, ImageTk.PhotoImage(file=icon_file))  # type: ignore
         try:
             root.iconbitmap(icon_file)
         except TclError: # On linux, we can't set a Windows icon file
@@ -123,10 +132,6 @@ class _appearanceTab(ttk.Frame):
         self._colors(self).grid(column=0, row=1, sticky="news")
         self._features(self).grid(column=1, row=0, sticky="news")
         self._preview(self).grid(column=1, row=1, sticky="news")
-        # self.append(self._fonts(self), sticky="news")
-        # self.append(self._colors(self), sticky="news")
-        # self.append(self._features(self), sticky="news")
-        # self.append(self._preview(self), sticky="news")
 
     def _fonts(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Fonts")
@@ -206,12 +211,26 @@ class _appearanceTab(ttk.Frame):
 class _dirsTab(ttk.Frame):
     def __init__(self, parent: Widget, vm: ViewModel) -> None:
         super().__init__(parent)
-        # super().__init__(parent, layouts.Orientation.VERTICAL)
         self._vm = vm
-        # self.columnconfigure(0, weight=1)
-        # self.rowconfigure(0, weight=1)
-        # self._fonts(self).grid(column=0, row=0, sticky="news")
-        # self._colors(self).grid(column=0, row=1, sticky="news")
-        # self._features(self).grid(column=1, row=0, sticky="news")
-        # self._preview(self).grid(column=1, row=1, sticky="news")
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+        self._start_list(self).grid(column=0, row=0, sticky="news", padx=1, pady=1)
+        self._race_results(self).grid(column=1, row=0, sticky="news", padx=1, pady=1)
 
+    def _start_list(self, parent: Widget) -> Widget:
+        frame = ttk.LabelFrame(parent, text='Start lists')
+        widgets.DirSelection(frame, self._vm.startlist_dir).grid(column=0, row=0, sticky="news", padx=1, pady=1)
+        widgets.StartListTreeView(frame, self._vm.startlist_contents).grid(column=0, row=1, sticky="news", padx=1, pady=1)
+        ttk.Button(frame, padding=(8, 0), text="Export events to Dolphin...", command=self._vm.do_dolphin_export).grid(column=0, row=2, padx=1, pady=1)
+        frame.rowconfigure(1, weight=1)
+        return frame
+
+    def _race_results(self, parent: Widget) -> Widget:
+        frame = ttk.LabelFrame(parent, text='Race results')
+        widgets.DirSelection(frame, self._vm.results_dir).grid(column=0, row=0, sticky="news", padx=1, pady=1)
+        widgets.RaceResultTreeView(frame, self._vm.results_contents).grid(column=0, row=1, sticky="news", padx=1, pady=1)
+        frame.rowconfigure(1, weight=1)
+        return frame
+
+# tik.Checklist for the Chromecasts
