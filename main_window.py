@@ -75,6 +75,7 @@ class ViewModel:
         self.startlist_contents = widgets.StartListVar([])
         self.results_dir = StringVar()
         self.results_contents = widgets.RaceResultVar([])
+        self.cc_status = widgets.ChromecastStatusVar([])
 
 class View(ttk.Frame):
     def __init__(self, root: Tk, vm: ViewModel):
@@ -103,7 +104,7 @@ class View(ttk.Frame):
         n.pack(side="top", fill="both", expand=True)
         n.add(_appearanceTab(n, self._vm), text="Appearance", sticky="news")
         n.add(_dirsTab(n, self._vm), text="Directories", sticky="news")
-        n.add(_appearanceTab(n, self._vm), text="Run", sticky="news")
+        n.add(_runTab(n, self._vm), text="Run", sticky="news")
 
     def _build_menu(self) -> None:
         '''Creates the dropdown menus'''
@@ -233,4 +234,11 @@ class _dirsTab(ttk.Frame):
         frame.rowconfigure(1, weight=1)
         return frame
 
-# tik.Checklist for the Chromecasts
+class _runTab(ttk.Frame):
+    def __init__(self, parent: Widget, vm: ViewModel) -> None:
+        super().__init__(parent)
+        self._vm = vm
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.cs = widgets.ChromcastSelector(self, self._vm.cc_status)
+        self.cs.grid(column=0, row=0, sticky="news")

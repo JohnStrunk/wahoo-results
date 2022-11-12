@@ -25,11 +25,13 @@ from tkinter import colorchooser
 from tkinter import filedialog
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 import tkinter.ttk as ttk
+import tkinter.tix as tix
 
 from PIL import ImageTk #type: ignore
 import PIL.Image as PILImage
 
 from config import WahooConfig
+import imagecast
 
 TkContainer = Any
 
@@ -198,3 +200,21 @@ class RaceResultTreeView(ttk.Frame):
         local_list.sort(key=lambda e: datetime.datetime.fromisoformat(e['time']), reverse=True)
         for entry in local_list:
             self.tv.insert('', 'end', id=entry['time'], values=[entry['meet'], entry['event'], entry['heat'], entry['time']])
+
+class ChromecastStatusVar(GVar[imagecast.DeviceStatus]):
+    """Holds a list of Chromecast devices and whether they are enabled"""
+
+class ChromcastSelector(ttk.Frame):
+    def __init__(self, parent: Widget, statusvar: ChromecastStatusVar) -> None:
+        super().__init__(parent)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        # self.cl = tix.CheckList(self)
+        # self.cl.grid(column=0, row=0, sticky="news")
+        self.devstatus = statusvar
+        self.devstatus.trace_add("write", lambda _a, _b, _c: self._update_contents())
+        self._update_contents()
+    
+    def _update_contents(self) -> None:
+        pass
+        # self.cl.subwidget('hlist').add('one', 'label1')

@@ -23,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import socket
 import threading
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 from uuid import UUID
 
 from PIL import Image # type: ignore
@@ -35,7 +35,7 @@ import zeroconf
 import wh_analytics
 
 # Dict of uuid, name, enabled
-DeviceStatus = Dict[str, Any]
+DeviceStatus = Dict[Literal['uuid', 'name', 'enabled'], Any]
 
 class ImageCast: # pylint: disable=too-many-instance-attributes
     """
