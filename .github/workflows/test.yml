@@ -13,9 +13,7 @@ on:
 env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2022.9.24"
-  IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
-  SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  SNYK_VERSION: v1.1048.0
   # https://github.com/upx/upx/releases
   UPX_VERSION: 3.96
 
@@ -62,6 +60,16 @@ jobs:
         shell: cmd
         run: pipenv run make-doc.bat html
 
+      - name: Download Snyk CLI
+        shell: cmd
+        run: curl -OsL https://github.com/snyk/cli/releases/download/${{ env.SNYK_VERSION }}/snyk-win.exe
+
+      - name: Run Snyk CLI
+        shell: cmd
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk-win monitor --fail-on=all --dev --print-deps --remote-repo-url=https://github.com/${{ github.repository }} --target-reference=${{ github.ref_name }} --file=Pipfile --project-name=${{ github.repository }}
+
   build:
     name: Build
     runs-on: windows-latest
@@ -104,6 +112,10 @@ jobs:
 
       - name: Build executable
         shell: cmd
+        env:
+          IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+          SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: pipenv run python build.py
 
       - name: Save executable as artifact
