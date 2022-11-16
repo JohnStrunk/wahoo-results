@@ -17,7 +17,8 @@ a = Analysis(
     binaries=[],
     datas=[
         ('media\\wr-icon.ico', 'media'),
-        (os.path.join(ipinfo_dir, 'countries.json'), 'ipinfo')
+        (os.path.join(ipinfo_dir, 'countries.json'), 'ipinfo'),
+        (os.path.join(ipinfo_dir, 'eu.json'), 'ipinfo')
     ],
     hiddenimports=[],
     hookspath=[],
