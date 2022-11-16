@@ -201,7 +201,7 @@ class RaceResultTreeView(ttk.Frame):
         for entry in local_list:
             self.tv.insert('', 'end', id=entry['time'], values=[entry['meet'], entry['event'], entry['heat'], entry['time']])
 
-class ChromecastStatusVar(GVar[imagecast.DeviceStatus]):
+class ChromecastStatusVar(GVar[List[imagecast.DeviceStatus]]):
     """Holds a list of Chromecast devices and whether they are enabled"""
 
 class ChromcastSelector(ttk.Frame):
@@ -209,12 +209,36 @@ class ChromcastSelector(ttk.Frame):
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        # self.cl = tix.CheckList(self)
-        # self.cl.grid(column=0, row=0, sticky="news")
+        self.tv = ttk.Treeview(self, columns = ['enabled', 'cc_name'])
+        self.tv.grid(column=0, row=0, sticky="news")
+        self.sb = ttk.Scrollbar(self, orient=VERTICAL, command=self.tv.yview)
+        self.sb.grid(column=1, row=0, sticky="news")
+        self.tv.configure(selectmode='none', show='headings', yscrollcommand=self.sb.set)
+        self.tv.column('enabled', anchor='center', width=30)
+        self.tv.heading('enabled', anchor='center', text='Enabled')
+        self.tv.column('cc_name', anchor='w', minwidth=100)
+        self.tv.heading('cc_name', anchor='w', text='Chromecast')
         self.devstatus = statusvar
         self.devstatus.trace_add("write", lambda _a, _b, _c: self._update_contents())
+        # Needs to be the ButtonRelease event because the Button event happens
+        # before the focus is actually set/changed.
+        self.tv.bind('<ButtonRelease-1>', self._item_clicked)
         self._update_contents()
     
     def _update_contents(self) -> None:
-        pass
-        # self.cl.subwidget('hlist').add('one', 'label1')
+        self.tv.delete(*self.tv.get_children())
+        local_list = self.devstatus.get()
+        # Sort them by name for display
+        local_list.sort(key=lambda d: (d['name']))
+        for dev in local_list:
+            txt_status = "Yes" if dev['enabled'] else "No"
+            self.tv.insert('', 'end', id=str(dev['uuid']), values=[txt_status, dev['name']])
+    def _item_clicked(self, _event) -> None:
+        item = self.tv.focus()
+        if len(item) == 0:
+            return
+        local_list = self.devstatus.get()
+        for i in range(len(local_list)):
+            if str(local_list[i]['uuid']) == item:
+                local_list[i]['enabled'] = not local_list[i]['enabled']
+        self.devstatus.set(local_list)

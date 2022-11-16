@@ -75,7 +75,10 @@ class ViewModel:
         self.startlist_contents = widgets.StartListVar([])
         self.results_dir = StringVar()
         self.results_contents = widgets.RaceResultVar([])
+        # Run tab
         self.cc_status = widgets.ChromecastStatusVar([])
+        self.scoreboard_preview = widgets.ImageVar(PILImage.Image())
+
 
 class View(ttk.Frame):
     def __init__(self, root: Tk, vm: ViewModel):
@@ -240,5 +243,17 @@ class _runTab(ttk.Frame):
         self._vm = vm
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.cs = widgets.ChromcastSelector(self, self._vm.cc_status)
-        self.cs.grid(column=0, row=0, sticky="news")
+        self._cc_selector(self).grid(column=1, row=0, sticky="news")
+        self._preview(self).grid(column=1, row=1, sticky="news")
+
+    def _cc_selector(self, parent: Widget) -> Widget:
+        frame = ttk.LabelFrame(parent, text="Available Chromecasts")
+        frame.columnconfigure(0, weight=1)
+        widgets.ChromcastSelector(frame, self._vm.cc_status).grid(column=0, row=0, sticky="news")
+        return frame
+
+    def _preview(self, parent: Widget) -> Widget:
+        frame = ttk.LabelFrame(parent, text="Scoreboard preview")
+        frame.columnconfigure(0, weight=1)
+        widgets.Preview(frame, self._vm.scoreboard_preview).grid(column=0, row=0, sticky="news")
+        return frame

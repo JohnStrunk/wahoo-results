@@ -3,8 +3,11 @@ from tkinter import Tk, ttk
 import tkinter
 import platform
 from PIL import Image
+from typing import List
+import uuid
 
 import main_window
+import imagecast
 import widgets
 
 def main():
@@ -38,6 +41,16 @@ def main():
         {'meet': '9', 'event': '102', 'heat': '12', 'time': str(datetime.datetime(2023, 2, 3, 12, 37, 23))},
     ]
     vm.results_contents.set(rr)
+
+    cc: List[imagecast.DeviceStatus] = [
+        {'uuid': uuid.uuid4(), 'name': 'Living room', 'enabled': False},
+        {'uuid': uuid.uuid4(), 'name': 'Computer room', 'enabled': True},
+        {'uuid': uuid.uuid4(), 'name': 'Main scoreboard', 'enabled': False},
+    ]
+    vm.cc_status.set(cc)
+    vm.scoreboard_preview.set(Image.new(mode="RGBA", size=(1280, 720),
+                    color="brown"))
+
     root.mainloop()
 
 if __name__ == "__main__":
