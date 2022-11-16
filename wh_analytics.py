@@ -20,7 +20,7 @@ import locale
 import platform
 import socket
 import time
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from segment import analytics  # type: ignore
 import ipinfo  # type: ignore
@@ -119,7 +119,7 @@ def cc_toggle(enable: bool) -> None:
         "enable": enable,
     })
 
-def _send_event(name: str, kvparams: Dict[str, Any] = None) -> None:
+def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
     if kvparams is None:
         kvparams = {}
     analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
