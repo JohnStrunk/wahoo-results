@@ -9,9 +9,3 @@ updates:
       - dependencies
     schedule:
       interval: weekly
-  - package-ecosystem: pip
-    directory: /
-    labels:
-      - dependencies
-    schedule:
-      interval: weekly
