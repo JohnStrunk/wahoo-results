@@ -30,6 +30,7 @@ plantweb = "*"
 rstcheck = "*"
 sphinx-rtd-theme = "*"
 sphinx-tabs = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.9"

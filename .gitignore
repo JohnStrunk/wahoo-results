@@ -1,8 +1,11 @@
 /__pycache__/
+/.coverage
 /.mypy_cache/
 /.pytest_cache/
 /.venv/
 /.vscode/
+/coverage.xml
+/htmlcov/
 /wahoo-results.exe
 /wahoo-results.ini
 /docs/_build/
