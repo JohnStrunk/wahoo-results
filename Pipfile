@@ -33,4 +33,4 @@ sphinx-tabs = "*"
 pytest-cov = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.11"

@@ -12,10 +12,10 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2022.9.24"
+  PIPENV_INSTALL_VERSION: "2022.11.23"
   SNYK_VERSION: v1.1048.0
   # https://github.com/upx/upx/releases
-  UPX_VERSION: 3.96
+  UPX_VERSION: 4.0.1
 
 jobs:
   test:
@@ -31,7 +31,7 @@ jobs:
         # https://github.com/actions/setup-python
         uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984  # v4.3.0
         with:
-          python-version: '3.x'
+          python-version: '3.11'
           cache: 'pipenv'
 
       # Add Scripts directory to the path so that pipenv (and associated
