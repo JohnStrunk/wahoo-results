@@ -20,6 +20,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_DOWN
 import io
+import re
 from typing import List, Optional, Tuple
 
 @dataclass
@@ -53,12 +54,12 @@ class RaceTimes(ABC):
     def raw_times(self, lane: int) -> List[Optional[Decimal]]:
         '''
         Retrieve the measured times from the specified lane.
-        
+
         The returned List will always be of length 3, but one or more
         elements may be None if no time was reported.
         '''
         return [None, None, None]
-    
+
     def times(self, lane: int) -> List[Optional[Time]]:
         '''
         Retrieve the measured times and their validity for the specified lane.
@@ -93,8 +94,11 @@ class RaceTimes(ABC):
         else:
             return Time(Decimal(0), False)
 
-        # If any times are outside threshold, final is not valid
         valid = True
+        # If we don't have enough times, final is not valid
+        if len(times) < self.min_times:
+            valid = False
+        # If any times are outside threshold, final is not valid
         for t in times:
             if abs(t - final) > self.threshold:
                 valid = False
@@ -105,9 +109,51 @@ class RaceTimes(ABC):
     def event(self) -> int:
         return 0
 
+    @property
+    @abstractmethod
+    def heat(self) -> int:
+        return 0
+
 class D04(RaceTimes):
     def __init__(self, stream: io.TextIOBase, min_times: int, threshold: Decimal):
         '''
         Parse a text stream in D04 format into a RaceTimes object
         '''
         super().__init__(min_times, threshold)
+        header = stream.readline()
+        match = re.match(r"^(\d+);(\d+);\w+;\w+$", header)
+        if not match:
+            raise ValueError("Unable to parse header")
+        self._event = int(match.group(1))
+        self._heat = int(match.group(2))
+
+        lines = stream.readlines()
+        if len(lines) != 11:
+            raise ValueError("Invalid number of lines in file")
+        self._lanes: List[List[Optional[Decimal]]] = []
+        for l in range(10):
+            match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[l])
+            if not match:
+                raise ValueError("Unable to parse times")
+            lane_times: List[Optional[Decimal]] = []
+            for t in range(1,4):
+                match_txt = match.group(t)
+                time = Decimal(0)
+                if match_txt != "":
+                    time = Decimal(match_txt)
+                if time > 0:
+                    lane_times.append(time)
+                else:
+                    lane_times.append(None)
+            self._lanes.append(lane_times)
+
+    def raw_times(self, lane: int) -> List[Optional[Decimal]]:
+        return self._lanes[lane-1]
+
+    @property
+    def event(self) -> int:
+        return self._event
+
+    @property
+    def heat(self) -> int:
+        return self._heat
