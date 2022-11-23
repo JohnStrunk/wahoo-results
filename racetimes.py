@@ -21,37 +21,40 @@ from dataclasses import dataclass
 from decimal import Decimal, ROUND_DOWN
 import io
 import re
-from typing import List, Optional, Tuple
+from typing import List, Optional
+
+RawTime = Decimal
 
 @dataclass
 class Time:
     '''Class to represent a result time.'''
-    value: Decimal  # The measured (or calculated) time to the hundredths
+    value: RawTime  # The measured (or calculated) time to the hundredths
     is_valid: bool  # True if the time is valid/consistent/within bounds
 
-def _truncate_hundredths(time: Decimal) -> Decimal:
+def _truncate_hundredths(time: RawTime) -> RawTime:
     '''
     Truncates a Time to two decimal places.
 
-    >>> _truncate_hundredths(Time('100.00'))
+    >>> _truncate_hundredths(RawTime('100.00'))
     Decimal('100.00')
-    >>> _truncate_hundredths(Time('99.999'))
+    >>> _truncate_hundredths(RawTime('99.999'))
     Decimal('99.99')
-    >>> _truncate_hundredths(Time('10.987'))
+    >>> _truncate_hundredths(RawTime('10.987'))
     Decimal('10.98')
-    >>> _truncate_hundredths(Time('100.123'))
+    >>> _truncate_hundredths(RawTime('100.123'))
     Decimal('100.12')
     '''
     return time.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
 
 
 class RaceTimes(ABC):
-    def __init__(self, min_times: int, threshold: Decimal):
+    '''Abstract class representing the times from a race'''
+    def __init__(self, min_times: int, threshold: RawTime):
         self.min_times = min_times
         self.threshold = threshold
 
     @abstractmethod
-    def raw_times(self, lane: int) -> List[Optional[Decimal]]:
+    def raw_times(self, lane: int) -> List[Optional[RawTime]]:
         '''
         Retrieve the measured times from the specified lane.
 
@@ -69,20 +72,20 @@ class RaceTimes(ABC):
         '''
         final = self.final_time(lane)
         times: List[Optional[Time]] = []
-        for t in self.raw_times(lane):
-            if t is None:
+        for time in self.raw_times(lane):
+            if time is None:
                 times.append(None)
             else:
-                v = abs(t - final.value) <= self.threshold
-                times.append(Time(t, v))
+                valid = abs(time - final.value) <= self.threshold
+                times.append(Time(time, valid))
         return times
 
     def final_time(self, lane: int) -> Time:
         '''Retrieve the calculated final time for a lane'''
-        times: List[Decimal] = []
-        for t in self.raw_times(lane):
-            if t is not None:
-                times.append(t)
+        times: List[RawTime] = []
+        for time in self.raw_times(lane):
+            if time is not None:
+                times.append(time)
 
         if len(times) == 3:    # 3 times -> median
             times.sort()
@@ -92,30 +95,58 @@ class RaceTimes(ABC):
         elif len(times) == 1:  # 1 time -> take it
             final = times[0]
         else:
-            return Time(Decimal(0), False)
+            return Time(RawTime(0), False)
 
         valid = True
         # If we don't have enough times, final is not valid
         if len(times) < self.min_times:
             valid = False
         # If any times are outside threshold, final is not valid
-        for t in times:
-            if abs(t - final) > self.threshold:
+        for time in times:
+            if abs(time - final) > self.threshold:
                 valid = False
         return Time(final, valid)
+
+    def place(self, lane: int) -> Optional[int]:
+        '''
+        Returns the finishing place within the heat for a given lane.
+
+        - A lane whose time is considered not valid will not be assigned a
+          place. These will return "None".
+        - Two lanes with identical times will receive the same place, and the
+          subsequent place will not be awarded. For example, 2 lanes tie for
+          2nd: both will receive a place of "2", and no lanes will receive a
+          "3". The next will be awarded "4".
+        '''
+        this_lane = self.final_time(lane)
+        if not this_lane.is_valid:
+            # Invalid times don't get a place
+            return None
+        # Place is determined by how many times are strictly faster than ours
+        faster = 0
+        for index in range(1, 11):
+            candidate = self.final_time(index)
+            if candidate.is_valid and candidate.value < this_lane.value:
+                faster += 1
+        return faster + 1
 
     @property
     @abstractmethod
     def event(self) -> int:
+        '''Event number for this race'''
         return 0
 
     @property
     @abstractmethod
     def heat(self) -> int:
+        '''Heat number for this race'''
         return 0
 
-class D04(RaceTimes):
-    def __init__(self, stream: io.TextIOBase, min_times: int, threshold: Decimal):
+class DO4(RaceTimes):
+    '''
+    Implementation of RaceTimes class for CTS Dolphin w/ Splits (.do4 files).
+    '''
+    def __init__(self, stream: io.TextIOBase, min_times: int, threshold: RawTime):
         '''
         Parse a text stream in D04 format into a RaceTimes object
         '''
@@ -130,24 +161,24 @@ class D04(RaceTimes):
         lines = stream.readlines()
         if len(lines) != 11:
             raise ValueError("Invalid number of lines in file")
-        self._lanes: List[List[Optional[Decimal]]] = []
-        for l in range(10):
-            match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[l])
+        self._lanes: List[List[Optional[RawTime]]] = []
+        for lane in range(10):
+            match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[lane])
             if not match:
                 raise ValueError("Unable to parse times")
-            lane_times: List[Optional[Decimal]] = []
-            for t in range(1,4):
-                match_txt = match.group(t)
-                time = Decimal(0)
+            lane_times: List[Optional[RawTime]] = []
+            for index in range(1,4):
+                match_txt = match.group(index)
+                time = RawTime(0)
                 if match_txt != "":
-                    time = Decimal(match_txt)
+                    time = RawTime(match_txt)
                 if time > 0:
                     lane_times.append(time)
                 else:
                     lane_times.append(None)
             self._lanes.append(lane_times)
 
-    def raw_times(self, lane: int) -> List[Optional[Decimal]]:
+    def raw_times(self, lane: int) -> List[Optional[RawTime]]:
         return self._lanes[lane-1]
 
     @property

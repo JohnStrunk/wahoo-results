@@ -16,12 +16,11 @@
 
 """Tests for RaceTimes"""
 
-from decimal import Decimal
 import io
 import textwrap
 import pytest
 
-from racetimes import RaceTimes, D04, Time
+from racetimes import RaceTimes, DO4, Time, RawTime
 
 @pytest.fixture
 def d04_mising_one_time():
@@ -57,40 +56,93 @@ def d04_big_delta():
         Lane10;0;0;0
         2CBB478C916F0ADA"""))
 
+@pytest.fixture
+def d04_one_time():
+    """Lane w/ only 1 time"""
+    return io.StringIO(textwrap.dedent("""\
+        57;1;1;All
+        Lane1;;55.92;
+        Lane2;54.86;55.18;54.98
+        Lane3;40.03;40.05;39.96
+        Lane4;39.71;39.68;39.75
+        Lane5;50.01;49.88;49.90
+        Lane6;0;0;0
+        Lane7;0;0;0
+        Lane8;0;0;0
+        Lane9;0;0;0
+        Lane10;0;0;0
+        9EF6F5121A02D2D5"""))
+
 def test_can_parse_header(d04_mising_one_time) -> None:
     """Ensure we can parse the event/heat header"""
-    race:RaceTimes = D04(d04_mising_one_time, 2, Decimal(0.30))
+    race:RaceTimes = DO4(d04_mising_one_time, 2, RawTime(0.30))
     assert race.event == 69
     assert race.heat == 1
 
 def test_resolve_times(d04_mising_one_time) -> None:
     """Ensure we can calculate final times correctly"""
-    race:RaceTimes = D04(d04_mising_one_time, 2, Decimal("0.30"))
+    race:RaceTimes = DO4(d04_mising_one_time, 2, RawTime("0.30"))
 
     assert len(race.times(1)) == 3
     assert race.final_time(1).is_valid
-    assert race.final_time(1).value == Decimal("143.37")
+    assert race.final_time(1).value == RawTime("143.37")
 
     assert len(race.times(3)) == 3
     assert race.final_time(3).is_valid
-    assert race.final_time(3).value == Decimal("128.14")
+    assert race.final_time(3).value == RawTime("128.14")
 
 def test_toofew_times(d04_mising_one_time) -> None:
     """Final time is invalid if too few raw times"""
-    race:RaceTimes = D04(d04_mising_one_time, 3, Decimal("0.30"))
+    race:RaceTimes = DO4(d04_mising_one_time, 3, RawTime("0.30"))
     assert len(race.times(3)) == 3
     assert not race.final_time(3).is_valid
-    assert race.final_time(3).value == Decimal("128.14")
+    assert race.final_time(3).value == RawTime("128.14")
 
 def test_largedelta_times(d04_big_delta) -> None:
     """Final time is invalid if too few raw times"""
 
-    race:RaceTimes = D04(d04_big_delta, 2, Decimal("0.30"))
+    race:RaceTimes = DO4(d04_big_delta, 2, RawTime("0.30"))
     assert len(race.times(1)) == 3
     assert not race.final_time(1).is_valid
-    assert race.final_time(1).value == Decimal("130.63")
+    assert race.final_time(1).value == RawTime("130.63")
 
     times = race.times(1)
-    assert times[0] == Time(Decimal("160.72"), False)
-    assert times[1] == Time(Decimal("130.63"), True)
-    assert times[2] == Time(Decimal("130.61"), True)
+    assert times[0] == Time(RawTime("160.72"), False)
+    assert times[1] == Time(RawTime("130.63"), True)
+    assert times[2] == Time(RawTime("130.61"), True)
+
+def test_one_zero_times(d04_one_time) -> None:
+    """Ensure we can calculate final times correctly"""
+    race:RaceTimes = DO4(d04_one_time, 2, RawTime("0.30"))
+
+    assert race.times(1) == [None, Time(RawTime("55.92"), True), None]
+    assert not race.final_time(1).is_valid
+    assert race.final_time(1).value == RawTime("55.92")
+
+    assert len(race.times(7)) == 3
+    assert not race.final_time(7).is_valid
+    assert race.final_time(7).value == RawTime("0")
+
+def test_places() -> None:
+    """Ensure we can calculate places correctly"""
+    data = io.StringIO(textwrap.dedent("""\
+        1;1;1;All
+        Lane1;55.92;55.92;
+        Lane2;54.86;54.86;
+        Lane3;;39.96;39.96
+        Lane4;39.71;;39.71
+        Lane5;50.00;60.00;
+        Lane6;;54.86;54.86
+        Lane7;0;0;0
+        Lane8;0;0;0
+        Lane9;0;0;0
+        Lane10;0;0;0
+        9EF6F5121A02D2D5"""))
+    race:RaceTimes = DO4(data, 2, RawTime("0.30"))
+    assert race.place(4) == 1  # Lane 4 is 1st
+    assert race.place(3) == 2  # Lane 3 is 2nd
+    assert race.place(2) == 3  # Lane 2 tied for 3rd
+    assert race.place(6) == 3  # Lane 6 tied for 3rd
+    assert race.place(1) == 5  # No 4th place due to tie
+    assert race.place(5) is None  # Lane 5 has invalid time
+    assert race.place(8) is None  # Lane 8 is empty
