@@ -17,11 +17,14 @@
 '''The times (raw and calculated) from a race'''
 
 from abc import ABC, abstractmethod
+import copy
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_DOWN
 import io
 import re
 from typing import List, Optional
+
+from startlist import StartList
 
 RawTime = Decimal
 
@@ -48,10 +51,51 @@ def _truncate_hundredths(time: RawTime) -> RawTime:
 
 
 class RaceTimes(ABC):
-    '''Abstract class representing the times from a race'''
+    '''
+    Abstract class representing the times from a race.
+
+    This should be instantiated from a derived class based on a particular
+    race result data format (e.g., DO4 for .do4 files). The RaceTimes can then
+    be augmented with names, teams, and event description by calling
+    set_names() with a StartList. Once the StartList has been added, the
+    RaceTimes object should be sufficient to render the scoreboard information
+    for the heat.
+    '''
     def __init__(self, min_times: int, threshold: RawTime):
+        '''
+        Parameters:
+        - min_times: The minimum number of times required for the lane time to
+          be considered "valid"
+        - threshold: The maximum allowable difference between the calculated
+          final time and each measured time in order for the final time to be
+          considered valid. Any individual times outside teh threshold are
+          also marked invalid.
+        '''
         self.min_times = min_times
         self.threshold = threshold
+        self._startlist = StartList()
+
+    def set_names(self, start_list: StartList) -> None:
+        '''Set the names/teams for the race'''
+        self._startlist = copy.deepcopy(start_list)
+
+    def name(self, lane: int) -> str:
+        '''The Swimmer's name'''
+        return self._startlist.name(self.heat, lane)
+
+    def team(self, lane: int) -> str:
+        '''The Swimmer's team'''
+        return self._startlist.team(self.heat, lane)
+
+    @property
+    def event_name(self) -> str:
+        '''The event description'''
+        return self._startlist.event_name
+
+    def is_noshow(self, lane: int) -> bool:
+        '''True if a swimmer should be in the lane, but no time was recorded'''
+        return not self._startlist.is_empty_lane(self.heat, lane) \
+            and self.final_time(lane).value == 0
 
     @abstractmethod
     def raw_times(self, lane: int) -> List[Optional[RawTime]]:
@@ -92,7 +136,7 @@ class RaceTimes(ABC):
             final = times[1]
         elif len(times) == 2:  # 2 times -> average
             final = _truncate_hundredths((times[0] + times[1]) / 2)
-        elif len(times) == 1:  # 1 time -> take it
+        elif len(times) == 1:  # 1 time -> use it
             final = times[0]
         else:
             return Time(RawTime(0), False)

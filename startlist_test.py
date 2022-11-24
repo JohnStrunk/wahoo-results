@@ -20,11 +20,21 @@ import io
 import textwrap
 import pytest
 
-from startlist import StartList
+from startlist import CTSStartList, StartList
+
+def test_startlist():
+    '''Instantiating a bare StartList generates an empty start list'''
+    slist = StartList()
+    assert slist.event_name == ""
+    assert slist.event_num == 0
+    assert slist.heats == 0
+    assert slist.name(1, 2) == ""
+    assert slist.team(1, 2) == ""
+    assert slist.is_empty_lane(7, 4)
 
 def test_two_heats():
     '''General test on 2 heats worth of data'''
-    slist = StartList(io.StringIO(textwrap.dedent("""\
+    slist = CTSStartList(io.StringIO(textwrap.dedent("""\
         #18 BOYS 10&U 50 FLY
                             --                
                             --                
@@ -49,23 +59,23 @@ def test_two_heats():
     assert slist.event_name == "BOYS 10&U 50 FLY"
 
     assert not slist.is_empty_lane(1, 4)
-    assert slist.entry(1, 4).name == "PERSON, JUST A"
-    assert slist.entry(1, 4).team == "TEAM"
+    assert slist.name(1, 4) == "PERSON, JUST A"
+    assert slist.team(1, 4) == "TEAM"
 
     assert slist.is_empty_lane(1, 5)
 
-    assert slist.entry(1, 6).name == "BIGBIGBIGLY, NAMENAM"
-    assert slist.entry(1, 6).team == "LONGLONGLONGLONG"
+    assert slist.name(1, 6) == "BIGBIGBIGLY, NAMENAM"
+    assert slist.team(1, 6) == "LONGLONGLONGLONG"
 
-    assert slist.entry(2, 4).name == "XXXXXXX, YYYYYY Z"
-    assert slist.entry(2, 4).team == ""
+    assert slist.name(2, 4) == "XXXXXXX, YYYYYY Z"
+    assert slist.team(2, 4) == ""
 
-    assert slist.entry(2, 6).name == "AAAAA, B"
-    assert slist.entry(2, 6).team == "X"
+    assert slist.name(2, 6) == "AAAAA, B"
+    assert slist.team(2, 6) == "X"
 
 def test_six_heats():
     '''General test on 6 heats worth of data'''
-    slist = StartList(io.StringIO(textwrap.dedent("""\
+    slist = CTSStartList(io.StringIO(textwrap.dedent("""\
         #34 GIRLS 15&O 50 BACK
                             --                
                             --                
@@ -137,7 +147,7 @@ def test_six_heats():
 def test_invalid_header():
     '''Exception should be thrown when header can't be parsed'''
     with pytest.raises(ValueError) as verr:
-        StartList(io.StringIO(textwrap.dedent("""\
+        CTSStartList(io.StringIO(textwrap.dedent("""\
             #AA BOYS 10&U 50 FLY
                                 --                
                                 --                
@@ -154,7 +164,7 @@ def test_invalid_header():
 def test_invalid_num_lanes():
     '''Exception should be thrown when there are not 10 lanes per heat'''
     with pytest.raises(ValueError) as verr:
-        StartList(io.StringIO(textwrap.dedent("""\
+        CTSStartList(io.StringIO(textwrap.dedent("""\
             #1 BOYS 10&U 50 FLY
                                 --                
                                 --                
@@ -170,7 +180,7 @@ def test_invalid_num_lanes():
 def test_invalid_line():
     '''Exception should be thrown when a line can't be parsed as an entry'''
     with pytest.raises(ValueError) as verr:
-        StartList(io.StringIO(textwrap.dedent("""\
+        CTSStartList(io.StringIO(textwrap.dedent("""\
             #1 BOYS 10&U 50 FLY
                                 --                
             INVALID LINE
