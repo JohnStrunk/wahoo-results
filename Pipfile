@@ -31,6 +31,7 @@ rstcheck = "*"
 sphinx-rtd-theme = "*"
 sphinx-tabs = "*"
 pytest-cov = "*"
+types-pillow = "*"
 
 [requires]
 python_version = "3.11"

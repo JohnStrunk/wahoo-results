@@ -1,0 +1,102 @@
+# Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
+# Copyright (C) 2022 - John D. Strunk
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+'''
+A scoreboard template for previews and theming
+'''
+
+from typing import List, Optional
+from racetimes import RaceTimes, RawTime
+from startlist import StartList
+
+def get_template() -> RaceTimes:
+    '''
+    Returns template data to create a scoreboard mockup
+
+    >>> from scoreboard import format_time
+    >>> t = get_template()
+    >>> t.event
+    999
+    >>> t.final_time(1).is_valid
+    True
+    >>> format_time(t.final_time(1).value)
+    '99:50.99'
+    >>> t.final_time(2).is_valid
+    False
+    >>> t.final_time(3).is_valid
+    False
+    >>> t.name(3)
+    'SWIMMER, NAMEOF A'
+    >>> t.team(3)
+    'TEAM'
+    '''
+    race = _TemplateRace(2, RawTime("0.30"))
+    race.set_names(_TemplateStartList())
+    return race
+
+class _TemplateRace(RaceTimes):
+    @property
+    def event(self) -> int:
+        return 999
+
+    @property
+    def heat(self) -> int:
+        return 88
+
+    def raw_times(self, lane: int) -> List[Optional[RawTime]]:
+        if lane == 2:
+            return [None, None, None] # no-show
+        if lane == 3:
+            return [RawTime("1"), None, None] # Too few times -> invalid
+        time = RawTime("59.99") + RawTime("60") * RawTime("99")
+        time = time + lane - 10
+        return [time, time, time]
+
+class _TemplateStartList(StartList):
+    @property
+    def event_name(self) -> str:
+        return "GIRLS 15&O 200 MEDLEY RELAY"
+
+    def name(self, _heat: int, _lane: int) -> str:
+        return "SWIMMER, NAMEOF A"
+
+    def team(self, _heat: int, _lane: int) -> str:
+        return "TEAM"
+
+if __name__ == "__main__":
+    from tkinter import Tk
+    from scoreboard import ScoreboardImage, waiting_screen
+    from main_window import Model
+    root = Tk()
+    model = Model()
+
+    # model.color_bg.set("black")
+    # model.color_event.set("red")
+    # model.color_heading.set("yellow")
+    # model.color_even.set("white")
+    # model.color_odd.set("blue")
+    # model.color_first.set("#00ffff")
+    # model.color_second.set("#ff0000")
+    # model.color_third.set("#ffff00")
+    # model.main_text.set("Calibri")
+    # model.time_text.set("Consolas")
+    # model.text_spacing.set(14/12)
+    model.num_lanes.set(6)
+    # model.heading.set("2022 Swimtastic")
+
+    sboard = ScoreboardImage((1280, 720), get_template(), model)
+    sboard.image.save("image.png")
+    waiting_screen((1280, 720), model).save('image_wait.png')

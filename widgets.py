@@ -20,12 +20,9 @@ TKinter code to display a button that presents a colorpicker.
 
 import datetime
 import os
-from tkinter import *
-from tkinter import colorchooser
-from tkinter import filedialog
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
-import tkinter.ttk as ttk
-import tkinter.tix as tix
+from tkinter import VERTICAL, Button, Canvas, StringVar, TclError, Variable, \
+    Widget, colorchooser, filedialog, ttk
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar
 
 from PIL import ImageTk #type: ignore
 import PIL.Image as PILImage
@@ -38,12 +35,13 @@ TkContainer = Any
 _T = TypeVar('_T')
 
 class GVar(Variable, Generic[_T]):
-    def __init__(self, value:_T, master=None):
-        """Construct a generic variable.
+    '''
+    Create a generic variable in the flavor of StringVar, IntVar, etc.
 
-        MASTER is the master widget.
-        VALUE is the initial value for the variable
-        """
+    - master: the master widget.
+    - value: the initial value for the variable
+    '''
+    def __init__(self, value:_T, master=None):
         super().__init__(master=master, value=0)
         self._value = value
 
@@ -75,6 +73,7 @@ class ColorButton(Button):  # pylint: disable=too-many-ancestors
             self.configure(bg=self._config.get_str(self._color_option))
 
 def swatch(width: int, height: int, color: str) -> ImageTk.PhotoImage:
+    '''Generate a color swatch'''
     img = PILImage.new("RGBA", (width, height), color)
     return ImageTk.PhotoImage(img)
 
@@ -127,31 +126,34 @@ class StartListVar(GVar[StartListType]):
     """Holds an ordered start list."""
 
 class StartListTreeView(ttk.Frame):
+    '''Widget to display a set of startlists'''
     def __init__(self, parent: Widget, startlist: StartListVar):
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.tv = ttk.Treeview(self, columns = ['event', 'desc', 'heats'])
-        self.tv.grid(column=0, row=0, sticky="news")
-        self.sb = ttk.Scrollbar(self, orient=VERTICAL, command=self.tv.yview)
-        self.sb.grid(column=1, row=0, sticky="news")
-        self.tv.configure(selectmode='none', show='headings', yscrollcommand=self.sb.set)
-        self.tv.column('event', anchor='w', minwidth=50, width=50)
-        self.tv.heading('event', anchor='w', text='Event')
-        self.tv.column('desc', anchor='w', minwidth=200, width=200)
-        self.tv.heading('desc', anchor='w', text='Description')
-        self.tv.column('heats', anchor='w', minwidth=50, width=50)
-        self.tv.heading('heats', anchor='w', text='Heats')
+        self.tview = ttk.Treeview(self, columns = ['event', 'desc', 'heats'])
+        self.tview.grid(column=0, row=0, sticky="news")
+        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)
+        self.scroll.grid(column=1, row=0, sticky="news")
+        self.tview.configure(selectmode='none', show='headings', yscrollcommand=self.scroll.set)
+        self.tview.column('event', anchor='w', minwidth=50, width=50)
+        self.tview.heading('event', anchor='w', text='Event')
+        self.tview.column('desc', anchor='w', minwidth=200, width=200)
+        self.tview.heading('desc', anchor='w', text='Description')
+        self.tview.column('heats', anchor='w', minwidth=50, width=50)
+        self.tview.heading('heats', anchor='w', text='Heats')
         self.startlist = startlist
         startlist.trace_add("write", lambda _a, _b, _c: self._update_contents())
 
     def _update_contents(self):
-        self.tv.delete(*self.tv.get_children())
+        self.tview.delete(*self.tview.get_children())
         local_list = self.startlist.get()
         for entry in local_list:
-            self.tv.insert('', 'end', id=entry['event'], values=[entry['event'], entry['desc'], entry['heats']])
+            self.tview.insert('', 'end', id=entry['event'], values=[entry['event'],
+            entry['desc'], entry['heats']])
 
 class DirSelection(ttk.Frame):
+    '''Directory selector widget'''
     def __init__(self, parent: Widget, directory: StringVar):
         super().__init__(parent)
         self.dir = directory
@@ -172,73 +174,77 @@ class RaceResultVar(GVar[RaceResultType]):
     """Holds an ordered list of race results."""
 
 class RaceResultTreeView(ttk.Frame):
+    '''Widget that displays a table of completed races'''
     def __init__(self, parent: Widget, racelist: RaceResultVar):
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.tv = ttk.Treeview(self, columns = ['meet', 'event', 'heat', 'time'])
-        self.tv.grid(column=0, row=0, sticky="news")
-        self.sb = ttk.Scrollbar(self, orient=VERTICAL, command=self.tv.yview)
-        self.sb.grid(column=1, row=0, sticky="news")
-        self.tv.configure(selectmode='none', show='headings', yscrollcommand=self.sb.set)
-        self.tv.column('meet', anchor='w', minwidth=50, width=50)
-        self.tv.heading('meet', anchor='w', text='Meet')
-        self.tv.column('event', anchor='w', minwidth=50, width=50)
-        self.tv.heading('event', anchor='w', text='Event')
-        self.tv.column('heat', anchor='w', minwidth=50, width=50)
-        self.tv.heading('heat', anchor='w', text='Heat')
-        self.tv.column('time', anchor='w', minwidth=140, width=140)
-        self.tv.heading('time', anchor='w', text='Time')
+        self.tview = ttk.Treeview(self, columns = ['meet', 'event', 'heat', 'time'])
+        self.tview.grid(column=0, row=0, sticky="news")
+        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)
+        self.scroll.grid(column=1, row=0, sticky="news")
+        self.tview.configure(selectmode='none', show='headings', yscrollcommand=self.scroll.set)
+        self.tview.column('meet', anchor='w', minwidth=50, width=50)
+        self.tview.heading('meet', anchor='w', text='Meet')
+        self.tview.column('event', anchor='w', minwidth=50, width=50)
+        self.tview.heading('event', anchor='w', text='Event')
+        self.tview.column('heat', anchor='w', minwidth=50, width=50)
+        self.tview.heading('heat', anchor='w', text='Heat')
+        self.tview.column('time', anchor='w', minwidth=140, width=140)
+        self.tview.heading('time', anchor='w', text='Time')
         self.racelist = racelist
         racelist.trace_add("write", lambda _a, _b, _c: self._update_contents())
 
     def _update_contents(self):
-        self.tv.delete(*self.tv.get_children())
+        self.tview.delete(*self.tview.get_children())
         local_list = self.racelist.get()
-        # TODO: Sort the list by date, descending
+        # Sort the list by date, descending
         # https://stackoverflow.com/a/39359270
         local_list.sort(key=lambda e: datetime.datetime.fromisoformat(e['time']), reverse=True)
         for entry in local_list:
-            self.tv.insert('', 'end', id=entry['time'], values=[entry['meet'], entry['event'], entry['heat'], entry['time']])
+            self.tview.insert('', 'end', id=entry['time'], values=[entry['meet'],
+            entry['event'], entry['heat'], entry['time']])
 
 class ChromecastStatusVar(GVar[List[imagecast.DeviceStatus]]):
     """Holds a list of Chromecast devices and whether they are enabled"""
 
 class ChromcastSelector(ttk.Frame):
+    '''Widget that allows enabling/disabling a set of Chromecast devices'''
     def __init__(self, parent: Widget, statusvar: ChromecastStatusVar) -> None:
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.tv = ttk.Treeview(self, columns = ['enabled', 'cc_name'])
-        self.tv.grid(column=0, row=0, sticky="news")
-        self.sb = ttk.Scrollbar(self, orient=VERTICAL, command=self.tv.yview)
-        self.sb.grid(column=1, row=0, sticky="news")
-        self.tv.configure(selectmode='none', show='headings', yscrollcommand=self.sb.set)
-        self.tv.column('enabled', anchor='center', width=30)
-        self.tv.heading('enabled', anchor='center', text='Enabled')
-        self.tv.column('cc_name', anchor='w', minwidth=100)
-        self.tv.heading('cc_name', anchor='w', text='Chromecast')
+        self.tview = ttk.Treeview(self, columns = ['enabled', 'cc_name'])
+        self.tview.grid(column=0, row=0, sticky="news")
+        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)
+        self.scroll.grid(column=1, row=0, sticky="news")
+        self.tview.configure(selectmode='none', show='headings', yscrollcommand=self.scroll.set)
+        self.tview.column('enabled', anchor='center', width=30)
+        self.tview.heading('enabled', anchor='center', text='Enabled')
+        self.tview.column('cc_name', anchor='w', minwidth=100)
+        self.tview.heading('cc_name', anchor='w', text='Chromecast')
         self.devstatus = statusvar
         self.devstatus.trace_add("write", lambda _a, _b, _c: self._update_contents())
         # Needs to be the ButtonRelease event because the Button event happens
         # before the focus is actually set/changed.
-        self.tv.bind('<ButtonRelease-1>', self._item_clicked)
+        self.tview.bind('<ButtonRelease-1>', self._item_clicked)
         self._update_contents()
-    
+
     def _update_contents(self) -> None:
-        self.tv.delete(*self.tv.get_children())
+        self.tview.delete(*self.tview.get_children())
         local_list = self.devstatus.get()
         # Sort them by name for display
         local_list.sort(key=lambda d: (d['name']))
         for dev in local_list:
             txt_status = "Yes" if dev['enabled'] else "No"
-            self.tv.insert('', 'end', id=str(dev['uuid']), values=[txt_status, dev['name']])
+            self.tview.insert('', 'end', id=str(dev['uuid']), values=[txt_status, dev['name']])
+
     def _item_clicked(self, _event) -> None:
-        item = self.tv.focus()
+        item = self.tview.focus()
         if len(item) == 0:
             return
         local_list = self.devstatus.get()
-        for i in range(len(local_list)):
-            if str(local_list[i]['uuid']) == item:
-                local_list[i]['enabled'] = not local_list[i]['enabled']
+        for dev in local_list:
+            if str(dev['uuid']) == item:
+                dev['enabled'] = not dev['enabled']
         self.devstatus.set(local_list)
