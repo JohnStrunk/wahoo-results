@@ -19,6 +19,7 @@
 from abc import ABC
 from enum import Enum, auto, unique
 import io
+import os
 import re
 from typing import Dict, List
 
@@ -254,3 +255,24 @@ def from_scb(filename: str) -> StartList:
     '''Create a StartList from a CTS startlist (.SCB) file'''
     with open(filename, "r", encoding="cp1252") as file:
         return CTSStartList(file)
+
+def events_to_csv(startlists: List[StartList]) -> List[str]:
+    '''Convert a list of StartLists to a CSV for the CTS Dolphin'''
+    csv = []
+    for slist in startlists:
+        csv.append(f"{slist.event_num},{slist.event_name},{slist.heats},1,A\n")
+    return csv
+
+def load_all_scb(directory: str) -> List[StartList]:
+    '''Load all the start list .scb files from a directory'''
+    files = os.scandir(directory)
+    startlists: List[StartList] = []
+    for file in files:
+        if file.name.endswith(".scb"):
+            try:
+                startlist = from_scb(file.path)
+                startlists.append(startlist)
+            except ValueError:
+                pass
+    startlists.sort(key=lambda l: l.event_num)
+    return startlists

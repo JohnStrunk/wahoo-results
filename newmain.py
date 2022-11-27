@@ -22,7 +22,7 @@ import os
 import re
 from time import sleep
 from tkinter import Tk, messagebox
-from typing import List, Optional
+from typing import Optional
 from watchdog.observers import Observer #type: ignore
 
 import main_window
@@ -30,7 +30,7 @@ import imagecast
 from model import Model
 from racetimes import RaceTimes, RawTime, from_do4
 from scoreboard import ScoreboardImage, waiting_screen
-from startlist import StartList, from_scb
+from startlist import events_to_csv, from_scb, load_all_scb
 from template import get_template
 import widgets
 from watcher import DO4Watcher, SCBWatcher
@@ -68,6 +68,15 @@ def main():
     do4_observer = Observer()
     do4_observer.start()
     setup_do4_watcher(model, do4_observer)
+
+    def write_dolphin_csv():
+        directory = model.dir_startlist.get()
+        slists = load_all_scb(directory)
+        csv = events_to_csv(slists)
+        filename = os.path.join(directory, "dolphin_events.csv")
+        with open(filename, "w", encoding="cp1252") as file:
+            file.writelines(csv)
+    model.dolphin_export.add(write_dolphin_csv)
 
     # Connections for the run tab
     icast = imagecast.ImageCast(9998)
@@ -116,16 +125,7 @@ def setup_scb_watcher(model: Model, observer: Observer) -> None:
         with their information.
         '''
         directory = model.dir_startlist.get()
-        files = os.scandir(directory)
-        startlists: List[StartList] = []
-        for file in files:
-            if file.name.endswith(".scb"):
-                try:
-                    startlist = from_scb(file.path)
-                    startlists.append(startlist)
-                except ValueError:
-                    pass
-        startlists.sort(key=lambda l: l.event_num)
+        startlists = load_all_scb(directory)
         contents: widgets.StartListType = []
         for startlist in startlists:
             contents.append({
