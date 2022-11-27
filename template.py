@@ -75,28 +75,3 @@ class _TemplateStartList(StartList):
 
     def team(self, _heat: int, _lane: int) -> str:
         return "TEAM"
-
-if __name__ == "__main__":
-    from tkinter import Tk
-    from scoreboard import ScoreboardImage, waiting_screen
-    from main_window import Model
-    root = Tk()
-    model = Model()
-
-    # model.color_bg.set("black")
-    # model.color_event.set("red")
-    # model.color_heading.set("yellow")
-    # model.color_even.set("white")
-    # model.color_odd.set("blue")
-    # model.color_first.set("#00ffff")
-    # model.color_second.set("#ff0000")
-    # model.color_third.set("#ffff00")
-    # model.main_text.set("Calibri")
-    # model.time_text.set("Consolas")
-    # model.text_spacing.set(14/12)
-    model.num_lanes.set(6)
-    # model.heading.set("2022 Swimtastic")
-
-    sboard = ScoreboardImage((1280, 720), get_template(), model)
-    sboard.image.save("image.png")
-    waiting_screen((1280, 720), model).save('image_wait.png')

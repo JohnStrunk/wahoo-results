@@ -26,8 +26,6 @@ from PIL import ImageTk
 from model import Model
 import widgets
 
-
-
 class View(ttk.Frame):
     '''Main window view definition'''
     def __init__(self, root: Tk, vm: Model):
@@ -77,7 +75,6 @@ class View(ttk.Frame):
 class _appearanceTab(ttk.Frame):
     def __init__(self, parent: Widget, vm: Model) -> None:
         super().__init__(parent)
-        # super().__init__(parent, layouts.Orientation.VERTICAL)
         self._vm = vm
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -90,21 +87,21 @@ class _appearanceTab(ttk.Frame):
         frame = ttk.LabelFrame(parent, text="Fonts")
         frame.columnconfigure(1, weight=1)  # col 1 gets any extra space
         ttk.Label(frame, text="Main font:", anchor="e").grid(column=0, row=0, sticky="news")
-        main_dd = ttkwidgets.font.FontFamilyDropdown(frame, self._vm.main_text.set)
+        main_dd = ttkwidgets.font.FontFamilyDropdown(frame, self._vm.font_normal.set)
         main_dd.grid(column=1, row=0, sticky="news")
         # Update dropdown if textvar is changed
-        self._vm.main_text.trace_add("write",
-        lambda _a, _b, _c: main_dd.set(self._vm.main_text.get()))
+        self._vm.font_normal.trace_add("write",
+        lambda *_: main_dd.set(self._vm.font_normal.get()))
         # Set initial value
-        main_dd.set(self._vm.main_text.get())
+        main_dd.set(self._vm.font_normal.get())
         ttk.Label(frame, text="Time font:", anchor="e").grid(column=0, row=1, sticky="news")
-        time_dd = ttkwidgets.font.FontFamilyDropdown(frame,  self._vm.time_text.set)
+        time_dd = ttkwidgets.font.FontFamilyDropdown(frame,  self._vm.font_time.set)
         time_dd.grid(column=1, row=1, sticky="news")
         # Update dropdown if textvar is changed
-        self._vm.time_text.trace_add("write",
-        lambda _a, _b, _c: time_dd.set(self._vm.time_text.get()))
+        self._vm.font_time.trace_add("write",
+        lambda *_: time_dd.set(self._vm.font_time.get()))
         # Set initial value
-        time_dd.set(self._vm.time_text.get())
+        time_dd.set(self._vm.font_time.get())
         ttk.Label(frame, text="Text spacing:", anchor="e").grid(column=0, row=2, sticky="news")
         ttk.Spinbox(frame, from_=0.8, to=2.0, increment=0.05, width=4, format="%0.2f",
         textvariable=self._vm.text_spacing).grid(column=1, row=2, sticky="nws")
@@ -116,7 +113,7 @@ class _appearanceTab(ttk.Frame):
         frame.columnconfigure(3, weight=1)
         # 1st col
         ttk.Label(frame, text="Heading:", anchor="e").grid(column=0, row=0, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_heading).grid(column=1,
+        widgets.ColorButton2(frame, color_var=self._vm.color_title).grid(column=1,
         row=0, sticky="nws")
         ttk.Label(frame, text="Event:", anchor="e").grid(column=0, row=1, sticky="news")
         widgets.ColorButton2(frame, color_var=self._vm.color_event).grid(column=1,
@@ -157,14 +154,14 @@ class _appearanceTab(ttk.Frame):
         hc_frame = ttk.Frame(frame)
         hc_frame.pack(side="top", fill="both")
         ttk.Label(hc_frame, text="Heading color:", anchor="e").grid(column=0, row=0, sticky="news")
-        widgets.ColorButton2(hc_frame, color_var=self._vm.color_heading).grid(column=1,
+        widgets.ColorButton2(hc_frame, color_var=self._vm.color_title).grid(column=1,
         row=0, sticky="nws")
 
         txt_frame = ttk.Frame(frame)
         txt_frame.pack(side="top", fill="both")
         txt_frame.columnconfigure(1, weight=1)
         ttk.Label(txt_frame, text="Heading 1:", anchor="e").grid(column=0, row=1, sticky="news")
-        ttk.Entry(txt_frame, textvariable=self._vm.heading).grid(column=1, row=1, sticky="news")
+        ttk.Entry(txt_frame, textvariable=self._vm.title).grid(column=1, row=1, sticky="news")
 
         opt_frame = ttk.Frame(frame)
         opt_frame.pack(side="top", fill="both")
@@ -196,7 +193,7 @@ class _dirsTab(ttk.Frame):
 
     def _start_list(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text='Start lists')
-        widgets.DirSelection(frame, self._vm.startlist_dir).grid(column=0, row=0,
+        widgets.DirSelection(frame, self._vm.dir_startlist).grid(column=0, row=0,
         sticky="news", padx=1, pady=1)
         widgets.StartListTreeView(frame, self._vm.startlist_contents).grid(column=0,
         row=1, sticky="news", padx=1, pady=1)
@@ -207,7 +204,7 @@ class _dirsTab(ttk.Frame):
 
     def _race_results(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text='Race results')
-        widgets.DirSelection(frame, self._vm.results_dir).grid(column=0, row=0,
+        widgets.DirSelection(frame, self._vm.dir_results).grid(column=0, row=0,
         sticky="news", padx=1, pady=1)
         widgets.RaceResultTreeView(frame, self._vm.results_contents).grid(column=0,
         row=1, sticky="news", padx=1, pady=1)
@@ -232,5 +229,5 @@ class _runTab(ttk.Frame):
     def _preview(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
-        widgets.Preview(frame, self._vm.scoreboard_preview).grid(column=0, row=0, sticky="news")
+        widgets.Preview(frame, self._vm.scoreboard).grid(column=0, row=0, sticky="news")
         return frame

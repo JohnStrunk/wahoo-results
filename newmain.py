@@ -16,30 +16,39 @@
 
 '''Wahoo Results!'''
 
+import copy
 import datetime
+import os
+import re
+from time import sleep
 from tkinter import Tk, messagebox
-from typing import List
-import uuid
-from PIL import Image
+from typing import List, Optional
+from watchdog.observers import Observer #type: ignore
 
 import main_window
 import imagecast
-from scoreboard import ScoreboardImage
+from model import Model
+from racetimes import RaceTimes, RawTime, from_do4
+from scoreboard import ScoreboardImage, waiting_screen
+from startlist import StartList, from_scb
 from template import get_template
 import widgets
+from watcher import DO4Watcher, SCBWatcher
+
+CONFIG_FILE = "wahoo-results.ini"
 
 def main():
     '''Main program'''
     root = Tk()
 
-    model = main_window.Model()
-    model.load("wahoo-results.ini")
+    model = Model()
+    model.load(CONFIG_FILE)
     main_window.View(root, model)
 
     # Exit menu exits app
     def exit_fn():
         try:
-            model.save("wahoo-results.ini")
+            model.save(CONFIG_FILE)
         except PermissionError as err:
             messagebox.showerror(title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
@@ -48,42 +57,46 @@ def main():
 
     model.menu_exit.add(exit_fn)
 
-    slist: widgets.StartListType = [
-        {'event': '102', 'desc': 'Girls 13&O 200 Free', 'heats': '12'},
-        {'event': '101', 'desc': 'Boys 13&O 200 Free', 'heats': '32'},
-        {'event': '110', 'desc': 'Boys 13&O 100 Free', 'heats': '2'},
-    ]
-    model.startlist_contents.set(slist)
+    # Connections for the appearance tab
+    setup_appearance(model)
 
-    raceres: widgets.RaceResultType = [
-        {'meet': '10', 'event': '102', 'heat': '12',
-        'time': str(datetime.datetime(2022, 2, 3, 12, 37, 23))},
-        {'meet': '9', 'event': '102', 'heat': '12',
-        'time': str(datetime.datetime(2023, 2, 3, 12, 37, 23))},
-    ]
-    model.results_contents.set(raceres)
+    # Connections for the directories tab
+    scb_observer = Observer()
+    scb_observer.start()
+    setup_scb_watcher(model, scb_observer)
 
-    cc_devs: List[imagecast.DeviceStatus] = [
-        {'uuid': uuid.uuid4(), 'name': 'Living room', 'enabled': False},
-        {'uuid': uuid.uuid4(), 'name': 'Computer room', 'enabled': True},
-        {'uuid': uuid.uuid4(), 'name': 'Main scoreboard', 'enabled': False},
-    ]
-    model.cc_status.set(cc_devs)
-    model.scoreboard_preview.set(Image.new(mode="RGBA", size=(1280, 720),
-                    color="brown"))
+    do4_observer = Observer()
+    do4_observer.start()
+    setup_do4_watcher(model, do4_observer)
 
-    # Any time the "appearance settings" are changed, we should regenerate the
-    # scoreboard preview image
-    def update_preview(_a, _b, _c) -> None:
-        preview = ScoreboardImage((1280, 720), get_template(), model)
+    # Connections for the run tab
+    icast = imagecast.ImageCast(9998)
+    setup_run(model, icast)
+    icast.start()
+
+    # Set initial scoreboard image
+    model.scoreboard.set(waiting_screen(imagecast.IMAGE_SIZE, model))
+
+    root.mainloop()
+
+    scb_observer.stop()
+    scb_observer.join()
+    do4_observer.stop()
+    do4_observer.join()
+    icast.stop()
+
+def setup_appearance(model: Model) -> None:
+    '''Link model changes to the scoreboard preview'''
+    def update_preview() -> None:
+        preview = ScoreboardImage(imagecast.IMAGE_SIZE, get_template(), model)
         model.appearance_preview.set(preview.image)
     for element in [
-        model.main_text,
-        model.time_text,
+        model.font_normal,
+        model.font_time,
         model.text_spacing,
-        model.heading,
-        model.bg_image,
-        model.color_heading,
+        model.title,
+        model.image_bg,
+        model.color_title,
         model.color_event,
         model.color_even,
         model.color_odd,
@@ -92,10 +105,134 @@ def main():
         model.color_third,
         model.color_bg,
         model.num_lanes,
-    ]: element.trace_add("write", update_preview)
-    update_preview(None, None, None)
+    ]: element.trace_add("write", lambda *_: update_preview())
+    update_preview()
 
-    root.mainloop()
+def setup_scb_watcher(model: Model, observer: Observer) -> None:
+    '''Set up file system watcher for startlists'''
+    def process_startlists() -> None:
+        '''
+        Load all the startlists from the current directory and update the UI
+        with their information.
+        '''
+        directory = model.dir_startlist.get()
+        files = os.scandir(directory)
+        startlists: List[StartList] = []
+        for file in files:
+            if file.name.endswith(".scb"):
+                try:
+                    startlist = from_scb(file.path)
+                    startlists.append(startlist)
+                except ValueError:
+                    pass
+        startlists.sort(key=lambda l: l.event_num)
+        contents: widgets.StartListType = []
+        for startlist in startlists:
+            contents.append({
+                'event': str(startlist.event_num),
+                'desc': startlist.event_name,
+                'heats': str(startlist.heats),
+            })
+        model.startlist_contents.set(contents)
+
+    def scb_dir_updated() -> None:
+        '''
+        When the startlist directory is changed, update the watched to look at
+        the new directory and trigger processing of the startlists.
+        '''
+        path = model.dir_startlist.get()
+        if not os.path.exists(path):
+            return
+        observer.unschedule_all()
+        observer.schedule(SCBWatcher(process_startlists), path)
+        process_startlists()
+
+    model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
+    scb_dir_updated()
+
+def setup_do4_watcher(model: Model, observer: Observer) -> None:
+    '''Set up watches for files/directories and connect to model'''
+    def process_racedir() -> None:
+        '''
+        Load all the race results and update the UI
+        '''
+        directory = model.dir_results.get()
+        files = os.scandir(directory)
+        contents: widgets.RaceResultType = []
+        for file in files:
+            if file.name.endswith(".do4"):
+                match = re.match(r'^(\d+)-', file.name)
+                if match is None:
+                    continue
+                try:
+                    racetime = from_do4(file.path, 2, RawTime("0.30"))
+                    contents.append({
+                        'meet': match.group(1),
+                        'event': str(racetime.event),
+                        'heat': str(racetime.heat),
+                        'time': str(datetime.datetime.fromtimestamp(file.stat().st_mtime))
+                    })
+                except ValueError:
+                    pass
+                except OSError:
+                    pass
+        model.results_contents.set(contents)
+
+    def process_new_result(file: str) -> None:
+        '''Process a new race result that has been detected'''
+        racetime: Optional[RaceTimes] = None
+        # Retry mechanism since we get errors if we try to read while it's
+        # still being written.
+        for tries in range(1, 6):
+            try:
+                racetime = from_do4(file, 2, RawTime("0.30"))
+            except ValueError:
+                sleep(0.05 * tries)
+            except OSError:
+                sleep(0.05 * tries)
+        if racetime is None:
+            return
+        efilename = f"E{racetime.event:0>3}.scb"
+        try:
+            startlist = from_scb(os.path.join(model.dir_startlist.get(), efilename))
+            racetime.set_names(startlist)
+        except OSError:
+            pass
+        except ValueError:
+            pass
+        scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
+        model.scoreboard.set(scoreboard.image)
+        process_racedir()  # update the UI
+
+    def do4_dir_updated() -> None:
+        '''
+        When the raceresult directory is changed, update the watch to look at
+        the new directory and trigger processing of the results.
+        '''
+        path = model.dir_results.get()
+        if not os.path.exists(path):
+            return
+        observer.unschedule_all()
+        observer.schedule(DO4Watcher(process_new_result), path)
+        process_racedir()
+
+    model.dir_results.trace_add("write", lambda *_: do4_dir_updated())
+    do4_dir_updated()
+
+def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
+    '''Link Chromecast discovery/management to the UI'''
+    def cast_discovery() -> None:
+        dev_list = copy.deepcopy(icast.get_devices())
+        model.cc_status.set(dev_list)
+    def update_cc_list() -> None:
+        dev_list = model.cc_status.get()
+        for dev in dev_list:
+            icast.enable(dev['uuid'], dev['enabled'])
+    model.cc_status.trace_add("write", lambda *_: update_cc_list())
+    icast.set_discovery_callback(cast_discovery)
+
+    # Link Chromecast contents to the UI preview
+    model.scoreboard.trace_add("write", lambda *_: icast.publish(model.scoreboard.get()))
 
 if __name__ == "__main__":
     main()

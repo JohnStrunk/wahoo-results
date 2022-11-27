@@ -29,7 +29,7 @@ def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
     '''Generate a "waiting" image to display on the scoreboard.'''
     img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
     center = (int(size[0]*0.5), int(size[1]*0.8))
-    normal = fontname_to_file(model.main_text.get())
+    normal = fontname_to_file(model.font_normal.get())
     font_size = 72
     fnt = ImageFont.truetype(normal, font_size)
     draw = ImageDraw.Draw(img)
@@ -83,7 +83,7 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
         return self._img.size
 
     def _add_bg_image(self) -> None:
-        bg_image_filename = self._model.bg_image.get()
+        bg_image_filename = self._model.image_bg.get()
         if bg_image_filename == "":
             return # bg image not defined
         try:
@@ -103,8 +103,8 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
         lines += 1  # Name, team, time header
         self._line_height = int(usable_height / lines)
         scaled_height = self._line_height / self._model.text_spacing.get()
-        normal_f_file = fontname_to_file(self._model.main_text.get())
-        time_f_file = fontname_to_file(self._model.time_text.get())
+        normal_f_file = fontname_to_file(self._model.font_normal.get())
+        time_f_file = fontname_to_file(self._model.font_time.get())
         self._normal_font = ImageFont.truetype(normal_f_file, int(scaled_height))
         self._time_font = ImageFont.truetype(time_f_file, int(scaled_height))
         draw = ImageDraw.Draw(self._img)
@@ -121,11 +121,11 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
         anchor="ls", fill=self._model.color_event.get())
         hstart = edge_l + draw.textsize(self._EVENT_SIZE, self._normal_font)[0]
         hwidth = width - hstart
-        head_txt = self._model.heading.get()
+        head_txt = self._model.title.get()
         while draw.textsize(head_txt, self._normal_font)[0] > hwidth:
             head_txt = head_txt[:-1]
         draw.text((edge_r, self._baseline(1)), head_txt, font=self._normal_font,
-        anchor="rs", fill=self._model.color_heading.get())
+        anchor="rs", fill=self._model.color_title.get())
 
         # Line2 - H: 99 Event description
         draw.text((edge_l, self._baseline(2)), f"H:{self._race.heat}",

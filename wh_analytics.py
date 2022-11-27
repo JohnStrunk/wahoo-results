@@ -28,7 +28,7 @@ import ipinfo  # type: ignore
 from config import WahooConfig
 import version
 
-_CONTEXT: Dict[str, Any]
+_CONTEXT: Dict[str, Any] = {}
 
 def application_start(config: WahooConfig, screen_size: Tuple[int, int],
     exe_environ: str) -> None:
@@ -120,6 +120,8 @@ def cc_toggle(enable: bool) -> None:
     })
 
 def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
+    if "user_id" not in _CONTEXT:
+        return
     if kvparams is None:
         kvparams = {}
     analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])

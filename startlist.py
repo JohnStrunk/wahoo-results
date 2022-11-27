@@ -249,3 +249,8 @@ def _shorter_strings(string: str) -> List[str]:
         shortened = string[:-1]
         return [shortened] + _shorter_strings(shortened)
     return []
+
+def from_scb(filename: str) -> StartList:
+    '''Create a StartList from a CTS startlist (.SCB) file'''
+    with open(filename, "r", encoding="cp1252") as file:
+        return CTSStartList(file)

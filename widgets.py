@@ -109,7 +109,7 @@ class Preview(Canvas):
         super().__init__(parent, width=self.WIDTH, height=self.HEIGHT)
         self._pimage: Optional[ImageTk.PhotoImage] = None
         self._image_var = image_var
-        image_var.trace_add("write", lambda _a, _b, _c: self._set_image(self._image_var.get()))
+        image_var.trace_add("write", lambda *_: self._set_image(self._image_var.get()))
 
     def _set_image(self, image: PILImage.Image) -> None:
         '''Set the preview image'''
@@ -136,14 +136,14 @@ class StartListTreeView(ttk.Frame):
         self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)
         self.scroll.grid(column=1, row=0, sticky="news")
         self.tview.configure(selectmode='none', show='headings', yscrollcommand=self.scroll.set)
-        self.tview.column('event', anchor='w', minwidth=50, width=50)
+        self.tview.column('event', anchor='w', minwidth=40, width=40)
         self.tview.heading('event', anchor='w', text='Event')
-        self.tview.column('desc', anchor='w', minwidth=200, width=200)
+        self.tview.column('desc', anchor='w', minwidth=220, width=220)
         self.tview.heading('desc', anchor='w', text='Description')
-        self.tview.column('heats', anchor='w', minwidth=50, width=50)
+        self.tview.column('heats', anchor='w', minwidth=40, width=40)
         self.tview.heading('heats', anchor='w', text='Heats')
         self.startlist = startlist
-        startlist.trace_add("write", lambda _a, _b, _c: self._update_contents())
+        startlist.trace_add("write", lambda *_: self._update_contents())
 
     def _update_contents(self):
         self.tview.delete(*self.tview.get_children())
@@ -163,7 +163,7 @@ class DirSelection(ttk.Frame):
         ttk.Label(self, textvariable=self.dir).grid(column=1, row=0, sticky="news")
 
     def _handle_browse(self) -> None:
-        directory = filedialog.askdirectory()
+        directory = filedialog.askdirectory(initialdir=self.dir.get())
         if len(directory) == 0:
             return
         directory = os.path.normpath(directory)
@@ -193,7 +193,7 @@ class RaceResultTreeView(ttk.Frame):
         self.tview.column('time', anchor='w', minwidth=140, width=140)
         self.tview.heading('time', anchor='w', text='Time')
         self.racelist = racelist
-        racelist.trace_add("write", lambda _a, _b, _c: self._update_contents())
+        racelist.trace_add("write", lambda *_: self._update_contents())
 
     def _update_contents(self):
         self.tview.delete(*self.tview.get_children())
@@ -224,7 +224,7 @@ class ChromcastSelector(ttk.Frame):
         self.tview.column('cc_name', anchor='w', minwidth=100)
         self.tview.heading('cc_name', anchor='w', text='Chromecast')
         self.devstatus = statusvar
-        self.devstatus.trace_add("write", lambda _a, _b, _c: self._update_contents())
+        self.devstatus.trace_add("write", lambda *_: self._update_contents())
         # Needs to be the ButtonRelease event because the Button event happens
         # before the focus is actually set/changed.
         self.tview.bind('<ButtonRelease-1>', self._item_clicked)

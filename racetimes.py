@@ -232,3 +232,8 @@ class DO4(RaceTimes):
     @property
     def heat(self) -> int:
         return self._heat
+
+def from_do4(filename: str, min_times: int, threshold: RawTime) -> RaceTimes:
+    '''Create a RaceTimes from a D04 race result file'''
+    with open(filename, "r", encoding="cp1252") as file:
+        return DO4(file, min_times, threshold)

@@ -34,6 +34,9 @@ import zeroconf
 
 import wh_analytics
 
+# Resolution of images for the Chromecast
+IMAGE_SIZE = (1280, 720)
+
 # Dict of uuid, name, enabled
 DeviceStatus = Dict[Literal['uuid', 'name', 'enabled'], Any]
 
