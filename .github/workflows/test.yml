@@ -61,10 +61,14 @@ jobs:
         run: pipenv run make-doc.bat html
 
       - name: Download Snyk CLI
+        if: ${{ env.SNYK_TOKEN != '' }}
         shell: cmd
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: curl -OsL https://github.com/snyk/cli/releases/download/${{ env.SNYK_VERSION }}/snyk-win.exe
 
       - name: Run Snyk CLI
+        if: ${{ env.SNYK_TOKEN != '' }}
         shell: cmd
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
