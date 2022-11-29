@@ -170,9 +170,6 @@ class _appearanceTab(ttk.Frame):
         ttk.Label(opt_frame, text="Lanes:", anchor="e").grid(column=0, row=0, sticky="news")
         ttk.Spinbox(opt_frame, from_=6, to=10, increment=1, width=3,
         textvariable=self._vm.num_lanes).grid(column=1, row=0, sticky="nws")
-        ttk.Label(opt_frame, text="Suppress >0.3s:", anchor="e").grid(column=2,
-        row=0, sticky="news")
-        ttk.Checkbutton(opt_frame, variable=self._vm.inhibit).grid(column=3, row=0, sticky="nws")
         return frame
 
     def _preview(self, parent: Widget) -> Widget:

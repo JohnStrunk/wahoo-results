@@ -87,7 +87,8 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.color_bg = StringVar()
         # features
         self.num_lanes = IntVar()
-        self.inhibit = BooleanVar(value=True)
+        self.min_times = IntVar()
+        self.time_threshold = DoubleVar()
         # Preview
         self.appearance_preview = widgets.ImageVar(PILImage.Image())
         # Directories
@@ -127,6 +128,8 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.color_third.set(data.get("color_third", self.PANTONE4505FLATGOLD))
         self.color_bg.set(data.get("color_bg", self.BLACK))
         self.num_lanes.set(data.getint("num_lanes", 10))
+        self.min_times.set(data.getint("min_times", 2))
+        self.time_threshold.set(data.getfloat("time_threshold", 0.30))
         self.dir_startlist.set(data.get("dir_startlist", "C:\\swmeets8"))
         self.dir_results.set(data.get("dir_results", "C:\\CTSDolphin"))
         self.client_id.set(data.get("client_id", str(uuid.uuid4())))
@@ -150,6 +153,8 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
             "color_third": self.color_third.get(),
             "color_bg": self.color_bg.get(),
             "num_lanes": str(self.num_lanes.get()),
+            "min_times": str(self.min_times.get()),
+            "time_threshold": str(self.time_threshold.get()),
             "dir_startlist": self.dir_startlist.get(),
             "dir_results": self.dir_results.get(),
             "client_id": self.client_id.get(),

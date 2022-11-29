@@ -165,7 +165,8 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
                 if match is None:
                     continue
                 try:
-                    racetime = from_do4(file.path, 2, RawTime("0.30"))
+                    racetime = from_do4(file.path, model.min_times.get(),
+                    RawTime(model.time_threshold.get()))
                     contents.append({
                         'meet': match.group(1),
                         'event': str(racetime.event),
@@ -185,7 +186,8 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
         # still being written.
         for tries in range(1, 6):
             try:
-                racetime = from_do4(file, 2, RawTime("0.30"))
+                racetime = from_do4(file, model.min_times.get(),
+                    RawTime(model.time_threshold.get()))
             except ValueError:
                 sleep(0.05 * tries)
             except OSError:
