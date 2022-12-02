@@ -18,7 +18,7 @@
 
 import os
 import sys
-from tkinter import FALSE, Menu, TclError, Tk, Widget, ttk
+from tkinter import FALSE, HORIZONTAL, Menu, TclError, Tk, Widget, ttk
 import ttkwidgets  #type: ignore
 import ttkwidgets.font  #type: ignore
 from PIL import ImageTk
@@ -52,7 +52,7 @@ class View(ttk.Frame):
 
         book = ttk.Notebook(self)
         book.pack(side="top", fill="both", expand=True)
-        book.add(_appearanceTab(book, self._vm), text="Appearance", sticky="news")
+        book.add(_configTab(book, self._vm), text="Configuration", sticky="news")
         book.add(_dirsTab(book, self._vm), text="Directories", sticky="news")
         book.add(_runTab(book, self._vm), text="Run", sticky="news")
 
@@ -72,105 +72,110 @@ class View(ttk.Frame):
         help_menu.add_command(label='About', underline=0, command=self._vm.menu_about.run)
 
 
-class _appearanceTab(ttk.Frame):
+class _configTab(ttk.Frame):
     def __init__(self, parent: Widget, vm: Model) -> None:
         super().__init__(parent)
         self._vm = vm
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self._fonts(self).grid(column=0, row=0, sticky="news")
-        self._colors(self).grid(column=0, row=1, sticky="news")
-        self._features(self).grid(column=1, row=0, sticky="news")
+        self._appearance(self).grid(column=0, row=0, rowspan=2, sticky="news")
+        self._options_frame(self).grid(column=1, row=0, sticky="news")
         self._preview(self).grid(column=1, row=1, sticky="news")
 
-    def _fonts(self, parent: Widget) -> Widget:
-        frame = ttk.LabelFrame(parent, text="Fonts")
-        frame.columnconfigure(1, weight=1)  # col 1 gets any extra space
-        ttk.Label(frame, text="Main font:", anchor="e").grid(column=0, row=0, sticky="news")
-        main_dd = ttkwidgets.font.FontFamilyDropdown(frame, self._vm.font_normal.set)
+    def _appearance(self, parent: Widget) -> Widget:
+        mainframe = ttk.LabelFrame(parent, text="Appearance")
+
+        txt_frame = ttk.Frame(mainframe)
+        txt_frame.pack(side="top", fill="x")
+        txt_frame.columnconfigure(1, weight=1)  # col 1 gets any extra space
+
+        ttk.Label(txt_frame, text="Main font:", anchor="e").grid(column=0, row=0, sticky="news")
+        main_dd = ttkwidgets.font.FontFamilyDropdown(txt_frame, self._vm.font_normal.set)
         main_dd.grid(column=1, row=0, sticky="news")
         # Update dropdown if textvar is changed
         self._vm.font_normal.trace_add("write",
         lambda *_: main_dd.set(self._vm.font_normal.get()))
         # Set initial value
         main_dd.set(self._vm.font_normal.get())
-        ttk.Label(frame, text="Time font:", anchor="e").grid(column=0, row=1, sticky="news")
-        time_dd = ttkwidgets.font.FontFamilyDropdown(frame,  self._vm.font_time.set)
+
+        ttk.Label(txt_frame, text="Time font:", anchor="e").grid(column=0, row=1, sticky="news")
+        time_dd = ttkwidgets.font.FontFamilyDropdown(txt_frame,  self._vm.font_time.set)
         time_dd.grid(column=1, row=1, sticky="news")
         # Update dropdown if textvar is changed
         self._vm.font_time.trace_add("write",
         lambda *_: time_dd.set(self._vm.font_time.get()))
         # Set initial value
         time_dd.set(self._vm.font_time.get())
-        ttk.Label(frame, text="Text spacing:", anchor="e").grid(column=0, row=2, sticky="news")
-        ttk.Spinbox(frame, from_=0.8, to=2.0, increment=0.05, width=4, format="%0.2f",
-        textvariable=self._vm.text_spacing).grid(column=1, row=2, sticky="nws")
-        return frame
 
-    def _colors(self, parent: Widget) -> Widget:
-        frame = ttk.LabelFrame(parent, text="Text colors")
-        frame.columnconfigure(1, weight=1)
-        frame.columnconfigure(3, weight=1)
+        ttk.Label(txt_frame, text="Heading:", anchor="e").grid(column=0, row=2, sticky="news")
+        ttk.Entry(txt_frame, textvariable=self._vm.title).grid(column=1, row=2, sticky="news")
+
+        ttk.Label(txt_frame, text="Text spacing:", anchor="e").grid(column=0, row=3, sticky="news")
+        ttk.Spinbox(txt_frame, from_=0.8, to=2.0, increment=0.05, width=4, format="%0.2f",
+        textvariable=self._vm.text_spacing).grid(column=1, row=3, sticky="nws")
+
+        ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
+
+        colorframe = ttk.Frame(mainframe)
+        colorframe.pack(side="top", fill="x")
+        colorframe.columnconfigure(1, weight=1)
+        colorframe.columnconfigure(3, weight=1)
         # 1st col
-        ttk.Label(frame, text="Heading:", anchor="e").grid(column=0, row=0, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_title).grid(column=1,
+        ttk.Label(colorframe, text="Heading:", anchor="e").grid(column=0, row=0, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_title).grid(column=1,
         row=0, sticky="nws")
-        ttk.Label(frame, text="Event:", anchor="e").grid(column=0, row=1, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_event).grid(column=1,
+        ttk.Label(colorframe, text="Event:", anchor="e").grid(column=0, row=1, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_event).grid(column=1,
         row=1, sticky="nws")
-        ttk.Label(frame, text="Odd rows:", anchor="e").grid(column=0, row=2, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_odd).grid(column=1,
+        ttk.Label(colorframe, text="Odd rows:", anchor="e").grid(column=0, row=2, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_odd).grid(column=1,
         row=2, sticky="nws")
-        ttk.Label(frame, text="Even rows:", anchor="e").grid(column=0, row=3, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_even).grid(column=1,
+        ttk.Label(colorframe, text="Even rows:", anchor="e").grid(column=0, row=3, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_even).grid(column=1,
         row=3, sticky="nws")
         # 2nd col
-        ttk.Label(frame, text="1st place:", anchor="e").grid(column=2, row=0, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_first).grid(column=3,
+        ttk.Label(colorframe, text="1st place:", anchor="e").grid(column=2, row=0, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_first).grid(column=3,
         row=0, sticky="nws")
-        ttk.Label(frame, text="2nd place:", anchor="e").grid(column=2, row=1, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_second).grid(column=3,
+        ttk.Label(colorframe, text="2nd place:", anchor="e").grid(column=2, row=1, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_second).grid(column=3,
         row=1, sticky="nws")
-        ttk.Label(frame, text="3rd place:", anchor="e").grid(column=2, row=2, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_third).grid(column=3,
+        ttk.Label(colorframe, text="3rd place:", anchor="e").grid(column=2, row=2, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_third).grid(column=3,
         row=2, sticky="nws")
-        ttk.Label(frame, text="Background:", anchor="e").grid(column=2, row=3, sticky="news")
-        widgets.ColorButton2(frame, color_var=self._vm.color_bg).grid(column=3, row=3, sticky="nws")
-        # Bottom
-        bottom = ttk.Frame(frame)
-        bottom.grid(column=0, row=4, columnspan=4, sticky="news")
-        bottom.columnconfigure(1, weight=1)
-        bottom.columnconfigure(2, weight=1)
-        ttk.Label(bottom, text="Background image:", anchor="e").grid(column=0, row=0, sticky="news")
-        ttk.Button(bottom, text="Import...", command=self._vm.bg_import.run).grid(column=1,
+        ttk.Label(colorframe, text="Background:", anchor="e").grid(column=2, row=3, sticky="news")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_bg).grid(column=3, row=3, sticky="nws")
+
+        ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
+
+        bgframe = ttk.Frame(mainframe)
+        bgframe.pack(side="top", fill="x")
+        bgframe.columnconfigure(1, weight=1)
+        bgframe.columnconfigure(2, weight=1)
+        ttk.Label(bgframe, text="Background image:", anchor="e").grid(column=0, row=0, sticky="news")
+        ttk.Button(bgframe, text="Import...", command=self._vm.bg_import.run).grid(column=1,
         row=0, sticky="news")
-        ttk.Button(bottom, text="Clear", command=self._vm.bg_clear.run).grid(column=2,
+        ttk.Button(bgframe, text="Clear", command=self._vm.bg_clear.run).grid(column=2,
         row=0, sticky="news")
-        return frame
+        ttk.Label(bgframe, textvariable=self._vm.image_bg, anchor="e").grid(column=0, columnspan=3, row=1, sticky="news")
+        return mainframe
 
-    def _features(self, parent: Widget) -> Widget:
-        frame = ttk.LabelFrame(parent, text="Scoreboard options")
+    def _options_frame(self, parent: Widget) -> Widget:
+        opt_frame = ttk.LabelFrame(parent, text="Options")
 
-        hc_frame = ttk.Frame(frame)
-        hc_frame.pack(side="top", fill="both")
-        ttk.Label(hc_frame, text="Heading color:", anchor="e").grid(column=0, row=0, sticky="news")
-        widgets.ColorButton2(hc_frame, color_var=self._vm.color_title).grid(column=1,
-        row=0, sticky="nws")
-
-        txt_frame = ttk.Frame(frame)
-        txt_frame.pack(side="top", fill="both")
-        txt_frame.columnconfigure(1, weight=1)
-        ttk.Label(txt_frame, text="Heading 1:", anchor="e").grid(column=0, row=1, sticky="news")
-        ttk.Entry(txt_frame, textvariable=self._vm.title).grid(column=1, row=1, sticky="news")
-
-        opt_frame = ttk.Frame(frame)
-        opt_frame.pack(side="top", fill="both")
-        opt_frame.columnconfigure(1, weight=1)
-        opt_frame.columnconfigure(3, weight=1)
         ttk.Label(opt_frame, text="Lanes:", anchor="e").grid(column=0, row=0, sticky="news")
         ttk.Spinbox(opt_frame, from_=6, to=10, increment=1, width=3,
-        textvariable=self._vm.num_lanes).grid(column=1, row=0, sticky="nws")
-        return frame
+        textvariable=self._vm.num_lanes).grid(column=1, row=0, sticky="news")
+
+        ttk.Label(opt_frame, text="Minimum times:", anchor="e").grid(column=0, row=1, sticky="news")
+        ttk.Spinbox(opt_frame, from_=1, to=3, increment=1, width=3,
+        textvariable=self._vm.min_times).grid(column=1, row=1, sticky="news")
+
+        ttk.Label(opt_frame, text="Time threshold:", anchor="e").grid(column=0, row=2, sticky="news")
+        ttk.Spinbox(opt_frame, from_=0.01, to=9.99, increment=0.1, width=4,
+        textvariable=self._vm.time_threshold).grid(column=1, row=2, sticky="news")
+
+        return opt_frame
 
     def _preview(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")

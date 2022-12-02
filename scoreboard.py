@@ -93,7 +93,10 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
         except UnidentifiedImageError:
             return  # problem parsing bg image
         bg_image = bg_image.resize(self.size, Image.BICUBIC)
-        self._img.alpha_composite(bg_image)
+        try:
+            self._img.alpha_composite(bg_image)
+        except ValueError:
+            return  # Problem overlaying the image
 
     def _load_fonts(self) -> None:
         usable_height = self.size[1] * (1 - (2 * self._BORDER_FRACTION))

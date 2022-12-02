@@ -21,7 +21,7 @@ import datetime
 import os
 import re
 from time import sleep
-from tkinter import Tk, messagebox
+from tkinter import Tk, filedialog, messagebox
 from typing import Optional
 from watchdog.observers import Observer #type: ignore
 
@@ -116,6 +116,15 @@ def setup_appearance(model: Model) -> None:
         model.num_lanes,
     ]: element.trace_add("write", lambda *_: update_preview())
     update_preview()
+
+    def handle_bg_import() -> None:
+        image = filedialog.askopenfilename(filetypes=[("image", "*.gif *.jpg *.jpeg *.png")])
+        if len(image) == 0:
+            return
+        image = os.path.normpath(image)
+        model.image_bg.set(image)
+    model.bg_import.add(handle_bg_import)
+    model.bg_clear.add(lambda: model.image_bg.set(""))
 
 def setup_scb_watcher(model: Model, observer: Observer) -> None:
     '''Set up file system watcher for startlists'''
