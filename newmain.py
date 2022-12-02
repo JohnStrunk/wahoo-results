@@ -23,6 +23,7 @@ import re
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
 from typing import Optional
+import webbrowser
 from watchdog.observers import Observer #type: ignore
 
 import main_window
@@ -46,7 +47,7 @@ def main():
     main_window.View(root, model)
 
     # Exit menu exits app
-    def exit_fn():
+    def exit_fn() -> None:
         try:
             model.save(CONFIG_FILE)
         except PermissionError as err:
@@ -56,6 +57,17 @@ def main():
         root.destroy()
 
     model.menu_exit.add(exit_fn)
+
+    def docs_fn() -> None:
+        query_params = "&".join([
+            "utm_source=wahoo_results",
+            "utm_medium=menu",
+            "utm_campaign=docs_link",
+            f"ajs_uid={model.client_id.get()}",
+        ])
+        webbrowser.open("https://wahoo-results.readthedocs.io/?" + query_params)
+
+    model.menu_docs.add(docs_fn)
 
     # Connections for the appearance tab
     setup_appearance(model)
@@ -176,11 +188,12 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
                 try:
                     racetime = from_do4(file.path, model.min_times.get(),
                     RawTime(model.time_threshold.get()))
+                    filetime = datetime.datetime.fromtimestamp(file.stat().st_mtime)
                     contents.append({
                         'meet': match.group(1),
                         'event': str(racetime.event),
                         'heat': str(racetime.heat),
-                        'time': str(datetime.datetime.fromtimestamp(file.stat().st_mtime))
+                        'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
                     })
                 except ValueError:
                     pass

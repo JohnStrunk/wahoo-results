@@ -18,7 +18,7 @@
 
 import os
 import sys
-from tkinter import FALSE, HORIZONTAL, Menu, TclError, Tk, Widget, ttk
+from tkinter import FALSE, HORIZONTAL, Menu, StringVar, TclError, Tk, Widget, ttk
 import ttkwidgets  #type: ignore
 import ttkwidgets.font  #type: ignore
 from PIL import ImageTk
@@ -76,7 +76,8 @@ class _configTab(ttk.Frame):
     def __init__(self, parent: Widget, vm: Model) -> None:
         super().__init__(parent)
         self._vm = vm
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1, uniform="same1")
+        self.columnconfigure(1, weight=1, uniform="same1")
         self.rowconfigure(0, weight=1)
         self._appearance(self).grid(column=0, row=0, rowspan=2, sticky="news")
         self._options_frame(self).grid(column=1, row=0, sticky="news")
@@ -148,16 +149,19 @@ class _configTab(ttk.Frame):
 
         ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
 
-        bgframe = ttk.Frame(mainframe)
-        bgframe.pack(side="top", fill="x")
-        bgframe.columnconfigure(1, weight=1)
-        bgframe.columnconfigure(2, weight=1)
-        ttk.Label(bgframe, text="Background image:", anchor="e").grid(column=0, row=0, sticky="news")
-        ttk.Button(bgframe, text="Import...", command=self._vm.bg_import.run).grid(column=1,
-        row=0, sticky="news")
-        ttk.Button(bgframe, text="Clear", command=self._vm.bg_clear.run).grid(column=2,
-        row=0, sticky="news")
-        ttk.Label(bgframe, textvariable=self._vm.image_bg, anchor="e").grid(column=0, columnspan=3, row=1, sticky="news")
+        bgframelabels = ttk.Frame(mainframe)
+        bgframelabels.pack(side="top", fill="x")
+        ttk.Label(bgframelabels, text="Background image:", anchor="e").pack(side="left", fill="both")
+        self._bg_img_label = StringVar()
+        ttk.Label(bgframelabels, textvariable=self._bg_img_label, anchor="w", relief="sunken").pack(side="left", fill="both", expand=1)
+        self._vm.image_bg.trace_add("write", lambda *_:
+            self._bg_img_label.set(os.path.basename(self._vm.image_bg.get())[-20:]))
+        self._vm.image_bg.set(self._vm.image_bg.get())
+
+        bgframebtns = ttk.Frame(mainframe)
+        bgframebtns.pack(side="top", fill="x")
+        ttk.Button(bgframebtns, text="Import...", command=self._vm.bg_import.run).pack(side="left", fill="both", expand=1)
+        ttk.Button(bgframebtns, text="Clear", command=self._vm.bg_clear.run).pack(side="left", fill="both", expand=1)
         return mainframe
 
     def _options_frame(self, parent: Widget) -> Widget:
@@ -180,15 +184,15 @@ class _configTab(ttk.Frame):
     def _preview(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
-        widgets.Preview(frame, self._vm.appearance_preview).grid(column=0, row=0, sticky="news")
+        widgets.Preview(frame, self._vm.appearance_preview).grid(column=0, row=0)
         return frame
 
 class _dirsTab(ttk.Frame):
     def __init__(self, parent: Widget, vm: Model) -> None:
         super().__init__(parent)
         self._vm = vm
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(0, weight=1, uniform="same1")
+        self.columnconfigure(1, weight=1, uniform="same1")
         self.rowconfigure(0, weight=1)
         self._start_list(self).grid(column=0, row=0, sticky="news", padx=1, pady=1)
         self._race_results(self).grid(column=1, row=0, sticky="news", padx=1, pady=1)
@@ -201,6 +205,7 @@ class _dirsTab(ttk.Frame):
         row=1, sticky="news", padx=1, pady=1)
         ttk.Button(frame, padding=(8, 0), text="Export events to Dolphin...",
         command=self._vm.dolphin_export.run).grid(column=0, row=2, padx=1, pady=1)
+        frame.columnconfigure(0, weight=1)
         frame.rowconfigure(1, weight=1)
         return frame
 
@@ -210,6 +215,7 @@ class _dirsTab(ttk.Frame):
         sticky="news", padx=1, pady=1)
         widgets.RaceResultTreeView(frame, self._vm.results_contents).grid(column=0,
         row=1, sticky="news", padx=1, pady=1)
+        frame.columnconfigure(0, weight=1)
         frame.rowconfigure(1, weight=1)
         return frame
 
@@ -231,5 +237,5 @@ class _runTab(ttk.Frame):
     def _preview(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
-        widgets.Preview(frame, self._vm.scoreboard).grid(column=0, row=0, sticky="news")
+        widgets.Preview(frame, self._vm.scoreboard).grid(column=0, row=0)
         return frame
