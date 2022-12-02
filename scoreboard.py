@@ -88,15 +88,18 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
             return # bg image not defined
         try:
             bg_image = Image.open(bg_image_filename)
-        except FileNotFoundError:
-            return  # bg couldn't be found
-        except UnidentifiedImageError:
-            return  # problem parsing bg image
-        bg_image = bg_image.resize(self.size, Image.BICUBIC)
-        try:
+            # Ensure the size matches
+            bg_image = bg_image.resize(self.size, Image.BICUBIC)
+            # Make sure the image modes match
+            bg_image = bg_image.convert("RGBA")
+            # Overlay it, respecting the alpha channel
             self._img.alpha_composite(bg_image)
+        except FileNotFoundError:
+            return
+        except UnidentifiedImageError:
+            return
         except ValueError:
-            return  # Problem overlaying the image
+            return
 
     def _load_fonts(self) -> None:
         usable_height = self.size[1] * (1 - (2 * self._BORDER_FRACTION))
