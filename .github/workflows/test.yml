@@ -155,7 +155,7 @@ jobs:
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         # https://github.com/softprops/action-gh-release
-        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5  # v0.1.14
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844  # v0.1.15
         with:
           name: Release ${{ github.ref_name }}
           draft: true
