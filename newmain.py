@@ -38,15 +38,8 @@ from watcher import DO4Watcher, SCBWatcher
 
 CONFIG_FILE = "wahoo-results.ini"
 
-def main():
-    '''Main program'''
-    root = Tk()
-
-    model = Model()
-    model.load(CONFIG_FILE)
-    main_window.View(root, model)
-
-    # Exit menu exits app
+def setup_exit(root: Tk, model: Model) -> None:
+    '''Set up handlers for application exit'''
     def exit_fn() -> None:
         try:
             model.save(CONFIG_FILE)
@@ -55,56 +48,11 @@ def main():
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.")
         root.destroy()
-
+    # Close box exits app
+    root.protocol("WM_DELETE_WINDOW", exit_fn)
+    # Exit menu item exits app
     model.menu_exit.add(exit_fn)
 
-    def docs_fn() -> None:
-        query_params = "&".join([
-            "utm_source=wahoo_results",
-            "utm_medium=menu",
-            "utm_campaign=docs_link",
-            f"ajs_uid={model.client_id.get()}",
-        ])
-        webbrowser.open("https://wahoo-results.readthedocs.io/?" + query_params)
-
-    model.menu_docs.add(docs_fn)
-
-    # Connections for the appearance tab
-    setup_appearance(model)
-
-    # Connections for the directories tab
-    scb_observer = Observer()
-    scb_observer.start()
-    setup_scb_watcher(model, scb_observer)
-
-    do4_observer = Observer()
-    do4_observer.start()
-    setup_do4_watcher(model, do4_observer)
-
-    def write_dolphin_csv():
-        directory = model.dir_startlist.get()
-        slists = load_all_scb(directory)
-        csv = events_to_csv(slists)
-        filename = os.path.join(directory, "dolphin_events.csv")
-        with open(filename, "w", encoding="cp1252") as file:
-            file.writelines(csv)
-    model.dolphin_export.add(write_dolphin_csv)
-
-    # Connections for the run tab
-    icast = imagecast.ImageCast(9998)
-    setup_run(model, icast)
-    icast.start()
-
-    # Set initial scoreboard image
-    model.scoreboard.set(waiting_screen(imagecast.IMAGE_SIZE, model))
-
-    root.mainloop()
-
-    scb_observer.stop()
-    scb_observer.join()
-    do4_observer.stop()
-    do4_observer.join()
-    icast.stop()
 
 def setup_appearance(model: Model) -> None:
     '''Link model changes to the scoreboard preview'''
@@ -171,6 +119,56 @@ def setup_scb_watcher(model: Model, observer: Observer) -> None:
     model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
     scb_dir_updated()
 
+def summarize_racedir(directory: str) -> widgets.RaceResultType:
+    '''Summarize all race results in a directory'''
+    files = os.scandir(directory)
+    contents: widgets.RaceResultType = []
+    for file in files:
+        if file.name.endswith(".do4"):
+            match = re.match(r'^(\d+)-', file.name)
+            if match is None:
+                continue
+            try:
+                # min times and threshold don't matter for the summary
+                racetime = from_do4(file.path, 1, RawTime(99.9))
+                filetime = datetime.datetime.fromtimestamp(file.stat().st_mtime)
+                contents.append({
+                    'meet': match.group(1),
+                    'event': str(racetime.event),
+                    'heat': str(racetime.heat),
+                    'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
+                })
+            except ValueError:
+                pass
+            except OSError:
+                pass
+    return contents
+
+def load_result(model: Model, filename: str) -> Optional[RaceTimes]:
+    '''Load a result file and corresponding startlist'''
+    racetime: Optional[RaceTimes] = None
+    # Retry mechanism since we get errors if we try to read while it's
+    # still being written.
+    for tries in range(1, 6):
+        try:
+            racetime = from_do4(filename, model.min_times.get(),
+                RawTime(model.time_threshold.get()))
+        except ValueError:
+            sleep(0.05 * tries)
+        except OSError:
+            sleep(0.05 * tries)
+    if racetime is None:
+        return None
+    efilename = f"E{racetime.event:0>3}.scb"
+    try:
+        startlist = from_scb(os.path.join(model.dir_startlist.get(), efilename))
+        racetime.set_names(startlist)
+    except OSError:
+        pass
+    except ValueError:
+        pass
+    return racetime
+
 def setup_do4_watcher(model: Model, observer: Observer) -> None:
     '''Set up watches for files/directories and connect to model'''
     def process_racedir() -> None:
@@ -178,52 +176,14 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
         Load all the race results and update the UI
         '''
         directory = model.dir_results.get()
-        files = os.scandir(directory)
-        contents: widgets.RaceResultType = []
-        for file in files:
-            if file.name.endswith(".do4"):
-                match = re.match(r'^(\d+)-', file.name)
-                if match is None:
-                    continue
-                try:
-                    racetime = from_do4(file.path, model.min_times.get(),
-                    RawTime(model.time_threshold.get()))
-                    filetime = datetime.datetime.fromtimestamp(file.stat().st_mtime)
-                    contents.append({
-                        'meet': match.group(1),
-                        'event': str(racetime.event),
-                        'heat': str(racetime.heat),
-                        'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
-                    })
-                except ValueError:
-                    pass
-                except OSError:
-                    pass
+        contents = summarize_racedir(directory)
         model.results_contents.set(contents)
 
     def process_new_result(file: str) -> None:
         '''Process a new race result that has been detected'''
-        racetime: Optional[RaceTimes] = None
-        # Retry mechanism since we get errors if we try to read while it's
-        # still being written.
-        for tries in range(1, 6):
-            try:
-                racetime = from_do4(file, model.min_times.get(),
-                    RawTime(model.time_threshold.get()))
-            except ValueError:
-                sleep(0.05 * tries)
-            except OSError:
-                sleep(0.05 * tries)
+        racetime = load_result(model, file)
         if racetime is None:
             return
-        efilename = f"E{racetime.event:0>3}.scb"
-        try:
-            startlist = from_scb(os.path.join(model.dir_startlist.get(), efilename))
-            racetime.set_names(startlist)
-        except OSError:
-            pass
-        except ValueError:
-            pass
         scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
         model.scoreboard.set(scoreboard.image)
         process_racedir()  # update the UI
@@ -257,6 +217,64 @@ def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
 
     # Link Chromecast contents to the UI preview
     model.scoreboard.trace_add("write", lambda *_: icast.publish(model.scoreboard.get()))
+
+def main() -> None:
+    '''Main program'''
+    root = Tk()
+
+    model = Model()
+    model.load(CONFIG_FILE)
+    main_window.View(root, model)
+
+    setup_exit(root, model)
+
+    def docs_fn() -> None:
+        query_params = "&".join([
+            "utm_source=wahoo_results",
+            "utm_medium=menu",
+            "utm_campaign=docs_link",
+            f"ajs_uid={model.client_id.get()}",
+        ])
+        webbrowser.open("https://wahoo-results.readthedocs.io/?" + query_params)
+
+    model.menu_docs.add(docs_fn)
+
+    # Connections for the appearance tab
+    setup_appearance(model)
+
+    # Connections for the directories tab
+    scb_observer = Observer()
+    scb_observer.start()
+    setup_scb_watcher(model, scb_observer)
+
+    do4_observer = Observer()
+    do4_observer.start()
+    setup_do4_watcher(model, do4_observer)
+
+    def write_dolphin_csv():
+        directory = model.dir_startlist.get()
+        slists = load_all_scb(directory)
+        csv = events_to_csv(slists)
+        filename = os.path.join(directory, "dolphin_events.csv")
+        with open(filename, "w", encoding="cp1252") as file:
+            file.writelines(csv)
+    model.dolphin_export.add(write_dolphin_csv)
+
+    # Connections for the run tab
+    icast = imagecast.ImageCast(9998)
+    setup_run(model, icast)
+    icast.start()
+
+    # Set initial scoreboard image
+    model.scoreboard.set(waiting_screen(imagecast.IMAGE_SIZE, model))
+
+    root.mainloop()
+
+    scb_observer.stop()
+    scb_observer.join()
+    do4_observer.stop()
+    do4_observer.join()
+    icast.stop()
 
 if __name__ == "__main__":
     main()

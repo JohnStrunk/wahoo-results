@@ -54,7 +54,7 @@ class _TemplateRace(RaceTimes):
 
     @property
     def heat(self) -> int:
-        return 88
+        return 99
 
     def raw_times(self, lane: int) -> List[Optional[RawTime]]:
         if lane == 2:
