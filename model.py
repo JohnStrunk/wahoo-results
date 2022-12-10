@@ -102,6 +102,9 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         # misc
         self.client_id = StringVar()
         self.analytics = BooleanVar()
+        self.version = StringVar()
+        self.statustext = StringVar()
+        self.statusclick = CallbackList()
 
     def load(self, filename: str) -> None:
         '''Load user's preferences'''

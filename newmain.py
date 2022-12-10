@@ -35,6 +35,8 @@ from startlist import events_to_csv, from_scb, load_all_scb
 from template import get_template
 import widgets
 from watcher import DO4Watcher, SCBWatcher
+from version import WAHOO_RESULTS_VERSION
+import wh_version
 
 CONFIG_FILE = "wahoo-results.ini"
 
@@ -203,6 +205,14 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
     model.dir_results.trace_add("write", lambda *_: do4_dir_updated())
     do4_dir_updated()
 
+def check_for_update(model: Model) -> None:
+    current_version = model.version.get()
+    latest_version = wh_version.latest()
+    if (latest_version is not None and
+        not wh_version.is_latest_version(latest_version, current_version)):
+        model.statustext.set(f"New version available. Click to download: {latest_version.tag}")
+        model.statusclick.add(lambda: webbrowser.open(latest_version.url))
+
 def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
     '''Link Chromecast discovery/management to the UI'''
     def cast_discovery() -> None:
@@ -223,7 +233,10 @@ def main() -> None:
     root = Tk()
 
     model = Model()
+
     model.load(CONFIG_FILE)
+    model.version.set(WAHOO_RESULTS_VERSION)
+
     main_window.View(root, model)
 
     setup_exit(root, model)
@@ -238,6 +251,7 @@ def main() -> None:
         webbrowser.open("https://wahoo-results.readthedocs.io/?" + query_params)
 
     model.menu_docs.add(docs_fn)
+    check_for_update(model)
 
     # Connections for the appearance tab
     setup_appearance(model)

@@ -50,11 +50,21 @@ class View(ttk.Frame):
         # App close button is same as Exit menu option
         root.protocol("WM_DELETE_WINDOW", vm.menu_exit.run)
 
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
         book = ttk.Notebook(self)
-        book.pack(side="top", fill="both", expand=True)
+        book.grid(column=0, row=0, sticky="news")
         book.add(_configTab(book, self._vm), text="Configuration", sticky="news")
         book.add(_dirsTab(book, self._vm), text="Directories", sticky="news")
         book.add(_runTab(book, self._vm), text="Run", sticky="news")
+
+        statusbar = ttk.Frame(self)
+        statusbar.grid(column=0, row=1, sticky="news")
+        statusbar.columnconfigure(0, weight=1)
+        ttk.Label(statusbar, textvariable=self._vm.version, justify="right", relief="sunken").grid(column=1, row=0, sticky="news")
+        statustext = ttk.Label(statusbar, textvariable=self._vm.statustext, justify="left", relief="sunken", foreground="blue")
+        statustext.grid(column=0, row=0, sticky="news")
+        statustext.bind("<Button-1>", lambda *_: self._vm.statusclick.run())
 
     def _build_menu(self) -> None:
         '''Creates the dropdown menus'''
