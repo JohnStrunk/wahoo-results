@@ -161,7 +161,8 @@ class DirSelection(ttk.Frame):
         self.btn = ttk.Button(self, text="Browse...", command=self._handle_browse)
         self.btn.grid(column=0, row=0, sticky="news")
         self.dir_label = StringVar()
-        ttk.Label(self, textvariable=self.dir_label, relief="sunken").grid(column=1, row=0, sticky="news")
+        ttk.Label(self, textvariable=self.dir_label, relief="sunken").grid(column=1,
+        row=0, sticky="news")
         self.dir.trace_add("write", lambda *_:
             self.dir_label.set(os.path.basename(self.dir.get())[-20:]))
         self.dir.set(self.dir.get())

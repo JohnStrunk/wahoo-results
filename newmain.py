@@ -206,6 +206,7 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
     do4_dir_updated()
 
 def check_for_update(model: Model) -> None:
+    '''Notifies if there's a newer released version'''
     current_version = model.version.get()
     latest_version = wh_version.latest()
     if (latest_version is not None and
