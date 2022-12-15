@@ -19,7 +19,11 @@
 import copy
 import datetime
 import os
+import platform
 import re
+import sys
+import sentry_sdk
+from sentry_sdk.integrations.threading import ThreadingIntegration
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
 from typing import Optional
@@ -35,8 +39,9 @@ from startlist import events_to_csv, from_scb, load_all_scb
 from template import get_template
 import widgets
 from watcher import DO4Watcher, SCBWatcher
-from version import WAHOO_RESULTS_VERSION
+from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 import wh_version
+from wh_analytics import application_start, application_stop
 
 CONFIG_FILE = "wahoo-results.ini"
 
@@ -177,18 +182,21 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
         '''
         Load all the race results and update the UI
         '''
-        directory = model.dir_results.get()
-        contents = summarize_racedir(directory)
-        model.results_contents.set(contents)
+        with sentry_sdk.start_span(op="update_race_ui", description="Update race summaries in UI") as span:
+            directory = model.dir_results.get()
+            contents = summarize_racedir(directory)
+            span.set_tag("race_files", len(contents))
+            model.results_contents.set(contents)
 
     def process_new_result(file: str) -> None:
         '''Process a new race result that has been detected'''
-        racetime = load_result(model, file)
-        if racetime is None:
-            return
-        scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
-        model.scoreboard.set(scoreboard.image)
-        process_racedir()  # update the UI
+        with sentry_sdk.start_transaction(op="new_result", name="New race result"):
+            racetime = load_result(model, file)
+            if racetime is None:
+                return
+            scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
+            model.scoreboard.set(scoreboard.image)
+            process_racedir()  # update the UI
 
     def do4_dir_updated() -> None:
         '''
@@ -229,6 +237,33 @@ def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
     # Link Chromecast contents to the UI preview
     model.scoreboard.trace_add("write", lambda *_: icast.publish(model.scoreboard.get()))
 
+def initialize_sentry(model: Model) -> None:
+    '''Initialize sentry.io crash reporting'''
+    execution_environment = "source"
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        execution_environment = "executable"
+
+    # Initialize Sentry crash reporting
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        sample_rate=1.0,
+        traces_sample_rate=1.0,
+        environment=execution_environment,
+        release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
+        with_locals=True,
+        integrations=[ThreadingIntegration(propagate_hub=True)],
+        debug=False,
+    )
+    uname = platform.uname()
+    sentry_sdk.set_tag("os_system", uname.system)
+    sentry_sdk.set_tag("os_release", uname.release)
+    sentry_sdk.set_tag("os_version", uname.version)
+    sentry_sdk.set_tag("os_machine", uname.machine)
+    sentry_sdk.set_user({
+        "id": model.client_id.get(),
+        "ip_address": "{{auto}}",
+    })
+
 def main() -> None:
     '''Main program'''
     root = Tk()
@@ -237,6 +272,16 @@ def main() -> None:
 
     model.load(CONFIG_FILE)
     model.version.set(WAHOO_RESULTS_VERSION)
+
+    initialize_sentry(model)
+    hub = sentry_sdk.Hub.current
+    hub.start_session(session_mode="application")
+
+    screen_size = (root.winfo_screenwidth(), root.winfo_screenheight())
+    application_start(model, screen_size)
+    sentry_sdk.set_context("display", {
+        "size": f"{screen_size[0]}x{screen_size[1]}",
+    })
 
     main_window.View(root, model)
 
@@ -290,6 +335,8 @@ def main() -> None:
     do4_observer.stop()
     do4_observer.join()
     icast.stop()
+    application_stop(model)
+    hub.end_session()
 
 if __name__ == "__main__":
     main()

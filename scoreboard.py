@@ -20,6 +20,7 @@ Generates an image of the scoreboard from a RaceTimes object.
 from typing import Optional, Tuple
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from matplotlib import font_manager # type: ignore
+import sentry_sdk
 
 from main_window import Model
 from racetimes import RaceTimes, RawTime
@@ -60,17 +61,18 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
     _time_font: ImageFont.FreeTypeFont    # Font for printing times
 
     def __init__(self, size: Tuple[int, int], race: RaceTimes, model: Model):
-        self._race = race
-        self._model = model
-        # We save the lane count once because it's used multiple times, and we
-        # want to ensure the value doesn't change while we're building the
-        # scoreboard image
-        self._lanes = model.num_lanes.get()
-        self._img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
-        self._add_bg_image()
-        self._load_fonts()
-        self._draw_header()
-        self._draw_lanes()
+        with sentry_sdk.start_span(op="render_image", description="Render image"):
+            self._race = race
+            self._model = model
+            # We save the lane count once because it's used multiple times, and we
+            # want to ensure the value doesn't change while we're building the
+            # scoreboard image
+            self._lanes = model.num_lanes.get()
+            self._img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
+            self._add_bg_image()
+            self._load_fonts()
+            self._draw_header()
+            self._draw_lanes()
 
     @property
     def image(self) -> Image.Image:

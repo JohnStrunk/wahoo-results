@@ -28,35 +28,10 @@ from PIL import ImageTk #type: ignore
 import PIL.Image as PILImage
 
 from config import WahooConfig
+from model import ImageVar, RaceResultVar, StartListVar
 import imagecast
 
 TkContainer = Any
-
-_T = TypeVar('_T')
-
-class GVar(Variable, Generic[_T]):
-    '''
-    Create a generic variable in the flavor of StringVar, IntVar, etc.
-
-    - master: the master widget.
-    - value: the initial value for the variable
-    '''
-    def __init__(self, value:_T, master=None):
-        super().__init__(master=master, value=0)
-        self._value = value
-
-    def get(self) -> _T:
-        """Returns the value of the variable."""
-        _x = super().get()
-        return self._value
-
-    def set(self, value:_T) -> None:
-        """Sets the variable to a new value."""
-        self._value = value
-        super().set(super().get() + 1)
-
-class ImageVar(GVar[PILImage.Image]):
-    """Value holder for PhotoImage variables."""
 
 class ColorButton(Button):  # pylint: disable=too-many-ancestors
     '''Displays a button that allows choosing a color.'''
@@ -121,10 +96,6 @@ class Preview(Canvas):
         self._pimage = ImageTk.PhotoImage(scaled)
         self.create_image(0, 0, image=self._pimage, anchor="nw")
 
-StartListType = List[Dict[Literal['event', 'desc', 'heats'], str]]
-class StartListVar(GVar[StartListType]):
-    """Holds an ordered start list."""
-
 class StartListTreeView(ttk.Frame):
     '''Widget to display a set of startlists'''
     def __init__(self, parent: Widget, startlist: StartListVar):
@@ -149,8 +120,8 @@ class StartListTreeView(ttk.Frame):
         self.tview.delete(*self.tview.get_children())
         local_list = self.startlist.get()
         for entry in local_list:
-            self.tview.insert('', 'end', id=entry['event'], values=[entry['event'],
-            entry['desc'], entry['heats']])
+            self.tview.insert('', 'end', id=str(entry.event_num), values=[str(entry.event_num),
+            entry.event_name, str(entry.heats)])
 
 class DirSelection(ttk.Frame):
     '''Directory selector widget'''
@@ -174,10 +145,6 @@ class DirSelection(ttk.Frame):
             return
         directory = os.path.normpath(directory)
         self.dir.set(directory)
-
-RaceResultType = List[Dict[Literal['meet', 'event', 'heat', 'time'], str]]
-class RaceResultVar(GVar[RaceResultType]):
-    """Holds an ordered list of race results."""
 
 class RaceResultTreeView(ttk.Frame):
     '''Widget that displays a table of completed races'''

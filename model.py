@@ -17,16 +17,42 @@
 '''Data model'''
 
 from configparser import ConfigParser
-from tkinter import BooleanVar, DoubleVar, IntVar, StringVar
-from typing import Callable, Set
+from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Variable
+from typing import Callable, Generic, List, Set, TypeVar
 import uuid
 import PIL.Image as PILImage
-
-import widgets
+from racetimes import RaceTimes
+from startlist import StartList
 
 CallbackFn = Callable[[], None]
 
 _INI_HEADING = "wahoo-results"
+
+_T = TypeVar('_T')
+
+class GVar(Variable, Generic[_T]):
+    '''
+    Create a generic variable in the flavor of StringVar, IntVar, etc.
+
+    - master: the master widget.
+    - value: the initial value for the variable
+    '''
+    def __init__(self, value:_T, master=None):
+        super().__init__(master=master, value=0)
+        self._value = value
+
+    def get(self) -> _T:
+        """Returns the value of the variable."""
+        _x = super().get()
+        return self._value
+
+    def set(self, value:_T) -> None:
+        """Sets the variable to a new value."""
+        self._value = value
+        super().set(super().get() + 1)
+
+class ImageVar(GVar[PILImage.Image]):
+    """Value holder for PhotoImage variables."""
 
 class CallbackList:
     '''A list of callback functions'''
@@ -43,6 +69,12 @@ class CallbackList:
     def remove(self, callback) -> None:
         '''Remove a callback function from the set'''
         self._callbacks.discard(callback)
+
+class StartListVar(GVar[List[StartList]]):
+    '''An ordered list of start lists'''
+
+class RaceResultVar(GVar[List[RaceTimes]]):
+    """Holds an ordered list of race results."""
 
 class Model: # pylint: disable=too-many-instance-attributes,too-few-public-methods
     '''Defines the state variables (model) for the main UI'''
@@ -90,15 +122,15 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.min_times = IntVar()
         self.time_threshold = DoubleVar()
         # Preview
-        self.appearance_preview = widgets.ImageVar(PILImage.Image())
+        self.appearance_preview = ImageVar(PILImage.Image())
         # Directories
         self.dir_startlist = StringVar()
-        self.startlist_contents = widgets.StartListVar([])
+        self.startlist_contents = StartListVar([])
         self.dir_results = StringVar()
-        self.results_contents = widgets.RaceResultVar([])
+        self.results_contents = RaceResultVar([])
         # Run tab
         self.cc_status = widgets.ChromecastStatusVar([])
-        self.scoreboard = widgets.ImageVar(PILImage.Image())
+        self.scoreboard = ImageVar(PILImage.Image())
         # misc
         self.client_id = StringVar()
         self.analytics = BooleanVar()
