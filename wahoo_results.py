@@ -40,7 +40,7 @@ from template import get_template
 from watcher import DO4Watcher, SCBWatcher
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 import wh_version
-from wh_analytics import application_start, application_stop
+import wh_analytics
 
 CONFIG_FILE = "wahoo-results.ini"
 
@@ -184,6 +184,8 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
                 return
             scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
             model.scoreboard.set(scoreboard.image)
+            num_cc = len([x for x in model.cc_status.get() if x.enabled])
+            wh_analytics.results_received(racetime.has_names, num_cc)
             process_racedir()  # update the UI
 
     def do4_dir_updated() -> None:
@@ -266,7 +268,7 @@ def main() -> None:
     hub.start_session(session_mode="application")
 
     screen_size = (root.winfo_screenwidth(), root.winfo_screenheight())
-    application_start(model, screen_size)
+    wh_analytics.application_start(model, screen_size)
     sentry_sdk.set_context("display", {
         "size": f"{screen_size[0]}x{screen_size[1]}",
     })
@@ -316,6 +318,13 @@ def main() -> None:
     # Set initial scoreboard image
     model.scoreboard.set(waiting_screen(imagecast.IMAGE_SIZE, model))
 
+    # Analytics triggers
+    model.menu_docs.add(wh_analytics.documentation_link)
+    model.statusclick.add(wh_analytics.update_link)
+    model.dir_startlist.trace_add("write", lambda *_: wh_analytics.set_cts_directory(True))
+    model.dir_results.trace_add("write", lambda *_: wh_analytics.set_do4_directory(True))
+    model.dolphin_export.add(wh_analytics.wrote_dolphin_csv)
+
     root.mainloop()
 
     scb_observer.stop()
@@ -323,7 +332,7 @@ def main() -> None:
     do4_observer.stop()
     do4_observer.join()
     icast.stop()
-    application_stop(model)
+    wh_analytics.application_stop(model)
     hub.end_session()
 
 if __name__ == "__main__":

@@ -76,10 +76,12 @@ class RaceTimes(ABC):
         self.min_times = min_times
         self.threshold = threshold
         self._startlist = StartList()
+        self._has_names = False
 
     def set_names(self, start_list: StartList) -> None:
         '''Set the names/teams for the race'''
         self._startlist = copy.deepcopy(start_list)
+        self._has_names = True
 
     def name(self, lane: int) -> str:
         '''The Swimmer's name'''
@@ -175,6 +177,11 @@ class RaceTimes(ABC):
             if candidate.is_valid and candidate.value < this_lane.value:
                 faster += 1
         return faster + 1
+
+    @property
+    def has_names(self) -> bool:
+        '''Whether this race has name/team information'''
+        return self._has_names
 
     @property
     @abstractmethod

@@ -18,6 +18,7 @@
 
 import locale
 import platform
+from pprint import pprint
 import socket
 import time
 from typing import Any, Dict, Optional, Tuple
@@ -75,18 +76,6 @@ def results_received(has_names: bool, chromecasts: int) -> None:
         "chromecast_count": chromecasts
     })
 
-def clear_btn() -> None:
-    """Clear scoreboard event"""
-    _send_event("Clear")
-
-def test_btn() -> None:
-    """Test scoreboard event"""
-    _send_event("Test")
-
-def manual_result() -> None:
-    """Publish a manually loaded result event"""
-    _send_event("Manual result")
-
 def documentation_link() -> None:
     """Follow link to docs event"""
     _send_event("Documentation click")
@@ -127,6 +116,7 @@ def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
     analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
     if analytics.write_key == "unknown": # dev environment
         print(f"Event: {name}")
+        pprint(kvparams)
 
 def _setup_context(screen_size: Tuple[int, int]) -> Dict[str, Any]:
     uname = platform.uname()
