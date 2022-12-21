@@ -24,6 +24,7 @@ import time
 from typing import Any, Dict, Optional, Tuple
 
 from segment import analytics  # type: ignore
+import sentry_sdk
 import ipinfo  # type: ignore
 
 from model import Model
@@ -109,14 +110,15 @@ def cc_toggle(enable: bool) -> None:
     })
 
 def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
-    if "user_id" not in _CONTEXT:
-        return
-    if kvparams is None:
-        kvparams = {}
-    analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
-    if analytics.write_key == "unknown": # dev environment
-        print(f"Event: {name}")
-        pprint(kvparams)
+    with sentry_sdk.start_span(op="analytics", description="Process analytics event"):
+        if "user_id" not in _CONTEXT:
+            return
+        if kvparams is None:
+            kvparams = {}
+        analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
+        if analytics.write_key == "unknown": # dev environment
+            print(f"Event: {name}")
+            pprint(kvparams)
 
 def _setup_context(screen_size: Tuple[int, int]) -> Dict[str, Any]:
     uname = platform.uname()
