@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
 # Copyright (C) 2022 - John D. Strunk
 #

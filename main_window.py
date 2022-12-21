@@ -32,7 +32,7 @@ class View(ttk.Frame):
         super().__init__(root)
         self._root = root
         self._vm = vm
-        root.title("NEW - Wahoo! Results")
+        root.title("Wahoo! Results")
         # Common screen sizes: HD=1366x768 FHD=1920x1080
         # Fix the window to 1/2 the size of the screen so that it's manageable
         root.resizable(False, False)
