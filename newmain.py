@@ -17,17 +17,16 @@
 '''Wahoo Results!'''
 
 import copy
-import datetime
 import os
 import platform
 import re
 import sys
-import sentry_sdk
-from sentry_sdk.integrations.threading import ThreadingIntegration
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
-from typing import Optional
+from typing import List, Optional
 import webbrowser
+import sentry_sdk
+from sentry_sdk.integrations.threading import ThreadingIntegration
 from watchdog.observers import Observer #type: ignore
 
 import main_window
@@ -37,7 +36,6 @@ from racetimes import RaceTimes, RawTime, from_do4
 from scoreboard import ScoreboardImage, waiting_screen
 from startlist import events_to_csv, from_scb, load_all_scb
 from template import get_template
-import widgets
 from watcher import DO4Watcher, SCBWatcher
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 import wh_version
@@ -102,14 +100,7 @@ def setup_scb_watcher(model: Model, observer: Observer) -> None:
         '''
         directory = model.dir_startlist.get()
         startlists = load_all_scb(directory)
-        contents: widgets.StartListType = []
-        for startlist in startlists:
-            contents.append({
-                'event': str(startlist.event_num),
-                'desc': startlist.event_name,
-                'heats': str(startlist.heats),
-            })
-        model.startlist_contents.set(contents)
+        model.startlist_contents.set(startlists)
 
     def scb_dir_updated() -> None:
         '''
@@ -126,10 +117,10 @@ def setup_scb_watcher(model: Model, observer: Observer) -> None:
     model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
     scb_dir_updated()
 
-def summarize_racedir(directory: str) -> widgets.RaceResultType:
+def summarize_racedir(directory: str) -> List[RaceTimes]:
     '''Summarize all race results in a directory'''
     files = os.scandir(directory)
-    contents: widgets.RaceResultType = []
+    contents: List[RaceTimes] = []
     for file in files:
         if file.name.endswith(".do4"):
             match = re.match(r'^(\d+)-', file.name)
@@ -138,13 +129,8 @@ def summarize_racedir(directory: str) -> widgets.RaceResultType:
             try:
                 # min times and threshold don't matter for the summary
                 racetime = from_do4(file.path, 1, RawTime(99.9))
-                filetime = datetime.datetime.fromtimestamp(file.stat().st_mtime)
-                contents.append({
-                    'meet': match.group(1),
-                    'event': str(racetime.event),
-                    'heat': str(racetime.heat),
-                    'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
-                })
+                contents.append(racetime)
+                #'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
             except ValueError:
                 pass
             except OSError:
@@ -182,7 +168,8 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
         '''
         Load all the race results and update the UI
         '''
-        with sentry_sdk.start_span(op="update_race_ui", description="Update race summaries in UI") as span:
+        with sentry_sdk.start_span(op="update_race_ui",
+        description="Update race summaries in UI") as span:
             directory = model.dir_results.get()
             contents = summarize_racedir(directory)
             span.set_tag("race_files", len(contents))

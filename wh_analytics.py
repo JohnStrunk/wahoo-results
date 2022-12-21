@@ -25,7 +25,6 @@ from typing import Any, Dict, Optional, Tuple
 from segment import analytics  # type: ignore
 import ipinfo  # type: ignore
 
-from config import WahooConfig
 from model import Model
 import version
 

@@ -19,8 +19,10 @@
 from abc import ABC, abstractmethod
 import copy
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal, ROUND_DOWN
 import io
+import os
 import re
 from typing import List, Optional
 
@@ -186,11 +188,24 @@ class RaceTimes(ABC):
         '''Heat number for this race'''
         return 0
 
+    @property
+    @abstractmethod
+    def time_recorded(self) -> datetime:
+        '''The time when this race result was recorded'''
+        return datetime.now()
+
+    @property
+    @abstractmethod
+    def meet_id(self) -> str:
+        '''Identifier for the meet to which this result belongs'''
+        return "0"
+
 class DO4(RaceTimes):
     '''
     Implementation of RaceTimes class for CTS Dolphin w/ Splits (.do4 files).
     '''
-    def __init__(self, stream: io.TextIOBase, min_times: int, threshold: RawTime):
+    def __init__(self, stream: io.TextIOBase, min_times: int, threshold: RawTime,  # pylint: disable=too-many-arguments
+    when: datetime, meet_id: str):
         '''
         Parse a text stream in D04 format into a RaceTimes object
         '''
@@ -201,6 +216,8 @@ class DO4(RaceTimes):
             raise ValueError("Unable to parse header")
         self._event = int(match.group(1))
         self._heat = int(match.group(2))
+        self._time_recorded = when
+        self._meet_id = meet_id
 
         lines = stream.readlines()
         if len(lines) != 11:
@@ -233,7 +250,22 @@ class DO4(RaceTimes):
     def heat(self) -> int:
         return self._heat
 
+    @property
+    def time_recorded(self) -> datetime:
+        '''The time when this race result was recorded'''
+        return self._time_recorded
+
+    @property
+    def meet_id(self) -> str:
+        return self._meet_id
+
 def from_do4(filename: str, min_times: int, threshold: RawTime) -> RaceTimes:
     '''Create a RaceTimes from a D04 race result file'''
     with open(filename, "r", encoding="cp1252") as file:
-        return DO4(file, min_times, threshold)
+        meet_id = "???"
+        meet_match = re.match(r"^(\d+)-", os.path.basename(filename))
+        if meet_match is not None:
+            meet_id = meet_match.group(1)
+        stinfo = os.stat(filename)
+        mtime = datetime.fromtimestamp(stinfo.st_mtime)
+        return DO4(file, min_times, threshold, mtime, meet_id)

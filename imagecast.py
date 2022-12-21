@@ -19,11 +19,12 @@ This file provides the ImageCast class that can be used to publish static PNG
 images to Chromecast devices.
 """
 
+from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import socket
 import threading
 import time
-from typing import Any, Callable, Dict, List, Literal, Optional
+from typing import Any, Callable, Dict, List, Optional
 from uuid import UUID
 
 from PIL import Image # type: ignore
@@ -32,13 +33,15 @@ from pychromecast.error import NotConnected # type: ignore
 import sentry_sdk
 import zeroconf
 
-import wh_analytics
-
 # Resolution of images for the Chromecast
 IMAGE_SIZE = (1280, 720)
 
-# Dict of uuid, name, enabled
-DeviceStatus = Dict[Literal['uuid', 'name', 'enabled'], Any]
+@dataclass
+class DeviceStatus:
+    '''The status of a Chromecast device'''
+    uuid: UUID     # UUID for the device
+    name: str      # Friendly name for the device
+    enabled: bool  # Whether the device is enabled
 
 DiscoveryCallbackFn = Callable[[], None]
 
@@ -126,7 +129,6 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     self._publish_one(self.devices[uuid]["cast"])
                 elif previous and not enabled: # disabling: disconnect
                     self._disconnect(self.devices[uuid]["cast"])
-                wh_analytics.cc_toggle(enabled)
 
     def get_devices(self) -> List[DeviceStatus]:
         '''
@@ -135,11 +137,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         '''
         devs: List[DeviceStatus] = []
         for uuid, state in self.devices.items():
-            devs.append({
-                "uuid": uuid,
-                "name": state["cast"].cast_info.friendly_name,
-                "enabled": state["enabled"]
-            })
+            devs.append(DeviceStatus(uuid, state["cast"].cast_info.friendly_name, state["enabled"]))
         return devs
 
     def publish(self, image: Image.Image) -> None:

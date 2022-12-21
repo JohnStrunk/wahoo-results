@@ -18,34 +18,17 @@
 TKinter code to display a button that presents a colorpicker.
 '''
 
-import datetime
 import os
-from tkinter import VERTICAL, Button, Canvas, StringVar, TclError, Variable, \
+from tkinter import VERTICAL, Canvas, StringVar, TclError, \
     Widget, colorchooser, filedialog, ttk
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar
+from typing import Any, Optional
 
 from PIL import ImageTk #type: ignore
 import PIL.Image as PILImage
 
-from config import WahooConfig
-from model import ImageVar, RaceResultVar, StartListVar
-import imagecast
+from model import ChromecastStatusVar, ImageVar, RaceResultVar, StartListVar
 
 TkContainer = Any
-
-class ColorButton(Button):  # pylint: disable=too-many-ancestors
-    '''Displays a button that allows choosing a color.'''
-    def __init__(self, container: TkContainer, config: WahooConfig, color_option: str):
-        super().__init__(container, bg=config.get_str(color_option), relief="solid",
-                         padx=7, borderwidth=1, command=self._btn_cb)
-        self._color_option = color_option
-        self._config = config
-
-    def _btn_cb(self) -> None:
-        (_, rgb) = colorchooser.askcolor(self._config.get_str(self._color_option))
-        if rgb is not None:
-            self._config.set_str(self._color_option, rgb)
-            self.configure(bg=self._config.get_str(self._color_option))
 
 def swatch(width: int, height: int, color: str) -> ImageTk.PhotoImage:
     '''Generate a color swatch'''
@@ -173,13 +156,11 @@ class RaceResultTreeView(ttk.Frame):
         local_list = self.racelist.get()
         # Sort the list by date, descending
         # https://stackoverflow.com/a/39359270
-        local_list.sort(key=lambda e: datetime.datetime.fromisoformat(e['time']), reverse=True)
+        local_list.sort(key=lambda e: e.time_recorded, reverse=True)
         for entry in local_list:
-            self.tview.insert('', 'end', id=entry['time'], values=[entry['meet'],
-            entry['event'], entry['heat'], entry['time']])
-
-class ChromecastStatusVar(GVar[List[imagecast.DeviceStatus]]):
-    """Holds a list of Chromecast devices and whether they are enabled"""
+            timetext = entry.time_recorded.strftime("%Y-%m-%d %H:%M:%S")
+            self.tview.insert('', 'end', id=timetext, values=[str(entry.meet_id),
+            entry.event, entry.heat, timetext])
 
 class ChromcastSelector(ttk.Frame):
     '''Widget that allows enabling/disabling a set of Chromecast devices'''
@@ -207,10 +188,10 @@ class ChromcastSelector(ttk.Frame):
         self.tview.delete(*self.tview.get_children())
         local_list = self.devstatus.get()
         # Sort them by name for display
-        local_list.sort(key=lambda d: (d['name']))
+        local_list.sort(key=lambda d: (d.name))
         for dev in local_list:
-            txt_status = "Yes" if dev['enabled'] else "No"
-            self.tview.insert('', 'end', id=str(dev['uuid']), values=[txt_status, dev['name']])
+            txt_status = "Yes" if dev.enabled else "No"
+            self.tview.insert('', 'end', id=str(dev.uuid), values=[txt_status, dev.name])
 
     def _item_clicked(self, _event) -> None:
         item = self.tview.focus()
@@ -218,6 +199,6 @@ class ChromcastSelector(ttk.Frame):
             return
         local_list = self.devstatus.get()
         for dev in local_list:
-            if str(dev['uuid']) == item:
-                dev['enabled'] = not dev['enabled']
+            if str(dev.uuid) == item:
+                dev.enabled = not dev.enabled
         self.devstatus.set(local_list)

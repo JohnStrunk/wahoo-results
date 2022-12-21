@@ -61,8 +61,10 @@ class View(ttk.Frame):
         statusbar = ttk.Frame(self)
         statusbar.grid(column=0, row=1, sticky="news")
         statusbar.columnconfigure(0, weight=1)
-        ttk.Label(statusbar, textvariable=self._vm.version, justify="right", relief="sunken").grid(column=1, row=0, sticky="news")
-        statustext = ttk.Label(statusbar, textvariable=self._vm.statustext, justify="left", relief="sunken", foreground="blue")
+        ttk.Label(statusbar, textvariable=self._vm.version, justify="right",
+        relief="sunken").grid(column=1, row=0, sticky="news")
+        statustext = ttk.Label(statusbar, textvariable=self._vm.statustext,
+        justify="left", relief="sunken", foreground="blue")
         statustext.grid(column=0, row=0, sticky="news")
         statustext.bind("<Button-1>", lambda *_: self._vm.statusclick.run())
 
@@ -93,7 +95,7 @@ class _configTab(ttk.Frame):
         self._options_frame(self).grid(column=1, row=0, sticky="news")
         self._preview(self).grid(column=1, row=1, sticky="news")
 
-    def _appearance(self, parent: Widget) -> Widget:
+    def _appearance(self, parent: Widget) -> Widget:  # pylint: disable=too-many-statements
         mainframe = ttk.LabelFrame(parent, text="Appearance")
 
         txt_frame = ttk.Frame(mainframe)
@@ -155,23 +157,28 @@ class _configTab(ttk.Frame):
         widgets.ColorButton2(colorframe, color_var=self._vm.color_third).grid(column=3,
         row=2, sticky="nws")
         ttk.Label(colorframe, text="Background:", anchor="e").grid(column=2, row=3, sticky="news")
-        widgets.ColorButton2(colorframe, color_var=self._vm.color_bg).grid(column=3, row=3, sticky="nws")
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_bg).grid(column=3,
+        row=3, sticky="nws")
 
         ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
 
         bgframelabels = ttk.Frame(mainframe)
         bgframelabels.pack(side="top", fill="x")
-        ttk.Label(bgframelabels, text="Background image:", anchor="e").pack(side="left", fill="both")
+        ttk.Label(bgframelabels, text="Background image:", anchor="e").pack(side="left",
+        fill="both")
         self._bg_img_label = StringVar()
-        ttk.Label(bgframelabels, textvariable=self._bg_img_label, anchor="w", relief="sunken").pack(side="left", fill="both", expand=1)
+        ttk.Label(bgframelabels, textvariable=self._bg_img_label, anchor="w",
+        relief="sunken").pack(side="left", fill="both", expand=1)
         self._vm.image_bg.trace_add("write", lambda *_:
             self._bg_img_label.set(os.path.basename(self._vm.image_bg.get())[-20:]))
         self._vm.image_bg.set(self._vm.image_bg.get())
 
         bgframebtns = ttk.Frame(mainframe)
         bgframebtns.pack(side="top", fill="x")
-        ttk.Button(bgframebtns, text="Import...", command=self._vm.bg_import.run).pack(side="left", fill="both", expand=1)
-        ttk.Button(bgframebtns, text="Clear", command=self._vm.bg_clear.run).pack(side="left", fill="both", expand=1)
+        ttk.Button(bgframebtns, text="Import...", command=self._vm.bg_import.run).pack(side="left",
+        fill="both", expand=1)
+        ttk.Button(bgframebtns, text="Clear", command=self._vm.bg_clear.run).pack(side="left",
+        fill="both", expand=1)
         return mainframe
 
     def _options_frame(self, parent: Widget) -> Widget:
@@ -185,7 +192,8 @@ class _configTab(ttk.Frame):
         ttk.Spinbox(opt_frame, from_=1, to=3, increment=1, width=3,
         textvariable=self._vm.min_times).grid(column=1, row=1, sticky="news")
 
-        ttk.Label(opt_frame, text="Time threshold:", anchor="e").grid(column=0, row=2, sticky="news")
+        ttk.Label(opt_frame, text="Time threshold:", anchor="e").grid(column=0, row=2,
+        sticky="news")
         ttk.Spinbox(opt_frame, from_=0.01, to=9.99, increment=0.1, width=4,
         textvariable=self._vm.time_threshold).grid(column=1, row=2, sticky="news")
 

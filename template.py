@@ -18,6 +18,7 @@
 A scoreboard template for previews and theming
 '''
 
+from datetime import datetime
 from typing import List, Optional
 from racetimes import RaceTimes, RawTime
 from startlist import StartList
@@ -64,6 +65,14 @@ class _TemplateRace(RaceTimes):
         time = RawTime("59.99") + RawTime("60") * RawTime("99")
         time = time + lane - 10
         return [time, time, time]
+
+    @property
+    def time_recorded(self) -> datetime:
+        return datetime.now()
+
+    @property
+    def meet_id(self) -> str:
+        return "000"
 
 class _TemplateStartList(StartList):
     @property

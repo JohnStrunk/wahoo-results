@@ -23,6 +23,7 @@ import uuid
 import PIL.Image as PILImage
 from racetimes import RaceTimes
 from startlist import StartList
+from imagecast import DeviceStatus
 
 CallbackFn = Callable[[], None]
 
@@ -50,6 +51,9 @@ class GVar(Variable, Generic[_T]):
         """Sets the variable to a new value."""
         self._value = value
         super().set(super().get() + 1)
+
+class ChromecastStatusVar(GVar[List[DeviceStatus]]):
+    """Holds a list of Chromecast devices and whether they are enabled"""
 
 class ImageVar(GVar[PILImage.Image]):
     """Value holder for PhotoImage variables."""
@@ -129,7 +133,7 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.dir_results = StringVar()
         self.results_contents = RaceResultVar([])
         # Run tab
-        self.cc_status = widgets.ChromecastStatusVar([])
+        self.cc_status = ChromecastStatusVar([])
         self.scoreboard = ImageVar(PILImage.Image())
         # misc
         self.client_id = StringVar()
