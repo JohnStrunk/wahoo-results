@@ -27,6 +27,12 @@ from model import Model
 from tooltip import ToolTip
 import widgets
 
+_PADDING = 3
+_TXT_X_PAD = 5
+_TXT_Y_PAD = 1
+_TXT_PAD = (_TXT_X_PAD, _TXT_Y_PAD)
+
+
 class View(ttk.Frame):
     '''Main window view definition'''
     def __init__(self, root: Tk, vm: Model):
@@ -60,7 +66,7 @@ class View(ttk.Frame):
         book.add(_runTab(book, self._vm), text="Run", underline=0, sticky="news")
         book.enable_traversal()  # So that Alt-<letter> switches tabs
 
-        statusbar = ttk.Frame(self)
+        statusbar = ttk.Frame(self, padding=_PADDING)
         statusbar.grid(column=0, row=1, sticky="news")
         statusbar.columnconfigure(0, weight=1)
         ttk.Label(statusbar, textvariable=self._vm.version, justify="right",
@@ -69,6 +75,13 @@ class View(ttk.Frame):
         justify="left", relief="sunken", foreground="blue")
         statustext.grid(column=0, row=0, sticky="news")
         statustext.bind("<Button-1>", lambda *_: self._vm.statusclick.run())
+
+        s = ttk.Style()
+        s.configure("TCombobox", padding=_TXT_PAD)  # Font drop-downs
+        s.configure("TLabel", padding=_TXT_PAD)
+        s.configure("TEntry", padding=_TXT_PAD)
+        s.configure("TSpinbox", padding=_TXT_PAD)
+        s.configure("TButton", padding=_PADDING)
 
     def _build_menu(self) -> None:
         '''Creates the dropdown menus'''
@@ -98,7 +111,7 @@ class _configTab(ttk.Frame):
         self._preview(self).grid(column=1, row=1, sticky="news")
 
     def _appearance(self, parent: Widget) -> Widget:  # pylint: disable=too-many-statements
-        mainframe = ttk.LabelFrame(parent, text="Appearance")
+        mainframe = ttk.LabelFrame(parent, text="Appearance", padding=_PADDING)
 
         txt_frame = ttk.Frame(mainframe)
         txt_frame.pack(side="top", fill="x")
@@ -144,29 +157,29 @@ class _configTab(ttk.Frame):
         # 1st col
         ttk.Label(colorframe, text="Heading:", anchor="e").grid(column=0, row=0, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_title).grid(column=1,
-        row=0, sticky="nws")
+        row=0, sticky="nws", pady=_PADDING)
         ttk.Label(colorframe, text="Event:", anchor="e").grid(column=0, row=1, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_event).grid(column=1,
-        row=1, sticky="nws")
+        row=1, sticky="nws", pady=_PADDING)
         ttk.Label(colorframe, text="Odd rows:", anchor="e").grid(column=0, row=2, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_odd).grid(column=1,
-        row=2, sticky="nws")
+        row=2, sticky="nws", pady=_PADDING)
         ttk.Label(colorframe, text="Even rows:", anchor="e").grid(column=0, row=3, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_even).grid(column=1,
-        row=3, sticky="nws")
+        row=3, sticky="nws", pady=_PADDING)
         # 2nd col
         ttk.Label(colorframe, text="1st place:", anchor="e").grid(column=2, row=0, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_first).grid(column=3,
-        row=0, sticky="nws")
+        row=0, sticky="nws", pady=_PADDING)
         ttk.Label(colorframe, text="2nd place:", anchor="e").grid(column=2, row=1, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_second).grid(column=3,
-        row=1, sticky="nws")
+        row=1, sticky="nws", pady=_PADDING)
         ttk.Label(colorframe, text="3rd place:", anchor="e").grid(column=2, row=2, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_third).grid(column=3,
-        row=2, sticky="nws")
+        row=2, sticky="nws", pady=_PADDING)
         ttk.Label(colorframe, text="Background:", anchor="e").grid(column=2, row=3, sticky="news")
         widgets.ColorButton2(colorframe, color_var=self._vm.color_bg).grid(column=3,
-        row=3, sticky="nws")
+        row=3, sticky="nws", pady=_PADDING)
 
         ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
 
@@ -185,13 +198,13 @@ class _configTab(ttk.Frame):
         bgframebtns = ttk.Frame(mainframe)
         bgframebtns.pack(side="top", fill="x")
         ttk.Button(bgframebtns, text="Import...", command=self._vm.bg_import.run).pack(side="left",
-        fill="both", expand=1)
+        fill="both", expand=1, padx=_PADDING, pady=_PADDING)
         ttk.Button(bgframebtns, text="Clear", command=self._vm.bg_clear.run).pack(side="left",
-        fill="both", expand=1)
+        fill="both", expand=1, padx=_PADDING, pady=_PADDING)
         return mainframe
 
     def _options_frame(self, parent: Widget) -> Widget:
-        opt_frame = ttk.LabelFrame(parent, text="Options")
+        opt_frame = ttk.LabelFrame(parent, text="Options", padding=_PADDING)
 
         ttk.Label(opt_frame, text="Lanes:", anchor="e").grid(column=0, row=0, sticky="news")
         lspin = ttk.Spinbox(opt_frame, from_=6, to=10, increment=1, width=3,
@@ -215,7 +228,7 @@ class _configTab(ttk.Frame):
         return opt_frame
 
     def _preview(self, parent: Widget) -> Widget:
-        frame = ttk.LabelFrame(parent, text="Scoreboard preview")
+        frame = ttk.LabelFrame(parent, text="Scoreboard preview", padding=_PADDING)
         frame.columnconfigure(0, weight=1)
         widgets.Preview(frame, self._vm.appearance_preview).grid(column=0, row=0)
         ToolTip(frame, "Mockup of how the scoreboard will look")
@@ -268,6 +281,7 @@ class _runTab(ttk.Frame):
     def _cc_selector(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Available Chromecasts")
         frame.columnconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=1)
         ccs = widgets.ChromcastSelector(frame, self._vm.cc_status)
         ccs.grid(column=0, row=0, sticky="news")
         ToolTip(ccs, "Chromecasts that have been detected. Click to toggle.")
@@ -276,6 +290,7 @@ class _runTab(ttk.Frame):
     def _preview(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=1)
         widgets.Preview(frame, self._vm.scoreboard).grid(column=0, row=0)
         ToolTip(frame, "Current contents of the scoreboard")
         return frame
