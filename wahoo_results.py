@@ -29,6 +29,7 @@ import webbrowser
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
 from watchdog.observers import Observer #type: ignore
+from about import about
 
 import main_window
 import imagecast
@@ -288,6 +289,8 @@ def main() -> None:
 
     model.menu_docs.add(docs_fn)
     check_for_update(model)
+
+    model.menu_about.add(lambda: about(root))
 
     # Connections for the appearance tab
     setup_appearance(model)
