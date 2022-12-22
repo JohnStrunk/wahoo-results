@@ -17,7 +17,7 @@ class ToolTip: # pylint: disable=too-few-public-methods
     """
     def __init__(self, widget, text='widget info'):
         self.waittime = 500     #miliseconds
-        self.wraplength = 180   #pixels
+        self.wraplength = 225   #pixels
         self.widget = widget
         self.text = text
         self.widget.bind("<Enter>", self._enter)

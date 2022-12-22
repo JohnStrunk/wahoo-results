@@ -24,6 +24,7 @@ import ttkwidgets.font  #type: ignore
 from PIL import ImageTk
 
 from model import Model
+from tooltip import ToolTip
 import widgets
 
 class View(ttk.Frame):
@@ -54,9 +55,10 @@ class View(ttk.Frame):
         self.columnconfigure(0, weight=1)
         book = ttk.Notebook(self)
         book.grid(column=0, row=0, sticky="news")
-        book.add(_configTab(book, self._vm), text="Configuration", sticky="news")
-        book.add(_dirsTab(book, self._vm), text="Directories", sticky="news")
-        book.add(_runTab(book, self._vm), text="Run", sticky="news")
+        book.add(_configTab(book, self._vm), text="Configuration", underline=0, sticky="news")
+        book.add(_dirsTab(book, self._vm), text="Directories", underline=0, sticky="news")
+        book.add(_runTab(book, self._vm), text="Run", underline=0, sticky="news")
+        book.enable_traversal()  # So that Alt-<letter> switches tabs
 
         statusbar = ttk.Frame(self)
         statusbar.grid(column=0, row=1, sticky="news")
@@ -105,6 +107,7 @@ class _configTab(ttk.Frame):
         ttk.Label(txt_frame, text="Main font:", anchor="e").grid(column=0, row=0, sticky="news")
         main_dd = ttkwidgets.font.FontFamilyDropdown(txt_frame, self._vm.font_normal.set)
         main_dd.grid(column=1, row=0, sticky="news")
+        ToolTip(main_dd, "Main font used for scoreboard text")
         # Update dropdown if textvar is changed
         self._vm.font_normal.trace_add("write",
         lambda *_: main_dd.set(self._vm.font_normal.get()))
@@ -114,18 +117,23 @@ class _configTab(ttk.Frame):
         ttk.Label(txt_frame, text="Time font:", anchor="e").grid(column=0, row=1, sticky="news")
         time_dd = ttkwidgets.font.FontFamilyDropdown(txt_frame,  self._vm.font_time.set)
         time_dd.grid(column=1, row=1, sticky="news")
+        ToolTip(time_dd, "Font for displaying the times - Recommended: fixed-width font")
         # Update dropdown if textvar is changed
         self._vm.font_time.trace_add("write",
         lambda *_: time_dd.set(self._vm.font_time.get()))
         # Set initial value
         time_dd.set(self._vm.font_time.get())
 
-        ttk.Label(txt_frame, text="Heading:", anchor="e").grid(column=0, row=2, sticky="news")
-        ttk.Entry(txt_frame, textvariable=self._vm.title).grid(column=1, row=2, sticky="news")
+        ttk.Label(txt_frame, text="Title:", anchor="e").grid(column=0, row=2, sticky="news")
+        hentry = ttk.Entry(txt_frame, textvariable=self._vm.title)
+        hentry.grid(column=1, row=2, sticky="news")
+        ToolTip(hentry, "Title text to display")
 
         ttk.Label(txt_frame, text="Text spacing:", anchor="e").grid(column=0, row=3, sticky="news")
-        ttk.Spinbox(txt_frame, from_=0.8, to=2.0, increment=0.05, width=4, format="%0.2f",
-        textvariable=self._vm.text_spacing).grid(column=1, row=3, sticky="nws")
+        spspin = ttk.Spinbox(txt_frame, from_=0.8, to=2.0, increment=0.05, width=4, format="%0.2f",
+        textvariable=self._vm.text_spacing)
+        spspin.grid(column=1, row=3, sticky="nws")
+        ToolTip(spspin, "Vertical space between text lines")
 
         ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
 
@@ -172,6 +180,7 @@ class _configTab(ttk.Frame):
         self._vm.image_bg.trace_add("write", lambda *_:
             self._bg_img_label.set(os.path.basename(self._vm.image_bg.get())[-20:]))
         self._vm.image_bg.set(self._vm.image_bg.get())
+        ToolTip(bgframelabels, f"Scoreboard background image - Recommended: 1280x720")
 
         bgframebtns = ttk.Frame(mainframe)
         bgframebtns.pack(side="top", fill="x")
@@ -185,17 +194,23 @@ class _configTab(ttk.Frame):
         opt_frame = ttk.LabelFrame(parent, text="Options")
 
         ttk.Label(opt_frame, text="Lanes:", anchor="e").grid(column=0, row=0, sticky="news")
-        ttk.Spinbox(opt_frame, from_=6, to=10, increment=1, width=3,
-        textvariable=self._vm.num_lanes).grid(column=1, row=0, sticky="news")
+        lspin = ttk.Spinbox(opt_frame, from_=6, to=10, increment=1, width=3,
+        textvariable=self._vm.num_lanes)
+        lspin.grid(column=1, row=0, sticky="news")
+        ToolTip(lspin, "Number of lanes to display")
 
         ttk.Label(opt_frame, text="Minimum times:", anchor="e").grid(column=0, row=1, sticky="news")
-        ttk.Spinbox(opt_frame, from_=1, to=3, increment=1, width=3,
-        textvariable=self._vm.min_times).grid(column=1, row=1, sticky="news")
+        tspin = ttk.Spinbox(opt_frame, from_=1, to=3, increment=1, width=3,
+        textvariable=self._vm.min_times)
+        tspin.grid(column=1, row=1, sticky="news")
+        ToolTip(tspin, 'Lanes with fewer than this number of raw times will display dashes instead of a time')
 
         ttk.Label(opt_frame, text="Time threshold:", anchor="e").grid(column=0, row=2,
         sticky="news")
-        ttk.Spinbox(opt_frame, from_=0.01, to=9.99, increment=0.1, width=4,
-        textvariable=self._vm.time_threshold).grid(column=1, row=2, sticky="news")
+        thresh = ttk.Spinbox(opt_frame, from_=0.01, to=9.99, increment=0.1, width=4,
+        textvariable=self._vm.time_threshold)
+        thresh.grid(column=1, row=2, sticky="news")
+        ToolTip(thresh, "Lanes with any raw times that differ from the final time more than this amount will display dashes")
 
         return opt_frame
 
@@ -203,6 +218,7 @@ class _configTab(ttk.Frame):
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
         widgets.Preview(frame, self._vm.appearance_preview).grid(column=0, row=0)
+        ToolTip(frame, "Mockup of how the scoreboard will look")
         return frame
 
 class _dirsTab(ttk.Frame):
@@ -217,12 +233,15 @@ class _dirsTab(ttk.Frame):
 
     def _start_list(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text='Start lists')
-        widgets.DirSelection(frame, self._vm.dir_startlist).grid(column=0, row=0,
-        sticky="news", padx=1, pady=1)
-        widgets.StartListTreeView(frame, self._vm.startlist_contents).grid(column=0,
-        row=1, sticky="news", padx=1, pady=1)
-        ttk.Button(frame, padding=(8, 0), text="Export events to Dolphin...",
-        command=self._vm.dolphin_export.run).grid(column=0, row=2, padx=1, pady=1)
+        dirsel = widgets.DirSelection(frame, self._vm.dir_startlist)
+        dirsel.grid(column=0, row=0, sticky="news", padx=1, pady=1)
+        ToolTip(dirsel, "Directory where start list (*.scb) files are located")
+        sltv = widgets.StartListTreeView(frame, self._vm.startlist_contents)
+        sltv.grid(column=0, row=1, sticky="news", padx=1, pady=1)
+        ToolTip(sltv, "List of events found in the start list directory")
+        expbtn = ttk.Button(frame, padding=(8, 0), text="Export events to Dolphin...", command=self._vm.dolphin_export.run)
+        expbtn.grid(column=0, row=2, padx=1, pady=1)
+        ToolTip(expbtn, 'Create "dolphin_events.csv" event list for import into CTS Dolphin software')
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(1, weight=1)
         return frame
@@ -249,11 +268,14 @@ class _runTab(ttk.Frame):
     def _cc_selector(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Available Chromecasts")
         frame.columnconfigure(0, weight=1)
-        widgets.ChromcastSelector(frame, self._vm.cc_status).grid(column=0, row=0, sticky="news")
+        ccs = widgets.ChromcastSelector(frame, self._vm.cc_status)
+        ccs.grid(column=0, row=0, sticky="news")
+        ToolTip(ccs, "Chromecasts that have been detected. Click to toggle.")
         return frame
 
     def _preview(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
         widgets.Preview(frame, self._vm.scoreboard).grid(column=0, row=0)
+        ToolTip(frame, "Current contents of the scoreboard")
         return frame
