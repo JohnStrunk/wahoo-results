@@ -60,6 +60,17 @@ def setup_exit(root: Tk, model: Model) -> None:
     # Exit menu item exits app
     model.menu_exit.add(exit_fn)
 
+def setup_template(model: Model) -> None:
+    '''Setup handler for exporting scoreboard template'''
+    def do_export() -> None:
+        filename = filedialog.asksaveasfilename(confirmoverwrite=True, 
+        defaultextension=".png", filetypes=[("image", "*.png")],
+        initialfile="template")
+        if len(filename) == 0:
+            return
+        model.appearance_preview.get().save(filename)
+
+    model.menu_export_template.add(do_export)
 
 def setup_appearance(model: Model) -> None:
     '''Link model changes to the scoreboard preview'''
@@ -278,6 +289,7 @@ def main() -> None:
     main_window.View(root, model)
 
     setup_exit(root, model)
+    setup_template(model)
 
     def docs_fn() -> None:
         query_params = "&".join([

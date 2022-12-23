@@ -92,6 +92,7 @@ class View(ttk.Frame):
         # File menu
         file_menu = Menu(menubar)
         menubar.add_cascade(menu=file_menu, label='File', underline=0)
+        file_menu.add_command(label='Export template...', underline=0, command=self._vm.menu_export_template.run)
         file_menu.add_command(label='Exit', underline=1, command=self._vm.menu_exit.run)
         # Help menu
         help_menu = Menu(menubar)
