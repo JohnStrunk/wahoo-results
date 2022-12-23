@@ -185,6 +185,7 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
                 return
             scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
             model.scoreboard.set(scoreboard.image)
+            model.latest_result.set(racetime)
             num_cc = len([x for x in model.cc_status.get() if x.enabled])
             wh_analytics.results_received(racetime.has_names, num_cc)
             process_racedir()  # update the UI

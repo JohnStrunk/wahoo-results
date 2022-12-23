@@ -79,8 +79,21 @@ class _TemplateStartList(StartList):
     def event_name(self) -> str:
         return "GIRLS 15&O 200 MEDLEY RELAY"
 
-    def name(self, _heat: int, _lane: int) -> str:
-        return "SWIMMER, NAMEOF A"
+    def name(self, _heat: int, lane: int) -> str:
+        # https://randomwordgenerator.com/name.php
+        names = (
+            "Hutchins, Lorraine O",
+            "English, Cheryl M",
+            "Brady, June A",
+            "Sloan, Michelle T",
+            "Downing, Doreen S",
+            "Collier, Julie G",
+            "Chase, Constance H",
+            "Clark, Leslie J",
+            "Jensen, Kelli N",
+            "Parsons, Marsha L",
+            )
+        return names[lane-1].upper()
 
     def team(self, _heat: int, _lane: int) -> str:
         return "TEAM"

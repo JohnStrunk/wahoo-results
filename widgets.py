@@ -26,7 +26,9 @@ from typing import Any, Optional
 from PIL import ImageTk #type: ignore
 import PIL.Image as PILImage
 
-from model import ChromecastStatusVar, ImageVar, RaceResultVar, StartListVar
+from model import ChromecastStatusVar, ImageVar, RaceResultListVar, RaceResultVar, StartListVar
+from racetimes import RaceTimes, RawTime
+import scoreboard
 
 TkContainer = Any
 
@@ -131,7 +133,7 @@ class DirSelection(ttk.Frame):
 
 class RaceResultTreeView(ttk.Frame):
     '''Widget that displays a table of completed races'''
-    def __init__(self, parent: Widget, racelist: RaceResultVar):
+    def __init__(self, parent: Widget, racelist: RaceResultListVar):
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -176,7 +178,7 @@ class ChromcastSelector(ttk.Frame):
         self.tview.column('enabled', anchor='center', width=30)
         self.tview.heading('enabled', anchor='center', text='Enabled')
         self.tview.column('cc_name', anchor='w', minwidth=100)
-        self.tview.heading('cc_name', anchor='w', text='Chromecast')
+        self.tview.heading('cc_name', anchor='w', text='Chromecast name')
         self.devstatus = statusvar
         self.devstatus.trace_add("write", lambda *_: self._update_contents())
         # Needs to be the ButtonRelease event because the Button event happens
@@ -202,3 +204,45 @@ class ChromcastSelector(ttk.Frame):
             if str(dev.uuid) == item:
                 dev.enabled = not dev.enabled
         self.devstatus.set(local_list)
+
+class RaceResultView(ttk.LabelFrame):
+    '''Widget that displays a RaceResult'''
+    def __init__(self, parent: Widget, resultvar: RaceResultVar) -> None:
+        super().__init__(parent, text="Latest result")
+        self._resultvar = resultvar
+        self._resultvar.trace_add("write", lambda *_: self._update())
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.tview = ttk.Treeview(self, columns=["lane", "t1", "t2", "t3", "final"],
+        selectmode="none", show="headings")
+        self.tview.grid(column=0, row=0, sticky="news")
+        # Column configuration
+        time_width = 70
+        self.tview.heading('lane', anchor='e', text='Lane')
+        self.tview.column('lane', anchor='e', width=40)
+        self.tview.heading('t1', anchor='e', text='Timer #1')
+        self.tview.column('t1', anchor='e', width=time_width)
+        self.tview.heading('t2', anchor='e', text='Timer #2')
+        self.tview.column('t2', anchor='e', width=time_width)
+        self.tview.heading('t3', anchor='e', text='Timer #3')
+        self.tview.column('t3', anchor='e', width=time_width)
+        self.tview.heading('final', anchor='e', text='Final')
+        self.tview.column('final', anchor='e', width=time_width)
+        self._update()
+
+    def _update(self) -> None:
+        self.tview.delete(*self.tview.get_children())
+        result = self._resultvar.get()
+        for l in range(1, 11):
+            if result is None:
+                self.tview.insert('', 'end', id=str(l),
+                values=[str(l), "", "", "", ""])
+            else:
+                rawtimes = result.raw_times(l)
+                timestr = [scoreboard.format_time(t) if t is not None else "" for t in rawtimes]
+                final = result.final_time(l)
+                finalstr = str(final.value)
+                if final.value == RawTime("0"):
+                    finalstr = ""
+                self.tview.insert('', 'end', id=str(l),
+                values=[str(l), timestr[0], timestr[1], timestr[2], finalstr])

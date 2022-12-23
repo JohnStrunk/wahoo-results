@@ -82,6 +82,7 @@ class View(ttk.Frame):
         s.configure("TEntry", padding=_TXT_PAD)
         s.configure("TSpinbox", padding=_TXT_PAD)
         s.configure("TButton", padding=_PADDING)
+        s.configure("TLabelframe", padding=_PADDING)
 
     def _build_menu(self) -> None:
         '''Creates the dropdown menus'''
@@ -111,7 +112,7 @@ class _configTab(ttk.Frame):
         self._preview(self).grid(column=1, row=1, sticky="news")
 
     def _appearance(self, parent: Widget) -> Widget:  # pylint: disable=too-many-statements
-        mainframe = ttk.LabelFrame(parent, text="Appearance", padding=_PADDING)
+        mainframe = ttk.LabelFrame(parent, text="Appearance")
 
         txt_frame = ttk.Frame(mainframe)
         txt_frame.pack(side="top", fill="x")
@@ -204,7 +205,7 @@ class _configTab(ttk.Frame):
         return mainframe
 
     def _options_frame(self, parent: Widget) -> Widget:
-        opt_frame = ttk.LabelFrame(parent, text="Options", padding=_PADDING)
+        opt_frame = ttk.LabelFrame(parent, text="Options")
 
         ttk.Label(opt_frame, text="Lanes:", anchor="e").grid(column=0, row=0, sticky="news")
         lspin = ttk.Spinbox(opt_frame, from_=6, to=10, increment=1, width=3,
@@ -228,7 +229,7 @@ class _configTab(ttk.Frame):
         return opt_frame
 
     def _preview(self, parent: Widget) -> Widget:
-        frame = ttk.LabelFrame(parent, text="Scoreboard preview", padding=_PADDING)
+        frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
         widgets.Preview(frame, self._vm.appearance_preview).grid(column=0, row=0)
         ToolTip(frame, "Mockup of how the scoreboard will look")
@@ -274,9 +275,13 @@ class _runTab(ttk.Frame):
         super().__init__(parent)
         self._vm = vm
         self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         self._cc_selector(self).grid(column=1, row=0, sticky="news")
         self._preview(self).grid(column=1, row=1, sticky="news")
+        latestres = widgets.RaceResultView(self, self._vm.latest_result)
+        latestres.grid(column=0, row=0, rowspan=2, sticky="news")
+        ToolTip(latestres, "Raw data from the latest race result")
 
     def _cc_selector(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Available Chromecasts")

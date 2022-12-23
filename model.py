@@ -18,7 +18,7 @@
 
 from configparser import ConfigParser
 from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Variable
-from typing import Callable, Generic, List, Set, TypeVar
+from typing import Callable, Generic, List, Optional, Set, TypeVar
 import uuid
 import PIL.Image as PILImage
 from racetimes import RaceTimes
@@ -77,8 +77,11 @@ class CallbackList:
 class StartListVar(GVar[List[StartList]]):
     '''An ordered list of start lists'''
 
-class RaceResultVar(GVar[List[RaceTimes]]):
+class RaceResultListVar(GVar[List[RaceTimes]]):
     """Holds an ordered list of race results."""
+
+class RaceResultVar(GVar[Optional[RaceTimes]]):
+    '''A race result'''
 
 class Model: # pylint: disable=too-many-instance-attributes,too-few-public-methods
     '''Defines the state variables (model) for the main UI'''
@@ -131,10 +134,11 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.dir_startlist = StringVar()
         self.startlist_contents = StartListVar([])
         self.dir_results = StringVar()
-        self.results_contents = RaceResultVar([])
+        self.results_contents = RaceResultListVar([])
         # Run tab
         self.cc_status = ChromecastStatusVar([])
         self.scoreboard = ImageVar(PILImage.Image())
+        self.latest_result = RaceResultVar(None)
         # misc
         self.client_id = StringVar()
         self.analytics = BooleanVar()
