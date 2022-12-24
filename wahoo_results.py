@@ -63,12 +63,14 @@ def setup_exit(root: Tk, model: Model) -> None:
 def setup_template(model: Model) -> None:
     '''Setup handler for exporting scoreboard template'''
     def do_export() -> None:
-        filename = filedialog.asksaveasfilename(confirmoverwrite=True, 
+        filename = filedialog.asksaveasfilename(confirmoverwrite=True,
         defaultextension=".png", filetypes=[("image", "*.png")],
         initialfile="template")
         if len(filename) == 0:
             return
-        model.appearance_preview.get().save(filename)
+        template = ScoreboardImage(imagecast.IMAGE_SIZE,
+        get_template(), model, False)
+        template.image.save(filename)
 
     model.menu_export_template.add(do_export)
 

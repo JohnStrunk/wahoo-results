@@ -60,7 +60,7 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
     _normal_font: ImageFont.FreeTypeFont  # Font for normal text
     _time_font: ImageFont.FreeTypeFont    # Font for printing times
 
-    def __init__(self, size: Tuple[int, int], race: RaceTimes, model: Model):
+    def __init__(self, size: Tuple[int, int], race: RaceTimes, model: Model, background: bool = True):
         with sentry_sdk.start_span(op="render_image", description="Render image"):
             self._race = race
             self._model = model
@@ -68,8 +68,12 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
             # want to ensure the value doesn't change while we're building the
             # scoreboard image
             self._lanes = model.num_lanes.get()
-            self._img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
-            self._add_bg_image()
+            bg_color = model.color_bg.get()
+            if not background:
+                bg_color = "#00000000"  # transparent
+            self._img = Image.new(mode="RGBA", size=size, color=bg_color)
+            if background:
+                self._add_bg_image()
             self._load_fonts()
             self._draw_header()
             self._draw_lanes()
