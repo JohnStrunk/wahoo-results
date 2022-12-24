@@ -343,6 +343,19 @@ def main() -> None:
     model.dir_results.trace_add("write", lambda *_: wh_analytics.set_do4_directory(True))
     model.dolphin_export.add(wh_analytics.wrote_dolphin_csv)
 
+    # Allow the root window to build, then close the splash screen if it's up
+    # and we're running in exe mode
+    try:
+        root.update()
+        #pylint: disable=import-error,import-outside-toplevel
+        import pyi_splash #type: ignore
+        if pyi_splash.is_alive():
+            pyi_splash.close()
+    except ModuleNotFoundError:
+        pass
+    except RuntimeError:
+        pass
+
     root.mainloop()
 
     scb_observer.stop()
