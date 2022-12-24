@@ -74,6 +74,19 @@ def setup_template(model: Model) -> None:
 
     model.menu_export_template.add(do_export)
 
+def setup_save(model: Model) -> None:
+    '''Setup handler for saving current scoreboard image'''
+    def do_save() -> None:
+        filename = filedialog.asksaveasfilename(confirmoverwrite=True,
+        defaultextension=".png", filetypes=[("image", "*.png")],
+        initialfile="scoreboard")
+        if len(filename) == 0:
+            return
+        sb_image = model.scoreboard.get()
+        sb_image.save(filename)
+
+    model.menu_save_scoreboard.add(do_save)
+
 def setup_appearance(model: Model) -> None:
     '''Link model changes to the scoreboard preview'''
     def update_preview() -> None:
@@ -291,6 +304,7 @@ def main() -> None:
     main_window.View(root, model)
 
     setup_exit(root, model)
+    setup_save(model)
     setup_template(model)
 
     def docs_fn() -> None:

@@ -101,6 +101,7 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         ########################################
         ## Dropdown menu items
         self.menu_export_template = CallbackList()
+        self.menu_save_scoreboard = CallbackList()
         self.menu_exit = CallbackList()
         self.menu_docs = CallbackList()
         self.menu_about = CallbackList()
