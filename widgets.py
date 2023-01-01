@@ -27,7 +27,7 @@ from PIL import ImageTk #type: ignore
 import PIL.Image as PILImage
 
 from model import ChromecastStatusVar, ImageVar, RaceResultListVar, RaceResultVar, StartListVar
-from racetimes import RaceTimes, RawTime
+from racetimes import RawTime
 import scoreboard
 
 TkContainer = Any
@@ -233,16 +233,16 @@ class RaceResultView(ttk.LabelFrame):
     def _update(self) -> None:
         self.tview.delete(*self.tview.get_children())
         result = self._resultvar.get()
-        for l in range(1, 11):
+        for lane in range(1, 11):
             if result is None:
-                self.tview.insert('', 'end', id=str(l),
-                values=[str(l), "", "", "", ""])
+                self.tview.insert('', 'end', id=str(lane),
+                values=[str(lane), "", "", "", ""])
             else:
-                rawtimes = result.raw_times(l)
+                rawtimes = result.raw_times(lane)
                 timestr = [scoreboard.format_time(t) if t is not None else "" for t in rawtimes]
-                final = result.final_time(l)
+                final = result.final_time(lane)
                 finalstr = str(final.value)
                 if final.value == RawTime("0"):
                     finalstr = ""
-                self.tview.insert('', 'end', id=str(l),
-                values=[str(l), timestr[0], timestr[1], timestr[2], finalstr])
+                self.tview.insert('', 'end', id=str(lane),
+                values=[str(lane), timestr[0], timestr[1], timestr[2], finalstr])

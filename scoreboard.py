@@ -60,7 +60,8 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
     _normal_font: ImageFont.FreeTypeFont  # Font for normal text
     _time_font: ImageFont.FreeTypeFont    # Font for printing times
 
-    def __init__(self, size: Tuple[int, int], race: RaceTimes, model: Model, background: bool = True):
+    def __init__(self, size: Tuple[int, int], race: RaceTimes, model: Model,
+    background: bool = True):
         with sentry_sdk.start_span(op="render_image", description="Render image"):
             self._race = race
             self._model = model

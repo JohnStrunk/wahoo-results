@@ -282,7 +282,7 @@ def initialize_sentry(model: Model) -> None:
         "ip_address": "{{auto}}",
     })
 
-def main() -> None:
+def main() -> None:  # pylint: disable=too-many-statements
     '''Main program'''
     root = Tk()
 

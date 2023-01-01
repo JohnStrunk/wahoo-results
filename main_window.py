@@ -76,13 +76,13 @@ class View(ttk.Frame):
         statustext.grid(column=0, row=0, sticky="news")
         statustext.bind("<Button-1>", lambda *_: self._vm.statusclick.run())
 
-        s = ttk.Style()
-        s.configure("TCombobox", padding=_TXT_PAD)  # Font drop-downs
-        s.configure("TLabel", padding=_TXT_PAD)
-        s.configure("TEntry", padding=_TXT_PAD)
-        s.configure("TSpinbox", padding=_TXT_PAD)
-        s.configure("TButton", padding=_PADDING)
-        s.configure("TLabelframe", padding=_PADDING)
+        style = ttk.Style()
+        style.configure("TCombobox", padding=_TXT_PAD)  # Font drop-downs
+        style.configure("TLabel", padding=_TXT_PAD)
+        style.configure("TEntry", padding=_TXT_PAD)
+        style.configure("TSpinbox", padding=_TXT_PAD)
+        style.configure("TButton", padding=_PADDING)
+        style.configure("TLabelframe", padding=_PADDING)
 
     def _build_menu(self) -> None:
         '''Creates the dropdown menus'''
@@ -92,8 +92,10 @@ class View(ttk.Frame):
         # File menu
         file_menu = Menu(menubar)
         menubar.add_cascade(menu=file_menu, label='File', underline=0)
-        file_menu.add_command(label='Save scoreboard...', underline=0, command=self._vm.menu_save_scoreboard.run)
-        file_menu.add_command(label='Export template...', underline=0, command=self._vm.menu_export_template.run)
+        file_menu.add_command(label='Save scoreboard...', underline=0,
+        command=self._vm.menu_save_scoreboard.run)
+        file_menu.add_command(label='Export template...', underline=0,
+        command=self._vm.menu_export_template.run)
         file_menu.add_separator()
         file_menu.add_command(label='Exit', underline=1, command=self._vm.menu_exit.run)
         # Help menu
@@ -197,7 +199,7 @@ class _configTab(ttk.Frame):
         self._vm.image_bg.trace_add("write", lambda *_:
             self._bg_img_label.set(os.path.basename(self._vm.image_bg.get())[-20:]))
         self._vm.image_bg.set(self._vm.image_bg.get())
-        ToolTip(bgframelabels, f"Scoreboard background image - Recommended: 1280x720")
+        ToolTip(bgframelabels, "Scoreboard background image - Recommended: 1280x720")
 
         bgframebtns = ttk.Frame(mainframe)
         bgframebtns.pack(side="top", fill="x")
@@ -220,14 +222,16 @@ class _configTab(ttk.Frame):
         tspin = ttk.Spinbox(opt_frame, from_=1, to=3, increment=1, width=3,
         textvariable=self._vm.min_times)
         tspin.grid(column=1, row=1, sticky="news")
-        ToolTip(tspin, 'Lanes with fewer than this number of raw times will display dashes instead of a time')
+        ToolTip(tspin, 'Lanes with fewer than this number of raw times will' +
+        ' display dashes instead of a time')
 
         ttk.Label(opt_frame, text="Time threshold:", anchor="e").grid(column=0, row=2,
         sticky="news")
         thresh = ttk.Spinbox(opt_frame, from_=0.01, to=9.99, increment=0.1, width=4,
         textvariable=self._vm.time_threshold)
         thresh.grid(column=1, row=2, sticky="news")
-        ToolTip(thresh, "Lanes with any raw times that differ from the final time more than this amount will display dashes")
+        ToolTip(thresh, "Lanes with any raw times that differ from the final" +
+        " time more than this amount will display dashes")
 
         return opt_frame
 
@@ -256,9 +260,11 @@ class _dirsTab(ttk.Frame):
         sltv = widgets.StartListTreeView(frame, self._vm.startlist_contents)
         sltv.grid(column=0, row=1, sticky="news", padx=1, pady=1)
         ToolTip(sltv, "List of events found in the start list directory")
-        expbtn = ttk.Button(frame, padding=(8, 0), text="Export events to Dolphin...", command=self._vm.dolphin_export.run)
+        expbtn = ttk.Button(frame, padding=(8, 0), text="Export events to Dolphin...",
+        command=self._vm.dolphin_export.run)
         expbtn.grid(column=0, row=2, padx=1, pady=1)
-        ToolTip(expbtn, 'Create "dolphin_events.csv" event list for import into CTS Dolphin software')
+        ToolTip(expbtn, 'Create "dolphin_events.csv" event list for import' +
+        ' into CTS Dolphin software')
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(1, weight=1)
         return frame

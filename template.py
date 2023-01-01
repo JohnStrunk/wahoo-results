@@ -40,7 +40,7 @@ def get_template() -> RaceTimes:
     >>> t.final_time(3).is_valid
     False
     >>> t.name(3)
-    'SWIMMER, NAMEOF A'
+    'BRADY, JUNE A'
     >>> t.team(3)
     'TEAM'
     '''
