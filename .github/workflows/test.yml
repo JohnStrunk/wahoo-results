@@ -61,10 +61,14 @@ jobs:
         run: pipenv run make-doc.bat html
 
       - name: Download Snyk CLI
+        if: ${{ env.SNYK_TOKEN != '' }}
         shell: cmd
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: curl -OsL https://github.com/snyk/cli/releases/download/${{ env.SNYK_VERSION }}/snyk-win.exe
 
       - name: Run Snyk CLI
+        if: ${{ env.SNYK_TOKEN != '' }}
         shell: cmd
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -151,7 +155,7 @@ jobs:
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         # https://github.com/softprops/action-gh-release
-        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5  # v0.1.14
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844  # v0.1.15
         with:
           name: Release ${{ github.ref_name }}
           draft: true
