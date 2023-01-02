@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from matplotlib import font_manager # type: ignore
 import sentry_sdk
 
-from main_window import Model
+from model import Model
 from racetimes import RaceTimes, RawTime
 from startlist import format_name, NameMode
 
