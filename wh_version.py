@@ -42,7 +42,10 @@ class ReleaseInfo:
         self.draft = release_json['draft']
         self.prerelease = release_json['prerelease']
         self.published = dateutil.parser.isoparse(release_json['published_at'])
-        self.semver = re.match(r'^v?(.*)$', self.tag).group(1)
+        match = re.match(r'^v?(.*)$', self.tag)
+        self.semver = ""
+        if match is not None:
+            self.semver = match.group(1)
 
 
 def releases(user_repo: str) -> List[ReleaseInfo]:

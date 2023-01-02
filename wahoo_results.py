@@ -1,5 +1,6 @@
+#! /usr/bin/env python
 # Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
-# Copyright (C) 2020 - John D. Strunk
+# Copyright (C) 2022 - John D. Strunk
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -14,202 +15,248 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Wahoo! Results scoreboard'''
+'''Wahoo Results!'''
 
+import copy
 import os
 import platform
+import re
 import sys
-import time
-import uuid
-import tkinter
-from tkinter import Tk, messagebox
-from typing import Callable, List
-
-from PIL import Image  # type: ignore
+from time import sleep
+from tkinter import Tk, filedialog, messagebox
+from typing import List, Optional
+import webbrowser
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
-import watchdog.events  #type: ignore
-import watchdog.observers  #type: ignore
+from watchdog.observers import Observer #type: ignore
+from about import about
 
-from imagecast import ImageCast
-from config import WahooConfig
-from manual import show_manual_chooser
-import results
-from scoreboardimage import ScoreboardImage, waiting_screen
-from settings import Settings
-import wh_analytics
+import main_window
+import imagecast
+from model import Model
+from racetimes import RaceTimes, RawTime, from_do4
+from scoreboard import ScoreboardImage, waiting_screen
+from startlist import events_to_csv, from_scb, load_all_scb
+from template import get_template
+from watcher import DO4Watcher, SCBWatcher
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
+import wh_version
+import wh_analytics
 
-FILE_WATCHER: watchdog.observers.Observer
-IC: ImageCast
+CONFIG_FILE = "wahoo-results.ini"
 
-def eventlist_to_csv(events: List[results.Event]) -> List[str]:
-    '''Converts a list of events into CSV format'''
-    lines: List[str] = []
-    for i in events:
-        lines.append(f"{i.event_num},{i.event_desc},{i.num_heats},1,A\n")
-    return lines
+def setup_exit(root: Tk, model: Model) -> None:
+    '''Set up handlers for application exit'''
+    def exit_fn() -> None:
+        try:
+            model.save(CONFIG_FILE)
+        except PermissionError as err:
+            messagebox.showerror(title="Error saving configuration",
+                message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
+                detail="Please ensure the working directory is writable.")
+        root.destroy()
+    # Close box exits app
+    root.protocol("WM_DELETE_WINDOW", exit_fn)
+    # Exit menu item exits app
+    model.menu_exit.add(exit_fn)
 
-def generate_dolphin_csv(filename: str, directory: str) -> int:
-    """
-    Write the events from the scb files in the given directory into a CSV
-    for Dolphin.
-    """
+def setup_template(model: Model) -> None:
+    '''Setup handler for exporting scoreboard template'''
+    def do_export() -> None:
+        filename = filedialog.asksaveasfilename(confirmoverwrite=True,
+        defaultextension=".png", filetypes=[("image", "*.png")],
+        initialfile="template")
+        if len(filename) == 0:
+            return
+        template = ScoreboardImage(imagecast.IMAGE_SIZE,
+        get_template(), model, False)
+        template.image.save(filename)
+
+    model.menu_export_template.add(do_export)
+
+def setup_save(model: Model) -> None:
+    '''Setup handler for saving current scoreboard image'''
+    def do_save() -> None:
+        filename = filedialog.asksaveasfilename(confirmoverwrite=True,
+        defaultextension=".png", filetypes=[("image", "*.png")],
+        initialfile="scoreboard")
+        if len(filename) == 0:
+            return
+        sb_image = model.scoreboard.get()
+        sb_image.save(filename)
+
+    model.menu_save_scoreboard.add(do_save)
+
+def setup_appearance(model: Model) -> None:
+    '''Link model changes to the scoreboard preview'''
+    def update_preview() -> None:
+        preview = ScoreboardImage(imagecast.IMAGE_SIZE, get_template(), model)
+        model.appearance_preview.set(preview.image)
+    for element in [
+        model.font_normal,
+        model.font_time,
+        model.text_spacing,
+        model.title,
+        model.image_bg,
+        model.color_title,
+        model.color_event,
+        model.color_even,
+        model.color_odd,
+        model.color_first,
+        model.color_second,
+        model.color_third,
+        model.color_bg,
+        model.num_lanes,
+    ]: element.trace_add("write", lambda *_: update_preview())
+    update_preview()
+
+    def handle_bg_import() -> None:
+        image = filedialog.askopenfilename(filetypes=[("image", "*.gif *.jpg *.jpeg *.png")])
+        if len(image) == 0:
+            return
+        image = os.path.normpath(image)
+        model.image_bg.set(image)
+    model.bg_import.add(handle_bg_import)
+    model.bg_clear.add(lambda: model.image_bg.set(""))
+
+def setup_scb_watcher(model: Model, observer: Observer) -> None:
+    '''Set up file system watcher for startlists'''
+    def process_startlists() -> None:
+        '''
+        Load all the startlists from the current directory and update the UI
+        with their information.
+        '''
+        directory = model.dir_startlist.get()
+        startlists = load_all_scb(directory)
+        model.startlist_contents.set(startlists)
+
+    def scb_dir_updated() -> None:
+        '''
+        When the startlist directory is changed, update the watched to look at
+        the new directory and trigger processing of the startlists.
+        '''
+        path = model.dir_startlist.get()
+        if not os.path.exists(path):
+            return
+        observer.unschedule_all()
+        observer.schedule(SCBWatcher(process_startlists), path)
+        process_startlists()
+
+    model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
+    scb_dir_updated()
+
+def summarize_racedir(directory: str) -> List[RaceTimes]:
+    '''Summarize all race results in a directory'''
     files = os.scandir(directory)
-    events = []
+    contents: List[RaceTimes] = []
     for file in files:
-        if file.name.endswith(".scb"):
-            event = results.Event()
-            event.from_scb(file.path)
-            events.append(event)
-    events.sort(key=lambda e: e.event_letter_portion())
-    events.sort(key=lambda e: e.event_number_portion())
-    csv_lines = eventlist_to_csv(events)
-    outfile = os.path.join(directory, filename)
-    with open(outfile, "w", encoding="cp1252") as csv:
-        csv.writelines(csv_lines)
-    return len(events)
-
-class Do4Handler(watchdog.events.PatternMatchingEventHandler):
-    '''Handler to process Dolphin .do4 files'''
-    HeatCallback = Callable[[results.Heat], None]
-    _options: WahooConfig
-
-    def __init__(self, hcb: HeatCallback, options: WahooConfig):
-        self._hcb = hcb
-        self._options = options
-        super().__init__(patterns=["*.do4"], ignore_directories=True)
-
-    def on_created(self, event):
-        time.sleep(1)
-        with sentry_sdk.start_transaction(op="new_result", name="New race result") as txn:
-            inhibit = self._options.get_bool("inhibit_inconsistent")
-            txn.set_tag("inhibit_inconsistent", inhibit)
-            heat = results.Heat(allow_inconsistent=not inhibit)
+        if file.name.endswith(".do4"):
+            match = re.match(r'^(\d+)-', file.name)
+            if match is None:
+                continue
             try:
-                heat.load_do4(event.src_path)
-                scb_filename = f"E{heat.event_num:0>3}.scb"
-                heat.load_scb(os.path.join(self._options.get_str("start_list_dir"), scb_filename))
-            except results.FileParseError:
+                # min times and threshold don't matter for the summary
+                racetime = from_do4(file.path, 1, RawTime(99.9))
+                contents.append(racetime)
+                #'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
+            except ValueError:
                 pass
-            except FileNotFoundError:
+            except OSError:
                 pass
-            num_cc = len([x for x in IC.get_devices() if x["enabled"]])
-            txn.set_tag("has_discription", heat.event_desc != "")
-            txn.set_tag("lanes", self._options.get_int("num_lanes"))
-            txn.set_tag("chromecasts", num_cc)
-            wh_analytics.results_received(
-                has_names = heat.event_desc != "",
-                chromecasts = num_cc,
-            )
-            self._hcb(heat)
+    return contents
 
-def settings_window(root: Tk, options: WahooConfig) -> None:
-    '''Display the settings window'''
-    # Settings window is fixed size
-    root.state("normal")
-    root.overrideredirect(False)  # show titlebar
-    root.resizable(False, False)
-    root.geometry("")  # allow automatic size
+def load_result(model: Model, filename: str) -> Optional[RaceTimes]:
+    '''Load a result file and corresponding startlist'''
+    racetime: Optional[RaceTimes] = None
+    # Retry mechanism since we get errors if we try to read while it's
+    # still being written.
+    for tries in range(1, 6):
+        try:
+            racetime = from_do4(filename, model.min_times.get(),
+                RawTime(model.time_threshold.get()))
+        except ValueError:
+            sleep(0.05 * tries)
+        except OSError:
+            sleep(0.05 * tries)
+    if racetime is None:
+        return None
+    efilename = f"E{racetime.event:0>3}.scb"
+    try:
+        startlist = from_scb(os.path.join(model.dir_startlist.get(), efilename))
+        racetime.set_names(startlist)
+    except OSError:
+        pass
+    except ValueError:
+        pass
+    return racetime
 
-    settings: Settings
+def setup_do4_watcher(model: Model, observer: Observer) -> None:
+    '''Set up watches for files/directories and connect to model'''
+    def process_racedir() -> None:
+        '''
+        Load all the race results and update the UI
+        '''
+        with sentry_sdk.start_span(op="update_race_ui",
+        description="Update race summaries in UI") as span:
+            directory = model.dir_results.get()
+            contents = summarize_racedir(directory)
+            span.set_tag("race_files", len(contents))
+            model.results_contents.set(contents)
 
-    def clear_cb():
-        wh_analytics.clear_btn()
-        image = waiting_screen((1280, 720), options)
-        settings.set_preview(image)
-        IC.publish(image)
+    def process_new_result(file: str) -> None:
+        '''Process a new race result that has been detected'''
+        with sentry_sdk.start_transaction(op="new_result", name="New race result"):
+            racetime = load_result(model, file)
+            if racetime is None:
+                return
+            scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
+            model.scoreboard.set(scoreboard.image)
+            model.latest_result.set(racetime)
+            num_cc = len([x for x in model.cc_status.get() if x.enabled])
+            wh_analytics.results_received(racetime.has_names, num_cc)
+            process_racedir()  # update the UI
 
-    def test_cb() -> None:
-        wh_analytics.test_btn()
-        heat = results.Heat(allow_inconsistent = not options.get_bool("inhibit_inconsistent"))
-        #pylint: disable=protected-access
-        heat._parse_do4("""432;1;1;All
-Lane1;991.03;991.02;
-Lane2;48.00;48.00;
-Lane3;600.20;600.20;
-Lane4;0;0;0
-Lane5;312.34;312.34;
-Lane6;678.12;679.12;
-Lane7;1000.03;1000.03;
-Lane8;1000.03;1000.03;
-Lane9;1010.03;1010.03;
-Lane10;1000.03;1000.03;
-F679E29E3D8A4CC4""".split("\n"))
-        # Names from https://www.name-generator.org.uk/
-        #pylint: disable=protected-access
-        heat._parse_scb("""#432 GIRLS 13&O 1650 FREE
-MILLER, STEPHANIE   --TEAM1           
-DAVIS, SARAH        --TEAM1           
-GARCIA, ASHLEY      --TEAM1           
-WILSON, JESSICA     --TEAM1           
-                    --                
-MOORE, SAMANTHA     --TEAM1           
-JACKSON, AMBER      --TEAM1           
-TAYLOR, MELISSA     --TEAM1           
-ANDERSON, RACHEL    --TEAM1           
-WHITE, MEGAN        --TEAM1           """.split("\n"))
-        heat_cb(heat)
+    def do4_dir_updated() -> None:
+        '''
+        When the raceresult directory is changed, update the watch to look at
+        the new directory and trigger processing of the results.
+        '''
+        path = model.dir_results.get()
+        if not os.path.exists(path):
+            return
+        observer.unschedule_all()
+        observer.schedule(DO4Watcher(process_new_result), path)
+        process_racedir()
 
-    def selection_cb(enabled_uuids: List[uuid.UUID]) -> None:
-        for status in IC.get_devices():
-            if status["uuid"] in enabled_uuids:
-                IC.enable(status["uuid"], True)
-            else:
-                IC.enable(status["uuid"], False)
+    model.dir_results.trace_add("write", lambda *_: do4_dir_updated())
+    do4_dir_updated()
 
-    def watchdir_cb(_dir: str) -> None:
-        FILE_WATCHER.unschedule_all()
-        path = options.get_str("dolphin_dir")
-        if os.path.exists(path):
-            FILE_WATCHER.schedule(do4_handler, path)
+def check_for_update(model: Model) -> None:
+    '''Notifies if there's a newer released version'''
+    current_version = model.version.get()
+    latest_version = wh_version.latest()
+    if (latest_version is not None and
+        not wh_version.is_latest_version(latest_version, current_version)):
+        model.statustext.set(f"New version available. Click to download: {latest_version.tag}")
+        model.statusclick.add(lambda: webbrowser.open(latest_version.url))
 
-    def heat_cb(heat: results.Heat) -> None:
-        sbi = ScoreboardImage(heat, (1280, 720), options)
-        settings.set_preview(sbi.image)
-        IC.publish(sbi.image)
+def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
+    '''Link Chromecast discovery/management to the UI'''
+    def cast_discovery() -> None:
+        dev_list = copy.deepcopy(icast.get_devices())
+        model.cc_status.set(dev_list)
+    def update_cc_list() -> None:
+        dev_list = model.cc_status.get()
+        for dev in dev_list:
+            icast.enable(dev['uuid'], dev['enabled'])
+    model.cc_status.trace_add("write", lambda *_: update_cc_list())
+    icast.set_discovery_callback(cast_discovery)
 
-    def cast_discovery_cb() -> None:
-        items = {}
-        for status in IC.get_devices():
-            items[status["uuid"]] = {
-                "name": status["name"],
-                "enabled": status["enabled"]
-            }
-        settings.set_items(items)
+    # Link Chromecast contents to the UI preview
+    model.scoreboard.trace_add("write", lambda *_: icast.publish(model.scoreboard.get()))
 
-    def manual_publish(img: Image.Image) -> None:
-        settings.set_preview(img)
-        IC.publish(img)
-
-    def manual_btn_cb() -> None:
-        show_manual_chooser(root, manual_publish, options)
-
-    do4_handler = Do4Handler(heat_cb, options)
-    path = options.get_str("dolphin_dir")
-    if os.path.exists(path):
-        FILE_WATCHER.schedule(do4_handler, path)
-
-    settings = Settings(root, generate_dolphin_csv, clear_cb, test_cb,
-                        selection_cb, watchdir_cb, manual_btn_cb, options)
-    settings.grid(column=0, row=0, sticky="news")
-
-    IC.set_discovery_callback(cast_discovery_cb)
-    IC.start()
-    clear_cb()
-
-def main():  # pylint: disable=too-many-statements
-    '''Runs the Wahoo! Results scoreboard'''
-    global FILE_WATCHER  # pylint: disable=global-statement
-    global IC  # pylint: disable=global-statement
-
-    # logging.basicConfig(
-    #     filename=f'wahoo-results.log',
-    #     level=logging.DEBUG,
-    #     format='%(asctime)s - %(levelname)s - %(module)s:%(filename)s:%(lineno)d - %(message)s',
-    #     )
-
-    # Determine if running as a PyInstaller exe bundle
+def initialize_sentry(model: Model) -> None:
+    '''Initialize sentry.io crash reporting'''
     execution_environment = "source"
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         execution_environment = "executable"
@@ -230,57 +277,85 @@ def main():  # pylint: disable=too-many-statements
     sentry_sdk.set_tag("os_release", uname.release)
     sentry_sdk.set_tag("os_version", uname.version)
     sentry_sdk.set_tag("os_machine", uname.machine)
-    config = WahooConfig()
     sentry_sdk.set_user({
-        "id": config.get_str("client_id"),
+        "id": model.client_id.get(),
         "ip_address": "{{auto}}",
     })
+
+def main() -> None:  # pylint: disable=too-many-statements
+    '''Main program'''
+    root = Tk()
+
+    model = Model()
+
+    model.load(CONFIG_FILE)
+    model.version.set(WAHOO_RESULTS_VERSION)
+
+    initialize_sentry(model)
     hub = sentry_sdk.Hub.current
     hub.start_session(session_mode="application")
 
-    bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
-
-    root = Tk()
-
-    wh_analytics.application_start(
-        config = config,
-        screen_size = (root.winfo_screenwidth(), root.winfo_screenheight()),
-        exe_environ = execution_environment,
-    )
-    screen_size = f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}"
+    screen_size = (root.winfo_screenwidth(), root.winfo_screenheight())
+    wh_analytics.application_start(model, screen_size)
     sentry_sdk.set_context("display", {
-        "size": screen_size,
+        "size": f"{screen_size[0]}x{screen_size[1]}",
     })
 
-    root.title("Wahoo! Results")
-    icon_file = os.path.abspath(os.path.join(bundle_dir, 'media', 'wr-icon.ico'))
-    try:
-        root.iconbitmap(icon_file)
-    except tkinter.TclError:
-        # On linux, we can't set a Windows icon file
-        pass
-    root.columnconfigure(0, weight=1)
-    root.rowconfigure(0, weight=1)
+    main_window.View(root, model)
 
-    FILE_WATCHER = watchdog.observers.Observer()
-    FILE_WATCHER.start()
+    setup_exit(root, model)
+    setup_save(model)
+    setup_template(model)
 
-    IC = ImageCast(8011)
+    def docs_fn() -> None:
+        query_params = "&".join([
+            "utm_source=wahoo_results",
+            "utm_medium=menu",
+            "utm_campaign=docs_link",
+            f"ajs_uid={model.client_id.get()}",
+        ])
+        webbrowser.open("https://wahoo-results.readthedocs.io/?" + query_params)
 
-    settings_window(root, config)
+    model.menu_docs.add(docs_fn)
+    check_for_update(model)
 
-    # Intercept the close button so we can save the config before destroying
-    # the main window and exiting the event loop in case we need to display an
-    # error dialog.
-    def close_cb():
-        try:
-            config.save()
-        except PermissionError as err:
-            messagebox.showerror(title="Error saving configuration",
-                message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
-                detail="Please ensure the working directory is writable.")
-        root.destroy()
-    root.protocol("WM_DELETE_WINDOW", close_cb)
+    model.menu_about.add(lambda: about(root))
+
+    # Connections for the appearance tab
+    setup_appearance(model)
+
+    # Connections for the directories tab
+    scb_observer = Observer()
+    scb_observer.start()
+    setup_scb_watcher(model, scb_observer)
+
+    do4_observer = Observer()
+    do4_observer.start()
+    setup_do4_watcher(model, do4_observer)
+
+    def write_dolphin_csv():
+        directory = model.dir_startlist.get()
+        slists = load_all_scb(directory)
+        csv = events_to_csv(slists)
+        filename = os.path.join(directory, "dolphin_events.csv")
+        with open(filename, "w", encoding="cp1252") as file:
+            file.writelines(csv)
+    model.dolphin_export.add(write_dolphin_csv)
+
+    # Connections for the run tab
+    icast = imagecast.ImageCast(9998)
+    setup_run(model, icast)
+    icast.start()
+
+    # Set initial scoreboard image
+    model.scoreboard.set(waiting_screen(imagecast.IMAGE_SIZE, model))
+
+    # Analytics triggers
+    model.menu_docs.add(wh_analytics.documentation_link)
+    model.statusclick.add(wh_analytics.update_link)
+    model.dir_startlist.trace_add("write", lambda *_: wh_analytics.set_cts_directory(True))
+    model.dir_results.trace_add("write", lambda *_: wh_analytics.set_do4_directory(True))
+    model.dolphin_export.add(wh_analytics.wrote_dolphin_csv)
 
     # Allow the root window to build, then close the splash screen if it's up
     # and we're running in exe mode
@@ -297,10 +372,13 @@ def main():  # pylint: disable=too-many-statements
 
     root.mainloop()
 
-    FILE_WATCHER.stop()
-    FILE_WATCHER.join()
-    IC.stop()
-    wh_analytics.application_stop(config)
+    scb_observer.stop()
+    scb_observer.join()
+    do4_observer.stop()
+    do4_observer.join()
+    icast.stop()
+    wh_analytics.application_stop(model)
+    hub.end_session()
 
 if __name__ == "__main__":
     main()

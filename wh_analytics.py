@@ -18,30 +18,31 @@
 
 import locale
 import platform
+from pprint import pprint
 import socket
 import time
 from typing import Any, Dict, Optional, Tuple
 
 from segment import analytics  # type: ignore
+import sentry_sdk
 import ipinfo  # type: ignore
 
-from config import WahooConfig
+from model import Model
 import version
 
-_CONTEXT: Dict[str, Any]
+_CONTEXT: Dict[str, Any] = {}
 
-def application_start(config: WahooConfig, screen_size: Tuple[int, int],
-    exe_environ: str) -> None:
+def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
     """Event for application startup"""
     analytics.write_key = version.SEGMENT_WRITE_KEY
-    analytics.send = config.get_bool("analytics")
+    analytics.send = model.analytics.get()
     global _CONTEXT  # pylint: disable=global-statement
     _CONTEXT = {
-        "context": _setup_context(screen_size, exe_environ),
+        "context": _setup_context(screen_size),
         "race_count": 0,
         "race_count_with_names": 0,
         "session_start": time.time(),
-        "user_id": config.get_str("client_id"),
+        "user_id": model.client_id.get()
     }
 
     analytics.identify(
@@ -51,17 +52,18 @@ def application_start(config: WahooConfig, screen_size: Tuple[int, int],
     )
     _send_event("Scoreboard started")
 
-def application_stop(config: WahooConfig) -> None:
+def application_stop(model: Model) -> None:
     """Event for application shutdown"""
     _send_event("Scoreboard stopped", {
         "runtime": time.time() - _CONTEXT["session_start"],
         "race_count": _CONTEXT["race_count"],
         "race_count_with_names": _CONTEXT["race_count_with_names"],
-        "lane_count": config.get_int("num_lanes"),
-        "inhibit": config.get_bool("inhibit_inconsistent"),
-        "bg_image": config.get_str("image_bg") != "",
-        "normal_font": config.get_str("normal_font"),
-        "time_font": config.get_str("time_font"),
+        "lane_count": model.num_lanes.get(),
+        "time_threshold": model.time_threshold.get(),
+        "min_times": model.min_times.get(),
+        "bg_image": model.image_bg.get() != "",
+        "normal_font": model.font_normal.get(),
+        "time_font": model.font_time.get(),
     })
     analytics.shutdown()
 
@@ -74,18 +76,6 @@ def results_received(has_names: bool, chromecasts: int) -> None:
         "has_names": has_names,
         "chromecast_count": chromecasts
     })
-
-def clear_btn() -> None:
-    """Clear scoreboard event"""
-    _send_event("Clear")
-
-def test_btn() -> None:
-    """Test scoreboard event"""
-    _send_event("Test")
-
-def manual_result() -> None:
-    """Publish a manually loaded result event"""
-    _send_event("Manual result")
 
 def documentation_link() -> None:
     """Follow link to docs event"""
@@ -120,13 +110,17 @@ def cc_toggle(enable: bool) -> None:
     })
 
 def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
-    if kvparams is None:
-        kvparams = {}
-    analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
-    if analytics.write_key == "unknown": # dev environment
-        print(f"Event: {name}")
+    with sentry_sdk.start_span(op="analytics", description="Process analytics event"):
+        if "user_id" not in _CONTEXT:
+            return
+        if kvparams is None:
+            kvparams = {}
+        analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
+        if analytics.write_key == "unknown": # dev environment
+            print(f"Event: {name}")
+            pprint(kvparams)
 
-def _setup_context(screen_size: Tuple[int, int], exe_environ: str) -> Dict[str, Any]:
+def _setup_context(screen_size: Tuple[int, int]) -> Dict[str, Any]:
     uname = platform.uname()
     iphandler = ipinfo.getHandler(version.IPINFO_TOKEN)
     ipdetails = iphandler.getDetails()
@@ -147,10 +141,9 @@ def _setup_context(screen_size: Tuple[int, int], exe_environ: str) -> Dict[str, 
     return {
         "app": {
             "version": version.WAHOO_RESULTS_VERSION,
-            "environment": exe_environ,
         },
         "ip": ipdetails.ip,
-        "locale": locale.getdefaultlocale()[0],
+        "locale": locale.getlocale()[0],
         "location": {
             "city": ipdetails.city,
             "region": ipdetails.region,
