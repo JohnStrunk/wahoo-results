@@ -27,7 +27,7 @@ from model import Model
 from tooltip import ToolTip
 import widgets
 
-_PADDING = 3
+_PADDING = 2
 _TXT_X_PAD = 5
 _TXT_Y_PAD = 1
 _TXT_PAD = (_TXT_X_PAD, _TXT_Y_PAD)
@@ -125,7 +125,7 @@ class _configTab(ttk.Frame):
 
         ttk.Label(txt_frame, text="Main font:", anchor="e").grid(column=0, row=0, sticky="news")
         main_dd = ttkwidgets.font.FontFamilyDropdown(txt_frame, self._vm.font_normal.set)
-        main_dd.grid(column=1, row=0, sticky="news")
+        main_dd.grid(column=1, row=0, sticky="news", pady=_PADDING)
         ToolTip(main_dd, "Main font used for scoreboard text")
         # Update dropdown if textvar is changed
         self._vm.font_normal.trace_add("write",
@@ -135,7 +135,7 @@ class _configTab(ttk.Frame):
 
         ttk.Label(txt_frame, text="Time font:", anchor="e").grid(column=0, row=1, sticky="news")
         time_dd = ttkwidgets.font.FontFamilyDropdown(txt_frame,  self._vm.font_time.set)
-        time_dd.grid(column=1, row=1, sticky="news")
+        time_dd.grid(column=1, row=1, sticky="news", pady=_PADDING)
         ToolTip(time_dd, "Font for displaying the times - Recommended: fixed-width font")
         # Update dropdown if textvar is changed
         self._vm.font_time.trace_add("write",
@@ -145,13 +145,13 @@ class _configTab(ttk.Frame):
 
         ttk.Label(txt_frame, text="Title:", anchor="e").grid(column=0, row=2, sticky="news")
         hentry = ttk.Entry(txt_frame, textvariable=self._vm.title)
-        hentry.grid(column=1, row=2, sticky="news")
+        hentry.grid(column=1, row=2, sticky="news", pady=_PADDING)
         ToolTip(hentry, "Title text to display")
 
         ttk.Label(txt_frame, text="Text spacing:", anchor="e").grid(column=0, row=3, sticky="news")
         spspin = ttk.Spinbox(txt_frame, from_=0.8, to=2.0, increment=0.05, width=4, format="%0.2f",
         textvariable=self._vm.text_spacing)
-        spspin.grid(column=1, row=3, sticky="nws")
+        spspin.grid(column=1, row=3, sticky="nws", pady=_PADDING)
         ToolTip(spspin, "Vertical space between text lines")
 
         ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
@@ -215,13 +215,13 @@ class _configTab(ttk.Frame):
         ttk.Label(opt_frame, text="Lanes:", anchor="e").grid(column=0, row=0, sticky="news")
         lspin = ttk.Spinbox(opt_frame, from_=6, to=10, increment=1, width=3,
         textvariable=self._vm.num_lanes)
-        lspin.grid(column=1, row=0, sticky="news")
+        lspin.grid(column=1, row=0, sticky="news", pady=_PADDING)
         ToolTip(lspin, "Number of lanes to display")
 
         ttk.Label(opt_frame, text="Minimum times:", anchor="e").grid(column=0, row=1, sticky="news")
         tspin = ttk.Spinbox(opt_frame, from_=1, to=3, increment=1, width=3,
         textvariable=self._vm.min_times)
-        tspin.grid(column=1, row=1, sticky="news")
+        tspin.grid(column=1, row=1, sticky="news", pady=_PADDING)
         ToolTip(tspin, 'Lanes with fewer than this number of raw times will' +
         ' display dashes instead of a time')
 
@@ -229,7 +229,7 @@ class _configTab(ttk.Frame):
         sticky="news")
         thresh = ttk.Spinbox(opt_frame, from_=0.01, to=9.99, increment=0.1, width=4,
         textvariable=self._vm.time_threshold)
-        thresh.grid(column=1, row=2, sticky="news")
+        thresh.grid(column=1, row=2, sticky="news", pady=_PADDING)
         ToolTip(thresh, "Lanes with any raw times that differ from the final" +
         " time more than this amount will display dashes")
 
