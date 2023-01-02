@@ -12,7 +12,7 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2022.11.23"
+  PIPENV_INSTALL_VERSION: "2022.12.19"
   SNYK_VERSION: v1.1048.0
   # https://github.com/upx/upx/releases
   UPX_VERSION: 4.0.1
