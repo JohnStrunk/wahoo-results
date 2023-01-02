@@ -19,11 +19,12 @@ This file provides the ImageCast class that can be used to publish static PNG
 images to Chromecast devices.
 """
 
+from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import socket
 import threading
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from uuid import UUID
 
 from PIL import Image # type: ignore
@@ -32,10 +33,17 @@ from pychromecast.error import NotConnected # type: ignore
 import sentry_sdk
 import zeroconf
 
-import wh_analytics
+# Resolution of images for the Chromecast
+IMAGE_SIZE = (1280, 720)
 
-# Dict of uuid, name, enabled
-DeviceStatus = Dict[str, Any]
+@dataclass
+class DeviceStatus:
+    '''The status of a Chromecast device'''
+    uuid: UUID     # UUID for the device
+    name: str      # Friendly name for the device
+    enabled: bool  # Whether the device is enabled
+
+DiscoveryCallbackFn = Callable[[], None]
 
 class ImageCast: # pylint: disable=too-many-instance-attributes
     """
@@ -50,6 +58,10 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
     devices: Dict[UUID, Dict[str, Any]]
     _webserver_thread: Optional[threading.Thread]
     _refresh_thread: Optional[threading.Thread]
+    image: Optional[Image.Image]
+    callback_fn: Optional[DiscoveryCallbackFn]
+    browser: Optional[pychromecast.CastBrowser]
+    zconf: Optional[zeroconf.Zeroconf]
 
     def __init__(self, server_port: int) -> None:
         '''
@@ -90,14 +102,14 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                 self._disconnect(state["cast"])
 
     @classmethod
-    def _disconnect(cls, cast):
+    def _disconnect(cls, cast: pychromecast.Chromecast) -> None:
         with sentry_sdk.start_span(op="disconnect"):
             try:
                 cast.quit_app()
             except NotConnected:
                 pass
 
-    def set_discovery_callback(self, func) -> None:
+    def set_discovery_callback(self, func: DiscoveryCallbackFn) -> None:
         '''
         Sets the callback function that will be called when the list of
         discovered Chromecasts changes.
@@ -117,20 +129,15 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     self._publish_one(self.devices[uuid]["cast"])
                 elif previous and not enabled: # disabling: disconnect
                     self._disconnect(self.devices[uuid]["cast"])
-                wh_analytics.cc_toggle(enabled)
 
     def get_devices(self) -> List[DeviceStatus]:
         '''
         Get the current list of known Chromecast devices and whether they are
         currently enabled.
         '''
-        devs = []
+        devs: List[DeviceStatus] = []
         for uuid, state in self.devices.items():
-            devs.append({
-                "uuid": uuid,
-                "name": state["cast"].cast_info.friendly_name,
-                "enabled": state["enabled"]
-            })
+            devs.append(DeviceStatus(uuid, state["cast"].cast_info.friendly_name, state["enabled"]))
         return devs
 
     def publish(self, image: Image.Image) -> None:
@@ -145,7 +152,7 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                 if state["enabled"]:
                     self._publish_one(state["cast"])
 
-    def _publish_one(self, cast) -> None:
+    def _publish_one(self, cast: pychromecast.Chromecast) -> None:
         with sentry_sdk.start_span(op="publish_one"):
             if self.image is None:
                 return
@@ -167,12 +174,12 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     self.send_response(200)
                     self.send_header("Content-type", "image/png")
                     self.end_headers()
-                    parent.image.save(self.wfile, "PNG", optimize=True)
+                    if parent.image is not None:
+                        parent.image.save(self.wfile, "PNG", optimize=True)
         def _webserver_run():
             web_server = HTTPServer(("", self._server_port), WSHandler)
             web_server.serve_forever()
-        self._webserver_thread = threading.Thread(target=_webserver_run)
-        self._webserver_thread.setDaemon(True)
+        self._webserver_thread = threading.Thread(target=_webserver_run, daemon=True)
         self._webserver_thread.start()
 
     # The refresh thread periodically re-publishes the current image to ensure
@@ -184,17 +191,16 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                 time.sleep(900)
                 if self.image is not None:
                     self.publish(self.image)
-        self._refresh_thread = threading.Thread(target=_refresh_run)
-        self._refresh_thread.setDaemon(True)
+        self._refresh_thread = threading.Thread(target=_refresh_run, daemon=True)
         self._refresh_thread.start()
 
-    def _start_listener(self):
+    def _start_listener(self) -> None:
         parent = self
         class Listener(pychromecast.discovery.AbstractCastListener):
             """Receive chromecast discovery updates"""
-            def add_cast(self, uuid, service):
+            def add_cast(self, uuid: UUID, service):
                 self.update_cast(uuid, service)
-            def remove_cast(self, uuid, service, cast_info):
+            def remove_cast(self, uuid: UUID, service, cast_info):
                 try:
                     del parent.devices[uuid]
                 except KeyError:
@@ -203,9 +209,11 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     pass
                 if parent.callback_fn is not None:
                     parent.callback_fn()
-            def update_cast(self, uuid, service):
+            def update_cast(self, uuid: UUID, service) -> None:
                 with sentry_sdk.start_transaction(op="cc_update",
                         name="Chromecast update recieved"):
+                    if parent.browser is None:
+                        return
                     svcs = parent.browser.services
                     cast = pychromecast.get_chromecast_from_cast_info(svcs[uuid], parent.zconf)
                     cast.wait(timeout=2)

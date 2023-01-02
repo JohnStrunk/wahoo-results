@@ -7,7 +7,7 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2022.9.24"
+  PIPENV_INSTALL_VERSION: "2022.12.19"
 
 jobs:
   test:
@@ -23,7 +23,7 @@ jobs:
         # https://github.com/actions/setup-python
         uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984  # v4.3.0
         with:
-          python-version: '3.x'
+          python-version: '3.11'
           cache: 'pipenv'
 
       # Add Scripts directory to the path so that pipenv (and associated

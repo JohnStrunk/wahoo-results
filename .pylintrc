@@ -1,0 +1,5 @@
+[MAIN]
+ignore-patterns=.*_test.py
+
+[DESIGN]
+max-parents=99
