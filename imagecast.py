@@ -247,8 +247,8 @@ def _main():
     def callback():
         status = imgcast.get_devices()
         for device in status:
-            print(f"{device['name']} -> {device['enabled']}")
-            imgcast.enable(device['uuid'], True)
+            print(f"{device.name} -> {device.enabled}")
+            imgcast.enable(device.uuid, True)
         print("---")
 
     imgcast = ImageCast(9657)

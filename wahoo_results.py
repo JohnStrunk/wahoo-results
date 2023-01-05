@@ -248,7 +248,7 @@ def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
     def update_cc_list() -> None:
         dev_list = model.cc_status.get()
         for dev in dev_list:
-            icast.enable(dev['uuid'], dev['enabled'])
+            icast.enable(dev.uuid, dev.enabled)
     model.cc_status.trace_add("write", lambda *_: update_cc_list())
     icast.set_discovery_callback(cast_discovery)
 
