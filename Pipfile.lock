@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f2033a0379476f6e0d660427c7354571f1cdd8c6ce493905621c57968cd421ff"
+            "sha256": "3208fd033cf8ab22088c90e1ff4061738a7d90fef22caad05f4548c96969de13"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -736,11 +736,11 @@
         },
         "pychromecast": {
             "hashes": [
-                "sha256:7650defc42f866e2fe2ffda8455123ca886ef67df20b56ab3dd55f2c59a8476d",
-                "sha256:792fba3f31e4968a5e99c19c771774083a2aa7e897ebf6f5e218e308e33a461f"
+                "sha256:203aaf037afbaca12763a3a911929dd25b0a8a7b1ee00d010d3439bd31a98252",
+                "sha256:a183a2a872a96e2ede5fedd85012eb181355e52d957d15bdafbfd647178fafd3"
             ],
             "index": "pypi",
-            "version": "==13.0.4"
+            "version": "==13.0.1"
         },
         "pyinstaller": {
             "hashes": [
