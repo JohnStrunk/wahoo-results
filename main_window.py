@@ -99,7 +99,7 @@ class View(ttk.Frame):
         file_menu.add_separator()
         file_menu.add_command(label='Exit', underline=1, command=self._vm.menu_exit.run)
         # Help menu
-        help_menu = Menu(menubar)
+        help_menu = Menu(menubar, name="help")
         menubar.add_cascade(menu=help_menu, label='Help', underline=0)
         help_menu.add_command(label='Documentation', underline=0, command=self._vm.menu_docs.run)
         help_menu.add_command(label='About', underline=0, command=self._vm.menu_about.run)

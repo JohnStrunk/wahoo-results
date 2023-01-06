@@ -8,6 +8,14 @@
 
 .. |wr|  replace:: Wahoo! Results
 
+.. |CC|  replace:: Google Chromecast
+
+.. _CC: https://store.google.com/us/product/chromecast
+
+.. |CD|  replace:: Colorado Dolphin wireless timing system
+
+.. _CD: https://www.coloradotime.com/dolphin-wireless-swim-timing/
+
 .. |HMM|  replace:: HyTek Meet Manager
 
 .. _HMM: https://hytek.active.com/swim-meet-software.html
