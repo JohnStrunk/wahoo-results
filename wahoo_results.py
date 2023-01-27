@@ -225,7 +225,9 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
         if not os.path.exists(path):
             return
         observer.unschedule_all()
-        observer.schedule(DO4Watcher(process_new_result), path)
+        def async_process(file: str) -> None:
+            model.enqueue(lambda: process_new_result(file))
+        observer.schedule(DO4Watcher(async_process), path)
         process_racedir()
 
     model.dir_results.trace_add("write", lambda *_: do4_dir_updated())
@@ -244,7 +246,7 @@ def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
     '''Link Chromecast discovery/management to the UI'''
     def cast_discovery() -> None:
         dev_list = copy.deepcopy(icast.get_devices())
-        model.cc_status.set(dev_list)
+        model.enqueue(lambda: model.cc_status.set(dev_list))
     def update_cc_list() -> None:
         dev_list = model.cc_status.get()
         for dev in dev_list:
@@ -286,7 +288,7 @@ def main() -> None:  # pylint: disable=too-many-statements
     '''Main program'''
     root = Tk()
 
-    model = Model()
+    model = Model(root)
 
     model.load(CONFIG_FILE)
     model.version.set(WAHOO_RESULTS_VERSION)
@@ -340,6 +342,8 @@ def main() -> None:  # pylint: disable=too-many-statements
         filename = os.path.join(directory, "dolphin_events.csv")
         with open(filename, "w", encoding="cp1252") as file:
             file.writelines(csv)
+        num_events = len(csv)
+        wh_analytics.wrote_dolphin_csv(num_events)
     model.dolphin_export.add(write_dolphin_csv)
 
     # Connections for the run tab
@@ -355,7 +359,6 @@ def main() -> None:  # pylint: disable=too-many-statements
     model.statusclick.add(wh_analytics.update_link)
     model.dir_startlist.trace_add("write", lambda *_: wh_analytics.set_cts_directory(True))
     model.dir_results.trace_add("write", lambda *_: wh_analytics.set_do4_directory(True))
-    model.dolphin_export.add(wh_analytics.wrote_dolphin_csv)
 
     # Allow the root window to build, then close the splash screen if it's up
     # and we're running in exe mode
@@ -377,6 +380,7 @@ def main() -> None:  # pylint: disable=too-many-statements
     do4_observer.stop()
     do4_observer.join()
     icast.stop()
+    root.update()
     wh_analytics.application_stop(model)
     hub.end_session()
 
