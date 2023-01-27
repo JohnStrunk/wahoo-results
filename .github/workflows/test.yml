@@ -29,7 +29,7 @@ jobs:
 
       - name: Set up Python
         # https://github.com/actions/setup-python
-        uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912  # v4.4.0
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435  # v4.5.0
         with:
           python-version: '3.11'
           cache: 'pipenv'
@@ -87,7 +87,7 @@ jobs:
 
       - name: Set up Python
         # https://github.com/actions/setup-python
-        uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912  # v4.4.0
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435  # v4.5.0
         with:
           python-version: '3.x'
           cache: 'pipenv'
@@ -161,3 +161,4 @@ jobs:
           draft: true
           files: |
             wahoo-results.exe
+          token: ${{ secrets.PAT_TOKEN }}
