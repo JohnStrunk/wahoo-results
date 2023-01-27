@@ -241,8 +241,9 @@ class RaceResultView(ttk.LabelFrame):
                 rawtimes = result.raw_times(lane)
                 timestr = [scoreboard.format_time(t) if t is not None else "" for t in rawtimes]
                 final = result.final_time(lane)
-                finalstr = str(final.value)
                 if final.value == RawTime("0"):
                     finalstr = ""
+                else:
+                    finalstr = scoreboard.format_time(final.value)
                 self.tview.insert('', 'end', id=str(lane),
                 values=[str(lane), timestr[0], timestr[1], timestr[2], finalstr])

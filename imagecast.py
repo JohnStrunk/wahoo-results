@@ -176,6 +176,9 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
                     self.end_headers()
                     if parent.image is not None:
                         parent.image.save(self.wfile, "PNG", optimize=True)
+            def log_message(self, format, *args):  # pylint: disable=redefined-builtin
+                pass  # Don't log anything
+
         def _webserver_run():
             web_server = HTTPServer(("", self._server_port), WSHandler)
             web_server.serve_forever()

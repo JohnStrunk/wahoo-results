@@ -17,7 +17,8 @@
 '''Data model'''
 
 from configparser import ConfigParser
-from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Variable
+import queue
+from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Tk, Variable
 from typing import Callable, Generic, List, Optional, Set, TypeVar
 import uuid
 import PIL.Image as PILImage
@@ -97,7 +98,13 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
     PANTONE871METALICGOLD = "#85754e"     # Tertiary
     PANTONE4505FLATGOLD = "#b1953a"       # Tertiary
 
-    def __init__(self):
+    _ENQUEUE_EVENT = "<<enqueue_event1>>"
+
+    def __init__(self, root: Tk):
+        self.root = root
+        self._event_queue: queue.Queue[Callable[[], None]] = queue.Queue(0)
+        root.bind(self._ENQUEUE_EVENT, self._dispatch_event)
+
         ########################################
         ## Dropdown menu items
         self.menu_export_template = CallbackList()
@@ -207,3 +214,16 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         }
         with open(filename, "w", encoding="utf-8") as file:
             config.write(file)
+
+    def enqueue(self, func: Callable[[], None]) -> None:
+        '''Enqueue a function to be executed by the tkinter main thread'''
+        self._event_queue.put(func)
+        self.root.event_generate(self._ENQUEUE_EVENT, when="tail")
+
+    def _dispatch_event(self, _event) -> None:
+        try:
+            func = self._event_queue.get_nowait()
+            func()
+            self._event_queue.task_done()
+        except queue.Empty:
+            pass
