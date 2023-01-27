@@ -161,3 +161,4 @@ jobs:
           draft: true
           files: |
             wahoo-results.exe
+          token: ${{ secrets.PAT_TOKEN }}
