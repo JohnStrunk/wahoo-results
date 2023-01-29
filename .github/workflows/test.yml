@@ -144,6 +144,9 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [success]
     runs-on: windows-latest
+    permissions:
+      contents: write
+      discussions: write
 
     steps:
       - name: Download executable as artifact
@@ -161,4 +164,3 @@ jobs:
           draft: true
           files: |
             wahoo-results.exe
-          token: ${{ secrets.PAT_TOKEN }}
