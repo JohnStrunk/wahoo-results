@@ -71,7 +71,7 @@ def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
     """
     highest = rlist[0]
     for release in rlist:
-        if semver.compare(release.semver, highest.semver) > 0:
+        if semver.compare(release.semver, highest.semver) > 0 and not release.prerelease:
             highest = release
     return highest
 
@@ -80,27 +80,33 @@ def git_semver(wrv: str) -> str:
     Returns a legal semver description of the Wahoo Results version
     identifier.
 
-    >>> git_semver('1.0.0')
-    '1.0.0'
-    >>> git_semver('v1.0')
-    '1.0'
+    Git describe should be converted:
     >>> git_semver('v0.3.2-2-g97e7a82')
-    '0.3.2-dev.2+g97e7a82'
-    >>> git_semver('0.6.2-dev.7+g901dc0d')
-    '0.6.2-dev.7+g901dc0d'
+    '0.3.3-dev.2+97e7a82'
+
+    Don't bump patch if it's a pre-release
+    >>> git_semver('v1.2.3-pre4-5-gbadbeef')
+    '1.2.3-pre4.dev.5+badbeef'
     """
-    if semver.VersionInfo.isvalid(wrv):
-        return wrv
     # groups: tag (w/o v), commits, hash (w/ g)
-    components = re.match(r'^v?([^-]+)(?:-(\d+)-(g[0-9a-f]+))?$', wrv)
+    components = re.match(r'^v?(.+)-(\d+)-g([0-9a-f]+)$', wrv)
     if components is None:
         return "0.0.1"
     version = components.group(1)
-    if components.group(2) is not None:
-        commits = components.group(2)
-        sha = components.group(3)
-        version += f'-dev.{commits}+{sha}'
-    return version
+    commits = int(components.group(2))
+    sha = components.group(3)
+    if not semver.VersionInfo.isvalid(version):
+        return "0.0.1"
+    version_info = semver.VersionInfo.parse(version)
+    if commits > 0: # it's a dev version, so modify the version information
+        pre = ""
+        if version_info.prerelease is not None:
+            pre += version_info.prerelease + "."
+        else:
+            version_info = version_info.bump_patch()
+        pre += f"dev.{commits}"
+        version_info = version_info.replace(prerelease=pre, build=sha)
+    return str(version_info)
 
 def latest() -> Optional[ReleaseInfo]:
     """Retrieves the latest release info"""
@@ -110,9 +116,22 @@ def latest() -> Optional[ReleaseInfo]:
     return highest_semver(rlist)
 
 def is_latest_version(latest_version: Optional[ReleaseInfo], wrv:str) -> bool:
-    """Returns true if the running version is the most recent"""
+    """
+    Returns true if the running version is the most recent
+
+    >>> rdict = {"html_url": "",
+    ...          "draft": "false",
+    ...          "prerelease": "false",
+    ...          "published_at": "2020-01-01 00:00:00"}
+    >>> is_latest_version(ReleaseInfo(rdict | {"tag_name": "v1.0.0"}), "0.9.0")
+    False
+    >>> is_latest_version(ReleaseInfo(rdict | {"tag_name": "v1.0.0"}), "1.9.0")
+    True
+    >>> is_latest_version(ReleaseInfo(rdict | {"tag_name": "v1.0.0-pre1"}), "1.0.0")
+    True
+    """
     if latest_version is None:
         return True
     if wrv == "unreleased":
         return False
-    return semver.compare(latest_version.semver, git_semver(wrv)) <= 0
+    return semver.VersionInfo.parse(latest_version.semver).compare(wrv) <= 0

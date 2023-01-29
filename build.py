@@ -34,8 +34,9 @@ except FileNotFoundError:
     pass
 
 # Determine current git tag
-git_ref = subprocess.check_output('git describe --tags --match "v*"', shell=True).decode("utf-8").rstrip()
+git_ref = subprocess.check_output('git describe --tags --match "v*" --long', shell=True).decode("utf-8").rstrip()
 wr_version = wh_version.git_semver(git_ref)
+print(f"Building Wahoo Results, version: {wr_version}")
 vdict = semver.parse(wr_version)
 
 with open ('version.py', 'w' ) as f:
