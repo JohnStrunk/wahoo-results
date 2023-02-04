@@ -28,8 +28,12 @@ race results in real-time.
 The scoreboard is transmitted to Chromecast devices, allowing the results to
 be available on many displays at your facility.
 
-.. image:: media/demo1.png
-  :alt: Example scoreboard
+.. figure:: media/demo1.png
+   :alt: Example scoreboard
+   :align: center
+
+   Example scoreboard
+
 
 ➡️ **In a hurry?** :doc:`Try out the quickstart <quickstart>` ⬅️
 
@@ -51,7 +55,7 @@ Requirements
 - |HMM|_, |SMM|_, or other meet management
   software that can generate scoreboard "CTS start list" files
 - |CD|_
-- Windows 10 PC to run |wr| (It can be shared with either of the above.)
+- Windows 10/11 PC to run |wr| (It can be shared with either of the above.)
 - One or more |CC|_ devices
 
 Contributing
