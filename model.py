@@ -97,7 +97,6 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
     PANTONE306_LTBLUE = "#00b3e4"         # Tertiary
     PANTONE871METALICGOLD = "#85754e"     # Tertiary
     PANTONE4505FLATGOLD = "#b1953a"       # Tertiary
-    WHITE = "#ffffff"
 
     _ENQUEUE_EVENT = "<<enqueue_event1>>"
 
@@ -174,8 +173,8 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.image_bg.set(data.get("image_bg", ""))
         self.color_title.set(data.get("color_title", self.PANTONE200_RED))
         self.color_event.set(data.get("color_event", self.PANTONE4505FLATGOLD))
-        self.color_even.set(data.get("color_even", self.PANTONE428_LTGRAY))
-        self.color_odd.set(data.get("color_odd", self.WHITE))
+        self.color_even.set(data.get("color_even", self.PANTONE877METALIC_MDGRAY))
+        self.color_odd.set(data.get("color_odd", self.PANTONE428_LTGRAY))
         self.color_first.set(data.get("color_first", self.PANTONE306_LTBLUE))
         self.color_second.set(data.get("color_second", self.PANTONE200_RED))
         self.color_third.set(data.get("color_third", self.PANTONE4505FLATGOLD))
