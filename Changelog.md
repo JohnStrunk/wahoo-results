@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+### [1.0.0] - 2023-02-05
+
+#### Changed
+
+- :information_source: Major overhaul of UI and code structure
+
 ### [0.8.1] - 2022-07-19
 
 #### Fixed
@@ -144,7 +150,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.8.1...v1.0.0
 [0.8.1]: https://github.com/JohnStrunk/wahoo-results/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.6.2...v0.7.0

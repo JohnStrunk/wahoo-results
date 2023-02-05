@@ -89,7 +89,7 @@ jobs:
         # https://github.com/actions/setup-python
         uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435  # v4.5.0
         with:
-          python-version: '3.x'
+          python-version: '3.11'
           cache: 'pipenv'
 
       # Add Scripts directory to the path so that pipenv (and associated
