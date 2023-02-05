@@ -14,8 +14,8 @@ Wahoo! Results
   :includehidden:
 
   self
-  quickstart
   download
+  quickstart
   configuration
   faq
 

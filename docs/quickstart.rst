@@ -82,6 +82,7 @@ The above steps will create a series of files named ``E<###>.scb``, one for
 each event in the session(s) that were exported. The start lists should all be
 placed into a directory that |wr| will be able to access.
 
+.. _qs_set_start_dir:
 
 Set the start list directory
 ============================
@@ -130,6 +131,7 @@ event screen with all the events and their heat counts.
 
 |clearfloat|
 
+.. _qs_config_do4:
 
 Configure result files
 ======================
@@ -153,6 +155,8 @@ step.
 
 |clearfloat|
 
+
+.. _qs_set_result_dir:
 
 Set the results directory
 =========================
