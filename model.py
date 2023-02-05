@@ -169,7 +169,7 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         # Consolas (monospace) is standard since Vista
         self.font_time.set(data.get("font_time", "Consolas"))
         self.text_spacing.set(data.getfloat("text_spacing", 1.1))
-        self.title.set(data.get("title", ""))
+        self.title.set(data.get("title", "Wahoo! Results"))
         self.image_bg.set(data.get("image_bg", ""))
         self.color_title.set(data.get("color_title", self.PANTONE200_RED))
         self.color_event.set(data.get("color_event", self.PANTONE4505FLATGOLD))

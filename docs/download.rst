@@ -8,7 +8,7 @@ Download
 
    Version 0.8.1 - 07/19/2022 - `wahoo-results.exe
    <https://github.com/JohnStrunk/wahoo-results/releases/download/v0.8.1/wahoo-results.exe>`_ |br|
-   See it on the  `GitHub releases page.
+   See it (and previous releases) on the  `GitHub releases page.
    <https://github.com/JohnStrunk/wahoo-results/releases>`_
 
 The scoreboard is packaged as a single executable, and no installation is

@@ -69,7 +69,7 @@ def setup_template(model: Model) -> None:
         if len(filename) == 0:
             return
         template = ScoreboardImage(imagecast.IMAGE_SIZE,
-        get_template(), model, False)
+        get_template(), model, True)
         template.image.save(filename)
 
     model.menu_export_template.add(do_export)
