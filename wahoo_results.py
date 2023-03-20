@@ -139,7 +139,10 @@ def setup_scb_watcher(model: Model, observer: Observer) -> None:
         if not os.path.exists(path):
             return
         observer.unschedule_all()
-        observer.schedule(SCBWatcher(process_startlists), path)
+        # When the watcher notices a change in the startlists, the update
+        # needs to happen from the main thread, so we enqueue instead of
+        # directly call process_startlists from the SCBWatcher.
+        observer.schedule(SCBWatcher(lambda: model.enqueue(process_startlists)), path)
         process_startlists()
 
     model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
