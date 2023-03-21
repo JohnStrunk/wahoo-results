@@ -273,7 +273,7 @@ def initialize_sentry(model: Model) -> None:
         traces_sample_rate=1.0,
         environment=execution_environment,
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
-        with_locals=True,
+        include_local_variables=True,
         integrations=[ThreadingIntegration(propagate_hub=True)],
         debug=False,
     )
