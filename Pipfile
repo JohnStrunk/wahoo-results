@@ -32,6 +32,7 @@ sphinx-rtd-theme = "*"
 sphinx-tabs = "*"
 pytest-cov = "*"
 types-pillow = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.11"

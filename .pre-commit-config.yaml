@@ -1,0 +1,33 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+# Install in your local dev environment
+# > pip install --upgrade --user pre-commit
+# Enable the hooks for this repo
+# > pre-commit install
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: check-added-large-files  # prevents giant files from being committed
+      - id: check-yaml               # checks yaml files for parseable syntax
+      - id: end-of-file-fixer        # ensures that a file is either empty, or ends with one newline
+      - id: trailing-whitespace      # trims trailing whitespace
+        exclude: startlist_test.py   # Test data has intentional EOL whitespace
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.1.1
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-python-dateutil
+          - types-requests
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: rst-backticks                  # Detect common mistake of using single backticks when writing rst
+      - id: rst-directive-colons           # Detect mistake of rst directive not ending with double colon or space before the double colon
+      - id: rst-inline-touching-normal     # Detect mistake of inline code touching normal text in rst
+      - id: text-unicode-replacement-char  # Forbid files which have a UTF-8 Unicode replacement character
