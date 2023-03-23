@@ -37,7 +37,7 @@ import zeroconf
 IMAGE_SIZE = (1280, 720)
 
 # Chromecast image refresh interval (seconds)
-_REFRESH_INTERVAL = 4 * 60
+_REFRESH_INTERVAL = 15 * 60
 
 @dataclass
 class DeviceStatus:
