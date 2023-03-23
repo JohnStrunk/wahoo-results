@@ -52,6 +52,10 @@ jobs:
         shell: cmd
         run: pipenv install --deploy --dev --no-site-packages -v
 
+      - name: Run pre-commit checks
+        shell: cmd
+        run: pipenv run pre-commit run -a
+
       - name: Run tests
         shell: cmd
         run: pipenv run pytest -v
