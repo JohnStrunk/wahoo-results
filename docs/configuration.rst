@@ -101,7 +101,7 @@ import into the Dolphin software.
 The right pane is for race result files. Use the "Browse..." button to select
 the directory where the race result files will be written by the Dolphin
 software. Any race result files that are found will be displayed in the table,
-ordered by their timestamp. 
+ordered by their timestamp.
 
 .. _config_run_tab:
 

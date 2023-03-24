@@ -10,10 +10,10 @@ python-dateutil = "*"
 requests = "*"
 semver = "*"
 ttkwidgets = "*"
-watchdog = "*"
+watchdog = "<3.0.0"                # 3.0.0 has broken type info
 DateTime = "*"
 Pillow = "*"
-PyChromecast = "<13.0.2"
+PyChromecast = ">=13.0.5"          # 13.0.5 fixed poll/select on Windows
 sentry-sdk = "*"
 segment-analytics-python = "<3.0"
 ipinfo = "*"
@@ -32,6 +32,7 @@ sphinx-rtd-theme = "*"
 sphinx-tabs = "*"
 pytest-cov = "*"
 types-pillow = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.11"

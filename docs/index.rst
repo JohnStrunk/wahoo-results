@@ -17,6 +17,7 @@ Wahoo! Results
   download
   quickstart
   configuration
+  chromecast-compat
   faq
 
 |wr| is a free swimming scoreboard that you can use to display race results at

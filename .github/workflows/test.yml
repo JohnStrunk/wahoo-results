@@ -12,10 +12,11 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2022.12.19"
-  SNYK_VERSION: v1.1048.0
+  PIPENV_INSTALL_VERSION: "2023.03.20"
+  # https://github.com/snyk/cli/releases
+  SNYK_VERSION: v1.1122.0
   # https://github.com/upx/upx/releases
-  UPX_VERSION: 4.0.1
+  UPX_VERSION: 4.0.2
 
 jobs:
   test:
@@ -25,7 +26,7 @@ jobs:
     steps:
       - name: Checkout repository
         # https://github.com/actions/checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c  # v3.3.0
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f  # v3.4.0
 
       - name: Set up Python
         # https://github.com/actions/setup-python
@@ -51,6 +52,10 @@ jobs:
       - name: Initialize virtual environment
         shell: cmd
         run: pipenv install --deploy --dev --no-site-packages -v
+
+      - name: Run pre-commit checks
+        shell: cmd
+        run: pipenv run pre-commit run -a
 
       - name: Run tests
         shell: cmd
@@ -81,7 +86,7 @@ jobs:
     steps:
       - name: Checkout repository
         # https://github.com/actions/checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c  # v3.3.0
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f  # v3.4.0
         with:
           fetch-depth: 0
 

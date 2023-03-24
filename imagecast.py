@@ -36,6 +36,9 @@ import zeroconf
 # Resolution of images for the Chromecast
 IMAGE_SIZE = (1280, 720)
 
+# Chromecast image refresh interval (seconds)
+_REFRESH_INTERVAL = 15 * 60
+
 @dataclass
 class DeviceStatus:
     '''The status of a Chromecast device'''
@@ -186,12 +189,11 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         self._webserver_thread.start()
 
     # The refresh thread periodically re-publishes the current image to ensure
-    # the Chromecast devices don't timeout. Empirically, the timeout seems to
-    # be about 20 minutes.
+    # the Chromecast devices don't timeout.
     def _start_refresh(self) -> None:
         def _refresh_run():
             while True:
-                time.sleep(900)
+                time.sleep(_REFRESH_INTERVAL)
                 if self.image is not None:
                     self.publish(self.image)
         self._refresh_thread = threading.Thread(target=_refresh_run, daemon=True)

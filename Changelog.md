@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+### [1.0.1] - 2023-02-10
+
+#### Fixed
+
+- :bug: Decrease image refresh interval to prevent Chromecast timeout
+
 ### [1.0.0] - 2023-02-05
 
 #### Changed
@@ -150,7 +156,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/JohnStrunk/wahoo-results/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.8.1...v1.0.0
 [0.8.1]: https://github.com/JohnStrunk/wahoo-results/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/JohnStrunk/wahoo-results/compare/v0.7.0...v0.8.0

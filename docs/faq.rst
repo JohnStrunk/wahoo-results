@@ -37,6 +37,15 @@ My Chromecast devices aren't being discovered.
     to be able to find the device.
 
 I've selected the Chromecast(s), but no image is being sent.
-    Make sure that |wr| is not being blocked by Windows Firewall. The Chromecast protocol works by sending a web URL to the chromecast device, then the device fetches the actual media from that address. This means that |wr| runs an embedded web server that server must be accessible to the chromecast devices.
+    Make sure that |wr| is not being blocked by Windows Firewall. The
+    Chromecast protocol works by sending a web URL to the chromecast device,
+    then the device fetches the actual media from that address. This means
+    that |wr| runs an embedded web server that server must be accessible to
+    the chromecast devices.
+
+The Chromecast screen turns off or goes back to "ambient" (slideshow) mode periodically.
+    You're probably using a Chromecast w/ Google TV... Those devices need some
+    :doc:`configuration changes <chromecast-compat>` to work well with
+    |wr|.
 
 Question still not answered? `Feel free to ask on GitHub. <https://github.com/JohnStrunk/wahoo-results/discussions/categories/q-a>`_
