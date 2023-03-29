@@ -184,7 +184,14 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.time_threshold.set(data.getfloat("time_threshold", 0.30))
         self.dir_startlist.set(data.get("dir_startlist", "C:\\swmeets8"))
         self.dir_results.set(data.get("dir_results", "C:\\CTSDolphin"))
-        self.client_id.set(data.get("client_id", str(uuid.uuid4())))
+        client_id = data.get("client_id")
+        if client_id is None or len(client_id) == 0:
+            client_id = str(uuid.uuid4())
+        try:
+            uuid.UUID(client_id)
+        except ValueError:
+            client_id = str(uuid.uuid4())
+        self.client_id.set(client_id)
         self.analytics.set(data.getboolean("analytics", True))
 
     def save(self, filename: str) -> None:
