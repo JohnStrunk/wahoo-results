@@ -22,6 +22,7 @@ from pprint import pprint
 import socket
 import time
 from typing import Any, Dict, Optional, Tuple
+import requests
 
 from segment import analytics  # type: ignore
 import sentry_sdk
@@ -122,35 +123,17 @@ def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
 
 def _setup_context(screen_size: Tuple[int, int]) -> Dict[str, Any]:
     uname = platform.uname()
-    iphandler = ipinfo.getHandler(version.IPINFO_TOKEN)
-    ipdetails = iphandler.getDetails()
-
     # https://segment.com/docs/connections/spec/identify/#traits
-    traits: Dict[str, Any] = {
-        "address": {
-            "city": ipdetails.city,
-            "state": ipdetails.region,
-            "country": ipdetails.country_name,
-            "postalCode": ipdetails.postal
-         },
-    }
+    traits: Dict[str, Any] = {}
     if hasattr(socket,  "gethostname"):
         traits["name"] = socket.gethostname()
 
     # https://segment.com/docs/connections/spec/common/#context
-    return {
+    context: Dict[str, Any] = {
         "app": {
             "version": version.WAHOO_RESULTS_VERSION,
         },
-        "ip": ipdetails.ip,
         "locale": locale.getlocale()[0],
-        "location": {
-            "city": ipdetails.city,
-            "region": ipdetails.region,
-            "country": ipdetails.country_name,
-            "latitude": ipdetails.latitude,
-            "longitude": ipdetails.longitude,
-        },
         "os": {
             "name": uname.system,
             "version": uname.version,
@@ -159,6 +142,30 @@ def _setup_context(screen_size: Tuple[int, int]) -> Dict[str, Any]:
             "height": screen_size[1],
             "width": screen_size[0],
         },
-        "timezone": ipdetails.timezone,
         "traits": traits,
     }
+
+    try:
+        iphandler = ipinfo.getHandler(version.IPINFO_TOKEN)
+        ipdetails = iphandler.getDetails()
+
+        traits["address"] = {
+            "city": ipdetails.city,
+            "state": ipdetails.region,
+            "country": ipdetails.country_name,
+            "postalCode": ipdetails.postal,
+        }
+        context["ip"] = ipdetails.ip
+        context["location"] = {
+            "city": ipdetails.city,
+            "region": ipdetails.region,
+            "country": ipdetails.country_name,
+            "latitude": ipdetails.latitude,
+            "longitude": ipdetails.longitude,
+        }
+        context["timezone"] = ipdetails.timezone
+    except requests.ConnectTimeout:
+        pass
+
+    print(context)
+    return context
