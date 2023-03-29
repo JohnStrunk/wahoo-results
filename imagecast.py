@@ -21,7 +21,6 @@ images to Chromecast devices.
 
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import socket
 import threading
 import time
 from typing import Any, Callable, Dict, List, Optional
@@ -54,7 +53,6 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
     set of Chromecast devices.
     """
     _server_port: int  # port for the web server
-    _local_address: Any  # External address of this machine
     # _devices maps the chromecast uuid to a map of:
     #    "cast" -> its chromecast object
     #    "enabled" -> boolean indicating whether we should cast to this device
@@ -75,9 +73,6 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
               embedded web server for the Chromecast(s) to connect to.
         '''
         self._server_port = server_port
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.connect(("8.8.8.8", 80))
-            self._local_address = sock.getsockname()[0]
         self.devices = {}
         self.image = None
         self.callback_fn = None
@@ -159,9 +154,16 @@ class ImageCast: # pylint: disable=too-many-instance-attributes
         with sentry_sdk.start_span(op="publish_one"):
             if self.image is None:
                 return
-            media = cast.media_controller
+            # Use the local address of the socket to handle environments with
+            # multiple NICs and cases where the host IP changes.
+            sock = cast.socket_client.get_socket()
+            if sock is None:
+                return
+            local_addr = sock.getsockname()[0]
+            # Use the current time as the URL to force the CC to refresh the image
             sec = int(time.time())
-            url = f"http://{self._local_address}:{self._server_port}/image-{sec}.png"
+            url = f"http://{local_addr}:{self._server_port}/image-{sec}.png"
+            media = cast.media_controller
             try:
                 media.play_media(url, "image/png")
             except NotConnected:
