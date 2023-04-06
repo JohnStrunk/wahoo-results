@@ -14,16 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Monitor the startlist directory'''
+"""Monitor the startlist directory"""
 
 from typing import Callable
-import watchdog.events #type: ignore
+
+import watchdog.events  # type: ignore
 
 CallbackFn = Callable[[], None]
 CreatedCallbackFn = Callable[[str], None]
 
+
 class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
-    '''Monitors a directory for changes to CTS Startlist files'''
+    """Monitors a directory for changes to CTS Startlist files"""
 
     def __init__(self, callback: CallbackFn):
         super().__init__(patterns=["*.scb"], ignore_directories=True)
@@ -32,8 +34,9 @@ class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
     def on_any_event(self, event: watchdog.events.FileSystemEvent):
         self._callback()
 
+
 class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
-    '''Monitors a directory for new .do4 race result files'''
+    """Monitors a directory for new .do4 race result files"""
 
     def __init__(self, callback: CreatedCallbackFn):
         super().__init__(patterns=["*.do4"], ignore_directories=True)

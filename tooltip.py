@@ -11,13 +11,15 @@ Modified to include a delay time by Victor Zaccardo, 25mar16
 
 import tkinter as tk
 
-class ToolTip: # pylint: disable=too-few-public-methods
+
+class ToolTip:  # pylint: disable=too-few-public-methods
     """
     create a tooltip for a given widget
     """
-    def __init__(self, widget, text='widget info'):
-        self.waittime = 500     #miliseconds
-        self.wraplength = 225   #pixels
+
+    def __init__(self, widget, text="widget info"):
+        self.waittime = 500  # miliseconds
+        self.wraplength = 225  # pixels
         self.widget = widget
         self.text = text
         self.widget.bind("<Enter>", self._enter)
@@ -54,32 +56,43 @@ class ToolTip: # pylint: disable=too-few-public-methods
         # Leaves only the label and removes the app window
         self._tip_win.wm_overrideredirect(True)
         self._tip_win.wm_geometry(f"+{x}+{y}")
-        label = tk.Label(self._tip_win, text=self.text, justify='left',
-                         background="#ffffff", relief='solid', borderwidth=1,
-                         wraplength = self.wraplength)
+        label = tk.Label(
+            self._tip_win,
+            text=self.text,
+            justify="left",
+            background="#ffffff",
+            relief="solid",
+            borderwidth=1,
+            wraplength=self.wraplength,
+        )
         label.pack(ipadx=1)
 
     def _hidetip(self):
         tip_win = self._tip_win
-        self._tip_win= None
+        self._tip_win = None
         if tip_win:
             tip_win.destroy()
 
+
 # testing ...
-if __name__ == '__main__':
+if __name__ == "__main__":
     root = tk.Tk()
     btn1 = tk.Button(root, text="button 1")
     btn1.pack(padx=10, pady=5)
-    button1_ttp = ToolTip(btn1, \
-   'Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, '
-   'consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum '
-   'quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam '
-   'est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.')
+    button1_ttp = ToolTip(
+        btn1,
+        "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, "
+        "consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum "
+        "quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam "
+        "est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.",
+    )
 
     btn2 = tk.Button(root, text="button 2")
     btn2.pack(padx=10, pady=5)
-    button2_ttp = ToolTip(btn2, \
-    "First thing's first, I'm the realest. Drop this and let the whole world "
-    "feel it. And I'm still in the Murda Bizness. I could hold you down, like "
-    "I'm givin' lessons in  physics. You should want a bad Vic like this.")
+    button2_ttp = ToolTip(
+        btn2,
+        "First thing's first, I'm the realest. Drop this and let the whole world "
+        "feel it. And I'm still in the Murda Bizness. I could hold you down, like "
+        "I'm givin' lessons in  physics. You should want a bad Vic like this.",
+    )
     root.mainloop()

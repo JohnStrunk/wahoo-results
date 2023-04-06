@@ -14,35 +14,37 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Version information'''
-from typing import List, Optional
+"""Version information"""
 import datetime
 import re
+from typing import List, Optional
 
 import dateutil.parser
 import dateutil.tz
 import requests
-import semver  #type: ignore
+import semver  # type: ignore
 
-#pylint: disable=too-few-public-methods
+
+# pylint: disable=too-few-public-methods
 class ReleaseInfo:
     """
     ReleaseInfo describes a single release from a GitHub repository.
     """
-    tag: str                      # The git tag of the release
-    url: str                      # The url to the release page
-    draft: bool                   # Whether the release is a draft
-    prerelease: bool              # Whether the release is a prerelease
+
+    tag: str  # The git tag of the release
+    url: str  # The url to the release page
+    draft: bool  # Whether the release is a draft
+    prerelease: bool  # Whether the release is a prerelease
     published: datetime.datetime  # When the release was published
-    semver: str                   # The version corresponding to the tag
+    semver: str  # The version corresponding to the tag
 
     def __init__(self, release_json):
-        self.tag = release_json['tag_name']
-        self.url = release_json['html_url']
-        self.draft = release_json['draft']
-        self.prerelease = release_json['prerelease']
-        self.published = dateutil.parser.isoparse(release_json['published_at'])
-        match = re.match(r'^v?(.*)$', self.tag)
+        self.tag = release_json["tag_name"]
+        self.url = release_json["html_url"]
+        self.draft = release_json["draft"]
+        self.prerelease = release_json["prerelease"]
+        self.published = dateutil.parser.isoparse(release_json["published_at"])
+        match = re.match(r"^v?(.*)$", self.tag)
         self.semver = ""
         if match is not None:
             self.semver = match.group(1)
@@ -53,15 +55,18 @@ def releases(user_repo: str) -> List[ReleaseInfo]:
     Retrieves the list of releases for the provided repo. user_repo should be
     of the form "user/repo" (i.e., "JohnStrunk/wahoo-results")
     """
-    url = f'https://api.github.com/repos/{user_repo}/releases'
+    url = f"https://api.github.com/repos/{user_repo}/releases"
     # The timeout may be too fast, but it's going to hold up displaying the
     # settings screen. Better to miss an update than hang for too long.
-    resp = requests.get(url, headers={'Accept': 'application/vnd.github.v3+json'}, timeout=2)
+    resp = requests.get(
+        url, headers={"Accept": "application/vnd.github.v3+json"}, timeout=2
+    )
     if not resp.ok:
         return []
 
     body = resp.json()
     return list(map(ReleaseInfo, body))
+
 
 def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
     """
@@ -71,9 +76,13 @@ def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
     """
     highest = rlist[0]
     for release in rlist:
-        if semver.compare(release.semver, highest.semver) > 0 and not release.prerelease:
+        if (
+            semver.compare(release.semver, highest.semver) > 0
+            and not release.prerelease
+        ):
             highest = release
     return highest
+
 
 def git_semver(wrv: str) -> str:
     """
@@ -89,7 +98,7 @@ def git_semver(wrv: str) -> str:
     '1.2.3-pre4.dev.5+badbeef'
     """
     # groups: tag (w/o v), commits, hash (w/ g)
-    components = re.match(r'^v?(.+)-(\d+)-g([0-9a-f]+)$', wrv)
+    components = re.match(r"^v?(.+)-(\d+)-g([0-9a-f]+)$", wrv)
     if components is None:
         return "0.0.1"
     version = components.group(1)
@@ -98,7 +107,7 @@ def git_semver(wrv: str) -> str:
     if not semver.VersionInfo.isvalid(version):
         return "0.0.1"
     version_info = semver.VersionInfo.parse(version)
-    if commits > 0: # it's a dev version, so modify the version information
+    if commits > 0:  # it's a dev version, so modify the version information
         pre = ""
         if version_info.prerelease is not None:
             pre += version_info.prerelease + "."
@@ -108,6 +117,7 @@ def git_semver(wrv: str) -> str:
         version_info = version_info.replace(prerelease=pre, build=sha)
     return str(version_info)
 
+
 def latest() -> Optional[ReleaseInfo]:
     """Retrieves the latest release info"""
     rlist = releases("JohnStrunk/wahoo-results")
@@ -115,7 +125,8 @@ def latest() -> Optional[ReleaseInfo]:
         return None
     return highest_semver(rlist)
 
-def is_latest_version(latest_version: Optional[ReleaseInfo], wrv:str) -> bool:
+
+def is_latest_version(latest_version: Optional[ReleaseInfo], wrv: str) -> bool:
     """
     Returns true if the running version is the most recent
 

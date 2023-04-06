@@ -14,32 +14,36 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Data model'''
+"""Data model"""
 
-from configparser import ConfigParser
 import queue
+import uuid
+from configparser import ConfigParser
 from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Tk, Variable
 from typing import Callable, Generic, List, Optional, Set, TypeVar
-import uuid
+
 import PIL.Image as PILImage
+
+from imagecast import DeviceStatus
 from racetimes import RaceTimes
 from startlist import StartList
-from imagecast import DeviceStatus
 
 CallbackFn = Callable[[], None]
 
 _INI_HEADING = "wahoo-results"
 
-_T = TypeVar('_T')
+_T = TypeVar("_T")
+
 
 class GVar(Variable, Generic[_T]):
-    '''
+    """
     Create a generic variable in the flavor of StringVar, IntVar, etc.
 
     - master: the master widget.
     - value: the initial value for the variable
-    '''
-    def __init__(self, value:_T, master=None):
+    """
+
+    def __init__(self, value: _T, master=None):
         super().__init__(master=master, value=0)
         self._value = value
 
@@ -48,55 +52,67 @@ class GVar(Variable, Generic[_T]):
         _x = super().get()
         return self._value
 
-    def set(self, value:_T) -> None:
+    def set(self, value: _T) -> None:
         """Sets the variable to a new value."""
         self._value = value
         super().set(super().get() + 1)
 
+
 class ChromecastStatusVar(GVar[List[DeviceStatus]]):
     """Holds a list of Chromecast devices and whether they are enabled"""
+
 
 class ImageVar(GVar[PILImage.Image]):
     """Value holder for PhotoImage variables."""
 
+
 class CallbackList:
-    '''A list of callback functions'''
+    """A list of callback functions"""
+
     _callbacks: Set[CallbackFn]
+
     def __init__(self):
         self._callbacks = set()
+
     def run(self) -> None:
-        '''Invoke all registered callback functions'''
+        """Invoke all registered callback functions"""
         for func in self._callbacks:
             func()
+
     def add(self, callback) -> None:
-        '''Add a callback function to the set'''
+        """Add a callback function to the set"""
         self._callbacks.add(callback)
+
     def remove(self, callback) -> None:
-        '''Remove a callback function from the set'''
+        """Remove a callback function from the set"""
         self._callbacks.discard(callback)
 
+
 class StartListVar(GVar[List[StartList]]):
-    '''An ordered list of start lists'''
+    """An ordered list of start lists"""
+
 
 class RaceResultListVar(GVar[List[RaceTimes]]):
     """Holds an ordered list of race results."""
 
-class RaceResultVar(GVar[Optional[RaceTimes]]):
-    '''A race result'''
 
-class Model: # pylint: disable=too-many-instance-attributes,too-few-public-methods
-    '''Defines the state variables (model) for the main UI'''
+class RaceResultVar(GVar[Optional[RaceTimes]]):
+    """A race result"""
+
+
+class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-methods
+    """Defines the state variables (model) for the main UI"""
 
     ## Colors from USA-S visual identity standards
-    PANTONE282_DKBLUE = "#041e42"         # Primary
-    PANTONE200_RED = "#ba0c2f"            # Primary
-    BLACK = "#000000"                     # Secondary
-    PANTONE428_LTGRAY = "#c1c6c8"         # Secondary
+    PANTONE282_DKBLUE = "#041e42"  # Primary
+    PANTONE200_RED = "#ba0c2f"  # Primary
+    BLACK = "#000000"  # Secondary
+    PANTONE428_LTGRAY = "#c1c6c8"  # Secondary
     PANTONE877METALIC_MDGRAY = "#8a8d8f"  # Secondary
-    PANTONE281_MDBLUE = "#00205b"         # Tertiary
-    PANTONE306_LTBLUE = "#00b3e4"         # Tertiary
-    PANTONE871METALICGOLD = "#85754e"     # Tertiary
-    PANTONE4505FLATGOLD = "#b1953a"       # Tertiary
+    PANTONE281_MDBLUE = "#00205b"  # Tertiary
+    PANTONE306_LTBLUE = "#00b3e4"  # Tertiary
+    PANTONE871METALICGOLD = "#85754e"  # Tertiary
+    PANTONE4505FLATGOLD = "#b1953a"  # Tertiary
 
     _ENQUEUE_EVENT = "<<enqueue_event1>>"
 
@@ -156,7 +172,7 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.statusclick = CallbackList()
 
     def load(self, filename: str) -> None:
-        '''Load user's preferences'''
+        """Load user's preferences"""
         config = ConfigParser()
         config.read(filename, encoding="utf-8")
         if _INI_HEADING not in config:
@@ -195,7 +211,7 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
         self.analytics.set(data.getboolean("analytics", True))
 
     def save(self, filename: str) -> None:
-        '''Save user's preferences'''
+        """Save user's preferences"""
         config = ConfigParser()
         config[_INI_HEADING] = {
             "font_normal": self.font_normal.get(),
@@ -223,7 +239,7 @@ class Model: # pylint: disable=too-many-instance-attributes,too-few-public-metho
             config.write(file)
 
     def enqueue(self, func: Callable[[], None]) -> None:
-        '''Enqueue a function to be executed by the tkinter main thread'''
+        """Enqueue a function to be executed by the tkinter main thread"""
         self._event_queue.put(func)
         self.root.event_generate(self._ENQUEUE_EVENT, when="tail")
 

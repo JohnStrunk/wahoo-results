@@ -14,16 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Tests for StartList class'''
+"""Tests for StartList class"""
 
 import io
 import textwrap
+
 import pytest
 
 from startlist import CTSStartList, StartList
 
+
 def test_startlist():
-    '''Instantiating a bare StartList generates an empty start list'''
+    """Instantiating a bare StartList generates an empty start list"""
     slist = StartList()
     assert slist.event_name == ""
     assert slist.event_num == 0
@@ -32,9 +34,13 @@ def test_startlist():
     assert slist.team(1, 2) == ""
     assert slist.is_empty_lane(7, 4)
 
+
 def test_two_heats():
-    '''General test on 2 heats worth of data'''
-    slist = CTSStartList(io.StringIO(textwrap.dedent("""\
+    """General test on 2 heats worth of data"""
+    slist = CTSStartList(
+        io.StringIO(
+            textwrap.dedent(
+                """\
         #18 BOYS 10&U 50 FLY
                             --                
                             --                
@@ -55,7 +61,10 @@ def test_two_heats():
                             --                
                             --                
                             --                
-                            --                """)))
+                            --                """
+            )
+        )
+    )
     assert slist.event_name == "BOYS 10&U 50 FLY"
 
     assert not slist.is_empty_lane(1, 4)
@@ -73,9 +82,13 @@ def test_two_heats():
     assert slist.name(2, 6) == "AAAAA, B"
     assert slist.team(2, 6) == "X"
 
+
 def test_six_heats():
-    '''General test on 6 heats worth of data'''
-    slist = CTSStartList(io.StringIO(textwrap.dedent("""\
+    """General test on 6 heats worth of data"""
+    slist = CTSStartList(
+        io.StringIO(
+            textwrap.dedent(
+                """\
         #34 GIRLS 15&O 50 BACK
                             --                
                             --                
@@ -136,7 +149,10 @@ def test_six_heats():
         WASHINGTON, TRACEY 1--RED             
         MCDANIEL, SUZANNE 1 --GREEN           
                             --                
-                            --                """)))
+                            --                """
+            )
+        )
+    )
     assert slist.event_num == 34
     assert slist.event_name == "GIRLS 15&O 50 BACK"
     assert slist.heats == 6
@@ -144,10 +160,14 @@ def test_six_heats():
     assert not slist.is_empty_lane(6, 8)
     assert slist.is_empty_lane(6, 10)
 
+
 def test_invalid_header():
-    '''Exception should be thrown when header can't be parsed'''
+    """Exception should be thrown when header can't be parsed"""
     with pytest.raises(ValueError) as verr:
-        CTSStartList(io.StringIO(textwrap.dedent("""\
+        CTSStartList(
+            io.StringIO(
+                textwrap.dedent(
+                    """\
             #AA BOYS 10&U 50 FLY
                                 --                
                                 --                
@@ -158,13 +178,20 @@ def test_invalid_header():
                                 --                
                                 --                
                                 --                
-                                --                """)))
-    assert verr.match(r'Unable to parse header')
+                                --                """
+                )
+            )
+        )
+    assert verr.match(r"Unable to parse header")
+
 
 def test_invalid_num_lanes():
-    '''Exception should be thrown when there are not 10 lanes per heat'''
+    """Exception should be thrown when there are not 10 lanes per heat"""
     with pytest.raises(ValueError) as verr:
-        CTSStartList(io.StringIO(textwrap.dedent("""\
+        CTSStartList(
+            io.StringIO(
+                textwrap.dedent(
+                    """\
             #1 BOYS 10&U 50 FLY
                                 --                
                                 --                
@@ -174,13 +201,20 @@ def test_invalid_num_lanes():
             BIGBIGBIGLY, NAMENAM--LONGLONGLONGLONG
                                 --                
                                 --                
-                                --                """)))
-    assert verr.match(r'Length is not a multiple of 10')
+                                --                """
+                )
+            )
+        )
+    assert verr.match(r"Length is not a multiple of 10")
+
 
 def test_invalid_line():
-    '''Exception should be thrown when a line can't be parsed as an entry'''
+    """Exception should be thrown when a line can't be parsed as an entry"""
     with pytest.raises(ValueError) as verr:
-        CTSStartList(io.StringIO(textwrap.dedent("""\
+        CTSStartList(
+            io.StringIO(
+                textwrap.dedent(
+                    """\
             #1 BOYS 10&U 50 FLY
                                 --                
             INVALID LINE
@@ -191,5 +225,8 @@ def test_invalid_line():
                                 --                
                                 --                
                                 --                
-                                --                """)))
-    assert verr.match(r'Unable to parse line')
+                                --                """
+                )
+            )
+        )
+    assert verr.match(r"Unable to parse line")
