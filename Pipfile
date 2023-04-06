@@ -33,6 +33,7 @@ sphinx-tabs = "*"
 pytest-cov = "*"
 types-pillow = "*"
 pre-commit = "*"
+esbonio = "*"
 
 [requires]
 python_version = "3.11"

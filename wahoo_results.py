@@ -27,6 +27,7 @@ from tkinter import Tk, filedialog, messagebox
 from typing import List, Optional
 import webbrowser
 import sentry_sdk
+from sentry_sdk.integrations.socket import SocketIntegration
 from sentry_sdk.integrations.threading import ThreadingIntegration
 from watchdog.observers import Observer #type: ignore
 from about import about
@@ -274,7 +275,10 @@ def initialize_sentry(model: Model) -> None:
         environment=execution_environment,
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
         include_local_variables=True,
-        integrations=[ThreadingIntegration(propagate_hub=True)],
+        integrations=[
+            SocketIntegration(),
+            ThreadingIntegration(propagate_hub=True)
+            ],
         debug=False,
     )
     uname = platform.uname()

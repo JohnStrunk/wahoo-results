@@ -28,6 +28,7 @@ def about(root: Tk) -> None:
     '''Displays a modal dialog containing the application "about" info'''
 
     dlg = Toplevel(root)
+    dlg.resizable(False, False) # don't allow resizing
 
     def dismiss():
         dlg.grab_release()
@@ -45,6 +46,15 @@ def about(root: Tk) -> None:
     dlg.transient(root)   # dialog window is related to main
     dlg.wait_visibility() # can't grab until window appears, so we wait
     dlg.grab_set()        # ensure all input goes to our window
+
+    geo = dlg.geometry()
+    # parse the geometry string of the form "WxH+X+Y" to get the width and height as integers
+    width, height = [int(x) for x in geo.split('+')[0].split('x')]
+    # center the dialog on the screen
+    left = root.winfo_screenwidth() // 2 - width // 2
+    top = root.winfo_screenheight() // 2 - height // 2
+    dlg.geometry(f'+{left}+{top}')
+
     dlg.wait_window()     # block until window is destroyed
 
 def _set_contents(txt: Text) -> None:
