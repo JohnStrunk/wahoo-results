@@ -14,17 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''
+"""
 A scoreboard template for previews and theming
-'''
+"""
 
 from datetime import datetime
 from typing import List, Optional
+
 from racetimes import RaceTimes, RawTime
 from startlist import StartList
 
+
 def get_template() -> RaceTimes:
-    '''
+    """
     Returns template data to create a scoreboard mockup
 
     >>> from scoreboard import format_time
@@ -43,10 +45,11 @@ def get_template() -> RaceTimes:
     'BRADY, JUNE A'
     >>> t.team(3)
     'TEAM'
-    '''
+    """
     race = _TemplateRace(2, RawTime("0.30"))
     race.set_names(_TemplateStartList())
     return race
+
 
 class _TemplateRace(RaceTimes):
     @property
@@ -59,9 +62,9 @@ class _TemplateRace(RaceTimes):
 
     def raw_times(self, lane: int) -> List[Optional[RawTime]]:
         if lane == 2:
-            return [None, None, None] # no-show
+            return [None, None, None]  # no-show
         if lane == 3:
-            return [RawTime("1"), None, None] # Too few times -> invalid
+            return [RawTime("1"), None, None]  # Too few times -> invalid
         time = RawTime("59.99") + RawTime("60") * RawTime("99")
         time = time + lane - 10
         return [time, time, time]
@@ -73,6 +76,7 @@ class _TemplateRace(RaceTimes):
     @property
     def meet_id(self) -> str:
         return "000"
+
 
 class _TemplateStartList(StartList):
     @property
@@ -92,8 +96,8 @@ class _TemplateStartList(StartList):
             "Clark, Leslie J",
             "Jensen, Kelli N",
             "Parsons, Marsha L",
-            )
-        return names[lane-1].upper()
+        )
+        return names[lane - 1].upper()
 
     def team(self, _heat: int, _lane: int) -> str:
         return "TEAM"

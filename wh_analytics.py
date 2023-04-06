@@ -14,24 +14,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Application usage analytics'''
+"""Application usage analytics"""
 
 import locale
 import platform
-from pprint import pprint
 import socket
 import time
+from pprint import pprint
 from typing import Any, Dict, Optional, Tuple
-import requests
 
-from segment import analytics  # type: ignore
-import sentry_sdk
 import ipinfo  # type: ignore
+import requests
+import sentry_sdk
+from segment import analytics  # type: ignore
 
-from model import Model
 import version
+from model import Model
 
 _CONTEXT: Dict[str, Any] = {}
+
 
 def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
     """Event for application startup"""
@@ -43,72 +44,95 @@ def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
         "race_count": 0,
         "race_count_with_names": 0,
         "session_start": time.time(),
-        "user_id": model.client_id.get()
+        "user_id": model.client_id.get(),
     }
 
     analytics.identify(
-        user_id = _CONTEXT["user_id"],
-        context = _CONTEXT["context"],
-        traits = _CONTEXT["context"]["traits"],
+        user_id=_CONTEXT["user_id"],
+        context=_CONTEXT["context"],
+        traits=_CONTEXT["context"]["traits"],
     )
     _send_event("Scoreboard started")
 
+
 def application_stop(model: Model) -> None:
     """Event for application shutdown"""
-    _send_event("Scoreboard stopped", {
-        "runtime": time.time() - _CONTEXT["session_start"],
-        "race_count": _CONTEXT["race_count"],
-        "race_count_with_names": _CONTEXT["race_count_with_names"],
-        "lane_count": model.num_lanes.get(),
-        "time_threshold": model.time_threshold.get(),
-        "min_times": model.min_times.get(),
-        "bg_image": model.image_bg.get() != "",
-        "normal_font": model.font_normal.get(),
-        "time_font": model.font_time.get(),
-    })
+    _send_event(
+        "Scoreboard stopped",
+        {
+            "runtime": time.time() - _CONTEXT["session_start"],
+            "race_count": _CONTEXT["race_count"],
+            "race_count_with_names": _CONTEXT["race_count_with_names"],
+            "lane_count": model.num_lanes.get(),
+            "time_threshold": model.time_threshold.get(),
+            "min_times": model.min_times.get(),
+            "bg_image": model.image_bg.get() != "",
+            "normal_font": model.font_normal.get(),
+            "time_font": model.font_time.get(),
+        },
+    )
     analytics.shutdown()
+
 
 def results_received(has_names: bool, chromecasts: int) -> None:
     """Event for race results"""
     _CONTEXT["race_count"] += 1
     if has_names:
         _CONTEXT["race_count_with_names"] += 1
-    _send_event("Results received", {
-        "has_names": has_names,
-        "chromecast_count": chromecasts
-    })
+    _send_event(
+        "Results received", {"has_names": has_names, "chromecast_count": chromecasts}
+    )
+
 
 def documentation_link() -> None:
     """Follow link to docs event"""
     _send_event("Documentation click")
 
+
 def update_link() -> None:
     """Follow link to dl latest version event"""
     _send_event("DownloadUpdate click")
 
+
 def set_cts_directory(changed: bool) -> None:
     """Set CTS start list directory"""
-    _send_event("Browse CTS directory",{
-        "directory_changed": changed,
-    })
+    _send_event(
+        "Browse CTS directory",
+        {
+            "directory_changed": changed,
+        },
+    )
+
 
 def wrote_dolphin_csv(num_events: int) -> None:
     """Dolphin CSV event list written"""
-    _send_event("Write Dolphin CSV", {
-        "event_count": num_events,
-    })
+    _send_event(
+        "Write Dolphin CSV",
+        {
+            "event_count": num_events,
+        },
+    )
+
 
 def set_do4_directory(changed: bool) -> None:
     """Set directory to watch for do4 files"""
-    _send_event("Browse D04 directory",{
-        "directory_changed": changed,
-    })
+    _send_event(
+        "Browse D04 directory",
+        {
+            "directory_changed": changed,
+        },
+    )
+
 
 def cc_toggle(enable: bool) -> None:
     """Enable/disable Chromecast"""
-    _send_event("Set Chromecast state",{
-        "enable": enable,
-    })
+    _send_event(
+        "Set Chromecast state",
+        {
+            "enable": enable,
+        },
+    )
+
 
 def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
     with sentry_sdk.start_span(op="analytics", description="Process analytics event"):
@@ -116,16 +140,19 @@ def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
             return
         if kvparams is None:
             kvparams = {}
-        analytics.track(_CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"])
-        if analytics.write_key == "unknown": # dev environment
+        analytics.track(
+            _CONTEXT["user_id"], name, kvparams, context=_CONTEXT["context"]
+        )
+        if analytics.write_key == "unknown":  # dev environment
             print(f"Event: {name}")
             pprint(kvparams)
+
 
 def _setup_context(screen_size: Tuple[int, int]) -> Dict[str, Any]:
     uname = platform.uname()
     # https://segment.com/docs/connections/spec/identify/#traits
     traits: Dict[str, Any] = {}
-    if hasattr(socket,  "gethostname"):
+    if hasattr(socket, "gethostname"):
         traits["name"] = socket.gethostname()
 
     # https://segment.com/docs/connections/spec/common/#context

@@ -14,52 +14,56 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Manipulation of CTS Start Lists'''
+"""Manipulation of CTS Start Lists"""
 
-from abc import ABC
-from enum import Enum, auto, unique
 import io
 import os
 import re
+from abc import ABC
+from enum import Enum, auto, unique
 from typing import Dict, List
 
+
 class StartList(ABC):
-    '''Represents the start list for an event'''
+    """Represents the start list for an event"""
+
     @property
     def heats(self) -> int:
-        '''The number of heats in the event'''
+        """The number of heats in the event"""
         return 0
 
     @property
     def event_name(self) -> str:
-        '''Get the event name (description)'''
+        """Get the event name (description)"""
         return ""
 
     @property
     def event_num(self) -> int:
-        '''Get the event number'''
+        """Get the event number"""
         return 0
 
     def name(self, _heat: int, _lane: int) -> str:
-        '''Retrieve the Swimmer's name for a heat/lane'''
+        """Retrieve the Swimmer's name for a heat/lane"""
         return ""
 
     def team(self, _heat: int, _lane: int) -> str:
-        '''Retrieve the Swimmer's team for a heat/lane'''
+        """Retrieve the Swimmer's team for a heat/lane"""
         return ""
 
     def is_empty_lane(self, heat: int, lane: int) -> bool:
-        '''Returns true if the specified heat/lane has no name or team'''
+        """Returns true if the specified heat/lane has no name or team"""
         return self.name(heat, lane) == "" and self.team(heat, lane) == ""
 
+
 class CTSStartList(StartList):
-    '''Implementation of StartList based on the CTS file format'''
+    """Implementation of StartList based on the CTS file format"""
+
     _event_name: str
     _event_num: int
-    _heats: List[List[Dict[str,str]]]
+    _heats: List[List[Dict[str, str]]]
 
     def __init__(self, stream: io.TextIOBase):
-        '''
+        """
         Construct a StartList from a text stream (file)
 
         Example:
@@ -68,7 +72,7 @@ class CTSStartList(StartList):
                     slist = StartList(file)
                 except ValueError as err: # Parse error
                     ...
-        '''
+        """
         super().__init__()
         # The following assumes event numbers are always numeric. I believe
         # this is ok given that we are parsing SCB format start lists. MM
@@ -85,7 +89,7 @@ class CTSStartList(StartList):
         lines = stream.readlines()
         if len(lines) % 10:
             raise ValueError("Length is not a multiple of 10")
-        heats = (len(lines))//10
+        heats = (len(lines)) // 10
 
         # Reverse the lines because we're going to pop() them later and we
         # want to read them in order.
@@ -104,42 +108,46 @@ class CTSStartList(StartList):
                 match = re.match(r"^(.{20})--(.{16})$", line)
                 if not match:
                     raise ValueError(f"Unable to parse line: '{line}'")
-                heat.append({
-                    "name": match.group(1).strip(),
-                    "team": match.group(2).strip(),
-                })
+                heat.append(
+                    {
+                        "name": match.group(1).strip(),
+                        "team": match.group(2).strip(),
+                    }
+                )
             self._heats.append(heat)
 
     @property
     def heats(self) -> int:
-        '''Get the number of heats in the event'''
+        """Get the number of heats in the event"""
         return len(self._heats)
 
     @property
     def event_name(self) -> str:
-        '''Get the event name (description)'''
+        """Get the event name (description)"""
         return self._event_name
 
     @property
     def event_num(self) -> int:
-        '''Get the event number'''
+        """Get the event number"""
         return self._event_num
 
     def name(self, heat: int, lane: int) -> str:
-        '''Retrieve the Swimmer's name for a heat/lane'''
+        """Retrieve the Swimmer's name for a heat/lane"""
         if heat > len(self._heats) or heat < 1 or lane > 10 or lane < 1:
             return ""
-        return self._heats[heat-1][lane-1]["name"]
+        return self._heats[heat - 1][lane - 1]["name"]
 
     def team(self, heat: int, lane: int) -> str:
-        '''Retrieve the Swimmer's team for a heat/lane'''
+        """Retrieve the Swimmer's team for a heat/lane"""
         if heat > len(self._heats) or heat < 1 or lane > 10 or lane < 1:
             return ""
-        return self._heats[heat-1][lane-1]["team"]
+        return self._heats[heat - 1][lane - 1]["team"]
+
 
 @unique
 class NameMode(Enum):
     """Formatting options for swimmer names"""
+
     NONE = auto()
     """Verbatim as in the start list file"""
     FIRST = auto()
@@ -155,7 +163,8 @@ class NameMode(Enum):
     LAST = auto()
     """Format name as: Last"""
 
-#pylint: disable=too-many-return-statements
+
+# pylint: disable=too-many-return-statements
 def arrange_name(how: NameMode, name: str) -> str:
     """
     Change the format of a name from a start list.
@@ -193,7 +202,9 @@ def arrange_name(how: NameMode, name: str) -> str:
     # - The middle (initial) is any remaining non-whitespace in the name
     # - The CTS start list names are placed into a 20-character field, so we
     # need to be able to properly parse w/ ws at the end (or not).
-    match = re.match(r'^(?P<l>(?P<li>[^,])[^,]*)(,\s+(?P<f>(?P<fi>\w)\w*)(\s+(?P<m>\w+))?)?', name)
+    match = re.match(
+        r"^(?P<l>(?P<li>[^,])[^,]*)(,\s+(?P<f>(?P<fi>\w)\w*)(\s+(?P<m>\w+))?)?", name
+    )
     if not match:
         return name.strip()
     if how == NameMode.FIRST:
@@ -210,6 +221,7 @@ def arrange_name(how: NameMode, name: str) -> str:
         return f"{match.group('l')}"
     # default is NameMode.NONE
     return name.strip()
+
 
 def format_name(how: NameMode, name: str) -> List[str]:
     """
@@ -241,6 +253,7 @@ def format_name(how: NameMode, name: str) -> List[str]:
         variants = _shorter_strings(arrange_name(how, name))
     return [arrange_name(how, name)] + variants
 
+
 def _shorter_strings(string: str) -> List[str]:
     """
     >>> _shorter_strings("foobar")
@@ -251,20 +264,23 @@ def _shorter_strings(string: str) -> List[str]:
         return [shortened] + _shorter_strings(shortened)
     return []
 
+
 def from_scb(filename: str) -> StartList:
-    '''Create a StartList from a CTS startlist (.SCB) file'''
+    """Create a StartList from a CTS startlist (.SCB) file"""
     with open(filename, "r", encoding="cp1252") as file:
         return CTSStartList(file)
 
+
 def events_to_csv(startlists: List[StartList]) -> List[str]:
-    '''Convert a list of StartLists to a CSV for the CTS Dolphin'''
+    """Convert a list of StartLists to a CSV for the CTS Dolphin"""
     csv = []
     for slist in startlists:
         csv.append(f"{slist.event_num},{slist.event_name},{slist.heats},1,A\n")
     return csv
 
+
 def load_all_scb(directory: str) -> List[StartList]:
-    '''Load all the start list .scb files from a directory'''
+    """Load all the start list .scb files from a directory"""
     files = os.scandir(directory)
     startlists: List[StartList] = []
     for file in files:

@@ -10,16 +10,16 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:
-      - id: check-added-large-files  # prevents giant files from being committed
-      - id: check-yaml               # checks yaml files for parseable syntax
-      - id: end-of-file-fixer        # ensures that a file is either empty, or ends with one newline
-      - id: trailing-whitespace      # trims trailing whitespace
+      - id: check-added-large-files  # Prevents giant files from being committed
+      - id: check-yaml               # Checks yaml files for parseable syntax
+      - id: end-of-file-fixer        # Ensures that a file is either empty, or ends with one newline
+      - id: trailing-whitespace      # Trims trailing whitespace
         exclude: startlist_test.py   # Test data has intentional EOL whitespace
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.1.1
     hooks:
-      - id: mypy
+      - id: mypy  # Run mypy to check typeing
         additional_dependencies:
           - types-python-dateutil
           - types-requests
@@ -31,3 +31,14 @@ repos:
       - id: rst-directive-colons           # Detect mistake of rst directive not ending with double colon or space before the double colon
       - id: rst-inline-touching-normal     # Detect mistake of inline code touching normal text in rst
       - id: text-unicode-replacement-char  # Forbid files which have a UTF-8 Unicode replacement character
+
+  - repo: https://github.com/psf/black
+    rev: "23.3.0"
+    hooks:
+      - id: black  # Run "black" for standardized code formatting
+
+  - repo: https://github.com/PyCQA/isort
+    rev: "5.12.0"
+    hooks:
+      - id: isort  # Sort imports
+        args: ["--profile", "black", "--filter-files"]

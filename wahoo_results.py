@@ -15,72 +15,87 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Wahoo Results!'''
+"""Wahoo Results!"""
 
 import copy
 import os
 import platform
 import re
 import sys
+import webbrowser
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
 from typing import List, Optional
-import webbrowser
+
 import sentry_sdk
 from sentry_sdk.integrations.socket import SocketIntegration
 from sentry_sdk.integrations.threading import ThreadingIntegration
-from watchdog.observers import Observer #type: ignore
-from about import about
+from watchdog.observers import Observer  # type: ignore
 
-import main_window
 import imagecast
+import main_window
+import wh_analytics
+import wh_version
+from about import about
 from model import Model
 from racetimes import RaceTimes, RawTime, from_do4
 from scoreboard import ScoreboardImage, waiting_screen
 from startlist import events_to_csv, from_scb, load_all_scb
 from template import get_template
-from watcher import DO4Watcher, SCBWatcher
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
-import wh_version
-import wh_analytics
+from watcher import DO4Watcher, SCBWatcher
 
 CONFIG_FILE = "wahoo-results.ini"
 
+
 def setup_exit(root: Tk, model: Model) -> None:
-    '''Set up handlers for application exit'''
+    """Set up handlers for application exit"""
+
     def exit_fn() -> None:
         try:
             model.save(CONFIG_FILE)
         except PermissionError as err:
-            messagebox.showerror(title="Error saving configuration",
+            messagebox.showerror(
+                title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
-                detail="Please ensure the working directory is writable.")
+                detail="Please ensure the working directory is writable.",
+            )
         root.destroy()
+
     # Close box exits app
     root.protocol("WM_DELETE_WINDOW", exit_fn)
     # Exit menu item exits app
     model.menu_exit.add(exit_fn)
 
+
 def setup_template(model: Model) -> None:
-    '''Setup handler for exporting scoreboard template'''
+    """Setup handler for exporting scoreboard template"""
+
     def do_export() -> None:
-        filename = filedialog.asksaveasfilename(confirmoverwrite=True,
-        defaultextension=".png", filetypes=[("image", "*.png")],
-        initialfile="template")
+        filename = filedialog.asksaveasfilename(
+            confirmoverwrite=True,
+            defaultextension=".png",
+            filetypes=[("image", "*.png")],
+            initialfile="template",
+        )
         if len(filename) == 0:
             return
-        template = ScoreboardImage(imagecast.IMAGE_SIZE,
-        get_template(), model, True)
+        template = ScoreboardImage(imagecast.IMAGE_SIZE, get_template(), model, True)
         template.image.save(filename)
 
     model.menu_export_template.add(do_export)
 
+
 def setup_save(model: Model) -> None:
-    '''Setup handler for saving current scoreboard image'''
+    """Setup handler for saving current scoreboard image"""
+
     def do_save() -> None:
-        filename = filedialog.asksaveasfilename(confirmoverwrite=True,
-        defaultextension=".png", filetypes=[("image", "*.png")],
-        initialfile="scoreboard")
+        filename = filedialog.asksaveasfilename(
+            confirmoverwrite=True,
+            defaultextension=".png",
+            filetypes=[("image", "*.png")],
+            initialfile="scoreboard",
+        )
         if len(filename) == 0:
             return
         sb_image = model.scoreboard.get()
@@ -88,11 +103,14 @@ def setup_save(model: Model) -> None:
 
     model.menu_save_scoreboard.add(do_save)
 
+
 def setup_appearance(model: Model) -> None:
-    '''Link model changes to the scoreboard preview'''
+    """Link model changes to the scoreboard preview"""
+
     def update_preview() -> None:
         preview = ScoreboardImage(imagecast.IMAGE_SIZE, get_template(), model)
         model.appearance_preview.set(preview.image)
+
     for element in [
         model.font_normal,
         model.font_time,
@@ -108,34 +126,40 @@ def setup_appearance(model: Model) -> None:
         model.color_third,
         model.color_bg,
         model.num_lanes,
-    ]: element.trace_add("write", lambda *_: update_preview())
+    ]:
+        element.trace_add("write", lambda *_: update_preview())
     update_preview()
 
     def handle_bg_import() -> None:
-        image = filedialog.askopenfilename(filetypes=[("image", "*.gif *.jpg *.jpeg *.png")])
+        image = filedialog.askopenfilename(
+            filetypes=[("image", "*.gif *.jpg *.jpeg *.png")]
+        )
         if len(image) == 0:
             return
         image = os.path.normpath(image)
         model.image_bg.set(image)
+
     model.bg_import.add(handle_bg_import)
     model.bg_clear.add(lambda: model.image_bg.set(""))
 
+
 def setup_scb_watcher(model: Model, observer: Observer) -> None:
-    '''Set up file system watcher for startlists'''
+    """Set up file system watcher for startlists"""
+
     def process_startlists() -> None:
-        '''
+        """
         Load all the startlists from the current directory and update the UI
         with their information.
-        '''
+        """
         directory = model.dir_startlist.get()
         startlists = load_all_scb(directory)
         model.startlist_contents.set(startlists)
 
     def scb_dir_updated() -> None:
-        '''
+        """
         When the startlist directory is changed, update the watched to look at
         the new directory and trigger processing of the startlists.
-        '''
+        """
         path = model.dir_startlist.get()
         if not os.path.exists(path):
             return
@@ -149,13 +173,14 @@ def setup_scb_watcher(model: Model, observer: Observer) -> None:
     model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
     scb_dir_updated()
 
+
 def summarize_racedir(directory: str) -> List[RaceTimes]:
-    '''Summarize all race results in a directory'''
+    """Summarize all race results in a directory"""
     files = os.scandir(directory)
     contents: List[RaceTimes] = []
     for file in files:
         if file.name.endswith(".do4"):
-            match = re.match(r'^(\d+)-', file.name)
+            match = re.match(r"^(\d+)-", file.name)
             if match is None:
                 continue
             try:
@@ -169,15 +194,17 @@ def summarize_racedir(directory: str) -> List[RaceTimes]:
                 pass
     return contents
 
+
 def load_result(model: Model, filename: str) -> Optional[RaceTimes]:
-    '''Load a result file and corresponding startlist'''
+    """Load a result file and corresponding startlist"""
     racetime: Optional[RaceTimes] = None
     # Retry mechanism since we get errors if we try to read while it's
     # still being written.
     for tries in range(1, 6):
         try:
-            racetime = from_do4(filename, model.min_times.get(),
-                RawTime(model.time_threshold.get()))
+            racetime = from_do4(
+                filename, model.min_times.get(), RawTime(model.time_threshold.get())
+            )
         except ValueError:
             sleep(0.05 * tries)
         except OSError:
@@ -194,21 +221,24 @@ def load_result(model: Model, filename: str) -> Optional[RaceTimes]:
         pass
     return racetime
 
+
 def setup_do4_watcher(model: Model, observer: Observer) -> None:
-    '''Set up watches for files/directories and connect to model'''
+    """Set up watches for files/directories and connect to model"""
+
     def process_racedir() -> None:
-        '''
+        """
         Load all the race results and update the UI
-        '''
-        with sentry_sdk.start_span(op="update_race_ui",
-        description="Update race summaries in UI") as span:
+        """
+        with sentry_sdk.start_span(
+            op="update_race_ui", description="Update race summaries in UI"
+        ) as span:
             directory = model.dir_results.get()
             contents = summarize_racedir(directory)
             span.set_tag("race_files", len(contents))
             model.results_contents.set(contents)
 
     def process_new_result(file: str) -> None:
-        '''Process a new race result that has been detected'''
+        """Process a new race result that has been detected"""
         with sentry_sdk.start_transaction(op="new_result", name="New race result"):
             racetime = load_result(model, file)
             if racetime is None:
@@ -221,50 +251,63 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
             process_racedir()  # update the UI
 
     def do4_dir_updated() -> None:
-        '''
+        """
         When the raceresult directory is changed, update the watch to look at
         the new directory and trigger processing of the results.
-        '''
+        """
         path = model.dir_results.get()
         if not os.path.exists(path):
             return
         observer.unschedule_all()
+
         def async_process(file: str) -> None:
             model.enqueue(lambda: process_new_result(file))
+
         observer.schedule(DO4Watcher(async_process), path)
         process_racedir()
 
     model.dir_results.trace_add("write", lambda *_: do4_dir_updated())
     do4_dir_updated()
 
+
 def check_for_update(model: Model) -> None:
-    '''Notifies if there's a newer released version'''
+    """Notifies if there's a newer released version"""
     current_version = model.version.get()
     latest_version = wh_version.latest()
-    if (latest_version is not None and
-        not wh_version.is_latest_version(latest_version, current_version)):
-        model.statustext.set(f"New version available. Click to download: {latest_version.tag}")
+    if latest_version is not None and not wh_version.is_latest_version(
+        latest_version, current_version
+    ):
+        model.statustext.set(
+            f"New version available. Click to download: {latest_version.tag}"
+        )
         model.statusclick.add(lambda: webbrowser.open(latest_version.url))
 
+
 def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
-    '''Link Chromecast discovery/management to the UI'''
+    """Link Chromecast discovery/management to the UI"""
+
     def cast_discovery() -> None:
         dev_list = copy.deepcopy(icast.get_devices())
         model.enqueue(lambda: model.cc_status.set(dev_list))
+
     def update_cc_list() -> None:
         dev_list = model.cc_status.get()
         for dev in dev_list:
             icast.enable(dev.uuid, dev.enabled)
+
     model.cc_status.trace_add("write", lambda *_: update_cc_list())
     icast.set_discovery_callback(cast_discovery)
 
     # Link Chromecast contents to the UI preview
-    model.scoreboard.trace_add("write", lambda *_: icast.publish(model.scoreboard.get()))
+    model.scoreboard.trace_add(
+        "write", lambda *_: icast.publish(model.scoreboard.get())
+    )
+
 
 def initialize_sentry(model: Model) -> None:
-    '''Initialize sentry.io crash reporting'''
+    """Initialize sentry.io crash reporting"""
     execution_environment = "source"
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         execution_environment = "executable"
 
     # Initialize Sentry crash reporting
@@ -275,10 +318,7 @@ def initialize_sentry(model: Model) -> None:
         environment=execution_environment,
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
         include_local_variables=True,
-        integrations=[
-            SocketIntegration(),
-            ThreadingIntegration(propagate_hub=True)
-            ],
+        integrations=[SocketIntegration(), ThreadingIntegration(propagate_hub=True)],
         debug=False,
     )
     uname = platform.uname()
@@ -286,13 +326,16 @@ def initialize_sentry(model: Model) -> None:
     sentry_sdk.set_tag("os_release", uname.release)
     sentry_sdk.set_tag("os_version", uname.version)
     sentry_sdk.set_tag("os_machine", uname.machine)
-    sentry_sdk.set_user({
-        "id": model.client_id.get(),
-        "ip_address": "{{auto}}",
-    })
+    sentry_sdk.set_user(
+        {
+            "id": model.client_id.get(),
+            "ip_address": "{{auto}}",
+        }
+    )
+
 
 def main() -> None:  # pylint: disable=too-many-statements
-    '''Main program'''
+    """Main program"""
     root = Tk()
 
     model = Model(root)
@@ -306,9 +349,12 @@ def main() -> None:  # pylint: disable=too-many-statements
 
     screen_size = (root.winfo_screenwidth(), root.winfo_screenheight())
     wh_analytics.application_start(model, screen_size)
-    sentry_sdk.set_context("display", {
-        "size": f"{screen_size[0]}x{screen_size[1]}",
-    })
+    sentry_sdk.set_context(
+        "display",
+        {
+            "size": f"{screen_size[0]}x{screen_size[1]}",
+        },
+    )
 
     main_window.View(root, model)
 
@@ -317,12 +363,14 @@ def main() -> None:  # pylint: disable=too-many-statements
     setup_template(model)
 
     def docs_fn() -> None:
-        query_params = "&".join([
-            "utm_source=wahoo_results",
-            "utm_medium=menu",
-            "utm_campaign=docs_link",
-            f"ajs_uid={model.client_id.get()}",
-        ])
+        query_params = "&".join(
+            [
+                "utm_source=wahoo_results",
+                "utm_medium=menu",
+                "utm_campaign=docs_link",
+                f"ajs_uid={model.client_id.get()}",
+            ]
+        )
         webbrowser.open("https://wahoo-results.readthedocs.io/?" + query_params)
 
     model.menu_docs.add(docs_fn)
@@ -351,6 +399,7 @@ def main() -> None:  # pylint: disable=too-many-statements
             file.writelines(csv)
         num_events = len(csv)
         wh_analytics.wrote_dolphin_csv(num_events)
+
     model.dolphin_export.add(write_dolphin_csv)
 
     # Connections for the run tab
@@ -364,15 +413,20 @@ def main() -> None:  # pylint: disable=too-many-statements
     # Analytics triggers
     model.menu_docs.add(wh_analytics.documentation_link)
     model.statusclick.add(wh_analytics.update_link)
-    model.dir_startlist.trace_add("write", lambda *_: wh_analytics.set_cts_directory(True))
-    model.dir_results.trace_add("write", lambda *_: wh_analytics.set_do4_directory(True))
+    model.dir_startlist.trace_add(
+        "write", lambda *_: wh_analytics.set_cts_directory(True)
+    )
+    model.dir_results.trace_add(
+        "write", lambda *_: wh_analytics.set_do4_directory(True)
+    )
 
     # Allow the root window to build, then close the splash screen if it's up
     # and we're running in exe mode
     try:
         root.update()
-        #pylint: disable=import-error,import-outside-toplevel
-        import pyi_splash #type: ignore
+        # pylint: disable=import-error,import-outside-toplevel
+        import pyi_splash  # type: ignore
+
         if pyi_splash.is_alive():
             pyi_splash.close()
     except ModuleNotFoundError:
@@ -390,6 +444,7 @@ def main() -> None:  # pylint: disable=too-many-statements
     root.update()
     wh_analytics.application_stop(model)
     hub.end_session()
+
 
 if __name__ == "__main__":
     main()

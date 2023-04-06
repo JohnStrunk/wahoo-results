@@ -14,22 +14,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''
+"""
 Generates an image of the scoreboard from a RaceTimes object.
-'''
+"""
 from typing import Optional, Tuple
-from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
-from matplotlib import font_manager # type: ignore
+
 import sentry_sdk
+from matplotlib import font_manager  # type: ignore
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
 from model import Model
 from racetimes import RaceTimes, RawTime
-from startlist import format_name, NameMode
+from startlist import NameMode, format_name
+
 
 def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
-    '''Generate a "waiting" image to display on the scoreboard.'''
+    """Generate a "waiting" image to display on the scoreboard."""
     img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
-    center = (int(size[0]*0.5), int(size[1]*0.8))
+    center = (int(size[0] * 0.5), int(size[1] * 0.8))
     normal = fontname_to_file(model.font_normal.get())
     font_size = 72
     fnt = ImageFont.truetype(normal, font_size)
@@ -38,8 +40,9 @@ def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
     draw.text(center, "Waiting for results...", font=fnt, fill=color, anchor="ms")
     return img
 
-class ScoreboardImage: #pylint: disable=too-many-instance-attributes
-    '''
+
+class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
+    """
     Generate a scoreboard image from a RaceTimes object.
 
     Parameters:
@@ -48,20 +51,25 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
     - race: The RaceTimes object containing the race result (and optionally
       the swimmer names/teams)
     - model: The model state that contains the rendering preferences
-    '''
+    """
 
     _BORDER_FRACTION = 0.05  # Fraction of image left as a border around all sides
-    _EVENT_SIZE = 'E:MMM'
-    _HEAT_SIZE = 'H:MM'
+    _EVENT_SIZE = "E:MMM"
+    _HEAT_SIZE = "H:MM"
     _img: Image.Image  # The rendered image
     _lanes: int  # The number of lanes to display
     _line_height: int  # Height of a line of text (baseline to baseline), in px
     _text_height: int  # Height of actual text, in px
     _normal_font: ImageFont.FreeTypeFont  # Font for normal text
-    _time_font: ImageFont.FreeTypeFont    # Font for printing times
+    _time_font: ImageFont.FreeTypeFont  # Font for printing times
 
-    def __init__(self, size: Tuple[int, int], race: RaceTimes, model: Model,
-    background: bool = True):
+    def __init__(
+        self,
+        size: Tuple[int, int],
+        race: RaceTimes,
+        model: Model,
+        background: bool = True,
+    ):
         with sentry_sdk.start_span(op="render_image", description="Render image"):
             self._race = race
             self._model = model
@@ -81,18 +89,18 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
 
     @property
     def image(self) -> Image.Image:
-        '''The image of the scoreboard'''
+        """The image of the scoreboard"""
         return self._img
 
     @property
     def size(self):
-        '''Get the size of the image'''
+        """Get the size of the image"""
         return self._img.size
 
     def _add_bg_image(self) -> None:
         bg_image_filename = self._model.image_bg.get()
         if bg_image_filename == "":
-            return # bg image not defined
+            return  # bg image not defined
         try:
             bg_image = Image.open(bg_image_filename)
             # Ensure the size matches
@@ -130,28 +138,48 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
         width = edge_r - edge_l
 
         # Line1 - E: 999 Heading text
-        draw.text((edge_l, self._baseline(1)), f"E:{self._race.event}", font=self._time_font,
-        anchor="ls", fill=self._model.color_event.get())
+        draw.text(
+            (edge_l, self._baseline(1)),
+            f"E:{self._race.event}",
+            font=self._time_font,
+            anchor="ls",
+            fill=self._model.color_event.get(),
+        )
         hstart = edge_l + draw.textsize(self._EVENT_SIZE, self._normal_font)[0]
         hwidth = width - hstart
         head_txt = self._model.title.get()
         while draw.textsize(head_txt, self._normal_font)[0] > hwidth:
             head_txt = head_txt[:-1]
-        draw.text((edge_r, self._baseline(1)), head_txt, font=self._normal_font,
-        anchor="rs", fill=self._model.color_title.get())
+        draw.text(
+            (edge_r, self._baseline(1)),
+            head_txt,
+            font=self._normal_font,
+            anchor="rs",
+            fill=self._model.color_title.get(),
+        )
 
         # Line2 - H: 99 Event description
-        draw.text((edge_l, self._baseline(2)), f"H:{self._race.heat}",
-        font=self._time_font, anchor="ls", fill=self._model.color_event.get())
+        draw.text(
+            (edge_l, self._baseline(2)),
+            f"H:{self._race.heat}",
+            font=self._time_font,
+            anchor="ls",
+            fill=self._model.color_event.get(),
+        )
         dstart = edge_l + draw.textsize(self._HEAT_SIZE, self._normal_font)[0]
         dwidth = width - dstart
         desc_txt = self._race.event_name
         while draw.textsize(desc_txt, self._normal_font)[0] > dwidth:
             desc_txt = desc_txt[:-1]
-        draw.text((edge_r, self._baseline(2)), desc_txt, font=self._normal_font,
-        anchor="rs", fill=self._model.color_event.get())
+        draw.text(
+            (edge_r, self._baseline(2)),
+            desc_txt,
+            font=self._normal_font,
+            anchor="rs",
+            fill=self._model.color_event.get(),
+        )
 
-    def _draw_lanes(self) -> None: # pylint: disable=too-many-locals
+    def _draw_lanes(self) -> None:  # pylint: disable=too-many-locals
         draw = ImageDraw.Draw(self._img)
         edge_l = int(self.size[0] * self._BORDER_FRACTION)
         edge_r = int(self.size[0] * (1 - self._BORDER_FRACTION))
@@ -164,18 +192,42 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
         # Lane title
         baseline = self._baseline(3)
         title_color = self._model.color_event.get()
-        draw.text((edge_l, baseline), "L", font=self._normal_font, anchor="ls", fill=title_color)
-        draw.text((edge_l + idx_width + pl_width, baseline), "Name",
-               font=self._normal_font, anchor="ls", fill=title_color)
-        draw.text((edge_r, baseline), "Time", font=self._normal_font, anchor="rs", fill=title_color)
+        draw.text(
+            (edge_l, baseline),
+            "L",
+            font=self._normal_font,
+            anchor="ls",
+            fill=title_color,
+        )
+        draw.text(
+            (edge_l + idx_width + pl_width, baseline),
+            "Name",
+            font=self._normal_font,
+            anchor="ls",
+            fill=title_color,
+        )
+        draw.text(
+            (edge_r, baseline),
+            "Time",
+            font=self._normal_font,
+            anchor="rs",
+            fill=title_color,
+        )
 
         # Lane data
         for i in range(1, self._lanes + 1):
-            color = self._model.color_odd.get() if i % 2 else self._model.color_even.get()
+            color = (
+                self._model.color_odd.get() if i % 2 else self._model.color_even.get()
+            )
             line_num = 3 + i
             # Lane
-            draw.text((edge_l + idx_width/2, self._baseline(line_num)),
-                f"{i}", font=self._normal_font, anchor="ms", fill=color)
+            draw.text(
+                (edge_l + idx_width / 2, self._baseline(line_num)),
+                f"{i}",
+                font=self._normal_font,
+                anchor="ms",
+                fill=color,
+            )
             # Place
             pl_num = self._race.place(i)
             pl_color = color
@@ -186,18 +238,33 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
             if pl_num == 3:
                 pl_color = self._model.color_third.get()
             ptxt = format_place(pl_num)
-            draw.text((edge_l + idx_width + pl_width/2, self._baseline(line_num)),
-                   ptxt, font=self._normal_font, anchor="ms", fill=pl_color)
+            draw.text(
+                (edge_l + idx_width + pl_width / 2, self._baseline(line_num)),
+                ptxt,
+                font=self._normal_font,
+                anchor="ms",
+                fill=pl_color,
+            )
             # Name
             name_variants = format_name(NameMode.NONE, self._race.name(i))
             while draw.textsize(name_variants[0], self._normal_font)[0] > name_width:
                 name_variants.pop(0)
             name = name_variants[0]
-            draw.text((edge_l + idx_width + pl_width, self._baseline(line_num)),
-            f"{name}", font=self._normal_font, anchor="ls", fill=color)
+            draw.text(
+                (edge_l + idx_width + pl_width, self._baseline(line_num)),
+                f"{name}",
+                font=self._normal_font,
+                anchor="ls",
+                fill=color,
+            )
             # Time
-            draw.text((edge_r, self._baseline(line_num)), self._time_text(i),
-            font=self._time_font, anchor="rs", fill=color)
+            draw.text(
+                (edge_r, self._baseline(line_num)),
+                self._time_text(i),
+                font=self._time_font,
+                anchor="rs",
+                fill=color,
+            )
 
     def _time_text(self, lane: int) -> str:
         if self._race.is_noshow(lane):
@@ -210,16 +277,19 @@ class ScoreboardImage: #pylint: disable=too-many-instance-attributes
         return format_time(final_time.value)
 
     def _baseline(self, line: int) -> int:
-        '''
+        """
         Return the y-coordinate for the baseline of the n-th line of text from
         the top.
-        '''
-        return int(self._img.size[1] * self._BORDER_FRACTION # skip top border
-                   + line * self._line_height # move down to proper line
-                   - (self._line_height - self._text_height)/2) # up 1/2 the inter-line space
+        """
+        return int(
+            self._img.size[1] * self._BORDER_FRACTION  # skip top border
+            + line * self._line_height  # move down to proper line
+            - (self._line_height - self._text_height) / 2
+        )  # up 1/2 the inter-line space
+
 
 def format_time(seconds: RawTime) -> str:
-    '''
+    """
     >>> format_time(RawTime('1.2'))
     '01.20'
     >>> format_time(RawTime('9.87'))
@@ -228,22 +298,24 @@ def format_time(seconds: RawTime) -> str:
     '50.00'
     >>> format_time(RawTime('120.0'))
     '2:00.00'
-    '''
-    sixty = RawTime('60')
+    """
+    sixty = RawTime("60")
     minutes = seconds // sixty
     seconds = seconds % sixty
     if minutes == 0:
         return f"{seconds:05.2f}"
     return f"{minutes}:{seconds:05.2f}"
 
+
 def fontname_to_file(name: str) -> str:
-    '''Convert a font name (Roboto) to its corresponding file name'''
+    """Convert a font name (Roboto) to its corresponding file name"""
     properties = font_manager.FontProperties(family=name, weight="bold")
     filename = font_manager.findfont(properties)
     return filename
 
+
 def format_place(place: Optional[int]) -> str:
-    '''
+    """
     Turn a numerical place into the printable string representation.
 
     >>> format_place(None)
@@ -258,7 +330,7 @@ def format_place(place: Optional[int]) -> str:
     '3rd'
     >>> format_place(6)
     '6th'
-    '''
+    """
     if place is None:
         return ""
     if place == 0:
