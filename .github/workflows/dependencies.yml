@@ -56,18 +56,19 @@ jobs:
         shell: bash
         run: |
           set -x
+          diff --version
+          diff --side-by-side --suppress-common-lines --width=80 requirements.old requirements.new
+
           echo 'This is an automated update of the `Pipfile.lock` file.' > updates.txt
           echo '' >> updates.txt
           echo '```' >> updates.txt
-          diff -y -d --suppress-common-lines -W 80 requirements.old requirements.new >> updates.txt
+          diff --side-by-side --suppress-common-lines --width=80 requirements.old requirements.new >> updates.txt
           echo '```' >> updates.txt
           cat updates.txt
 
           echo 'UPDATES<<EOF' >> $GITHUB_ENV
           cat updates.txt >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
-
-          cat $GITHUB_ENV
 
       - name: Create PR to update lockfile
         # https://github.com/peter-evans/create-pull-request
