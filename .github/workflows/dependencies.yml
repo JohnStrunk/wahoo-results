@@ -58,7 +58,7 @@ jobs:
           echo 'This is an automated update of the `Pipfile.lock` file.' > updates.txt
           echo '' >> updates.txt
           echo '```' >> updates.txt
-          diff --side-by-side --suppress-common-lines --width=80 requirements.old requirements.new >> updates.txt || true
+          diff --side-by-side --suppress-common-lines --width=80 --expand-tabs requirements.old requirements.new >> updates.txt || true
           echo '```' >> updates.txt
 
           echo 'UPDATES<<EOF' >> $GITHUB_ENV
