@@ -40,24 +40,34 @@ jobs:
         shell: cmd
         run: python -m pip install --user pipenv==${{ env.PIPENV_INSTALL_VERSION }}
 
-      - name: Update pipenv lock file
-        id: updates
+      - name: Save current package version information
+        shell: bash
+        run: pipenv requirements | cut -f1 -d ' ' | sort > requirements.old
+
+      - name: Update dependencies
+        shell: bash
+        run: pipenv update --dev
+
+      - name: Save new package version information
+        shell: bash
+        run: pipenv requirements | cut -f1 -d ' ' | sort > requirements.new
+
+      - name: Create update text
         shell: bash
         run: |
           echo 'This is an automated update of the `Pipfile.lock` file.' > updates.txt
           echo '' >> updates.txt
           echo '```' >> updates.txt
-          pipenv update --dev --outdated >> updates.txt || echo "continuing..."
+          diff --side-by-side --suppress-common-lines --width=80 --expand-tabs requirements.old requirements.new >> updates.txt || true
           echo '```' >> updates.txt
-          pipenv update --dev
 
           echo 'UPDATES<<EOF' >> $GITHUB_ENV
-          echo "$(<updates.txt)" >> $GITHUB_ENV
+          cat updates.txt >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
       - name: Create PR to update lockfile
         # https://github.com/peter-evans/create-pull-request
-        uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54  # v4.2.4
+        uses: peter-evans/create-pull-request@5b4a9f6a9e2af26e5f02351490b90d01eb8ec1e5  # v5.0.0
         with:
           token: ${{ secrets.PAT_TOKEN }}
           add-paths: |
