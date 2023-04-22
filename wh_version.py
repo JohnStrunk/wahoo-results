@@ -22,7 +22,7 @@ from typing import List, Optional
 import dateutil.parser
 import dateutil.tz
 import requests
-import semver  # type: ignore
+import semver.version  # type: ignore
 
 
 # pylint: disable=too-few-public-methods
@@ -42,7 +42,7 @@ class ReleaseInfo:
         self.tag = release_json["tag_name"]
         self.url = release_json["html_url"]
         self.draft = release_json["draft"]
-        self.prerelease = release_json["prerelease"]
+        self.prerelease = release_json["prerelease"].lower() == "true"
         self.published = dateutil.parser.isoparse(release_json["published_at"])
         match = re.match(r"^v?(.*)$", self.tag)
         self.semver = ""
@@ -73,13 +73,25 @@ def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
     Takes a list of releases and returns the one with the highest semantic
     version tag. Assumes the tag is the semver string with an optional leading
     "v" (e.g., "1.2" or "v1.2")
+
+    >>> rdict = {"html_url": "",
+    ...          "draft": "false",
+    ...          "prerelease": "false",
+    ...          "published_at": "2020-01-01 00:00:00"}
+    >>> v1 = ReleaseInfo(rdict | {"tag_name": "v1.0.0"})
+    >>> v2 = ReleaseInfo(rdict | {"tag_name": "v2.0.0"})
+    >>> v3 = ReleaseInfo(rdict | {"tag_name": "v3.0.0"})
+    >>> highest_semver([v1, v2, v3]).semver
+    '3.0.0'
+    >>> highest_semver([v2, v3, v1]).semver
+    '3.0.0'
+    >>> highest_semver([v3, v1, v2]).semver
+    '3.0.0'
     """
     highest = rlist[0]
     for release in rlist:
-        if (
-            semver.compare(release.semver, highest.semver) > 0
-            and not release.prerelease
-        ):
+        sv_release = semver.version.Version.parse(release.semver)
+        if sv_release.compare(highest.semver) > 0 and not release.prerelease:
             highest = release
     return highest
 
@@ -104,9 +116,9 @@ def git_semver(wrv: str) -> str:
     version = components.group(1)
     commits = int(components.group(2))
     sha = components.group(3)
-    if not semver.VersionInfo.isvalid(version):
+    if not semver.version.Version.is_valid(version):
         return "0.0.1"
-    version_info = semver.VersionInfo.parse(version)
+    version_info = semver.version.Version.parse(version)
     if commits > 0:  # it's a dev version, so modify the version information
         pre = ""
         if version_info.prerelease is not None:
@@ -145,4 +157,4 @@ def is_latest_version(latest_version: Optional[ReleaseInfo], wrv: str) -> bool:
         return True
     if wrv == "unreleased":
         return False
-    return semver.VersionInfo.parse(latest_version.semver).compare(wrv) <= 0
+    return semver.version.Version.parse(latest_version.semver).compare(wrv) <= 0
