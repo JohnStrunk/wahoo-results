@@ -30,6 +30,7 @@ import pychromecast  # type: ignore
 import sentry_sdk
 import zeroconf
 from PIL import Image  # type: ignore
+from pychromecast.controllers.media import BaseMediaPlayer  # type: ignore
 from pychromecast.error import NotConnected  # type: ignore
 
 # Resolution of images for the Chromecast
@@ -37,6 +38,9 @@ IMAGE_SIZE = (1280, 720)
 
 # Chromecast image refresh interval (seconds)
 _REFRESH_INTERVAL = 15 * 60
+
+# Chomecast application id
+_WAHOO_RESULTS_APP_ID = "34B218B6"
 
 
 @dataclass
@@ -49,6 +53,23 @@ class DeviceStatus:
 
 
 DiscoveryCallbackFn = Callable[[], None]
+
+
+class ICController(BaseMediaPlayer):
+    """Media controller for ImageCast"""
+
+    def __init__(self):
+        super().__init__(_WAHOO_RESULTS_APP_ID)
+
+    # pylint: disable-next=arguments-differ
+    def quick_play(self, url: str, mime_type: str, **kwargs):
+        """Quick Play helper for Scoreboard images"""
+        super().quick_play(
+            url,
+            media_type=mime_type,
+            metadata={"metadataType": 0, "title": ""},
+            **kwargs,
+        )
 
 
 class ImageCast:  # pylint: disable=too-many-instance-attributes
@@ -100,9 +121,14 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
         Shut down the background processes and disconnect from the
         Chromecast(s).
         """
+        # Separate generating the list from disconnecting becase disconnecting
+        # can alter the list
+        to_disconnect: list[pychromecast.Chromecast] = []
         for state in self.devices.values():
             if state["enabled"]:
-                self._disconnect(state["cast"])
+                to_disconnect.append(state["cast"])
+        for cast in to_disconnect:
+            self._disconnect(cast)
 
     @classmethod
     def _disconnect(cls, cast: pychromecast.Chromecast) -> None:
@@ -176,11 +202,15 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             # Use the current time as the URL to force the CC to refresh the image
             sec = int(time.time())
             url = f"http://{local_addr}:{self._server_port}/image-{sec}.png"
-            media = cast.media_controller
+            # Set media controller to use our app
+            controller = ICController()
+            cast.register_handler(controller)
             try:
-                media.play_media(url, "image/png")
+                controller.quick_play(url, "image/png")
             except NotConnected:
                 pass
+            finally:
+                cast.unregister_handler(controller)
 
     def _start_webserver(self) -> None:
         parent = self
@@ -282,9 +312,11 @@ def _main():
     imgcast = ImageCast(9657)
     imgcast.set_discovery_callback(callback)
     imgcast.start()
-    for _ in range(0, 5):
+    iterations = 3
+    for i in range(0, iterations):
+        print(f"Publishing iteration: {i + 1} of {iterations}")
         imgcast.publish(image)
-        time.sleep(60)
+        time.sleep(10)
     imgcast.stop()
 
 
