@@ -35,6 +35,12 @@ jobs:
           python-version: '3.11'
           cache: 'pipenv'
 
+      - name: Enable cache for pre-commit hooks
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8  # v3.3.1
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
       - name: Add python Scripts directory to path
