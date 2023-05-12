@@ -42,7 +42,7 @@ jobs:
 
       - name: Save current package version information
         shell: bash
-        run: pipenv requirements | cut -f1 -d ' ' | sort > requirements.old
+        run: pipenv requirements --dev | cut -f1 -d ' ' | sort > requirements.old
 
       - name: Update dependencies
         shell: bash
@@ -50,7 +50,7 @@ jobs:
 
       - name: Save new package version information
         shell: bash
-        run: pipenv requirements | cut -f1 -d ' ' | sort > requirements.new
+        run: pipenv requirements --dev | cut -f1 -d ' ' | sort > requirements.new
 
       - name: Create update text
         shell: bash
