@@ -35,12 +35,13 @@ a = Analysis(
 )
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 splash = Splash(
-    'media\\wr-card2.png',
+    #'media\\wr-card2.png',
+    'chromecast-receiver\\cc-receiver-logo.png',
     binaries=a.binaries,
     datas=a.datas,
     text_pos=(10, 365),
     text_size=10,
-    text_color='black',
+    text_color='white',
     minify_script=True,
     always_on_top=True,
 )
