@@ -125,6 +125,7 @@ def setup_appearance(model: Model) -> None:
         model.color_second,
         model.color_third,
         model.color_bg,
+        model.brightness_bg,
         model.num_lanes,
     ]:
         element.trace_add("write", lambda *_: update_preview())

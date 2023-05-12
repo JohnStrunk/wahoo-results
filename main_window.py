@@ -206,6 +206,7 @@ class _configTab(ttk.Frame):
         colorframe.pack(side="top", fill="x")
         colorframe.columnconfigure(1, weight=1)
         colorframe.columnconfigure(3, weight=1)
+        colorframe.columnconfigure(5, weight=1)
         # 1st col
         ttk.Label(colorframe, text="Heading:", anchor="e").grid(
             column=0, row=0, sticky="news"
@@ -218,18 +219,6 @@ class _configTab(ttk.Frame):
         )
         widgets.ColorButton2(colorframe, color_var=self._vm.color_event).grid(
             column=1, row=1, sticky="nws", pady=_PADDING
-        )
-        ttk.Label(colorframe, text="Odd rows:", anchor="e").grid(
-            column=0, row=2, sticky="news"
-        )
-        widgets.ColorButton2(colorframe, color_var=self._vm.color_odd).grid(
-            column=1, row=2, sticky="nws", pady=_PADDING
-        )
-        ttk.Label(colorframe, text="Even rows:", anchor="e").grid(
-            column=0, row=3, sticky="news"
-        )
-        widgets.ColorButton2(colorframe, color_var=self._vm.color_even).grid(
-            column=1, row=3, sticky="nws", pady=_PADDING
         )
         # 2nd col
         ttk.Label(colorframe, text="1st place:", anchor="e").grid(
@@ -250,24 +239,53 @@ class _configTab(ttk.Frame):
         widgets.ColorButton2(colorframe, color_var=self._vm.color_third).grid(
             column=3, row=2, sticky="nws", pady=_PADDING
         )
+        # 3rd col
+        ttk.Label(colorframe, text="Odd rows:", anchor="e").grid(
+            column=4, row=0, sticky="news"
+        )
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_odd).grid(
+            column=5, row=0, sticky="nws", pady=_PADDING
+        )
+        ttk.Label(colorframe, text="Even rows:", anchor="e").grid(
+            column=4, row=1, sticky="news"
+        )
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_even).grid(
+            column=5, row=1, sticky="nws", pady=_PADDING
+        )
         ttk.Label(colorframe, text="Background:", anchor="e").grid(
-            column=2, row=3, sticky="news"
+            column=4, row=2, sticky="news"
         )
         widgets.ColorButton2(colorframe, color_var=self._vm.color_bg).grid(
-            column=3, row=3, sticky="nws", pady=_PADDING
+            column=5, row=2, sticky="nws", pady=_PADDING
         )
 
         ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
 
         bgframelabels = ttk.Frame(mainframe)
         bgframelabels.pack(side="top", fill="x")
-        ttk.Label(bgframelabels, text="Background image:", anchor="e").pack(
-            side="left", fill="both"
+        bgframelabels.columnconfigure(1, weight=1)
+        ttk.Label(bgframelabels, text="Image brightness:", anchor="e").grid(
+            column=0, row=0, sticky="news"
+        )
+        bg_bgight_spin = ttk.Spinbox(
+            bgframelabels,
+            from_=0,
+            to=100,
+            increment=5,
+            width=4,
+            textvariable=self._vm.brightness_bg,
+        )
+        bg_bgight_spin.grid(column=1, row=0, sticky="nws", pady=_PADDING)
+        ToolTip(bg_bgight_spin, "Brightness of the background image (percent: 0-100)")
+        ttk.Label(bgframelabels, text="Background image:", anchor="e").grid(
+            column=0, row=1, sticky="news"
         )
         self._bg_img_label = StringVar()
-        ttk.Label(
+        bg_img_label = ttk.Label(
             bgframelabels, textvariable=self._bg_img_label, anchor="w", relief="sunken"
-        ).pack(side="left", fill="both", expand=1)
+        )
+        bg_img_label.grid(column=1, row=1, sticky="news")
+        ToolTip(bg_img_label, "Scoreboard background image - Recommended: 1280x720")
         self._vm.image_bg.trace_add(
             "write",
             lambda *_: self._bg_img_label.set(
@@ -275,7 +293,6 @@ class _configTab(ttk.Frame):
             ),
         )
         self._vm.image_bg.set(self._vm.image_bg.get())
-        ToolTip(bgframelabels, "Scoreboard background image - Recommended: 1280x720")
 
         bgframebtns = ttk.Frame(mainframe)
         bgframebtns.pack(side="top", fill="x")

@@ -22,6 +22,7 @@ from typing import Optional, Tuple
 import sentry_sdk
 from matplotlib import font_manager  # type: ignore
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL.ImageEnhance import Brightness
 
 from model import Model
 from racetimes import RaceTimes, RawTime
@@ -107,6 +108,10 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
             bg_image = bg_image.resize(self.size, Image.BICUBIC)
             # Make sure the image modes match
             bg_image = bg_image.convert("RGBA")
+            # Adjust the image brightness
+            bg_image = Brightness(bg_image).enhance(
+                float(self._model.brightness_bg.get()) / 100.0
+            )
             # Overlay it, respecting the alpha channel
             self._img.alpha_composite(bg_image)
         except FileNotFoundError:
