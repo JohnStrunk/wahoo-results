@@ -11,6 +11,11 @@ repos:
     rev: v3.2.0
     hooks:
       - id: check-added-large-files  # Prevents giant files from being committed
+        exclude: |
+          (?x)^(
+                chromecast-receiver/cc-receiver-logo.png|
+                media/cc-receiver-logo.svg
+            )$
       - id: check-yaml               # Checks yaml files for parseable syntax
       - id: end-of-file-fixer        # Ensures that a file is either empty, or ends with one newline
       - id: trailing-whitespace      # Trims trailing whitespace

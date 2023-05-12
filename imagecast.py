@@ -37,7 +37,8 @@ from pychromecast.error import NotConnected  # type: ignore
 IMAGE_SIZE = (1280, 720)
 
 # Chromecast image refresh interval (seconds)
-_REFRESH_INTERVAL = 15 * 60
+# Newer versions of the Chromecast firmware seem to have a 10 minute timeout
+_REFRESH_INTERVAL = 7 * 60
 
 # Chomecast application id
 _WAHOO_RESULTS_APP_ID = "34B218B6"
