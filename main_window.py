@@ -263,13 +263,29 @@ class _configTab(ttk.Frame):
 
         bgframelabels = ttk.Frame(mainframe)
         bgframelabels.pack(side="top", fill="x")
-        ttk.Label(bgframelabels, text="Background image:", anchor="e").pack(
-            side="left", fill="both"
+        bgframelabels.columnconfigure(1, weight=1)
+        ttk.Label(bgframelabels, text="Image brightness:", anchor="e").grid(
+            column=0, row=0, sticky="news"
+        )
+        bg_bgight_spin = ttk.Spinbox(
+            bgframelabels,
+            from_=0,
+            to=100,
+            increment=5,
+            width=4,
+            textvariable=self._vm.brightness_bg,
+        )
+        bg_bgight_spin.grid(column=1, row=0, sticky="nws", pady=_PADDING)
+        ToolTip(bg_bgight_spin, "Brightness of the background image (percent: 0-100)")
+        ttk.Label(bgframelabels, text="Background image:", anchor="e").grid(
+            column=0, row=1, sticky="news"
         )
         self._bg_img_label = StringVar()
-        ttk.Label(
+        bg_img_label = ttk.Label(
             bgframelabels, textvariable=self._bg_img_label, anchor="w", relief="sunken"
-        ).pack(side="left", fill="both", expand=1)
+        )
+        bg_img_label.grid(column=1, row=1, sticky="news")
+        ToolTip(bg_img_label, "Scoreboard background image - Recommended: 1280x720")
         self._vm.image_bg.trace_add(
             "write",
             lambda *_: self._bg_img_label.set(
@@ -277,7 +293,6 @@ class _configTab(ttk.Frame):
             ),
         )
         self._vm.image_bg.set(self._vm.image_bg.get())
-        ToolTip(bgframelabels, "Scoreboard background image - Recommended: 1280x720")
 
         bgframebtns = ttk.Frame(mainframe)
         bgframebtns.pack(side="top", fill="x")
