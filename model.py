@@ -118,7 +118,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
 
     def __init__(self, root: Tk):
         self.root = root
-        self._event_queue: queue.Queue[Callable[[], None]] = queue.Queue(0)
+        self._event_queue: queue.Queue[Callable[[], None]] = queue.Queue()
         root.bind(self._ENQUEUE_EVENT, self._dispatch_event)
 
         ########################################
@@ -149,6 +149,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
         self.color_second = StringVar()
         self.color_third = StringVar()
         self.color_bg = StringVar()
+        self.brightness_bg = IntVar()
         # features
         self.num_lanes = IntVar()
         self.min_times = IntVar()
@@ -195,6 +196,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
         self.color_second.set(data.get("color_second", self.PANTONE200_RED))
         self.color_third.set(data.get("color_third", self.PANTONE4505FLATGOLD))
         self.color_bg.set(data.get("color_bg", self.BLACK))
+        self.brightness_bg.set(data.getint("brightness_bg", 100))
         self.num_lanes.set(data.getint("num_lanes", 10))
         self.min_times.set(data.getint("min_times", 2))
         self.time_threshold.set(data.getfloat("time_threshold", 0.30))
@@ -227,6 +229,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
             "color_second": self.color_second.get(),
             "color_third": self.color_third.get(),
             "color_bg": self.color_bg.get(),
+            "brightness_bg": str(self.brightness_bg.get()),
             "num_lanes": str(self.num_lanes.get()),
             "min_times": str(self.min_times.get()),
             "time_threshold": str(self.time_threshold.get()),

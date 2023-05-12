@@ -206,6 +206,7 @@ class _configTab(ttk.Frame):
         colorframe.pack(side="top", fill="x")
         colorframe.columnconfigure(1, weight=1)
         colorframe.columnconfigure(3, weight=1)
+        colorframe.columnconfigure(5, weight=1)
         # 1st col
         ttk.Label(colorframe, text="Heading:", anchor="e").grid(
             column=0, row=0, sticky="news"
@@ -218,18 +219,6 @@ class _configTab(ttk.Frame):
         )
         widgets.ColorButton2(colorframe, color_var=self._vm.color_event).grid(
             column=1, row=1, sticky="nws", pady=_PADDING
-        )
-        ttk.Label(colorframe, text="Odd rows:", anchor="e").grid(
-            column=0, row=2, sticky="news"
-        )
-        widgets.ColorButton2(colorframe, color_var=self._vm.color_odd).grid(
-            column=1, row=2, sticky="nws", pady=_PADDING
-        )
-        ttk.Label(colorframe, text="Even rows:", anchor="e").grid(
-            column=0, row=3, sticky="news"
-        )
-        widgets.ColorButton2(colorframe, color_var=self._vm.color_even).grid(
-            column=1, row=3, sticky="nws", pady=_PADDING
         )
         # 2nd col
         ttk.Label(colorframe, text="1st place:", anchor="e").grid(
@@ -250,11 +239,24 @@ class _configTab(ttk.Frame):
         widgets.ColorButton2(colorframe, color_var=self._vm.color_third).grid(
             column=3, row=2, sticky="nws", pady=_PADDING
         )
+        # 3rd col
+        ttk.Label(colorframe, text="Odd rows:", anchor="e").grid(
+            column=4, row=0, sticky="news"
+        )
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_odd).grid(
+            column=5, row=0, sticky="nws", pady=_PADDING
+        )
+        ttk.Label(colorframe, text="Even rows:", anchor="e").grid(
+            column=4, row=1, sticky="news"
+        )
+        widgets.ColorButton2(colorframe, color_var=self._vm.color_even).grid(
+            column=5, row=1, sticky="nws", pady=_PADDING
+        )
         ttk.Label(colorframe, text="Background:", anchor="e").grid(
-            column=2, row=3, sticky="news"
+            column=4, row=2, sticky="news"
         )
         widgets.ColorButton2(colorframe, color_var=self._vm.color_bg).grid(
-            column=3, row=3, sticky="nws", pady=_PADDING
+            column=5, row=2, sticky="nws", pady=_PADDING
         )
 
         ttk.Separator(mainframe, orient=HORIZONTAL).pack(side="top", fill="x", pady=10)
