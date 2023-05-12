@@ -48,12 +48,13 @@ Title
     other information.
 Text spacing
     This controls the amount of vertical space between lines of text.
-
-Text colors can be customized by clicking on the color swatches and choosing a
-new color.
-
-A background image can be inserted using the "Import..." button. The
-background image should be a 1280x720 PNG image.
+Text colors
+    The colors can be customized by clicking on the color swatches and choosing
+    a new color.
+Background image
+    A background image can be inserted using the "Import..." button. The image
+    should be a 1280x720 PNG image. Once imported, the "image brightness"
+    adjustment can be used to dim the image if it is too bright.
 
 -----
 
