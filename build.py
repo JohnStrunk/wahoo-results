@@ -42,10 +42,10 @@ git_ref = (
 )
 wr_version = wh_version.git_semver(git_ref)
 print(f"Building Wahoo Results, version: {wr_version}")
-vdict = semver.parse(wr_version)
+version = semver.version.Version.parse(wr_version)
 
 with open("version.py", "w") as f:
-    f.write("'''Version information'''\n\n")
+    f.write('"""Version information"""\n\n')
     f.write(f'WAHOO_RESULTS_VERSION = "{wr_version}"\n')
 
     # Sentry API key
@@ -74,8 +74,8 @@ with open("version.py", "w") as f:
 # Create file info to embed in executable
 v = vinfo.VSVersionInfo(
     ffi=vinfo.FixedFileInfo(
-        filevers=(vdict["major"], vdict["minor"], vdict["patch"], 0),
-        prodvers=(vdict["major"], vdict["minor"], vdict["patch"], 0),
+        filevers=(version.major, version.minor, version.patch, 0),
+        prodvers=(version.major, version.minor, version.patch, 0),
         mask=0x3F,
         flags=0x0,
         OS=0x4,

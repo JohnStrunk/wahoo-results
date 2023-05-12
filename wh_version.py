@@ -42,7 +42,7 @@ class ReleaseInfo:
         self.tag = release_json["tag_name"]
         self.url = release_json["html_url"]
         self.draft = release_json["draft"]
-        self.prerelease = release_json["prerelease"].lower() == "true"
+        self.prerelease = release_json["prerelease"]
         self.published = dateutil.parser.isoparse(release_json["published_at"])
         match = re.match(r"^v?(.*)$", self.tag)
         self.semver = ""
@@ -75,8 +75,8 @@ def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
     "v" (e.g., "1.2" or "v1.2")
 
     >>> rdict = {"html_url": "",
-    ...          "draft": "false",
-    ...          "prerelease": "false",
+    ...          "draft": False,
+    ...          "prerelease": False,
     ...          "published_at": "2020-01-01 00:00:00"}
     >>> v1 = ReleaseInfo(rdict | {"tag_name": "v1.0.0"})
     >>> v2 = ReleaseInfo(rdict | {"tag_name": "v2.0.0"})
@@ -143,8 +143,8 @@ def is_latest_version(latest_version: Optional[ReleaseInfo], wrv: str) -> bool:
     Returns true if the running version is the most recent
 
     >>> rdict = {"html_url": "",
-    ...          "draft": "false",
-    ...          "prerelease": "false",
+    ...          "draft": False,
+    ...          "prerelease": False,
     ...          "published_at": "2020-01-01 00:00:00"}
     >>> is_latest_version(ReleaseInfo(rdict | {"tag_name": "v1.0.0"}), "0.9.0")
     False
