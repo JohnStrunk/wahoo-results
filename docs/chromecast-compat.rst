@@ -46,19 +46,19 @@ Chromecast w/ Google TV
 
     1. Disable power saving
 
-       - Go to Settings (⚙️ icon) > System > Power & Energy
-       - Set "Turn off display" to "Never"
+       - Go to: :menuselection:`Settings (⚙️ icon) --> System --> Power & Energy`
+       - Set :guilabel:`Turn off display` to ``Never``
 
     2. Enable "developer mode"
 
-       - Go to Settings (⚙️ icon) > System > About
-       - Scroll down to "Android TV OS Build" and repeatedly click on it until
-         you get the message "You are now a developer"
+       - Go to: :menuselection:`Settings (⚙️ icon) --> System --> About`
+       - Scroll down to :guilabel:`Android TV OS Build` and repeatedly click on
+         it until you get the message "You are now a developer"
 
     3. Enable "Stay awake"
 
-       - Go to Settings (⚙️ icon) > System > Developer options
-       - Enable "Stay awake"
+       - Go to: :menuselection:`Settings (⚙️ icon) --> System --> Developer options`
+       - Enable :guilabel:`Stay awake`
 
 -----
 
