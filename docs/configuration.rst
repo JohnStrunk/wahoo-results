@@ -52,9 +52,10 @@ Text colors
     The colors can be customized by clicking on the color swatches and choosing
     a new color.
 Background image
-    A background image can be inserted using the "Import..." button. The image
-    should be a 1280x720 PNG image. Once imported, the "image brightness"
-    adjustment can be used to dim the image if it is too bright.
+    A background image can be inserted using the :guilabel:`Import...` button.
+    The image should be a 1280x720 PNG image. Once imported, the
+    :guilabel:`Image brightness` adjustment can be used to dim the image if it
+    is too bright.
 
 -----
 
@@ -73,8 +74,9 @@ Time threshold
     than this threshold (in seconds), the scoreboard will display "--:--.--"
     instead of the calculated final time.
 
-The "Minimum times" and "Time threshold" settings are designed to prevent
-potentially unreliable or incorrect times from being shown to spectators.
+The :guilabel:`Minimum times` and :guilabel:`Time threshold` settings are
+designed to prevent potentially unreliable or incorrect times from being shown
+to spectators.
 
 
 .. _config_dir_tab:
@@ -89,18 +91,18 @@ Directories tab
    Directories tab
 
 The Directories tab configures where the scoreboard will search for start list
-(``*.ECB``) files and race result (``*.DO4``) files.
+(:file:`*.ECB`) files and race result (:file:`*.DO4`) files.
 
-The left pane is for the start list files. Use the "Browse..." button to
-select the directory where the start lists reside. The start list files will
+The left pane is for the start list files. Use the :guilabel:`Browse...` button
+to select the directory where the start lists reside. The start list files will
 be parsed and summarized in the table.
 
-The "Export events to Dolphin..." button will generate a
-``dolphin_events.csv`` file in the start list directory that is suitable for
+The :guilabel:`Export events to Dolphin...` button will generate a
+:file:`dolphin_events.csv` file in the start list directory that is suitable for
 import into the Dolphin software.
 
-The right pane is for race result files. Use the "Browse..." button to select
-the directory where the race result files will be written by the Dolphin
+The right pane is for race result files. Use the :guilabel:`Browse...` button to
+select the directory where the race result files will be written by the Dolphin
 software. Any race result files that are found will be displayed in the table,
 ordered by their timestamp.
 
