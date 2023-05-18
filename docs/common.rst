@@ -23,3 +23,6 @@
 .. |SMM|  replace:: SwimTopia Meet Maestro
 
 .. _SMM: https://www.swimtopia.com/products/meet-maestro/swim-meet-management-software/
+
+.. role:: raw-html(raw)
+   :format: html
