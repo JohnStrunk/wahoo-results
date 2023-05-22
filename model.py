@@ -177,7 +177,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
         config = ConfigParser()
         config.read(filename, encoding="utf-8")
         if _INI_HEADING not in config:
-            return
+            config.add_section(_INI_HEADING)
         data = config[_INI_HEADING]
         # Calibri (sans serif) is standard since Vista
         # It's also part of USA-S visual identity standards

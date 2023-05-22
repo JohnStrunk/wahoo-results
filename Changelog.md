@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 #### Fixed
 
-- :bug: Fix UUID handling from ini file
+- :bug: Fix crash at startup w/ non-existant config file
 - :bug: Enqueue startlists to be processed in main thread to avoid tkinter error
 
 ### [1.0.1] - 2023-02-10
