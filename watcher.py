@@ -32,7 +32,15 @@ class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
         self._callback = callback
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent):
-        self._callback()
+        # Limit triggering to only events that modify the contents to avoid
+        # creating a loop
+        if event.event_type in [
+            watchdog.events.EVENT_TYPE_CREATED,
+            watchdog.events.EVENT_TYPE_DELETED,
+            watchdog.events.EVENT_TYPE_MODIFIED,
+            watchdog.events.EVENT_TYPE_MOVED,
+        ]:
+            self._callback()
 
 
 class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
