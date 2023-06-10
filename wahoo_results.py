@@ -17,6 +17,7 @@
 
 """Wahoo Results!"""
 
+import argparse
 import copy
 import os
 import platform
@@ -32,6 +33,7 @@ from sentry_sdk.integrations.socket import SocketIntegration
 from sentry_sdk.integrations.threading import ThreadingIntegration
 from watchdog.observers import Observer  # type: ignore
 
+import autotest
 import imagecast
 import main_window
 import wh_analytics
@@ -337,6 +339,10 @@ def initialize_sentry(model: Model) -> None:
 
 def main() -> None:  # pylint: disable=too-many-statements
     """Main program"""
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--test", type=float)
+    args = arg_parser.parse_args()
+
     root = Tk()
 
     model = Model(root)
@@ -434,6 +440,10 @@ def main() -> None:  # pylint: disable=too-many-statements
         pass
     except RuntimeError:
         pass
+
+    if args.test is not None:
+        tester = autotest.Tester(model, args.test)
+        tester.start()
 
     root.mainloop()
 
