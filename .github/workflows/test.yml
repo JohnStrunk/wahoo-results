@@ -15,6 +15,8 @@ env:
   PIPENV_INSTALL_VERSION: "2023.03.20"
   # https://github.com/snyk/cli/releases
   SNYK_VERSION: v1.1122.0
+  # How long to run the executable automated tests
+  TEST_DURATION_SECONDS: 60
   # https://github.com/upx/upx/releases
   UPX_VERSION: 4.0.2
 
@@ -141,9 +143,32 @@ jobs:
           path: wahoo-results.exe
           if-no-files-found: error
 
+  autotest:
+    name: Autotest
+    needs: [build]
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        # https://github.com/actions/checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          fetch-depth: 0
+
+      - name: Load executable artifact
+        # https://github.com/actions/download-artifact
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a  # v3.0.2
+        with:
+          name: wahoo-results.exe
+
+      - name: Run autotest
+        shell: cmd
+        run: wahoo-results.exe --test ${{ env.TEST_DURATION_SECONDS }}
+
+
   success:
     name: Successful CI
-    needs: [build, test]
+    needs: [autotest, test]
     runs-on: windows-latest
     steps:
       - name: Success
