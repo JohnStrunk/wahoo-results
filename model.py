@@ -114,12 +114,12 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
     PANTONE871METALICGOLD = "#85754e"  # Tertiary
     PANTONE4505FLATGOLD = "#b1953a"  # Tertiary
 
-    _ENQUEUE_EVENT = "<<enqueue_event1>>"
-
     def __init__(self, root: Tk):
         self.root = root
+
+        # Initialize the event queue and start the dispatch loop
         self._event_queue: queue.Queue[Callable[[], None]] = queue.Queue()
-        root.bind(self._ENQUEUE_EVENT, self._dispatch_event)
+        root.after_idle(self._dispatch_event)
 
         ########################################
         ## Dropdown menu items
@@ -244,12 +244,14 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
     def enqueue(self, func: Callable[[], None]) -> None:
         """Enqueue a function to be executed by the tkinter main thread"""
         self._event_queue.put(func)
-        self.root.event_generate(self._ENQUEUE_EVENT, when="tail")
 
-    def _dispatch_event(self, _event) -> None:
+    def _dispatch_event(self) -> None:
         try:
-            func = self._event_queue.get_nowait()
-            func()
-            self._event_queue.task_done()
+            while True:  # Process all events in the queue
+                func = self._event_queue.get_nowait()
+                func()
+                self._event_queue.task_done()
         except queue.Empty:
             pass
+        # Schedule the next time we check the queue for events
+        self.root.after(10, self._dispatch_event)
