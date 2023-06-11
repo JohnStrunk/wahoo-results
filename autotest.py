@@ -19,9 +19,10 @@
 
 import abc
 import random
+import string
 import threading
 import time
-from tkinter import IntVar
+from tkinter import DoubleVar, IntVar, StringVar
 from typing import Callable, List
 
 from model import Model
@@ -45,8 +46,11 @@ class Tester(threading.Thread):
     def run(self) -> None:
         # The list of potential test actions to run
         actions: List[Action] = [
-            # SimpleOp(self, self._model.menu_exit.run),
             SetInt(self, self._model.num_lanes, 6, 10),
+            SetInt(self, self._model.min_times, 1, 3),
+            SetDouble(self, self._model.time_threshold, 0.01, 3.0),
+            SetDouble(self, self._model.text_spacing, 0.8, 2.0),
+            SetString(self, self._model.title, 0, 20),
         ]
         stop_time = time.time() + self._duration
         while time.time() < stop_time or self._duration == 0:
@@ -98,5 +102,59 @@ class SetInt(Action):  # pylint: disable=too-few-public-methods
 
     def run(self) -> None:
         newvalue = random.randint(self._min, self._max)
+        print(f"Setting {self._var} to {newvalue}")
+        self._tester.enqueue(lambda: self._var.set(newvalue))
+
+
+class SetDouble(Action):  # pylint: disable=too-few-public-methods
+    """Set a double variable to a random value"""
+
+    def __init__(
+        self, tester: Tester, var: DoubleVar, minimum: float, maximum: float
+    ) -> None:
+        """
+        Set a double variable to a random value
+
+        :param tester: the test runner
+        :param var: the variable to set
+        :param minimum: the minimum value to choose
+        :param maximum: the maximum value to choose
+        """
+        super().__init__(tester)
+        self._var = var
+        self._min = minimum
+        self._max = maximum
+
+    def run(self) -> None:
+        newvalue = random.random() * (self._max - self._min) + self._min
+        print(f"Setting {self._var} to {newvalue}")
+        self._tester.enqueue(lambda: self._var.set(newvalue))
+
+
+class SetString(Action):  # pylint: disable=too-few-public-methods
+    """Set a string variable to a random value"""
+
+    def __init__(
+        self, tester: Tester, var: StringVar, length_min: int, length_max: int
+    ) -> None:
+        """
+        Set a string variable to a random value
+
+        :param tester: the test runner
+        :param var: the variable to set
+        :param values: the list of values to choose from
+        """
+        super().__init__(tester)
+        self._var = var
+        self._min = length_min
+        self._max = length_max
+
+    def run(self) -> None:
+        newvalue = "".join(
+            random.choice(
+                string.ascii_letters + string.digits + string.punctuation + " "
+            )
+            for _ in range(random.randint(self._min, self._max))
+        )
         print(f"Setting {self._var} to {newvalue}")
         self._tester.enqueue(lambda: self._var.set(newvalue))
