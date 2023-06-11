@@ -342,6 +342,8 @@ def main() -> None:  # pylint: disable=too-many-statements
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--test", type=float)
     args = arg_parser.parse_args()
+    if args.test is not None:
+        autotest.set_test_mode()
 
     root = Tk()
 

@@ -29,6 +29,7 @@ import requests
 import sentry_sdk
 from segment import analytics  # type: ignore
 
+import autotest
 import version
 from model import Model
 
@@ -138,6 +139,8 @@ def cc_toggle(enable: bool) -> None:
 def _send_event(name: str, kvparams: Optional[Dict[str, Any]] = None) -> None:
     with sentry_sdk.start_span(op="analytics", description="Process analytics event"):
         if "user_id" not in _CONTEXT:
+            return
+        if autotest.TESTING:  # Don't send analytics during testing
             return
         if kvparams is None:
             kvparams = {}

@@ -23,12 +23,20 @@ import string
 import threading
 import time
 from tkinter import DoubleVar, IntVar, StringVar
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 from model import Model
 
 # How long to pause beween test actions
 MEAN_ARRIVAL_SECONDS = 1.0
+
+TESTING = False
+
+
+def set_test_mode() -> None:
+    """Set the application to test mode"""
+    global TESTING  # pylint: disable=global-statement
+    TESTING = True
 
 
 class Tester(threading.Thread):
