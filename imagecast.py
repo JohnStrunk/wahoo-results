@@ -199,7 +199,10 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             sock = cast.socket_client.get_socket()
             if sock is None:
                 return
-            local_addr = sock.getsockname()[0]
+            try:
+                local_addr = sock.getsockname()[0]
+            except OSError:  # Socket is closed or not connected. Nothing to do.
+                return
             # Use the current time as the URL to force the CC to refresh the image
             sec = int(time.time())
             url = f"http://{local_addr}:{self._server_port}/image-{sec}.png"
