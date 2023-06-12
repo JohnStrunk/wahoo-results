@@ -39,6 +39,17 @@ def set_test_mode() -> None:
     TESTING = True
 
 
+class Action(abc.ABC):  # pylint: disable=too-few-public-methods
+    """Base class for test actions"""
+
+    def __init__(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    def run(self) -> None:
+        """Run the action"""
+
+
 class Tester(threading.Thread):
     """Test harness for Wahoo Results"""
 
@@ -53,30 +64,32 @@ class Tester(threading.Thread):
 
     def run(self) -> None:
         # The list of potential test actions to run
-        actions: List[Action] = [
-            SetInt(self, self._model.num_lanes, 6, 10),
-            SetInt(self, self._model.min_times, 1, 3),
-            SetDouble(self, self._model.time_threshold, 0.01, 3.0),
-            SetDouble(self, self._model.text_spacing, 0.8, 2.0),
-            SetString(self, self._model.title, 0, 20),
-        ]
+        actions = OneOf(
+            [
+                SetInt(self, self._model.num_lanes, 6, 10),
+                SetInt(self, self._model.min_times, 1, 3),
+                SetDouble(self, self._model.time_threshold, 0.01, 3.0),
+                SetDouble(self, self._model.text_spacing, 0.8, 2.0),
+                SetString(self, self._model.title, 0, 20),
+            ]
+        )
         stop_time = time.time() + self._duration
         while time.time() < stop_time or self._duration == 0:
-            random.choice(actions).run()
+            actions.run()
             time.sleep(random.expovariate(1.0 / MEAN_ARRIVAL_SECONDS))
         # Exit the application
         self.enqueue(self._model.menu_exit.run)
 
 
-class Action(abc.ABC):  # pylint: disable=too-few-public-methods
-    """Base class for test actions"""
+class OneOf(Action):  # pylint: disable=too-few-public-methods
+    """Run one of a list of actions"""
 
-    def __init__(self, tester: Tester) -> None:
-        self._tester = tester
+    def __init__(self, actions: List[Action]) -> None:
+        super().__init__()
+        self._actions = actions
 
-    @abc.abstractmethod
     def run(self) -> None:
-        """Run the action"""
+        random.choice(self._actions).run()
 
 
 class SimpleOp(Action):  # pylint: disable=too-few-public-methods
@@ -84,7 +97,8 @@ class SimpleOp(Action):  # pylint: disable=too-few-public-methods
 
     def __init__(self, tester: Tester, func: Callable[[], None]) -> None:
         """A simple operation that just runs a function"""
-        super().__init__(tester)
+        super().__init__()
+        self._tester = tester
         self._fn = func
 
     def run(self) -> None:
@@ -103,7 +117,8 @@ class SetInt(Action):  # pylint: disable=too-few-public-methods
         :param minimum: the minimum value to choose
         :param maximum: the maximum value to choose
         """
-        super().__init__(tester)
+        super().__init__()
+        self._tester = tester
         self._var = var
         self._min = minimum
         self._max = maximum
@@ -128,7 +143,8 @@ class SetDouble(Action):  # pylint: disable=too-few-public-methods
         :param minimum: the minimum value to choose
         :param maximum: the maximum value to choose
         """
-        super().__init__(tester)
+        super().__init__()
+        self._tester = tester
         self._var = var
         self._min = minimum
         self._max = maximum
@@ -152,7 +168,8 @@ class SetString(Action):  # pylint: disable=too-few-public-methods
         :param var: the variable to set
         :param values: the list of values to choose from
         """
-        super().__init__(tester)
+        super().__init__()
+        self._tester = tester
         self._var = var
         self._min = length_min
         self._max = length_max
