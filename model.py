@@ -174,7 +174,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
 
     def load(self, filename: str) -> None:
         """Load user's preferences"""
-        config = ConfigParser()
+        config = ConfigParser(interpolation=None)
         config.read(filename, encoding="utf-8")
         if _INI_HEADING not in config:
             config.add_section(_INI_HEADING)
@@ -214,7 +214,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
 
     def save(self, filename: str) -> None:
         """Save user's preferences"""
-        config = ConfigParser()
+        config = ConfigParser(interpolation=None)
         config[_INI_HEADING] = {
             "font_normal": self.font_normal.get(),
             "font_time": self.font_time.get(),
