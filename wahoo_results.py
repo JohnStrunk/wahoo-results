@@ -62,6 +62,9 @@ def setup_exit(root: Tk, model: Model) -> None:
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.",
             )
+        # Cancel all pending "after" events
+        for after_id in root.tk.eval("after info").split():
+            root.after_cancel(after_id)
         root.destroy()
 
     # Close box exits app
