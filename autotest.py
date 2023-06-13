@@ -27,9 +27,6 @@ from typing import Callable, List, Optional
 
 from model import Model
 
-# How long to pause beween test actions
-MEAN_ARRIVAL_SECONDS = 1.0
-
 TESTING = False
 
 
@@ -39,7 +36,7 @@ def set_test_mode() -> None:
     TESTING = True
 
 
-class Action(abc.ABC):  # pylint: disable=too-few-public-methods
+class Scenario(abc.ABC):  # pylint: disable=too-few-public-methods
     """Base class for test actions"""
 
     def __init__(self) -> None:
@@ -50,41 +47,86 @@ class Action(abc.ABC):  # pylint: disable=too-few-public-methods
         """Run the action"""
 
 
-class Tester(threading.Thread):
-    """Test harness for Wahoo Results"""
+def run_scenario(scenario: Scenario) -> None:
+    """Run a test scenario"""
+    test_thread = threading.Thread(
+        target=scenario.run, name="Test scenario", daemon=True
+    )
+    test_thread.start()
 
-    def __init__(self, model: Model, duration: float = 0) -> None:
-        super().__init__(name="Tester", daemon=True)
-        self._model = model
-        self._duration = duration
 
-    def enqueue(self, func: Callable[[], None]) -> None:
-        """Enqueue a function to be run on the main thread"""
-        self._model.enqueue(func)
+def build_random_scenario(
+    model: Model, delay: float, seconds: float = 0, operations: int = 0
+) -> Scenario:
+    """Builds a test scenario that executes actions randomly"""
+    return Sequentially(
+        [
+            Repeatedly(
+                OneOf(
+                    [
+                        SetInt(model, model.num_lanes, 6, 10),
+                        SetInt(model, model.min_times, 1, 3),
+                        SetDouble(model, model.time_threshold, 0.01, 3.0),
+                        SetDouble(model, model.text_spacing, 0.8, 2.0),
+                        SetString(model, model.title, 0, 20),
+                    ]
+                ),
+                delay,
+                seconds,
+                operations,
+            ),
+            SimpleOp(model, model.menu_exit.run),
+        ]
+    )
+
+
+class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
+    """Run an action repeatedly"""
+
+    def __init__(
+        self, action: Scenario, delay: float, seconds: float, operations: int
+    ) -> None:
+        """
+        Run an action repeatedly
+
+        :param action: The scenario to run
+        :param delay: The mean delay between actions
+        :param seconds: The maximum number of seconds to run (0: run forever)
+        :param operations: The maximum number of operations to run (0: run forever)
+        """
+        super().__init__()
+        self._delay = delay
+        self._seconds = seconds
+        self._operations = operations
+        self._action = action
 
     def run(self) -> None:
-        # The list of potential test actions to run
-        actions = OneOf(
-            [
-                SetInt(self, self._model.num_lanes, 6, 10),
-                SetInt(self, self._model.min_times, 1, 3),
-                SetDouble(self, self._model.time_threshold, 0.01, 3.0),
-                SetDouble(self, self._model.text_spacing, 0.8, 2.0),
-                SetString(self, self._model.title, 0, 20),
-            ]
-        )
-        stop_time = time.time() + self._duration
-        while time.time() < stop_time or self._duration == 0:
-            actions.run()
-            time.sleep(random.expovariate(1.0 / MEAN_ARRIVAL_SECONDS))
-        # Exit the application
-        self.enqueue(self._model.menu_exit.run)
+        start = time.time()
+        total_ops = 0
+        while (self._seconds == 0 or time.time() - start < self._seconds) and (
+            self._operations == 0 or self._operations > total_ops
+        ):
+            self._action.run()
+            time.sleep(random.expovariate(1.0 / self._delay))
+            total_ops += 1
 
 
-class OneOf(Action):  # pylint: disable=too-few-public-methods
-    """Run one of a list of actions"""
+class Sequentially(Scenario):  # pylint: disable=too-few-public-methods
+    """Run each item in a list of actions"""
 
-    def __init__(self, actions: List[Action]) -> None:
+    def __init__(self, actions: List[Scenario]) -> None:
+        super().__init__()
+        self._actions = actions
+
+    def run(self) -> None:
+        for action in self._actions:
+            action.run()
+
+
+class OneOf(Scenario):  # pylint: disable=too-few-public-methods
+    """Randomly choose one of a list of actions to run"""
+
+    def __init__(self, actions: List[Scenario]) -> None:
         super().__init__()
         self._actions = actions
 
@@ -92,33 +134,33 @@ class OneOf(Action):  # pylint: disable=too-few-public-methods
         random.choice(self._actions).run()
 
 
-class SimpleOp(Action):  # pylint: disable=too-few-public-methods
+class SimpleOp(Scenario):  # pylint: disable=too-few-public-methods
     """A test operation that runs a function"""
 
-    def __init__(self, tester: Tester, func: Callable[[], None]) -> None:
+    def __init__(self, model: Model, func: Callable[[], None]) -> None:
         """A simple operation that just runs a function"""
         super().__init__()
-        self._tester = tester
+        self._model = model
         self._fn = func
 
     def run(self) -> None:
-        self._tester.enqueue(self._fn)
+        self._model.enqueue(self._fn)
 
 
-class SetInt(Action):  # pylint: disable=too-few-public-methods
+class SetInt(Scenario):  # pylint: disable=too-few-public-methods
     """Set an integer variable to a random value"""
 
-    def __init__(self, tester: Tester, var: IntVar, minimum: int, maximum: int) -> None:
+    def __init__(self, model: Model, var: IntVar, minimum: int, maximum: int) -> None:
         """
         Set an integer variable to a random value
 
-        :param tester: the test runner
+        :param model: the application model
         :param var: the integer variable to set
         :param minimum: the minimum value to choose
         :param maximum: the maximum value to choose
         """
         super().__init__()
-        self._tester = tester
+        self._model = model
         self._var = var
         self._min = minimum
         self._max = maximum
@@ -126,25 +168,25 @@ class SetInt(Action):  # pylint: disable=too-few-public-methods
     def run(self) -> None:
         newvalue = random.randint(self._min, self._max)
         print(f"Setting {self._var} to {newvalue}")
-        self._tester.enqueue(lambda: self._var.set(newvalue))
+        self._model.enqueue(lambda: self._var.set(newvalue))
 
 
-class SetDouble(Action):  # pylint: disable=too-few-public-methods
+class SetDouble(Scenario):  # pylint: disable=too-few-public-methods
     """Set a double variable to a random value"""
 
     def __init__(
-        self, tester: Tester, var: DoubleVar, minimum: float, maximum: float
+        self, model: Model, var: DoubleVar, minimum: float, maximum: float
     ) -> None:
         """
         Set a double variable to a random value
 
-        :param tester: the test runner
+        :param model: the application model
         :param var: the variable to set
         :param minimum: the minimum value to choose
         :param maximum: the maximum value to choose
         """
         super().__init__()
-        self._tester = tester
+        self._model = model
         self._var = var
         self._min = minimum
         self._max = maximum
@@ -152,24 +194,24 @@ class SetDouble(Action):  # pylint: disable=too-few-public-methods
     def run(self) -> None:
         newvalue = random.random() * (self._max - self._min) + self._min
         print(f"Setting {self._var} to {newvalue}")
-        self._tester.enqueue(lambda: self._var.set(newvalue))
+        self._model.enqueue(lambda: self._var.set(newvalue))
 
 
-class SetString(Action):  # pylint: disable=too-few-public-methods
+class SetString(Scenario):  # pylint: disable=too-few-public-methods
     """Set a string variable to a random value"""
 
     def __init__(
-        self, tester: Tester, var: StringVar, length_min: int, length_max: int
+        self, model: Model, var: StringVar, length_min: int, length_max: int
     ) -> None:
         """
         Set a string variable to a random value
 
-        :param tester: the test runner
+        :param model: the application model
         :param var: the variable to set
         :param values: the list of values to choose from
         """
         super().__init__()
-        self._tester = tester
+        self._model = model
         self._var = var
         self._min = length_min
         self._max = length_max
@@ -182,4 +224,4 @@ class SetString(Action):  # pylint: disable=too-few-public-methods
             for _ in range(random.randint(self._min, self._max))
         )
         print(f"Setting {self._var} to {newvalue}")
-        self._tester.enqueue(lambda: self._var.set(newvalue))
+        self._model.enqueue(lambda: self._var.set(newvalue))

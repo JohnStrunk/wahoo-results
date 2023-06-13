@@ -447,8 +447,8 @@ def main() -> None:  # pylint: disable=too-many-statements
         pass
 
     if args.test is not None:
-        tester = autotest.Tester(model, args.test)
-        tester.start()
+        scenario = autotest.build_random_scenario(model, 1.0, args.test)
+        autotest.run_scenario(scenario)
 
     root.mainloop()
 
