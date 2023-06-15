@@ -18,12 +18,14 @@
 """Test harness for Wahoo Results"""
 
 import abc
+import os
 import random
+import shutil
 import string
 import threading
 import time
 from tkinter import DoubleVar, IntVar, StringVar
-from typing import Callable, List, Optional
+from typing import Callable, List
 
 from model import Model
 
@@ -225,3 +227,113 @@ class SetString(Scenario):  # pylint: disable=too-few-public-methods
         )
         print(f"Setting {self._var} to {newvalue}")
         self._model.enqueue(lambda: self._var.set(newvalue))
+
+
+class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
+    """Copy a startlist file into the startlists directory"""
+
+    def __init__(self, testdatadir: str, startlistdir: str) -> None:
+        """
+        Copy a startlist file into the startlists directory
+
+        :param model: the application model
+        :param testdatadir: the directory containing the main test data
+        :param startlistdir: the directory for the startlists
+        """
+        super().__init__()
+        self._testdatadir = testdatadir
+        self._startlistdir = startlistdir
+
+        # Ensure the directories exist
+        assert os.path.isdir(self._testdatadir)
+        assert os.path.isdir(self._startlistdir)
+
+    def run(self) -> None:
+        startlists_all = filter(
+            lambda f: f.endswith(".scb"), os.listdir(self._testdatadir)
+        )
+        startlists_existing = filter(
+            lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)
+        )
+        startlists_new = set(startlists_all) - set(startlists_existing)
+        if len(startlists_new) > 0:
+            startlist = random.choice(list(startlists_new))
+            print(f"Adding startlist {startlist}")
+            shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)
+
+
+class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
+    """Remove a startlist file from the startlists directory"""
+
+    def __init__(self, startlistdir: str) -> None:
+        """
+        Remove a startlist file from the startlists directory
+
+        :param startlistdir: the directory for the startlists
+        """
+        super().__init__()
+        self._startlistdir = startlistdir
+
+        # Ensure the directory exists
+        assert os.path.isdir(self._startlistdir)
+
+    def run(self) -> None:
+        startlists = list(
+            filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir))
+        )
+        if len(startlists) > 0:
+            startlist = random.choice(startlists)
+            print(f"Removing startlist {startlist}")
+            os.remove(os.path.join(self._startlistdir, startlist))
+
+
+class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
+    """Copy a do4 file into the do4 directory"""
+
+    def __init__(self, testdatadir: str, do4dir: str) -> None:
+        """
+        Copy a do4 file into the do4 directory
+
+        :param model: the application model
+        :param testdatadir: the directory containing the main test data
+        :param do4dir: the directory for the do4 files
+        """
+        super().__init__()
+        self._testdatadir = testdatadir
+        self._do4dir = do4dir
+
+        # Ensure the directories exist
+        assert os.path.isdir(self._testdatadir)
+        assert os.path.isdir(self._do4dir)
+
+    def run(self) -> None:
+        do4_all = filter(lambda f: f.endswith(".do4"), os.listdir(self._testdatadir))
+        do4_existing = filter(lambda f: f.endswith(".do4"), os.listdir(self._do4dir))
+        do4_new = set(do4_all) - set(do4_existing)
+        if len(do4_new) > 0:
+            do4 = random.choice(list(do4_new))
+            print(f"Adding do4 {do4}")
+            shutil.copy(os.path.join(self._testdatadir, do4), self._do4dir)
+
+
+class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
+    """Remove a do4 file from the do4 directory"""
+
+    def __init__(self, do4dir: str) -> None:
+        """
+        Remove a do4 file from the do4 directory
+
+        :param do4dir: the directory for the do4 files
+        """
+        super().__init__()
+        self._do4dir = do4dir
+
+        # Ensure the directory exists
+        assert os.path.isdir(self._do4dir)
+
+    def run(self) -> None:
+        do4list = list(filter(lambda f: f.endswith(".do4"), os.listdir(self._do4dir)))
+        if len(do4list) > 0:
+            do4 = random.choice(do4list)
+            print(f"Removing do4 {do4}")
+            os.remove(os.path.join(self._do4dir, do4))
