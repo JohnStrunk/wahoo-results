@@ -61,17 +61,49 @@ def build_random_scenario(
     model: Model, delay: float, seconds: float = 0, operations: int = 0
 ) -> Scenario:
     """Builds a test scenario that executes actions randomly"""
+
+    # Prepare test data directories & result scenarios
+    startlist_scenarios: List[Scenario] = []
+    result_scenarios: List[Scenario] = []
+    testdatadir = os.path.join(os.curdir, "testdata")
+    testdata_exists = os.path.exists(testdatadir)
+    tmp_startlist = os.path.join(testdatadir, "tmp_startlists")
+    tmp_result = os.path.join(testdatadir, "tmp_result")
+    if testdata_exists:
+        os.makedirs(tmp_startlist, exist_ok=True)
+        os.makedirs(tmp_result, exist_ok=True)
+        model.enqueue(lambda: model.dir_startlist.set(tmp_startlist))
+        model.enqueue(lambda: model.dir_results.set(tmp_result))
+        startlist_scenarios = [
+            AddStartlist(testdatadir, tmp_startlist),
+            AddStartlist(testdatadir, tmp_startlist),
+            RemoveStartlist(tmp_startlist),
+        ]
+        result_scenarios = [
+            AddDO4(testdatadir, tmp_result),
+            AddDO4(testdatadir, tmp_result),
+            RemoveDO4(tmp_result),
+        ]
+
+    appearance_scenarios: List[Scenario] = [
+        SetInt(model, model.num_lanes, 6, 10),
+        SetDouble(model, model.text_spacing, 0.8, 2.0),
+        SetString(model, model.title, 0, 20),
+    ]
+
+    calculation_scenarios: List[Scenario] = [
+        SetInt(model, model.min_times, 1, 3),
+        SetDouble(model, model.time_threshold, 0.01, 3.0),
+    ]
+
     return Sequentially(
         [
             Repeatedly(
                 OneOf(
-                    [
-                        SetInt(model, model.num_lanes, 6, 10),
-                        SetInt(model, model.min_times, 1, 3),
-                        SetDouble(model, model.time_threshold, 0.01, 3.0),
-                        SetDouble(model, model.text_spacing, 0.8, 2.0),
-                        SetString(model, model.title, 0, 20),
-                    ]
+                    appearance_scenarios * 1
+                    + calculation_scenarios * 2
+                    + startlist_scenarios * 2
+                    + result_scenarios * 20
                 ),
                 delay,
                 seconds,
@@ -109,7 +141,7 @@ class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
             self._operations == 0 or self._operations > total_ops
         ):
             self._action.run()
-            time.sleep(random.expovariate(1.0 / self._delay))
+            time.sleep(1 + random.expovariate(1.0 / self._delay))
             total_ops += 1
 
 
@@ -236,7 +268,6 @@ class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
         """
         Copy a startlist file into the startlists directory
 
-        :param model: the application model
         :param testdatadir: the directory containing the main test data
         :param startlistdir: the directory for the startlists
         """
@@ -294,7 +325,6 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         """
         Copy a do4 file into the do4 directory
 
-        :param model: the application model
         :param testdatadir: the directory containing the main test data
         :param do4dir: the directory for the do4 files
         """
