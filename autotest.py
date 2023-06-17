@@ -21,9 +21,12 @@ import abc
 import os
 import random
 import shutil
+import signal
 import string
+import sys
 import threading
 import time
+import tkinter
 from tkinter import DoubleVar, IntVar, StringVar
 from typing import Callable, List
 
@@ -51,6 +54,14 @@ class Scenario(abc.ABC):  # pylint: disable=too-few-public-methods
 
 def run_scenario(scenario: Scenario) -> None:
     """Run a test scenario"""
+    # Cause the application to exit if an exception occurs in the test thread
+    old_hook = threading.excepthook
+
+    def new_hook(*args, **kwargs):
+        old_hook(*args, **kwargs)
+        os.kill(os.getpid(), signal.SIGKILL)
+
+    threading.excepthook = new_hook
     test_thread = threading.Thread(
         target=scenario.run, name="Test scenario", daemon=True
     )
@@ -69,6 +80,9 @@ def build_random_scenario(
     testdata_exists = os.path.exists(testdatadir)
     tmp_startlist = os.path.join(testdatadir, "tmp_startlists")
     tmp_result = os.path.join(testdatadir, "tmp_result")
+
+    result_counter = Counter(model.latest_result)
+
     if testdata_exists:
         os.makedirs(tmp_startlist, exist_ok=True)
         os.makedirs(tmp_result, exist_ok=True)
@@ -80,8 +94,8 @@ def build_random_scenario(
             RemoveStartlist(tmp_startlist),
         ]
         result_scenarios = [
-            AddDO4(testdatadir, tmp_result),
-            AddDO4(testdatadir, tmp_result),
+            AddDO4(testdatadir, tmp_result, result_counter),
+            AddDO4(testdatadir, tmp_result, result_counter),
             RemoveDO4(tmp_result),
         ]
 
@@ -112,6 +126,31 @@ def build_random_scenario(
             SimpleOp(model, model.menu_exit.run),
         ]
     )
+
+
+def eventually(bool_fn: Callable[[], bool], interval_secs: float, tries: int) -> bool:
+    """Check a boolean function until it returns true or we run out of tries"""
+    for _ in range(tries):
+        if bool_fn():
+            return True
+        time.sleep(interval_secs)
+    return False
+
+
+class Counter:
+    """A counter that tracks how often a Tk.Variable has been updated"""
+
+    def __init__(self, var: tkinter.Variable) -> None:
+        self._value = 0
+
+        def update() -> None:
+            self._value += 1
+
+        var.trace_add("write", lambda *_: update())
+
+    def get(self) -> int:
+        """Get the counter's value"""
+        return self._value
 
 
 class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
@@ -321,16 +360,18 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
 class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
     """Copy a do4 file into the do4 directory"""
 
-    def __init__(self, testdatadir: str, do4dir: str) -> None:
+    def __init__(self, testdatadir: str, do4dir: str, update_counter: Counter) -> None:
         """
         Copy a do4 file into the do4 directory
 
         :param testdatadir: the directory containing the main test data
         :param do4dir: the directory for the do4 files
+        :param update_counter: the counter for the number of updates to the results
         """
         super().__init__()
         self._testdatadir = testdatadir
         self._do4dir = do4dir
+        self._update_counter = update_counter
 
         # Ensure the directories exist
         assert os.path.isdir(self._testdatadir)
@@ -343,7 +384,9 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         if len(do4_new) > 0:
             do4 = random.choice(list(do4_new))
             print(f"Adding do4 {do4}")
+            prev_count = self._update_counter.get()
             shutil.copy(os.path.join(self._testdatadir, do4), self._do4dir)
+            assert eventually(lambda: self._update_counter.get() > prev_count, 0.1, 20)
 
 
 class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
