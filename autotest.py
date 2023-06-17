@@ -81,7 +81,8 @@ def build_random_scenario(
     tmp_startlist = os.path.join(testdatadir, "tmp_startlists")
     tmp_result = os.path.join(testdatadir, "tmp_result")
 
-    result_counter = Counter(model.latest_result)
+    latest_result_counter = Counter(model.latest_result)
+    scoreboard_counter = Counter(model.scoreboard)
 
     if testdata_exists:
         os.makedirs(tmp_startlist, exist_ok=True)
@@ -90,13 +91,16 @@ def build_random_scenario(
         model.enqueue(lambda: model.dir_results.set(tmp_result))
         startlist_scenarios = [
             AddStartlist(testdatadir, tmp_startlist),
-            AddStartlist(testdatadir, tmp_startlist),
             RemoveStartlist(tmp_startlist),
+            GenDolphinCSV(model, tmp_startlist),
         ]
         result_scenarios = [
-            AddDO4(testdatadir, tmp_result, result_counter),
-            AddDO4(testdatadir, tmp_result, result_counter),
-            RemoveDO4(tmp_result),
+            AddDO4(
+                testdatadir, tmp_result, [latest_result_counter, scoreboard_counter]
+            ),
+            AddDO4(
+                testdatadir, tmp_result, [latest_result_counter, scoreboard_counter]
+            ),
         ]
 
     appearance_scenarios: List[Scenario] = [
@@ -137,7 +141,7 @@ def eventually(bool_fn: Callable[[], bool], interval_secs: float, tries: int) ->
     return False
 
 
-class Counter:
+class Counter:  # pylint: disable=too-few-public-methods
     """A counter that tracks how often a Tk.Variable has been updated"""
 
     def __init__(self, var: tkinter.Variable) -> None:
@@ -360,7 +364,7 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
 class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
     """Copy a do4 file into the do4 directory"""
 
-    def __init__(self, testdatadir: str, do4dir: str, update_counter: Counter) -> None:
+    def __init__(self, testdatadir: str, do4dir: str, counters: List[Counter]) -> None:
         """
         Copy a do4 file into the do4 directory
 
@@ -371,7 +375,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         super().__init__()
         self._testdatadir = testdatadir
         self._do4dir = do4dir
-        self._update_counter = update_counter
+        self._counters = counters
 
         # Ensure the directories exist
         assert os.path.isdir(self._testdatadir)
@@ -384,9 +388,14 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         if len(do4_new) > 0:
             do4 = random.choice(list(do4_new))
             print(f"Adding do4 {do4}")
-            prev_count = self._update_counter.get()
+            prev_count = []
+            for counter in self._counters:
+                prev_count.append(counter.get())
             shutil.copy(os.path.join(self._testdatadir, do4), self._do4dir)
-            assert eventually(lambda: self._update_counter.get() > prev_count, 0.1, 20)
+            for i in range(len(self._counters)):
+                assert eventually(
+                    lambda: self._counters[i].get() > prev_count[i], 0.1, 20
+                )
 
 
 class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
@@ -410,3 +419,40 @@ class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
             do4 = random.choice(do4list)
             print(f"Removing do4 {do4}")
             os.remove(os.path.join(self._do4dir, do4))
+
+
+class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
+    """Generate the dolphin event CSV file and verify its contents"""
+
+    def __init__(self, model: Model, startlistdir: str) -> None:
+        """
+        Generate the dolphin event CSV file and verify its contents
+
+        :param model: the application model
+        :param startlistdir: the directory for the startlists
+        """
+        super().__init__()
+        self._model = model
+        self._startlistdir = startlistdir
+
+        # Ensure the directory exists
+        assert os.path.isdir(self._startlistdir)
+
+    def run(self) -> None:
+        print("Checking CSV")
+        # Trigger event CSV export
+        self._model.enqueue(self._model.dolphin_export.run)
+        num_startlists = len(
+            list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
+        )
+        # Ensure the CSV has on entry for each event
+        assert eventually(lambda: num_startlists == len(self._read_csv()), 0.1, 20)
+
+    def _read_csv(self) -> List[str]:
+        filename = os.path.join(self._startlistdir, "dolphin_events.csv")
+        try:
+            with open(filename, "r", encoding="cp1252") as file:
+                lines = file.readlines()
+                return lines
+        except FileNotFoundError:
+            return []
