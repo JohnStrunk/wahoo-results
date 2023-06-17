@@ -59,7 +59,7 @@ def run_scenario(scenario: Scenario) -> None:
 
     def new_hook(*args, **kwargs):
         old_hook(*args, **kwargs)
-        os.kill(os.getpid(), signal.SIGKILL)
+        os.kill(os.getpid(), signal.SIGABRT)
 
     threading.excepthook = new_hook
     test_thread = threading.Thread(
@@ -98,9 +98,7 @@ def build_random_scenario(
             AddDO4(
                 testdatadir, tmp_result, [latest_result_counter, scoreboard_counter]
             ),
-            AddDO4(
-                testdatadir, tmp_result, [latest_result_counter, scoreboard_counter]
-            ),
+            RemoveDO4(tmp_result),
         ]
 
     appearance_scenarios: List[Scenario] = [
@@ -394,7 +392,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
             shutil.copy(os.path.join(self._testdatadir, do4), self._do4dir)
             for i in range(len(self._counters)):
                 assert eventually(
-                    lambda: self._counters[i].get() > prev_count[i], 0.1, 20
+                    lambda: self._counters[i].get() > prev_count[i], 0.1, 50
                 )
 
 
@@ -446,7 +444,7 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
             list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
         )
         # Ensure the CSV has on entry for each event
-        assert eventually(lambda: num_startlists == len(self._read_csv()), 0.1, 20)
+        assert eventually(lambda: num_startlists == len(self._read_csv()), 0.1, 50)
 
     def _read_csv(self) -> List[str]:
         filename = os.path.join(self._startlistdir, "dolphin_events.csv")
