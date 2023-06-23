@@ -23,7 +23,6 @@ import random
 import shutil
 import signal
 import string
-import sys
 import threading
 import time
 import tkinter
@@ -392,7 +391,10 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
             shutil.copy(os.path.join(self._testdatadir, do4), self._do4dir)
             for i in range(len(self._counters)):
                 assert eventually(
-                    lambda: self._counters[i].get() > prev_count[i], 0.1, 50
+                    # i=i is a hack to capture the current value of i
+                    lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
+                    0.1,
+                    50,
                 )
 
 
