@@ -62,6 +62,9 @@ def setup_exit(root: Tk, model: Model) -> None:
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.",
             )
+        # Cancel all pending "after" events
+        for after_id in root.tk.eval("after info").split():
+            root.after_cancel(after_id)
         root.destroy()
 
     # Close box exits app
@@ -342,6 +345,8 @@ def main() -> None:  # pylint: disable=too-many-statements
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--test", type=float)
     args = arg_parser.parse_args()
+    if args.test is not None:
+        autotest.set_test_mode()
 
     root = Tk()
 
@@ -442,8 +447,8 @@ def main() -> None:  # pylint: disable=too-many-statements
         pass
 
     if args.test is not None:
-        tester = autotest.Tester(model, args.test)
-        tester.start()
+        scenario = autotest.build_random_scenario(model, 0.25, args.test)
+        autotest.run_scenario(scenario)
 
     root.mainloop()
 
