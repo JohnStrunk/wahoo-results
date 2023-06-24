@@ -163,7 +163,7 @@ jobs:
 
       - name: Run autotest
         shell: cmd
-        run: wahoo-results.exe --test ${{ env.TEST_DURATION_SECONDS }}
+        run: wahoo-results.exe --log=debug --test ${{ env.TEST_DURATION_SECONDS }}
 
 
   success:
