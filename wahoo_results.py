@@ -19,6 +19,7 @@
 
 import argparse
 import copy
+import logging
 import os
 import platform
 import re
@@ -343,8 +344,18 @@ def initialize_sentry(model: Model) -> None:
 def main() -> None:  # pylint: disable=too-many-statements
     """Main program"""
     arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--log", type=str)
     arg_parser.add_argument("--test", type=float)
     args = arg_parser.parse_args()
+    if args.log is not None:
+        loglevel = args.log
+        numeric_level = getattr(logging, loglevel.upper(), None)
+        if not isinstance(numeric_level, int):
+            raise ValueError(f"Invalid log level: {loglevel}")
+        logging.basicConfig(
+            format="%(asctime)s %(module)s %(levelname)s %(message)s",
+            level=numeric_level,
+        )
     if args.test is not None:
         autotest.set_test_mode()
 

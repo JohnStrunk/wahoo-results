@@ -18,6 +18,7 @@
 """Test harness for Wahoo Results"""
 
 import abc
+import logging
 import os
 import random
 import shutil
@@ -32,6 +33,8 @@ from typing import Callable, List
 from model import Model
 
 TESTING = False
+
+logger = logging.getLogger(__name__)
 
 
 def set_test_mode() -> None:
@@ -241,7 +244,7 @@ class SetInt(Scenario):  # pylint: disable=too-few-public-methods
 
     def run(self) -> None:
         newvalue = random.randint(self._min, self._max)
-        print(f"Setting {self._var} to {newvalue}")
+        logger.info("Setting %s to %d", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
@@ -267,7 +270,7 @@ class SetDouble(Scenario):  # pylint: disable=too-few-public-methods
 
     def run(self) -> None:
         newvalue = random.random() * (self._max - self._min) + self._min
-        print(f"Setting {self._var} to {newvalue}")
+        logger.info("Setting %s to %f", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
@@ -297,7 +300,7 @@ class SetString(Scenario):  # pylint: disable=too-few-public-methods
             )
             for _ in range(random.randint(self._min, self._max))
         )
-        print(f"Setting {self._var} to {newvalue}")
+        logger.info("Setting %s to %s", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
@@ -329,7 +332,7 @@ class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
         startlists_new = set(startlists_all) - set(startlists_existing)
         if len(startlists_new) > 0:
             startlist = random.choice(list(startlists_new))
-            print(f"Adding startlist {startlist}")
+            logger.info("Adding startlist %s", startlist)
             shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)
 
 
@@ -354,7 +357,7 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
         )
         if len(startlists) > 0:
             startlist = random.choice(startlists)
-            print(f"Removing startlist {startlist}")
+            logger.info("Removing startlist %s", startlist)
             os.remove(os.path.join(self._startlistdir, startlist))
 
 
@@ -384,7 +387,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         do4_new = set(do4_all) - set(do4_existing)
         if len(do4_new) > 0:
             do4 = random.choice(list(do4_new))
-            print(f"Adding do4 {do4}")
+            logger.info("Adding do4 %s", do4)
             prev_count = []
             for counter in self._counters:
                 prev_count.append(counter.get())
@@ -417,7 +420,7 @@ class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
         do4list = list(filter(lambda f: f.endswith(".do4"), os.listdir(self._do4dir)))
         if len(do4list) > 0:
             do4 = random.choice(do4list)
-            print(f"Removing do4 {do4}")
+            logger.info("Removing do4 %s", do4)
             os.remove(os.path.join(self._do4dir, do4))
 
 
@@ -439,7 +442,7 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
         assert os.path.isdir(self._startlistdir)
 
     def run(self) -> None:
-        print("Checking CSV")
+        logger.info("Checking CSV")
         # Trigger event CSV export
         self._model.enqueue(self._model.dolphin_export.run)
         num_startlists = len(
