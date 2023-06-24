@@ -344,17 +344,32 @@ def initialize_sentry(model: Model) -> None:
 def main() -> None:  # pylint: disable=too-many-statements
     """Main program"""
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("--log", type=str)
-    arg_parser.add_argument("--test", type=float)
+    arg_parser.add_argument(
+        "--loglevel",
+        type=str,
+        help="Set the log level",
+        choices=["debug", "info", "warning", "error", "critical"],
+    )
+    arg_parser.add_argument(
+        "--logfile",
+        type=str,
+        help="Send log output to the specified file instead of the screen",
+    )
+    arg_parser.add_argument(
+        "--test",
+        type=float,
+        help="Enable test mode, running for the specified number of seconds",
+    )
     args = arg_parser.parse_args()
-    if args.log is not None:
-        loglevel = args.log
+    if args.loglevel is not None:
+        loglevel = args.loglevel
         numeric_level = getattr(logging, loglevel.upper(), None)
         if not isinstance(numeric_level, int):
             raise ValueError(f"Invalid log level: {loglevel}")
         logging.basicConfig(
             format="%(asctime)s %(module)s %(levelname)s %(message)s",
             level=numeric_level,
+            filename=args.logfile,  # May be None
         )
     if args.test is not None:
         autotest.set_test_mode()
