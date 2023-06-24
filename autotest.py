@@ -67,7 +67,77 @@ def run_scenario(scenario: Scenario) -> None:
     test_thread.start()
 
 
-def build_random_scenario(
+def build_scenario(model: Model, test: str) -> Scenario:
+    """Build a test scenario"""
+    test_name = test.split(":")[0]
+    if test_name == "scripted":
+        [seconds] = test.split(":")[1:]
+        return _build_scripted_scenario(model, float(seconds))
+    if test_name == "random":
+        [delay, seconds, operations] = test.split(":")[1:]
+        return _build_random_scenario(
+            model, float(delay), float(seconds), int(operations)
+        )
+    raise ValueError(f"Unknown test: {test}")
+
+
+def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
+    """Builds a test scenario that executes a pre-defined sequence of actions"""
+
+    testdatadir = os.path.join(os.curdir, "testdata")
+    testdata_exists = os.path.exists(testdatadir)
+    tmp_startlist = os.path.join(testdatadir, "tmp_startlists")
+    tmp_result = os.path.join(testdatadir, "tmp_result")
+
+    latest_result_counter = Counter(model.latest_result)
+    scoreboard_counter = Counter(model.scoreboard)
+
+    # Ensure the test data is present, and clean out the temporary directories
+    assert testdata_exists
+    for dirname in [tmp_startlist, tmp_result]:
+        try:
+            shutil.rmtree(dirname)
+        except FileNotFoundError:
+            pass
+        os.makedirs(dirname)
+    model.enqueue(lambda: model.dir_startlist.set(tmp_startlist))
+    model.enqueue(lambda: model.dir_results.set(tmp_result))
+
+    return Sequentially(
+        [
+            Delay(2),  # Wait for the application to start
+            LoadAllSCB(testdatadir, tmp_startlist),  # Make all startlists available
+            GenDolphinCSV(model, tmp_startlist),  # Generate the Dolphin CSV file
+            SimpleOp(model, lambda: model.title.set("Test Title")),  # Set the title
+            SimpleOp(
+                model, lambda: model.text_spacing.set(1.1)  # Set the text spacing
+            ),
+            SimpleOp(model, lambda: model.num_lanes.set(6)),  # Set the number of lanes
+            SimpleOp(model, lambda: model.min_times.set(2)),  # Set the minimum times
+            SimpleOp(
+                model, lambda: model.time_threshold.set(0.30)  # Set the time threshold
+            ),
+            Repeatedly(  # Add a bunch of results
+                OneOf(
+                    [
+                        AddRandomDO4(
+                            testdatadir,
+                            tmp_result,
+                            [latest_result_counter, scoreboard_counter],
+                        ),
+                        RemoveRandomDO4(tmp_result),
+                    ]
+                ),
+                0.5,
+                seconds,
+                0,
+            ),
+            SimpleOp(model, model.menu_exit.run),  # Exit the application
+        ]
+    )
+
+
+def _build_random_scenario(
     model: Model, delay: float, seconds: float = 0, operations: int = 0
 ) -> Scenario:
     """Builds a test scenario that executes actions randomly"""
@@ -94,10 +164,10 @@ def build_random_scenario(
             GenDolphinCSV(model, tmp_startlist),
         ]
         result_scenarios = [
-            AddDO4(
+            AddRandomDO4(
                 testdatadir, tmp_result, [latest_result_counter, scoreboard_counter]
             ),
-            RemoveDO4(tmp_result),
+            RemoveRandomDO4(tmp_result),
         ]
 
     appearance_scenarios: List[Scenario] = [
@@ -152,6 +222,18 @@ class Counter:  # pylint: disable=too-few-public-methods
     def get(self) -> int:
         """Get the counter's value"""
         return self._value
+
+
+class Delay(Scenario):  # pylint: disable=too-few-public-methods
+    """A scenario that does nothing for a specified amount of time"""
+
+    def __init__(self, seconds: float) -> None:
+        super().__init__()
+        self._seconds = seconds
+
+    def run(self) -> None:
+        logger.info("Delaying for %f seconds", self._seconds)
+        time.sleep(self._seconds)
 
 
 class Fail(Scenario):  # pylint: disable=too-few-public-methods
@@ -366,7 +448,47 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
 
 
 class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
-    """Copy a do4 file into the do4 directory"""
+    """Copy a specific do4 file into the do4 directory"""
+
+    def __init__(
+        self, testdatadir: str, do4dir: str, do4: str, counters: List[Counter]
+    ) -> None:
+        """
+        Copy a do4 file into the do4 directory
+
+        :param testdatadir: the directory containing the main test data
+        :param do4dir: the directory for the do4 files
+        :param do4: the do4 file to copy
+        :param counters: the counters used to verify the do4 file was processed
+        """
+        super().__init__()
+        self._testdatadir = testdatadir
+        self._do4dir = do4dir
+        self._do4 = do4
+        self._counters = counters
+
+        # Ensure the directories exist
+        assert os.path.isdir(self._testdatadir)
+        assert os.path.isdir(self._do4dir)
+        assert os.path.isfile(os.path.join(self._testdatadir, self._do4))
+
+    def run(self) -> None:
+        logger.info("Adding do4 %s", self._do4)
+        prev_count = []
+        for counter in self._counters:
+            prev_count.append(counter.get())
+        shutil.copy(os.path.join(self._testdatadir, self._do4), self._do4dir)
+        for i in range(len(self._counters)):
+            assert eventually(
+                # i=i is a hack to capture the current value of i
+                lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
+                0.1,
+                50,
+            )
+
+
+class AddRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
+    """Copy a random do4 file into the do4 directory"""
 
     def __init__(self, testdatadir: str, do4dir: str, counters: List[Counter]) -> None:
         """
@@ -374,7 +496,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
 
         :param testdatadir: the directory containing the main test data
         :param do4dir: the directory for the do4 files
-        :param update_counter: the counter for the number of updates to the results
+        :param counters: the counters used to verify the do4 file was processed
         """
         super().__init__()
         self._testdatadir = testdatadir
@@ -391,21 +513,10 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         do4_new = set(do4_all) - set(do4_existing)
         if len(do4_new) > 0:
             do4 = random.choice(list(do4_new))
-            logger.info("Adding do4 %s", do4)
-            prev_count = []
-            for counter in self._counters:
-                prev_count.append(counter.get())
-            shutil.copy(os.path.join(self._testdatadir, do4), self._do4dir)
-            for i in range(len(self._counters)):
-                assert eventually(
-                    # i=i is a hack to capture the current value of i
-                    lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
-                    0.1,
-                    50,
-                )
+            AddDO4(self._testdatadir, self._do4dir, do4, self._counters).run()
 
 
-class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
+class RemoveRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
     """Remove a do4 file from the do4 directory"""
 
     def __init__(self, do4dir: str) -> None:
@@ -463,3 +574,31 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
                 return lines
         except FileNotFoundError:
             return []
+
+
+class LoadAllSCB(Scenario):  # pylint: disable=too-few-public-methods
+    """Load all SCB files in the startlists directory"""
+
+    def __init__(self, testdatadir: str, startlistdir: str) -> None:
+        """
+        Load all SCB files in the startlists directory
+
+        :param testdatadir: the directory containing the main test data
+        :param startlistdir: the directory for the startlists
+        """
+        super().__init__()
+        self._testdatadir = testdatadir
+        self._startlistdir = startlistdir
+
+        # Ensure the directories exist
+        assert os.path.isdir(self._testdatadir)
+        assert os.path.isdir(self._startlistdir)
+
+    def run(self) -> None:
+        startlists = list(
+            filter(lambda f: f.endswith(".scb"), os.listdir(self._testdatadir))
+        )
+        logger.info("Loading all %d SCB files", len(startlists))
+        for startlist in startlists:
+            logger.info("Loading SCB %s", startlist)
+            shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)

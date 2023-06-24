@@ -357,8 +357,8 @@ def main() -> None:  # pylint: disable=too-many-statements
     )
     arg_parser.add_argument(
         "--test",
-        type=float,
-        help="Enable test mode, running for the specified number of seconds",
+        type=str,
+        help="Enable test mode, running for the specified scenario",
     )
     args = arg_parser.parse_args()
     if args.loglevel is not None:
@@ -473,7 +473,7 @@ def main() -> None:  # pylint: disable=too-many-statements
         pass
 
     if args.test is not None:
-        scenario = autotest.build_random_scenario(model, 0.25, args.test)
+        scenario = autotest.build_scenario(model, args.test)
         autotest.run_scenario(scenario)
 
     root.mainloop()

@@ -12,3 +12,4 @@
 /docs/__pycache__/
 /build/
 /wahoo-results.fileinfo
+/testdata/tmp_*
