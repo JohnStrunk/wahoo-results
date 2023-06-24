@@ -46,9 +46,6 @@ def set_test_mode() -> None:
 class Scenario(abc.ABC):  # pylint: disable=too-few-public-methods
     """Base class for test actions"""
 
-    def __init__(self) -> None:
-        pass
-
     @abc.abstractmethod
     def run(self) -> None:
         """Run the action"""
@@ -155,6 +152,13 @@ class Counter:  # pylint: disable=too-few-public-methods
     def get(self) -> int:
         """Get the counter's value"""
         return self._value
+
+
+class Fail(Scenario):  # pylint: disable=too-few-public-methods
+    """A scenario that always fails"""
+
+    def run(self) -> None:
+        assert False, "This scenario always fails"
 
 
 class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
