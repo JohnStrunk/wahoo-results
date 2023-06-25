@@ -93,7 +93,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
     scoreboard_counter = Counter(model.scoreboard)
 
     # Ensure the test data is present, and clean out the temporary directories
-    assert testdata_exists
+    assert testdata_exists, "Test data directory does not exist"
     for dirname in [tmp_startlist, tmp_result]:
         try:
             shutil.rmtree(dirname)
@@ -301,7 +301,14 @@ class SimpleOp(Scenario):  # pylint: disable=too-few-public-methods
     """A test operation that runs a function"""
 
     def __init__(self, model: Model, func: Callable[[], None]) -> None:
-        """A simple operation that just runs a function"""
+        """
+        A simple operation that just runs a function. Note: The function is run
+        asynchronously in the main thread, so it must not block, and it will not
+        block the test thread.
+
+        :param model: the application model
+        :param func: the function to run
+        """
         super().__init__()
         self._model = model
         self._fn = func
@@ -405,8 +412,12 @@ class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
         self._startlistdir = startlistdir
 
         # Ensure the directories exist
-        assert os.path.isdir(self._testdatadir)
-        assert os.path.isdir(self._startlistdir)
+        assert os.path.isdir(
+            self._testdatadir
+        ), "Test data directory does not exist or is not a directory"
+        assert os.path.isdir(
+            self._startlistdir
+        ), "Startlist directory does not exist or is not a directory"
 
     def run(self) -> None:
         startlists_all = filter(
@@ -435,7 +446,7 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
         self._startlistdir = startlistdir
 
         # Ensure the directory exists
-        assert os.path.isdir(self._startlistdir)
+        assert os.path.isdir(self._startlistdir), "Startlist directory does not exist"
 
     def run(self) -> None:
         startlists = list(
@@ -468,9 +479,11 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         self._counters = counters
 
         # Ensure the directories exist
-        assert os.path.isdir(self._testdatadir)
-        assert os.path.isdir(self._do4dir)
-        assert os.path.isfile(os.path.join(self._testdatadir, self._do4))
+        assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
+        assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
+        assert os.path.isfile(
+            os.path.join(self._testdatadir, self._do4)
+        ), "DO4 file does not exist or is not a file"
 
     def run(self) -> None:
         logger.info("Adding do4 %s", self._do4)
@@ -484,7 +497,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
                 lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
                 0.1,
                 50,
-            )
+            ), "DO4 file was not processed"
 
 
 class AddRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
@@ -504,8 +517,8 @@ class AddRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
         self._counters = counters
 
         # Ensure the directories exist
-        assert os.path.isdir(self._testdatadir)
-        assert os.path.isdir(self._do4dir)
+        assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
+        assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
 
     def run(self) -> None:
         do4_all = filter(lambda f: f.endswith(".do4"), os.listdir(self._testdatadir))
@@ -529,7 +542,7 @@ class RemoveRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
         self._do4dir = do4dir
 
         # Ensure the directory exists
-        assert os.path.isdir(self._do4dir)
+        assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
 
     def run(self) -> None:
         do4list = list(filter(lambda f: f.endswith(".do4"), os.listdir(self._do4dir)))
@@ -554,7 +567,7 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
         self._startlistdir = startlistdir
 
         # Ensure the directory exists
-        assert os.path.isdir(self._startlistdir)
+        assert os.path.isdir(self._startlistdir), "Startlist directory does not exist"
 
     def run(self) -> None:
         logger.info("Checking CSV")
@@ -563,8 +576,9 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
         num_startlists = len(
             list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
         )
-        # Ensure the CSV has on entry for each event
-        assert eventually(lambda: num_startlists == len(self._read_csv()), 0.1, 50)
+        assert eventually(
+            lambda: num_startlists == len(self._read_csv()), 0.1, 50
+        ), "The CSV file does not contain the expected number of events"
 
     def _read_csv(self) -> List[str]:
         filename = os.path.join(self._startlistdir, "dolphin_events.csv")
@@ -591,8 +605,10 @@ class LoadAllSCB(Scenario):  # pylint: disable=too-few-public-methods
         self._startlistdir = startlistdir
 
         # Ensure the directories exist
-        assert os.path.isdir(self._testdatadir)
-        assert os.path.isdir(self._startlistdir)
+        assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
+        assert os.path.isdir(
+            self._startlistdir
+        ), "The startlist directory does not exist"
 
     def run(self) -> None:
         startlists = list(
