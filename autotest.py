@@ -340,11 +340,17 @@ def _build_random_scenario(
         SetDouble(model, model.time_threshold, 0.01, 3.0),
     ]
 
+    chromecast_scenarios: List[Scenario] = [
+        EnableChromecast(model),
+        DisableChromecast(model),
+    ]
+
     return Sequentially(
         [
             Repeatedly(
                 OneOf(
                     appearance_scenarios * 1
+                    + chromecast_scenarios * 1
                     + calculation_scenarios * 2
                     + startlist_scenarios * 2
                     + result_scenarios * 20
@@ -798,3 +804,63 @@ class LoadAllSCB(Scenario):  # pylint: disable=too-few-public-methods
         for startlist in startlists:
             logger.info("Loading SCB %s", startlist)
             shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)
+
+
+class EnableChromecast(Scenario):  # pylint: disable=too-few-public-methods
+    """Enable a random Chromecast device"""
+
+    def __init__(self, model: Model) -> None:
+        """
+        Enable a random Chromecast device
+
+        :param model: the application model
+        """
+        super().__init__()
+        self._model = model
+        self._await_queue = False
+
+    def run(self) -> None:
+        devices = self._model.cc_status.get()
+        disabled_devices = list(filter(lambda d: not d.enabled, devices))
+        if len(disabled_devices) > 0:
+            device = random.choice(disabled_devices)
+            logger.info("Enabling chromecast %s", device.name)
+            for dev in devices:
+                if dev.name == device.name:
+                    dev.enabled = True
+            self._model.enqueue(lambda: self._model.cc_status.set(devices))
+            self._await_queue = False
+            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
+            assert eventually(
+                lambda: self._await_queue, 0.1, 100
+            ), "Ensure queue is serviced"
+
+
+class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
+    """Disable a random Chromecast device"""
+
+    def __init__(self, model: Model) -> None:
+        """
+        Disable a random Chromecast device
+
+        :param model: the application model
+        """
+        super().__init__()
+        self._model = model
+        self._await_queue = False
+
+    def run(self) -> None:
+        devices = self._model.cc_status.get()
+        enabled_devices = list(filter(lambda d: d.enabled, devices))
+        if len(enabled_devices) > 0:
+            device = random.choice(enabled_devices)
+            logger.info("Disabling chromecast %s", device.name)
+            for dev in devices:
+                if dev.name == device.name:
+                    dev.enabled = False
+            self._model.enqueue(lambda: self._model.cc_status.set(devices))
+            self._await_queue = False
+            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
+            assert eventually(
+                lambda: self._await_queue, 0.1, 100
+            ), "Ensure queue is serviced"
