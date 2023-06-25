@@ -27,6 +27,7 @@ import string
 import threading
 import time
 import tkinter
+from functools import reduce
 from tkinter import DoubleVar, IntVar, StringVar
 from typing import Callable, List
 
@@ -82,7 +83,12 @@ def build_scenario(model: Model, test: str) -> Scenario:
 
 
 def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
-    """Builds a test scenario that executes a pre-defined sequence of actions"""
+    """
+    Builds a test scenario that executes a pre-defined sequence of actions
+
+    :param model: The model
+    :param seconds: The amount of time to perform randomized testing
+    """
 
     testdatadir = os.path.join(os.curdir, "testdata")
     testdata_exists = os.path.exists(testdatadir)
@@ -106,17 +112,167 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
     return Sequentially(
         [
             Delay(2),  # Wait for the application to start
-            LoadAllSCB(testdatadir, tmp_startlist),  # Make all startlists available
-            GenDolphinCSV(model, tmp_startlist),  # Generate the Dolphin CSV file
-            SimpleOp(model, lambda: model.title.set("Test Title")),  # Set the title
-            SimpleOp(
-                model, lambda: model.text_spacing.set(1.1)  # Set the text spacing
-            ),
-            SimpleOp(model, lambda: model.num_lanes.set(6)),  # Set the number of lanes
-            SimpleOp(model, lambda: model.min_times.set(2)),  # Set the minimum times
-            SimpleOp(
+            ############################################################
+            ## Set configuration for the tests
+            Enqueue(model, lambda: model.title.set("Test Title")),  # Set the title
+            Enqueue(model, lambda: model.text_spacing.set(1.1)),  # Set the text spacing
+            Enqueue(model, lambda: model.num_lanes.set(6)),  # Set the number of lanes
+            Enqueue(model, lambda: model.min_times.set(2)),  # Set the minimum times
+            Enqueue(
                 model, lambda: model.time_threshold.set(0.30)  # Set the time threshold
             ),
+            ############################################################
+            ## Validate creation of event CSV file
+            LoadAllSCB(testdatadir, tmp_startlist),  # Make all startlists available
+            GenDolphinCSV(model, tmp_startlist),  # Generate the Dolphin CSV file
+            ############################################################
+            ## Test specific scenarios
+            # Race w/ 6 lanes, names, all valid times
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "010-223-003A-0020.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                # list comp creates a list of booleans, one for each lane (do
+                # they have a name?), reduce ands them together, ensuring that
+                # if any don't have a name, the result is false
+                lambda: reduce(
+                    lambda a, b: a and b,
+                    [
+                        len(model.latest_result.get().name(i)) > 0  # type: ignore
+                        for i in range(1, 6)
+                    ],
+                ),
+                "All lanes should have a name",
+            ),
+            Validate(
+                lambda: reduce(
+                    lambda a, b: a and b,
+                    [
+                        model.latest_result.get().final_time(i).is_valid  # type: ignore
+                        for i in range(1, 6)
+                    ],
+                ),
+                "All lanes should have valid final times",
+            ),
+            # Race w/ a no-show
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "010-214-001A-0068.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().is_noshow(2),  # type: ignore
+                "Lane 2 IS NOT a no-show",
+            ),
+            Validate(
+                lambda: model.latest_result.get().is_noshow(5),  # type: ignore
+                "Lane 5 IS a no-show",
+            ),
+            # Race w/ an unexpected swimmer (no name)
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "001-011-001A-0015.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: len(model.latest_result.get().name(1)) == 0,  # type: ignore
+                "Lane 1 should not have a name",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(1).is_valid,  # type: ignore
+                "Lane 1 should have a valid time",
+            ),
+            # Race w/ an extra heat (no names)
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "001-011-002A-0016.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: len(model.latest_result.get().name(3)) == 0,  # type: ignore
+                "SCB should NOT have names for the heat",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                "Lane 3 should have a valid time",
+            ),
+            # Race w/o a corresponding scb file
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "001-042-001A-0077.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: not model.latest_result.get().has_names,  # type: ignore
+                "There should not be an SCB for the event",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                "Lane 3 should have a valid time",
+            ),
+            # Race w/ too much time delta
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "046-111-004A-0049.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                "Lane 3 should not have a valid time (2 times differ by greater than threshold)",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().is_noshow(3),  # type: ignore
+                "Lane 3 IS NOT a no-show",
+            ),
+            # Race w/ too few watch times
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "046-111-003A-0048.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().final_time(1).is_valid,  # type: ignore
+                "Lane 1 should not have a valid time (only 1 watch time, threshold is 2)",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().is_noshow(1),  # type: ignore
+                "Lane 1 IS NOT a no-show",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(2).is_valid,  # type: ignore
+                "Lane 2 should have a valid time",
+            ),
+            ############################################################
+            ## Perform some random actions
             Repeatedly(  # Add a bunch of results
                 OneOf(
                     [
@@ -126,13 +282,16 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                             [latest_result_counter, scoreboard_counter],
                         ),
                         RemoveRandomDO4(tmp_result),
-                    ]
+                        AddStartlist(testdatadir, tmp_startlist),
+                        RemoveStartlist(tmp_startlist),
+                        GenDolphinCSV(model, tmp_startlist),
+                    ],
                 ),
                 0.5,
                 seconds,
                 0,
             ),
-            SimpleOp(model, model.menu_exit.run),  # Exit the application
+            Enqueue(model, model.menu_exit.run),  # Exit the application
         ]
     )
 
@@ -194,7 +353,7 @@ def _build_random_scenario(
                 seconds,
                 operations,
             ),
-            SimpleOp(model, model.menu_exit.run),
+            Enqueue(model, model.menu_exit.run),
         ]
     )
 
@@ -297,14 +456,15 @@ class OneOf(Scenario):  # pylint: disable=too-few-public-methods
         random.choice(self._actions).run()
 
 
-class SimpleOp(Scenario):  # pylint: disable=too-few-public-methods
+class Enqueue(Scenario):  # pylint: disable=too-few-public-methods
     """A test operation that runs a function"""
 
     def __init__(self, model: Model, func: Callable[[], None]) -> None:
         """
-        A simple operation that just runs a function. Note: The function is run
-        asynchronously in the main thread, so it must not block, and it will not
-        block the test thread.
+        A simple operation that just runs a function.
+
+        Note: The function is run asynchronously in the main thread, so it must
+        not block, and it will not block the test thread.
 
         :param model: the application model
         :param func: the function to run
@@ -314,7 +474,27 @@ class SimpleOp(Scenario):  # pylint: disable=too-few-public-methods
         self._fn = func
 
     def run(self) -> None:
+        logger.info("Enqueuing function to run in main thread")
         self._model.enqueue(self._fn)
+
+
+class Validate(Scenario):  # pylint: disable=too-few-public-methods
+    """A test operation that runs a function"""
+
+    def __init__(self, func: Callable[[], bool], message: str = "") -> None:
+        """
+        A simple operation that just runs a function inline.
+
+        :param model: the application model
+        :param func: the function to run
+        """
+        super().__init__()
+        self._fn = func
+        self._message = message
+
+    def run(self) -> None:
+        logger.info("Validating: %s", self._message)
+        assert self._fn(), self._message
 
 
 class SetInt(Scenario):  # pylint: disable=too-few-public-methods
