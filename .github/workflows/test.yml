@@ -161,7 +161,21 @@ jobs:
         with:
           name: wahoo-results.exe
 
-      - name: Run autotest
+      - name: Ensure config file does not exist
+        shell: bash
+        run: |
+          [[ ! -e wahoo-results.ini ]]
+
+      - name: Run autotest (no config file)
+        shell: cmd
+        run: wahoo-results.exe --loglevel=debug --test scripted:${{ env.TEST_DURATION_SECONDS }}
+
+      - name: Ensure config file exists
+        shell: bash
+        run: |
+          [[ -e wahoo-results.ini ]]
+
+      - name: Run autotest (with config file)
         shell: cmd
         run: wahoo-results.exe --loglevel=debug --test scripted:${{ env.TEST_DURATION_SECONDS }}
 
