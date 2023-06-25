@@ -18,6 +18,7 @@
 """Test harness for Wahoo Results"""
 
 import abc
+import logging
 import os
 import random
 import shutil
@@ -26,12 +27,15 @@ import string
 import threading
 import time
 import tkinter
+from functools import reduce
 from tkinter import DoubleVar, IntVar, StringVar
 from typing import Callable, List
 
 from model import Model
 
 TESTING = False
+
+logger = logging.getLogger(__name__)
 
 
 def set_test_mode() -> None:
@@ -42,9 +46,6 @@ def set_test_mode() -> None:
 
 class Scenario(abc.ABC):  # pylint: disable=too-few-public-methods
     """Base class for test actions"""
-
-    def __init__(self) -> None:
-        pass
 
     @abc.abstractmethod
     def run(self) -> None:
@@ -67,7 +68,235 @@ def run_scenario(scenario: Scenario) -> None:
     test_thread.start()
 
 
-def build_random_scenario(
+def build_scenario(model: Model, test: str) -> Scenario:
+    """Build a test scenario"""
+    test_name = test.split(":")[0]
+    if test_name == "scripted":
+        [seconds] = test.split(":")[1:]
+        return _build_scripted_scenario(model, float(seconds))
+    if test_name == "random":
+        [delay, seconds, operations] = test.split(":")[1:]
+        return _build_random_scenario(
+            model, float(delay), float(seconds), int(operations)
+        )
+    raise ValueError(f"Unknown test: {test}")
+
+
+def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
+    """
+    Builds a test scenario that executes a pre-defined sequence of actions
+
+    :param model: The model
+    :param seconds: The amount of time to perform randomized testing
+    """
+
+    testdatadir = os.path.join(os.curdir, "testdata")
+    testdata_exists = os.path.exists(testdatadir)
+    tmp_startlist = os.path.join(testdatadir, "tmp_startlists")
+    tmp_result = os.path.join(testdatadir, "tmp_result")
+
+    latest_result_counter = Counter(model.latest_result)
+    scoreboard_counter = Counter(model.scoreboard)
+
+    # Ensure the test data is present, and clean out the temporary directories
+    assert testdata_exists, "Test data directory does not exist"
+    for dirname in [tmp_startlist, tmp_result]:
+        try:
+            shutil.rmtree(dirname)
+        except FileNotFoundError:
+            pass
+        os.makedirs(dirname)
+    model.enqueue(lambda: model.dir_startlist.set(tmp_startlist))
+    model.enqueue(lambda: model.dir_results.set(tmp_result))
+
+    return Sequentially(
+        [
+            Delay(2),  # Wait for the application to start
+            ############################################################
+            ## Set configuration for the tests
+            Enqueue(model, lambda: model.title.set("Test Title")),  # Set the title
+            Enqueue(model, lambda: model.text_spacing.set(1.1)),  # Set the text spacing
+            Enqueue(model, lambda: model.num_lanes.set(6)),  # Set the number of lanes
+            Enqueue(model, lambda: model.min_times.set(2)),  # Set the minimum times
+            Enqueue(
+                model, lambda: model.time_threshold.set(0.30)  # Set the time threshold
+            ),
+            ############################################################
+            ## Validate creation of event CSV file
+            LoadAllSCB(testdatadir, tmp_startlist),  # Make all startlists available
+            GenDolphinCSV(model, tmp_startlist),  # Generate the Dolphin CSV file
+            ############################################################
+            ## Test specific scenarios
+            # Race w/ 6 lanes, names, all valid times
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "010-223-003A-0020.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                # list comp creates a list of booleans, one for each lane (do
+                # they have a name?), reduce ands them together, ensuring that
+                # if any don't have a name, the result is false
+                lambda: reduce(
+                    lambda a, b: a and b,
+                    [
+                        len(model.latest_result.get().name(i)) > 0  # type: ignore
+                        for i in range(1, 6)
+                    ],
+                ),
+                "All lanes should have a name",
+            ),
+            Validate(
+                lambda: reduce(
+                    lambda a, b: a and b,
+                    [
+                        model.latest_result.get().final_time(i).is_valid  # type: ignore
+                        for i in range(1, 6)
+                    ],
+                ),
+                "All lanes should have valid final times",
+            ),
+            # Race w/ a no-show
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "010-214-001A-0068.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().is_noshow(2),  # type: ignore
+                "Lane 2 IS NOT a no-show",
+            ),
+            Validate(
+                lambda: model.latest_result.get().is_noshow(5),  # type: ignore
+                "Lane 5 IS a no-show",
+            ),
+            # Race w/ an unexpected swimmer (no name)
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "001-011-001A-0015.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: len(model.latest_result.get().name(1)) == 0,  # type: ignore
+                "Lane 1 should not have a name",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(1).is_valid,  # type: ignore
+                "Lane 1 should have a valid time",
+            ),
+            # Race w/ an extra heat (no names)
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "001-011-002A-0016.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: len(model.latest_result.get().name(3)) == 0,  # type: ignore
+                "SCB should NOT have names for the heat",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                "Lane 3 should have a valid time",
+            ),
+            # Race w/o a corresponding scb file
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "001-042-001A-0077.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: not model.latest_result.get().has_names,  # type: ignore
+                "There should not be an SCB for the event",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                "Lane 3 should have a valid time",
+            ),
+            # Race w/ too much time delta
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "046-111-004A-0049.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                "Lane 3 should not have a valid time (2 times differ by greater than threshold)",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().is_noshow(3),  # type: ignore
+                "Lane 3 IS NOT a no-show",
+            ),
+            # Race w/ too few watch times
+            AddDO4(
+                testdatadir,
+                tmp_result,
+                "046-111-003A-0048.do4",
+                [latest_result_counter, scoreboard_counter],
+            ),
+            Validate(
+                lambda: model.latest_result.get().has_names,  # type: ignore
+                "SCB should have an entry for the heat/event",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().final_time(1).is_valid,  # type: ignore
+                "Lane 1 should not have a valid time (only 1 watch time, threshold is 2)",
+            ),
+            Validate(
+                lambda: not model.latest_result.get().is_noshow(1),  # type: ignore
+                "Lane 1 IS NOT a no-show",
+            ),
+            Validate(
+                lambda: model.latest_result.get().final_time(2).is_valid,  # type: ignore
+                "Lane 2 should have a valid time",
+            ),
+            ############################################################
+            ## Perform some random actions
+            Repeatedly(  # Add a bunch of results
+                OneOf(
+                    [
+                        AddRandomDO4(
+                            testdatadir,
+                            tmp_result,
+                            [latest_result_counter, scoreboard_counter],
+                        ),
+                        RemoveRandomDO4(tmp_result),
+                        AddStartlist(testdatadir, tmp_startlist),
+                        RemoveStartlist(tmp_startlist),
+                        GenDolphinCSV(model, tmp_startlist),
+                    ],
+                ),
+                0.5,
+                seconds,
+                0,
+            ),
+            Enqueue(model, model.menu_exit.run),  # Exit the application
+        ]
+    )
+
+
+def _build_random_scenario(
     model: Model, delay: float, seconds: float = 0, operations: int = 0
 ) -> Scenario:
     """Builds a test scenario that executes actions randomly"""
@@ -94,10 +323,10 @@ def build_random_scenario(
             GenDolphinCSV(model, tmp_startlist),
         ]
         result_scenarios = [
-            AddDO4(
+            AddRandomDO4(
                 testdatadir, tmp_result, [latest_result_counter, scoreboard_counter]
             ),
-            RemoveDO4(tmp_result),
+            RemoveRandomDO4(tmp_result),
         ]
 
     appearance_scenarios: List[Scenario] = [
@@ -111,11 +340,17 @@ def build_random_scenario(
         SetDouble(model, model.time_threshold, 0.01, 3.0),
     ]
 
+    chromecast_scenarios: List[Scenario] = [
+        EnableChromecast(model),
+        DisableChromecast(model),
+    ]
+
     return Sequentially(
         [
             Repeatedly(
                 OneOf(
                     appearance_scenarios * 1
+                    + chromecast_scenarios * 1
                     + calculation_scenarios * 2
                     + startlist_scenarios * 2
                     + result_scenarios * 20
@@ -124,7 +359,7 @@ def build_random_scenario(
                 seconds,
                 operations,
             ),
-            SimpleOp(model, model.menu_exit.run),
+            Enqueue(model, model.menu_exit.run),
         ]
     )
 
@@ -152,6 +387,25 @@ class Counter:  # pylint: disable=too-few-public-methods
     def get(self) -> int:
         """Get the counter's value"""
         return self._value
+
+
+class Delay(Scenario):  # pylint: disable=too-few-public-methods
+    """A scenario that does nothing for a specified amount of time"""
+
+    def __init__(self, seconds: float) -> None:
+        super().__init__()
+        self._seconds = seconds
+
+    def run(self) -> None:
+        logger.info("Delaying for %f seconds", self._seconds)
+        time.sleep(self._seconds)
+
+
+class Fail(Scenario):  # pylint: disable=too-few-public-methods
+    """A scenario that always fails"""
+
+    def run(self) -> None:
+        assert False, "This scenario always fails"
 
 
 class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
@@ -208,17 +462,45 @@ class OneOf(Scenario):  # pylint: disable=too-few-public-methods
         random.choice(self._actions).run()
 
 
-class SimpleOp(Scenario):  # pylint: disable=too-few-public-methods
+class Enqueue(Scenario):  # pylint: disable=too-few-public-methods
     """A test operation that runs a function"""
 
     def __init__(self, model: Model, func: Callable[[], None]) -> None:
-        """A simple operation that just runs a function"""
+        """
+        A simple operation that just runs a function.
+
+        Note: The function is run asynchronously in the main thread, so it must
+        not block, and it will not block the test thread.
+
+        :param model: the application model
+        :param func: the function to run
+        """
         super().__init__()
         self._model = model
         self._fn = func
 
     def run(self) -> None:
+        logger.info("Enqueuing function to run in main thread")
         self._model.enqueue(self._fn)
+
+
+class Validate(Scenario):  # pylint: disable=too-few-public-methods
+    """A test operation that runs a function"""
+
+    def __init__(self, func: Callable[[], bool], message: str = "") -> None:
+        """
+        A simple operation that just runs a function inline.
+
+        :param model: the application model
+        :param func: the function to run
+        """
+        super().__init__()
+        self._fn = func
+        self._message = message
+
+    def run(self) -> None:
+        logger.info("Validating: %s", self._message)
+        assert self._fn(), self._message
 
 
 class SetInt(Scenario):  # pylint: disable=too-few-public-methods
@@ -241,7 +523,7 @@ class SetInt(Scenario):  # pylint: disable=too-few-public-methods
 
     def run(self) -> None:
         newvalue = random.randint(self._min, self._max)
-        print(f"Setting {self._var} to {newvalue}")
+        logger.info("Setting %s to %d", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
@@ -267,7 +549,7 @@ class SetDouble(Scenario):  # pylint: disable=too-few-public-methods
 
     def run(self) -> None:
         newvalue = random.random() * (self._max - self._min) + self._min
-        print(f"Setting {self._var} to {newvalue}")
+        logger.info("Setting %s to %f", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
@@ -297,7 +579,7 @@ class SetString(Scenario):  # pylint: disable=too-few-public-methods
             )
             for _ in range(random.randint(self._min, self._max))
         )
-        print(f"Setting {self._var} to {newvalue}")
+        logger.info("Setting %s to %s", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
@@ -316,8 +598,12 @@ class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
         self._startlistdir = startlistdir
 
         # Ensure the directories exist
-        assert os.path.isdir(self._testdatadir)
-        assert os.path.isdir(self._startlistdir)
+        assert os.path.isdir(
+            self._testdatadir
+        ), "Test data directory does not exist or is not a directory"
+        assert os.path.isdir(
+            self._startlistdir
+        ), "Startlist directory does not exist or is not a directory"
 
     def run(self) -> None:
         startlists_all = filter(
@@ -329,7 +615,7 @@ class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
         startlists_new = set(startlists_all) - set(startlists_existing)
         if len(startlists_new) > 0:
             startlist = random.choice(list(startlists_new))
-            print(f"Adding startlist {startlist}")
+            logger.info("Adding startlist %s", startlist)
             shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)
 
 
@@ -346,7 +632,7 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
         self._startlistdir = startlistdir
 
         # Ensure the directory exists
-        assert os.path.isdir(self._startlistdir)
+        assert os.path.isdir(self._startlistdir), "Startlist directory does not exist"
 
     def run(self) -> None:
         startlists = list(
@@ -354,12 +640,54 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
         )
         if len(startlists) > 0:
             startlist = random.choice(startlists)
-            print(f"Removing startlist {startlist}")
+            logger.info("Removing startlist %s", startlist)
             os.remove(os.path.join(self._startlistdir, startlist))
 
 
 class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
-    """Copy a do4 file into the do4 directory"""
+    """Copy a specific do4 file into the do4 directory"""
+
+    def __init__(
+        self, testdatadir: str, do4dir: str, do4: str, counters: List[Counter]
+    ) -> None:
+        """
+        Copy a do4 file into the do4 directory
+
+        :param testdatadir: the directory containing the main test data
+        :param do4dir: the directory for the do4 files
+        :param do4: the do4 file to copy
+        :param counters: the counters used to verify the do4 file was processed
+        """
+        super().__init__()
+        self._testdatadir = testdatadir
+        self._do4dir = do4dir
+        self._do4 = do4
+        self._counters = counters
+
+        # Ensure the directories exist
+        assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
+        assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
+        assert os.path.isfile(
+            os.path.join(self._testdatadir, self._do4)
+        ), "DO4 file does not exist or is not a file"
+
+    def run(self) -> None:
+        logger.info("Adding do4 %s", self._do4)
+        prev_count = []
+        for counter in self._counters:
+            prev_count.append(counter.get())
+        shutil.copy(os.path.join(self._testdatadir, self._do4), self._do4dir)
+        for i in range(len(self._counters)):
+            assert eventually(
+                # i=i is a hack to capture the current value of i
+                lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
+                0.1,
+                50,
+            ), "DO4 file was not processed"
+
+
+class AddRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
+    """Copy a random do4 file into the do4 directory"""
 
     def __init__(self, testdatadir: str, do4dir: str, counters: List[Counter]) -> None:
         """
@@ -367,7 +695,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
 
         :param testdatadir: the directory containing the main test data
         :param do4dir: the directory for the do4 files
-        :param update_counter: the counter for the number of updates to the results
+        :param counters: the counters used to verify the do4 file was processed
         """
         super().__init__()
         self._testdatadir = testdatadir
@@ -375,8 +703,8 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         self._counters = counters
 
         # Ensure the directories exist
-        assert os.path.isdir(self._testdatadir)
-        assert os.path.isdir(self._do4dir)
+        assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
+        assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
 
     def run(self) -> None:
         do4_all = filter(lambda f: f.endswith(".do4"), os.listdir(self._testdatadir))
@@ -384,21 +712,10 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
         do4_new = set(do4_all) - set(do4_existing)
         if len(do4_new) > 0:
             do4 = random.choice(list(do4_new))
-            print(f"Adding do4 {do4}")
-            prev_count = []
-            for counter in self._counters:
-                prev_count.append(counter.get())
-            shutil.copy(os.path.join(self._testdatadir, do4), self._do4dir)
-            for i in range(len(self._counters)):
-                assert eventually(
-                    # i=i is a hack to capture the current value of i
-                    lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
-                    0.1,
-                    50,
-                )
+            AddDO4(self._testdatadir, self._do4dir, do4, self._counters).run()
 
 
-class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
+class RemoveRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
     """Remove a do4 file from the do4 directory"""
 
     def __init__(self, do4dir: str) -> None:
@@ -411,13 +728,13 @@ class RemoveDO4(Scenario):  # pylint: disable=too-few-public-methods
         self._do4dir = do4dir
 
         # Ensure the directory exists
-        assert os.path.isdir(self._do4dir)
+        assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
 
     def run(self) -> None:
         do4list = list(filter(lambda f: f.endswith(".do4"), os.listdir(self._do4dir)))
         if len(do4list) > 0:
             do4 = random.choice(do4list)
-            print(f"Removing do4 {do4}")
+            logger.info("Removing do4 %s", do4)
             os.remove(os.path.join(self._do4dir, do4))
 
 
@@ -436,17 +753,18 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
         self._startlistdir = startlistdir
 
         # Ensure the directory exists
-        assert os.path.isdir(self._startlistdir)
+        assert os.path.isdir(self._startlistdir), "Startlist directory does not exist"
 
     def run(self) -> None:
-        print("Checking CSV")
+        logger.info("Checking CSV")
         # Trigger event CSV export
         self._model.enqueue(self._model.dolphin_export.run)
         num_startlists = len(
             list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
         )
-        # Ensure the CSV has on entry for each event
-        assert eventually(lambda: num_startlists == len(self._read_csv()), 0.1, 50)
+        assert eventually(
+            lambda: num_startlists == len(self._read_csv()), 0.1, 50
+        ), "The CSV file does not contain the expected number of events"
 
     def _read_csv(self) -> List[str]:
         filename = os.path.join(self._startlistdir, "dolphin_events.csv")
@@ -456,3 +774,93 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
                 return lines
         except FileNotFoundError:
             return []
+
+
+class LoadAllSCB(Scenario):  # pylint: disable=too-few-public-methods
+    """Load all SCB files in the startlists directory"""
+
+    def __init__(self, testdatadir: str, startlistdir: str) -> None:
+        """
+        Load all SCB files in the startlists directory
+
+        :param testdatadir: the directory containing the main test data
+        :param startlistdir: the directory for the startlists
+        """
+        super().__init__()
+        self._testdatadir = testdatadir
+        self._startlistdir = startlistdir
+
+        # Ensure the directories exist
+        assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
+        assert os.path.isdir(
+            self._startlistdir
+        ), "The startlist directory does not exist"
+
+    def run(self) -> None:
+        startlists = list(
+            filter(lambda f: f.endswith(".scb"), os.listdir(self._testdatadir))
+        )
+        logger.info("Loading all %d SCB files", len(startlists))
+        for startlist in startlists:
+            logger.info("Loading SCB %s", startlist)
+            shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)
+
+
+class EnableChromecast(Scenario):  # pylint: disable=too-few-public-methods
+    """Enable a random Chromecast device"""
+
+    def __init__(self, model: Model) -> None:
+        """
+        Enable a random Chromecast device
+
+        :param model: the application model
+        """
+        super().__init__()
+        self._model = model
+        self._await_queue = False
+
+    def run(self) -> None:
+        devices = self._model.cc_status.get()
+        disabled_devices = list(filter(lambda d: not d.enabled, devices))
+        if len(disabled_devices) > 0:
+            device = random.choice(disabled_devices)
+            logger.info("Enabling chromecast %s", device.name)
+            for dev in devices:
+                if dev.name == device.name:
+                    dev.enabled = True
+            self._model.enqueue(lambda: self._model.cc_status.set(devices))
+            self._await_queue = False
+            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
+            assert eventually(
+                lambda: self._await_queue, 0.1, 100
+            ), "Ensure queue is serviced"
+
+
+class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
+    """Disable a random Chromecast device"""
+
+    def __init__(self, model: Model) -> None:
+        """
+        Disable a random Chromecast device
+
+        :param model: the application model
+        """
+        super().__init__()
+        self._model = model
+        self._await_queue = False
+
+    def run(self) -> None:
+        devices = self._model.cc_status.get()
+        enabled_devices = list(filter(lambda d: d.enabled, devices))
+        if len(enabled_devices) > 0:
+            device = random.choice(enabled_devices)
+            logger.info("Disabling chromecast %s", device.name)
+            for dev in devices:
+                if dev.name == device.name:
+                    dev.enabled = False
+            self._model.enqueue(lambda: self._model.cc_status.set(devices))
+            self._await_queue = False
+            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
+            assert eventually(
+                lambda: self._await_queue, 0.1, 100
+            ), "Ensure queue is serviced"

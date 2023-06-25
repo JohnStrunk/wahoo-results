@@ -203,7 +203,7 @@ class RaceResultTreeView(ttk.Frame):
             self.tview.insert(
                 "",
                 "end",
-                id=timetext,
+                id=str(entry.time_recorded.timestamp()),
                 values=[str(entry.meet_id), entry.event, entry.heat, timetext],
             )
 
