@@ -19,6 +19,7 @@ This file provides the ImageCast class that can be used to publish static PNG
 images to Chromecast devices.
 """
 
+import logging
 import threading
 import time
 from dataclasses import dataclass
@@ -42,6 +43,8 @@ _REFRESH_INTERVAL = 7 * 60
 
 # Chomecast application id
 _WAHOO_RESULTS_APP_ID = "34B218B6"
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -122,6 +125,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
         Shut down the background processes and disconnect from the
         Chromecast(s).
         """
+        logger.debug("Stopping ImageCast and disconnecting from Chromecasts")
         # Separate generating the list from disconnecting becase disconnecting
         # can alter the list
         to_disconnect: list[pychromecast.Chromecast] = []
@@ -134,6 +138,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def _disconnect(cls, cast: pychromecast.Chromecast) -> None:
         with sentry_sdk.start_span(op="disconnect"):
+            logger.debug("Disconnecting from %s", cast.name)
             try:
                 cast.quit_app()
             except NotConnected:
@@ -158,8 +163,10 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                 previous = self.devices[uuid]["enabled"]
                 self.devices[uuid]["enabled"] = enabled
                 if enabled and not previous:  # enabling: send the latest image
+                    logger.debug("Enabling %s", self.devices[uuid]["cast"].name)
                     self._publish_one(self.devices[uuid]["cast"])
                 elif previous and not enabled:  # disabling: disconnect
+                    logger.debug("Disabling %s", self.devices[uuid]["cast"].name)
                     self._disconnect(self.devices[uuid]["cast"])
 
     def get_devices(self) -> List[DeviceStatus]:
@@ -209,6 +216,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             # Set media controller to use our app
             controller = ICController()
             cast.register_handler(controller)
+            logger.debug("Publishing to %s", cast.name)
             try:
                 controller.quick_play(url, "image/png")
             except NotConnected:
@@ -232,7 +240,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                         parent.image.save(self.wfile, "PNG", optimize=True)
 
             def log_message(self, format, *args):  # pylint: disable=redefined-builtin
-                pass  # Don't log anything
+                logger.debug(format, *args)
 
         def _webserver_run():
             web_server = HTTPServer(("", self._server_port), WSHandler)
@@ -260,9 +268,11 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             """Receive chromecast discovery updates"""
 
             def add_cast(self, uuid: UUID, service):
+                logger.debug("Got add cast: %s", str(uuid))
                 self.update_cast(uuid, service)
 
             def remove_cast(self, uuid: UUID, service, cast_info):
+                logger.debug("Got remove cast: %s", str(uuid))
                 try:
                     del parent.devices[uuid]
                 except KeyError:
@@ -276,6 +286,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                 with sentry_sdk.start_transaction(
                     op="cc_update", name="Chromecast update recieved"
                 ):
+                    logger.debug("Got update cast: %s", str(uuid))
                     if parent.browser is None:
                         return
                     svcs = parent.browser.services
@@ -286,13 +297,17 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                     # We only care about devices that we can cast to (i.e., not
                     # audio devices)
                     if cast.cast_info.cast_type != pychromecast.CAST_TYPE_CHROMECAST:
+                        logger.debug("Not cast-able. Ignoring: %s", cast.name)
                         cast.disconnect(blocking=False)
                         return
                     if uuid not in parent.devices:
+                        logger.debug("Adding to device list: %s", cast.name)
                         parent.devices[uuid] = {"cast": cast, "enabled": False}
                     else:
+                        logger.debug("Already in device list: %s", cast.name)
                         cast.disconnect(blocking=False)
                     if parent.callback_fn is not None:
+                        logger.debug("Triggering callback for: %s", cast.name)
                         parent.callback_fn()
 
         self.zconf = zeroconf.Zeroconf()

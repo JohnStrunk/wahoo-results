@@ -247,11 +247,11 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
 
     def _dispatch_event(self) -> None:
         try:
-            while True:  # Process all events in the queue
-                func = self._event_queue.get_nowait()
-                func()
-                self._event_queue.task_done()
+            func = self._event_queue.get_nowait()
+            func()
+            self._event_queue.task_done()
+            # Give tkinter a chance to process events
+            self.root.after_idle(self._dispatch_event)
         except queue.Empty:
-            pass
-        # Schedule the next time we check the queue for events
-        self.root.after(10, self._dispatch_event)
+            # No more events to process, check again later
+            self.root.after(10, self._dispatch_event)

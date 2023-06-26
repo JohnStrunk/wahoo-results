@@ -71,6 +71,9 @@ def run_scenario(scenario: Scenario) -> None:
 def build_scenario(model: Model, test: str) -> Scenario:
     """Build a test scenario"""
     test_name = test.split(":")[0]
+    if test_name == "chromecast":
+        [delay, seconds, operations] = test.split(":")[1:]
+        return _build_cc_scenario(model, float(delay), float(seconds), int(operations))
     if test_name == "scripted":
         [seconds] = test.split(":")[1:]
         return _build_scripted_scenario(model, float(seconds))
@@ -80,6 +83,30 @@ def build_scenario(model: Model, test: str) -> Scenario:
             model, float(delay), float(seconds), int(operations)
         )
     raise ValueError(f"Unknown test: {test}")
+
+
+def _build_cc_scenario(
+    model: Model, delay: float, seconds: float, operations: int
+) -> Scenario:
+    """
+    Builds a test scenario that manipulates the Chromecast connections
+
+    :param model: The model
+    :param seconds: The amount of time to perform testing
+    """
+    return Sequentially(
+        [
+            Delay(2),  # Wait for the application to start
+            ############################################################
+            Repeatedly(
+                ToggleChromecast(model),
+                delay,
+                seconds,
+                operations,
+            ),
+            Enqueue(model, model.menu_exit.run),
+        ]
+    )
 
 
 def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
@@ -340,17 +367,12 @@ def _build_random_scenario(
         SetDouble(model, model.time_threshold, 0.01, 3.0),
     ]
 
-    chromecast_scenarios: List[Scenario] = [
-        EnableChromecast(model),
-        DisableChromecast(model),
-    ]
-
     return Sequentially(
         [
             Repeatedly(
                 OneOf(
                     appearance_scenarios * 1
-                    + chromecast_scenarios * 1
+                    + [ToggleChromecast(model)] * 1
                     + calculation_scenarios * 2
                     + startlist_scenarios * 2
                     + result_scenarios * 20
@@ -435,7 +457,7 @@ class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
             self._operations == 0 or self._operations > total_ops
         ):
             self._action.run()
-            time.sleep(1 + random.expovariate(1.0 / self._delay))
+            time.sleep(random.expovariate(1.0 / self._delay))
             total_ops += 1
 
 
@@ -858,6 +880,38 @@ class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
             for dev in devices:
                 if dev.name == device.name:
                     dev.enabled = False
+            self._model.enqueue(lambda: self._model.cc_status.set(devices))
+            self._await_queue = False
+            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
+            assert eventually(
+                lambda: self._await_queue, 0.1, 100
+            ), "Ensure queue is serviced"
+
+
+class ToggleChromecast(Scenario):  # pylint: disable=too-few-public-methods
+    """Toggle a random Chromecast device"""
+
+    def __init__(self, model: Model) -> None:
+        """
+        Toggle a random Chromecast device
+
+        :param model: the application model
+        """
+        super().__init__()
+        self._model = model
+        self._await_queue = False
+
+    def run(self) -> None:
+        devices = self._model.cc_status.get().copy()
+        if len(devices) > 0:
+            device = random.choice(devices)
+            logger.info(
+                "Toggling chromecast %s - %s -> %s",
+                device.name,
+                device.enabled,
+                not device.enabled,
+            )
+            device.enabled = not device.enabled
             self._model.enqueue(lambda: self._model.cc_status.set(devices))
             self._await_queue = False
             self._model.enqueue(lambda: setattr(self, "_await_queue", True))
