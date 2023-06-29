@@ -49,6 +49,9 @@ def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
         "user_id": model.client_id.get(),
     }
 
+    if autotest.TESTING:  # Don't send analytics during testing
+        return
+
     analytics.identify(
         user_id=_CONTEXT["user_id"],
         context=_CONTEXT["context"],
