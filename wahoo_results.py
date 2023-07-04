@@ -321,6 +321,8 @@ def initialize_sentry(model: Model) -> None:
     execution_environment = "source"
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         execution_environment = "executable"
+    if autotest.TESTING:
+        execution_environment = "test"
 
     # Initialize Sentry crash reporting
     sentry_sdk.init(
