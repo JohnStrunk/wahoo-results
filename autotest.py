@@ -388,8 +388,9 @@ def _build_random_scenario(
 
 def eventually(bool_fn: Callable[[], bool], interval_secs: float, tries: int) -> bool:
     """Check a boolean function until it returns true or we run out of tries"""
-    for _ in range(tries):
+    for i in range(tries):
         if bool_fn():
+            logger.debug("Eventually passed in %0.1f seconds", interval_secs * i)
             return True
         time.sleep(interval_secs)
     return False
@@ -781,6 +782,7 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
         logger.info("Checking CSV")
         # Trigger event CSV export
         self._model.enqueue(self._model.dolphin_export.run)
+        _FlushQueue(self._model).run()  # Ensure the queue is serviced before checking
         num_startlists = len(
             list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
         )
@@ -918,3 +920,22 @@ class ToggleChromecast(Scenario):  # pylint: disable=too-few-public-methods
             assert eventually(
                 lambda: self._await_queue, 0.1, 100
             ), "Ensure queue is serviced"
+
+
+class _FlushQueue:  # pylint: disable=too-few-public-methods
+    """Flush the model's queue"""
+
+    def __init__(self, model: Model) -> None:
+        """
+        Flush the model's queue
+
+        :param model: the application model
+        """
+        self._model = model
+        self._flushed = False
+
+    def run(self) -> None:
+        """Flush the queue"""
+        self._model.enqueue(lambda: setattr(self, "_flushed", True))
+        logger.debug("Waiting for event queue to be serviced")
+        assert eventually(lambda: self._flushed, 0.1, 100), "Ensure queue is serviced"
