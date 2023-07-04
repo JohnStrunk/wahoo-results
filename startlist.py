@@ -288,7 +288,9 @@ def load_all_scb(directory: str) -> List[StartList]:
             try:
                 startlist = from_scb(file.path)
                 startlists.append(startlist)
-            except ValueError:
+            except ValueError:  # Problem parsing the file
+                pass
+            except FileNotFoundError:  # File was deleted after we read the dir
                 pass
     startlists.sort(key=lambda l: l.event_num)
     return startlists
