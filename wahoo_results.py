@@ -30,6 +30,7 @@ from tkinter import Tk, filedialog, messagebox
 from typing import List, Optional
 
 import sentry_sdk
+from requests.exceptions import RequestException
 from sentry_sdk.integrations.socket import SocketIntegration
 from sentry_sdk.integrations.threading import ThreadingIntegration
 from watchdog.observers import Observer  # type: ignore
@@ -49,6 +50,7 @@ from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 from watcher import DO4Watcher, SCBWatcher
 
 CONFIG_FILE = "wahoo-results.ini"
+logger = logging.getLogger(__name__)
 
 
 def setup_exit(root: Tk, model: Model) -> None:
@@ -280,14 +282,17 @@ def setup_do4_watcher(model: Model, observer: Observer) -> None:
 def check_for_update(model: Model) -> None:
     """Notifies if there's a newer released version"""
     current_version = model.version.get()
-    latest_version = wh_version.latest()
-    if latest_version is not None and not wh_version.is_latest_version(
-        latest_version, current_version
-    ):
-        model.statustext.set(
-            f"New version available. Click to download: {latest_version.tag}"
-        )
-        model.statusclick.add(lambda: webbrowser.open(latest_version.url))
+    try:
+        latest_version = wh_version.latest()
+        if latest_version is not None and not wh_version.is_latest_version(
+            latest_version, current_version
+        ):
+            model.statustext.set(
+                f"New version available. Click to download: {latest_version.tag}"
+            )
+            model.statusclick.add(lambda: webbrowser.open(latest_version.url))
+    except RequestException as ex:
+        logger.warning("Error checking for update: %s", ex)
 
 
 def setup_run(model: Model, icast: imagecast.ImageCast) -> None:

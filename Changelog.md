@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   handling event queue
 - :bug: Handle errors while publishing results to Chromecast
 - :bug: Don't re-probe Chromecast devices if their UUID has already been seen
+- :bug: Handle errors when trying to contact GitHub for update check
 
 ### [1.1.0] - 2023-05-22
 
