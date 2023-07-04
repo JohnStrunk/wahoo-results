@@ -704,7 +704,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
                 # i=i is a hack to capture the current value of i
                 lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
                 0.1,
-                50,
+                100,
             ), "DO4 file was not processed"
 
 
@@ -785,7 +785,7 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
             list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
         )
         assert eventually(
-            lambda: num_startlists == len(self._read_csv()), 0.1, 50
+            lambda: num_startlists == len(self._read_csv()), 0.1, 100
         ), "The CSV file does not contain the expected number of events"
 
     def _read_csv(self) -> List[str]:

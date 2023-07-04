@@ -220,7 +220,11 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             try:
                 controller.quick_play(url, "image/png")
             except NotConnected:
-                pass
+                logger.debug("Error: NotConnected while publishing to %s", cast.name)
+            except pychromecast.PyChromecastError:
+                logger.debug(
+                    "Error: PyChromecastError while publishing to %s", cast.name
+                )
             finally:
                 cast.unregister_handler(controller)
 
@@ -287,27 +291,30 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                     op="cc_update", name="Chromecast update recieved"
                 ):
                     logger.debug("Got update cast: %s", str(uuid))
-                    if parent.browser is None:
-                        return
-                    svcs = parent.browser.services
-                    cast = pychromecast.get_chromecast_from_cast_info(
-                        svcs[uuid], parent.zconf
-                    )
-                    cast.wait(timeout=2)
-                    # We only care about devices that we can cast to (i.e., not
-                    # audio devices)
-                    if cast.cast_info.cast_type != pychromecast.CAST_TYPE_CHROMECAST:
-                        logger.debug("Not cast-able. Ignoring: %s", cast.name)
-                        cast.disconnect(blocking=False)
-                        return
-                    if uuid not in parent.devices:
+                    if uuid not in parent.devices:  # new device
+                        if parent.browser is None:
+                            return
+                        svcs = parent.browser.services
+                        cast = pychromecast.get_chromecast_from_cast_info(
+                            svcs[uuid], parent.zconf
+                        )
+                        cast.wait(timeout=2)
+                        # We only care about devices that we can cast to (i.e., not
+                        # audio devices)
+                        if (
+                            cast.cast_info.cast_type
+                            != pychromecast.CAST_TYPE_CHROMECAST
+                        ):
+                            logger.debug("Not cast-able. Ignoring: %s", cast.name)
+                            cast.disconnect(blocking=False)
+                            return
                         logger.debug("Adding to device list: %s", cast.name)
                         parent.devices[uuid] = {"cast": cast, "enabled": False}
-                    else:
-                        logger.debug("Already in device list: %s", cast.name)
-                        cast.disconnect(blocking=False)
                     if parent.callback_fn is not None:
-                        logger.debug("Triggering callback for: %s", cast.name)
+                        logger.debug(
+                            "Triggering callback for: %s",
+                            parent.devices[uuid]["cast"].name,
+                        )
                         parent.callback_fn()
 
         self.zconf = zeroconf.Zeroconf()

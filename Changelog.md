@@ -4,6 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+#### Fixed
+
+- :bug: Only watch for changes in the startlist directory to prevent infinite
+  loop while processing start lists
+- :bug: Poll the event queue instead of sending an event to fix "main thread not
+  in main loop" error
+- :bug: Fix crash when getting socket information
+- :bug: Fix crash when "%" appears in the title
+- :bug: Improve UI responsiveness by allowing tkinter to process events while
+  handling event queue
+- :bug: Handle errors while publishing results to Chromecast
+- :bug: Don't re-probe Chromecast devices if their UUID has already been seen
+- :bug: Handle errors when trying to contact GitHub for update check
+
 ### [1.1.0] - 2023-05-22
 
 #### Added
