@@ -17,6 +17,7 @@ repos:
                 media/cc-receiver-logo\.svg|
                 testdata/.*
             )$
+      - id: check-merge-conflict     # Check for files that contain merge conflict strings
       - id: check-yaml               # Checks yaml files for parseable syntax
       - id: end-of-file-fixer        # Ensures that a file is either empty, or ends with one newline
         exclude: |
