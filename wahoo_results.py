@@ -33,7 +33,12 @@ import sentry_sdk
 from requests.exceptions import RequestException
 from sentry_sdk.integrations.socket import SocketIntegration
 from sentry_sdk.integrations.threading import ThreadingIntegration
-from watchdog.observers import Observer  # type: ignore
+from watchdog.observers import Observer
+
+# We can't use Observer in type specifications due to
+# https://github.com/gorakhargosh/watchdog/issues/982 but we can use
+# BaseObserver as a workaround
+from watchdog.observers.api import BaseObserver
 
 import autotest
 import imagecast
@@ -152,7 +157,7 @@ def setup_appearance(model: Model) -> None:
     model.bg_clear.add(lambda: model.image_bg.set(""))
 
 
-def setup_scb_watcher(model: Model, observer: Observer) -> None:
+def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
     """Set up file system watcher for startlists"""
 
     def process_startlists() -> None:
@@ -231,7 +236,7 @@ def load_result(model: Model, filename: str) -> Optional[RaceTimes]:
     return racetime
 
 
-def setup_do4_watcher(model: Model, observer: Observer) -> None:
+def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
     """Set up watches for files/directories and connect to model"""
 
     def process_racedir() -> None:
