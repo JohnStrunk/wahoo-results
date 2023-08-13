@@ -4,5 +4,39 @@
     "config:best-practices",
     ":enablePreCommit",
     ":gitSignOff"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "regexManagers": [
+    {
+      "description": "Pipenv version updates",
+      "fileMatch": [ "^.github/(?:workflows|actions)/.+\\.ya?ml$" ],
+      "matchStrings": [
+        "PIPENV_INSTALL_VERSION: \"(?<currentValue>.+?)\""
+      ],
+      "depNameTemplate": "pipenv",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "description": "Snyk version updates",
+      "fileMatch": [ "^.github/(?:workflows|actions)/.+\\.ya?ml$" ],
+      "matchStrings": [
+        "SNYK_VERSION: \"v(?<currentValue>.+?)\""
+      ],
+      "depNameTemplate": "snyk/cli",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "UPX version updates",
+      "fileMatch": [ "^.github/(?:workflows|actions)/.+\\.ya?ml$" ],
+      "matchStrings": [
+        "UPX_VERSION: \"(?<currentValue>.+?)\""
+      ],
+      "depNameTemplate": "upx/upx",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    }
   ]
 }
