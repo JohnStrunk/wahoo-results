@@ -34,8 +34,7 @@
         "UPX_VERSION: \"(?<currentValue>.+?)\""
       ],
       "depNameTemplate": "upx/upx",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "v(.*)"
+      "datasourceTemplate": "github-releases"
     }
   ]
 }
