@@ -105,7 +105,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         try:
             bg_image = Image.open(bg_image_filename)
             # Ensure the size matches
-            bg_image = bg_image.resize(self.size, Image.BICUBIC)
+            bg_image = bg_image.resize(self.size, Image.Resampling.BICUBIC)
             # Make sure the image modes match
             bg_image = bg_image.convert("RGBA")
             # Adjust the image brightness

@@ -12,11 +12,11 @@ semver = "*"
 ttkwidgets = "*"
 watchdog = "*"
 DateTime = "*"
-Pillow = "*"
 PyChromecast = ">=13.0.5"          # 13.0.5 fixed poll/select on Windows
 sentry-sdk = "*"
 segment-analytics-python = "<3.0"
 ipinfo = "*"
+pillow = "*"
 
 [dev-packages]
 mypy = "*"
