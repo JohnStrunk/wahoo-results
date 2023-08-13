@@ -22,7 +22,7 @@
       "description": "Snyk version updates",
       "fileMatch": [ "^.github/(?:workflows|actions)/.+\\.ya?ml$" ],
       "matchStrings": [
-        "SNYK_VERSION: \"v(?<currentValue>.+?)\""
+        "SNYK_VERSION: \"(?<currentValue>.+?)\""
       ],
       "depNameTemplate": "snyk/cli",
       "datasourceTemplate": "github-releases",
@@ -36,6 +36,7 @@
       ],
       "depNameTemplate": "upx/upx",
       "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "v(.*)",
       "versioningTemplate": "semver"
     }
   ]
