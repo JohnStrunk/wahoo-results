@@ -25,8 +25,7 @@
         "SNYK_VERSION: \"(?<currentValue>.+?)\""
       ],
       "depNameTemplate": "snyk/cli",
-      "datasourceTemplate": "github-releases",
-      "versioningTemplate": "semver"
+      "datasourceTemplate": "github-releases"
     },
     {
       "description": "UPX version updates",
@@ -36,8 +35,7 @@
       ],
       "depNameTemplate": "upx/upx",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "v(.*)",
-      "versioningTemplate": "semver"
+      "extractVersionTemplate": "v(.*)"
     }
   ]
 }
