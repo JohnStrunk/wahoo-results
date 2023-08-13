@@ -10,7 +10,7 @@ python-dateutil = "*"
 requests = "*"
 semver = "*"
 ttkwidgets = "*"
-watchdog = "<3.0.0"                # 3.0.0 has broken type info
+watchdog = "*"
 DateTime = "*"
 Pillow = "*"
 PyChromecast = ">=13.0.5"          # 13.0.5 fixed poll/select on Windows
