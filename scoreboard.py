@@ -105,7 +105,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         try:
             bg_image = Image.open(bg_image_filename)
             # Ensure the size matches
-            bg_image = bg_image.resize(self.size, Image.BICUBIC)
+            bg_image = bg_image.resize(self.size, Image.Resampling.BICUBIC)
             # Make sure the image modes match
             bg_image = bg_image.convert("RGBA")
             # Adjust the image brightness
@@ -134,7 +134,9 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         self._normal_font = ImageFont.truetype(normal_f_file, int(scaled_height))
         self._time_font = ImageFont.truetype(time_f_file, int(scaled_height))
         draw = ImageDraw.Draw(self._img)
-        self._text_height = draw.textsize(self._EVENT_SIZE, self._normal_font)[1]
+        self._text_height = draw.textbbox((0, 0), self._EVENT_SIZE, self._normal_font)[
+            3
+        ]
 
     def _draw_header(self) -> None:
         draw = ImageDraw.Draw(self._img)
@@ -150,10 +152,10 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
             anchor="ls",
             fill=self._model.color_event.get(),
         )
-        hstart = edge_l + draw.textsize(self._EVENT_SIZE, self._normal_font)[0]
+        hstart = edge_l + draw.textlength(self._EVENT_SIZE, self._normal_font)
         hwidth = width - hstart
         head_txt = self._model.title.get()
-        while draw.textsize(head_txt, self._normal_font)[0] > hwidth:
+        while draw.textlength(head_txt, self._normal_font) > hwidth:
             head_txt = head_txt[:-1]
         draw.text(
             (edge_r, self._baseline(1)),
@@ -171,10 +173,10 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
             anchor="ls",
             fill=self._model.color_event.get(),
         )
-        dstart = edge_l + draw.textsize(self._HEAT_SIZE, self._normal_font)[0]
+        dstart = edge_l + draw.textlength(self._HEAT_SIZE, self._normal_font)
         dwidth = width - dstart
         desc_txt = self._race.event_name
-        while draw.textsize(desc_txt, self._normal_font)[0] > dwidth:
+        while draw.textlength(desc_txt, self._normal_font) > dwidth:
             desc_txt = desc_txt[:-1]
         draw.text(
             (edge_r, self._baseline(2)),
@@ -189,9 +191,9 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         edge_l = int(self.size[0] * self._BORDER_FRACTION)
         edge_r = int(self.size[0] * (1 - self._BORDER_FRACTION))
         width = edge_r - edge_l
-        time_width = int(draw.textsize("00:00.00", self._time_font)[0] * 1.1)
-        idx_width = draw.textsize("L", self._normal_font)[0]
-        pl_width = draw.textsize("MMM", self._normal_font)[0]
+        time_width = int(draw.textlength("00:00.00", self._time_font) * 1.1)
+        idx_width = draw.textlength("L", self._normal_font)
+        pl_width = draw.textlength("MMM", self._normal_font)
         name_width = width - time_width - idx_width - pl_width
 
         # Lane title
@@ -252,7 +254,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
             )
             # Name
             name_variants = format_name(NameMode.NONE, self._race.name(i))
-            while draw.textsize(name_variants[0], self._normal_font)[0] > name_width:
+            while draw.textlength(name_variants[0], self._normal_font) > name_width:
                 name_variants.pop(0)
             name = name_variants[0]
             draw.text(
