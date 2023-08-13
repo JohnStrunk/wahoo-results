@@ -12,7 +12,7 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2023.06.18"
+  PIPENV_INSTALL_VERSION: "2023.7.23"
   PYTHON_VERSION: "3.11"
   # https://github.com/snyk/cli/releases
   SNYK_VERSION: "v1.1122.0"
