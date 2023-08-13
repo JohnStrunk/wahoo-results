@@ -13,6 +13,7 @@ on:
 env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2023.06.18"
+  PYTHON_VERSION: "3.11"
   # https://github.com/snyk/cli/releases
   SNYK_VERSION: v1.1122.0
   # How long to run the executable automated tests
@@ -21,8 +22,10 @@ env:
   UPX_VERSION: 4.0.2
 
 jobs:
-  test:
-    name: Test
+  pipenv-cache:
+    # This job is used to refresh the pipenv cache so that both the test and
+    # build job can use it.
+    name: Refresh pipenv cache
     runs-on: windows-latest
 
     steps:
@@ -34,7 +37,42 @@ jobs:
         # https://github.com/actions/setup-python
         uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1  # v4.7.0
         with:
-          python-version: '3.11'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pipenv'
+
+      # Add Scripts directory to the path so that pipenv (and associated
+      # utilities) can be used once installed
+      - name: Add python Scripts directory to path
+        shell: cmd
+        # Code-page switch is needed to write the env file as utf-8
+        run: |
+          chcp 65001
+          python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
+          chcp 1252
+
+      - name: Install pipenv
+        shell: cmd
+        run: python -m pip install --user pipenv==${{ env.PIPENV_INSTALL_VERSION }}
+
+      - name: Initialize virtual environment
+        shell: cmd
+        run: pipenv install --deploy --dev --no-site-packages -v
+
+  test:
+    name: Test
+    runs-on: windows-latest
+    needs: [pipenv-cache]
+
+    steps:
+      - name: Checkout repository
+        # https://github.com/actions/checkout
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Set up Python
+        # https://github.com/actions/setup-python
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1  # v4.7.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pipenv'
 
       - name: Enable cache for pre-commit hooks
@@ -90,6 +128,7 @@ jobs:
   build:
     name: Build
     runs-on: windows-latest
+    needs: [pipenv-cache]
 
     steps:
       - name: Checkout repository
@@ -102,7 +141,7 @@ jobs:
         # https://github.com/actions/setup-python
         uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1  # v4.7.0
         with:
-          python-version: '3.11'
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pipenv'
 
       # Add Scripts directory to the path so that pipenv (and associated
@@ -121,7 +160,9 @@ jobs:
 
       - name: Initialize virtual environment
         shell: cmd
-        run: pipenv install --deploy --no-site-packages -v
+        run: |
+          pipenv install --deploy --no-site-packages -v
+          pipenv clean -v
 
       - name: Install UPX
         shell: cmd
