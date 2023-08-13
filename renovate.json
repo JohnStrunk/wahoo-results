@@ -35,7 +35,7 @@
       ],
       "depNameTemplate": "upx/upx",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "v(.*)"
+      "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ]
 }
