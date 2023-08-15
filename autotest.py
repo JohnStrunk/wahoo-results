@@ -27,6 +27,7 @@ import string
 import threading
 import time
 import tkinter
+import tracemalloc
 from functools import reduce
 from tkinter import DoubleVar, IntVar, StringVar
 from typing import Callable, List
@@ -367,6 +368,14 @@ def _build_random_scenario(
         SetDouble(model, model.time_threshold, 0.01, 3.0),
     ]
 
+    def mem_snapshot() -> None:
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics("lineno")
+        for stat in top_stats[:25]:
+            print(stat)
+
+    tracemalloc.start()
+
     return Sequentially(
         [
             Repeatedly(
@@ -381,6 +390,7 @@ def _build_random_scenario(
                 seconds,
                 operations,
             ),
+            Enqueue(model, mem_snapshot),
             Enqueue(model, model.menu_exit.run),
         ]
     )
