@@ -153,6 +153,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
             ## Validate creation of event CSV file
             LoadAllSCB(testdatadir, tmp_startlist),  # Make all startlists available
             GenDolphinCSV(model, tmp_startlist),  # Generate the Dolphin CSV file
+            _FlushQueue(model),  # Flush the queue
             ############################################################
             ## Test specific scenarios
             # Race w/ 6 lanes, names, all valid times
@@ -851,7 +852,6 @@ class EnableChromecast(Scenario):  # pylint: disable=too-few-public-methods
         """
         super().__init__()
         self._model = model
-        self._await_queue = False
 
     def run(self) -> None:
         devices = self._model.cc_status.get()
@@ -863,11 +863,9 @@ class EnableChromecast(Scenario):  # pylint: disable=too-few-public-methods
                 if dev.name == device.name:
                     dev.enabled = True
             self._model.enqueue(lambda: self._model.cc_status.set(devices))
-            self._await_queue = False
-            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
-            assert eventually(
-                lambda: self._await_queue, 0.1, 100
-            ), "Ensure queue is serviced"
+            _FlushQueue(
+                self._model
+            ).run()  # Ensure the queue is serviced before returning
 
 
 class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
@@ -881,7 +879,6 @@ class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
         """
         super().__init__()
         self._model = model
-        self._await_queue = False
 
     def run(self) -> None:
         devices = self._model.cc_status.get()
@@ -893,11 +890,9 @@ class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
                 if dev.name == device.name:
                     dev.enabled = False
             self._model.enqueue(lambda: self._model.cc_status.set(devices))
-            self._await_queue = False
-            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
-            assert eventually(
-                lambda: self._await_queue, 0.1, 100
-            ), "Ensure queue is serviced"
+            _FlushQueue(
+                self._model
+            ).run()  # Ensure the queue is serviced before returning
 
 
 class ToggleChromecast(Scenario):  # pylint: disable=too-few-public-methods
@@ -911,7 +906,6 @@ class ToggleChromecast(Scenario):  # pylint: disable=too-few-public-methods
         """
         super().__init__()
         self._model = model
-        self._await_queue = False
 
     def run(self) -> None:
         devices = self._model.cc_status.get().copy()
@@ -925,14 +919,12 @@ class ToggleChromecast(Scenario):  # pylint: disable=too-few-public-methods
             )
             device.enabled = not device.enabled
             self._model.enqueue(lambda: self._model.cc_status.set(devices))
-            self._await_queue = False
-            self._model.enqueue(lambda: setattr(self, "_await_queue", True))
-            assert eventually(
-                lambda: self._await_queue, 0.1, 100
-            ), "Ensure queue is serviced"
+            _FlushQueue(
+                self._model
+            ).run()  # Ensure the queue is serviced before returning
 
 
-class _FlushQueue:  # pylint: disable=too-few-public-methods
+class _FlushQueue(Scenario):  # pylint: disable=too-few-public-methods
     """Flush the model's queue"""
 
     def __init__(self, model: Model) -> None:
@@ -941,6 +933,7 @@ class _FlushQueue:  # pylint: disable=too-few-public-methods
 
         :param model: the application model
         """
+        super().__init__()
         self._model = model
         self._flushed = False
 
