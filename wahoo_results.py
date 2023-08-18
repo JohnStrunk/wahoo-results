@@ -182,6 +182,7 @@ def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
         # needs to happen from the main thread, so we enqueue instead of
         # directly call process_startlists from the SCBWatcher.
         observer.schedule(SCBWatcher(lambda: model.enqueue(process_startlists)), path)
+        logger.debug("scb watcher updated to %s", path)
         process_startlists()
 
     model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
@@ -278,6 +279,7 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
             model.enqueue(lambda: process_new_result(file))
 
         observer.schedule(DO4Watcher(async_process), path)
+        logger.debug("do4 watcher updated to %s", path)
         process_racedir()
 
     model.dir_results.trace_add("write", lambda *_: do4_dir_updated())
