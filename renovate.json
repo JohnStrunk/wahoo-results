@@ -23,15 +23,6 @@
       "datasourceTemplate": "pypi"
     },
     {
-      "description": "Snyk version updates",
-      "fileMatch": [ "^.github/(?:workflows|actions)/.+\\.ya?ml$" ],
-      "matchStrings": [
-        "SNYK_VERSION: \"(?<currentValue>.+?)\""
-      ],
-      "depNameTemplate": "snyk/cli",
-      "datasourceTemplate": "github-releases"
-    },
-    {
       "description": "UPX version updates",
       "fileMatch": [
         "^.github/(?:workflows|actions)/.+\\.ya?ml$",

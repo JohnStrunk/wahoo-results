@@ -14,8 +14,6 @@ env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2023.7.23"
   PYTHON_VERSION: "3.11"
-  # https://github.com/snyk/cli/releases
-  SNYK_VERSION: "v1.1200.0"
   # How long to run the executable automated tests
   TEST_DURATION_SECONDS: 60
   # https://github.com/upx/upx/releases
@@ -110,20 +108,6 @@ jobs:
       - name: Build docs
         shell: cmd
         run: pipenv run make-doc.bat html
-
-      - name: Download Snyk CLI
-        if: ${{ env.SNYK_TOKEN != '' }}
-        shell: cmd
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: curl -OsL https://github.com/snyk/cli/releases/download/${{ env.SNYK_VERSION }}/snyk-win.exe
-
-      - name: Run Snyk CLI
-        if: ${{ env.SNYK_TOKEN != '' }}
-        shell: cmd
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk-win monitor --fail-on=all --dev --print-deps --remote-repo-url=https://github.com/${{ github.repository }} --target-reference=${{ github.ref_name }} --file=Pipfile --project-name=${{ github.repository }}
 
   build:
     name: Build
