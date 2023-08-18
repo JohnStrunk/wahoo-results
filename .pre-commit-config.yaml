@@ -25,6 +25,7 @@ repos:
                 testdata/.*
             )$
       - id: trailing-whitespace      # Trims trailing whitespace
+        args: [--markdown-linebreak-ext=md]
         exclude: |
           (?x)^(
                 startlist_test\.py|
