@@ -80,6 +80,6 @@ jobs:
           commit-message: '[workflow] Update dependencies in Pipfile.lock'
           signoff: true
           title: '[workflow] Update dependencies in Pipfile.lock'
+          labels: dependencies
           body: ${{ env.UPDATES }}
-          # Create as draft to avoid auto-merge by mergify
-          draft: true
+          draft: false  # Set to true to to prevent automerge by Mergify
