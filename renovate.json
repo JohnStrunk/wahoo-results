@@ -11,9 +11,13 @@
   "regexManagers": [
     {
       "description": "Pipenv version updates",
-      "fileMatch": [ "^.github/(?:workflows|actions)/.+\\.ya?ml$" ],
+      "fileMatch": [
+        "^.github/(?:workflows|actions)/.+\\.ya?ml$",
+        "\\.md$"
+      ],
       "matchStrings": [
-        "PIPENV_INSTALL_VERSION: \"(?<currentValue>.+?)\""
+        "PIPENV_INSTALL_VERSION: \"(?<currentValue>.+?)\"",
+        "pipenv==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
       "depNameTemplate": "pipenv",
       "datasourceTemplate": "pypi"
@@ -29,9 +33,13 @@
     },
     {
       "description": "UPX version updates",
-      "fileMatch": [ "^.github/(?:workflows|actions)/.+\\.ya?ml$" ],
+      "fileMatch": [
+        "^.github/(?:workflows|actions)/.+\\.ya?ml$",
+        "\\.md$"
+      ],
       "matchStrings": [
-        "UPX_VERSION: \"(?<currentValue>.+?)\""
+        "UPX_VERSION: \"(?<currentValue>.+?)\"",
+        "upx --version (?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
       "depNameTemplate": "upx/upx",
       "datasourceTemplate": "github-releases",
