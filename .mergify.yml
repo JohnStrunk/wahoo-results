@@ -14,9 +14,12 @@ pull_request_rules:
         method: merge
         name: default
 
-  - name: Automatic merge own PRs
+  - name: Automatic merge trusted PRs
     conditions:
-      - author=JohnStrunk
+      - and:
+        - or:
+          - author=JohnStrunk
+          - author=renovate-bot
       - "#changes-requested-reviews-by=0"
       - label!=do-not-merge
       - check-success="Successful CI"
