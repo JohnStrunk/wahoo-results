@@ -16,12 +16,15 @@
 
 """Monitor the startlist directory"""
 
+import logging
 from typing import Callable
 
 import watchdog.events  # type: ignore
 
 CallbackFn = Callable[[], None]
 CreatedCallbackFn = Callable[[str], None]
+
+logger = logging.getLogger(__name__)
 
 
 class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
@@ -40,6 +43,9 @@ class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
             watchdog.events.EVENT_TYPE_MODIFIED,
             watchdog.events.EVENT_TYPE_MOVED,
         ]:
+            logger.debug(
+                "SCBWatcher: operation=%s, path=%s", event.event_type, event.src_path
+            )
             self._callback()
 
 
@@ -51,4 +57,7 @@ class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
         self._callback = callback
 
     def on_created(self, event: watchdog.events.FileCreatedEvent):
+        logger.debug(
+            "DO4Watcher: operation=%s, path=%s", event.event_type, event.src_path
+        )
         self._callback(event.src_path)
