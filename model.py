@@ -16,6 +16,7 @@
 
 """Data model"""
 
+import logging
 import queue
 import uuid
 from configparser import ConfigParser
@@ -33,6 +34,8 @@ CallbackFn = Callable[[], None]
 _INI_HEADING = "wahoo-results"
 
 _T = TypeVar("_T")
+
+logger = logging.getLogger(__name__)
 
 
 class GVar(Variable, Generic[_T]):
@@ -248,6 +251,7 @@ class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-meth
     def _dispatch_event(self) -> None:
         try:
             func = self._event_queue.get_nowait()
+            logger.debug("Dispatching function from queue: %s", func.__name__)
             func()
             self._event_queue.task_done()
             # Give tkinter a chance to process events
