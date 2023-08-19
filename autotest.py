@@ -106,6 +106,7 @@ def _build_cc_scenario(
                 operations,
             ),
             Enqueue(model, model.menu_exit.run),
+            _FlushQueue(model),
         ]
     )
 
@@ -128,12 +129,16 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
 
     # Ensure the test data is present, and clean out the temporary directories
     assert testdata_exists, "Test data directory does not exist"
+    time.sleep(2)
     for dirname in [tmp_startlist, tmp_result]:
         try:
             shutil.rmtree(dirname)
+            logger.debug("Removed directory: %s", dirname)
         except FileNotFoundError:
             pass
         os.makedirs(dirname)
+        logger.debug("Created directory: %s", dirname)
+    time.sleep(2)
     model.enqueue(lambda: model.dir_startlist.set(tmp_startlist))
     model.enqueue(lambda: model.dir_results.set(tmp_result))
 
@@ -153,7 +158,6 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
             ## Validate creation of event CSV file
             LoadAllSCB(testdatadir, tmp_startlist),  # Make all startlists available
             GenDolphinCSV(model, tmp_startlist),  # Generate the Dolphin CSV file
-            _FlushQueue(model),  # Flush the queue
             ############################################################
             ## Test specific scenarios
             # Race w/ 6 lanes, names, all valid times
@@ -321,6 +325,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 0,
             ),
             Enqueue(model, model.menu_exit.run),  # Exit the application
+            _FlushQueue(model),
         ]
     )
 
@@ -393,6 +398,7 @@ def _build_random_scenario(
             ),
             Enqueue(model, mem_snapshot),
             Enqueue(model, model.menu_exit.run),
+            _FlushQueue(model),
         ]
     )
 
