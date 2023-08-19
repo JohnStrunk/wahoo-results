@@ -1,40 +1,42 @@
 {
+  // JSON5 spec: https://json5.org/
+  // Renovate docs: https://docs.renovatebot.com/configuration-options/
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:best-practices",
-    ":enablePreCommit",
-    ":gitSignOff"
+    "config:best-practices",  // Use Renovate best-practices
+    ":enablePreCommit",       // Enable updates to pre-commit repos
+    ":gitSignOff",            // Add Signed-off-by line to commit messages
   ],
   "labels": [
-    "dependencies"
+    "dependencies",
   ],
   "regexManagers": [
     {
       "description": "Pipenv version updates",
       "fileMatch": [
         "^.github/(?:workflows|actions)/.+\\.ya?ml$",
-        "\\.md$"
+        "\\.md$",
       ],
       "matchStrings": [
         "PIPENV_INSTALL_VERSION: \"(?<currentValue>.+?)\"",
-        "pipenv==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "pipenv==(?<currentValue>\\d+\\.\\d+\\.\\d+)",
       ],
       "depNameTemplate": "pipenv",
-      "datasourceTemplate": "pypi"
+      "datasourceTemplate": "pypi",
     },
     {
       "description": "UPX version updates",
       "fileMatch": [
         "^.github/(?:workflows|actions)/.+\\.ya?ml$",
-        "\\.md$"
+        "\\.md$",
       ],
       "matchStrings": [
         "UPX_VERSION: \"(?<currentValue>.+?)\"",
-        "upx --version (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "upx --version (?<currentValue>\\d+\\.\\d+\\.\\d+)",
       ],
       "depNameTemplate": "upx/upx",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$"
-    }
-  ]
+      "extractVersionTemplate": "^v(?<version>.*)$",
+    },
+  ],
 }
