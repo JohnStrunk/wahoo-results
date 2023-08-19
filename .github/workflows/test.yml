@@ -192,6 +192,7 @@ jobs:
           [[ ! -e wahoo-results.ini ]]
 
       - name: Run autotest (no config file)
+        timeout-minutes: 3
         shell: cmd
         run: wahoo-results.exe --loglevel=debug --test scripted:${{ env.TEST_DURATION_SECONDS }}
 
@@ -201,6 +202,7 @@ jobs:
           [[ -e wahoo-results.ini ]]
 
       - name: Run autotest (with config file)
+        timeout-minutes: 3
         shell: cmd
         run: wahoo-results.exe --loglevel=debug --test scripted:${{ env.TEST_DURATION_SECONDS }}
 

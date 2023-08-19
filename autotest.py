@@ -412,11 +412,16 @@ class Counter:  # pylint: disable=too-few-public-methods
 
     def __init__(self, var: tkinter.Variable) -> None:
         self._value = 0
+        self._var = var
 
         def update() -> None:
             self._value += 1
 
-        var.trace_add("write", lambda *_: update())
+        self._cbname = var.trace_add("write", lambda *_: update())
+
+    def __del__(self) -> None:
+        if self._cbname:
+            self._var.trace_remove("write", self._cbname)
 
     def get(self) -> int:
         """Get the counter's value"""
@@ -939,6 +944,11 @@ class _FlushQueue(Scenario):  # pylint: disable=too-few-public-methods
 
     def run(self) -> None:
         """Flush the queue"""
-        self._model.enqueue(lambda: setattr(self, "_flushed", True))
-        logger.debug("Waiting for event queue to be serviced")
+
+        def _set_flushed() -> None:
+            logger.debug("Queue serviced: id=%d", id(self))
+            self._flushed = True
+
+        self._model.enqueue(_set_flushed)
+        logger.debug("Waiting for event queue to be serviced: id=%d", id(self))
         assert eventually(lambda: self._flushed, 0.1, 100), "Ensure queue is serviced"
