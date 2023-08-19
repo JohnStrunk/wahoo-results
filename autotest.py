@@ -407,9 +407,10 @@ def eventually(bool_fn: Callable[[], bool], interval_secs: float, tries: int) ->
     """Check a boolean function until it returns true or we run out of tries"""
     for i in range(tries):
         if bool_fn():
-            logger.debug("Eventually passed in %0.1f seconds", interval_secs * i)
+            logger.debug("Eventually() passed in %0.1f seconds", interval_secs * i)
             return True
         time.sleep(interval_secs)
+    logger.debug("Eventually() failed in %0.1f seconds", interval_secs * tries)
     return False
 
 
