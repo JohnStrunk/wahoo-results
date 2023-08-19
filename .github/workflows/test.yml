@@ -78,6 +78,9 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           key: pre-commit|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit|${{ env.pythonLocation }}
+            pre-commit|
 
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
