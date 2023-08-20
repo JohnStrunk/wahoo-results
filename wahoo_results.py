@@ -62,9 +62,11 @@ def setup_exit(root: Tk, model: Model) -> None:
     """Set up handlers for application exit"""
 
     def exit_fn() -> None:
+        logger.info("Exit called")
         try:
             model.save(CONFIG_FILE)
         except PermissionError as err:
+            logger.debug("Error saving configuration")
             messagebox.showerror(
                 title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
@@ -73,6 +75,18 @@ def setup_exit(root: Tk, model: Model) -> None:
         # Cancel all pending "after" events
         for after_id in root.tk.eval("after info").split():
             root.after_cancel(after_id)
+        logger.debug("Exit: calling destroy...")
+        if logger.isEnabledFor(logging.DEBUG):
+            import threading
+
+            for thread in threading.enumerate():
+                logger.debug(
+                    "Thread %s - alive: %s, daemon: %s",
+                    thread.name,
+                    thread.is_alive(),
+                    thread.daemon,
+                )
+            sleep(1)
         root.destroy()
 
     # Close box exits app
