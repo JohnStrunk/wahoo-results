@@ -75,18 +75,6 @@ def setup_exit(root: Tk, model: Model) -> None:
         # Cancel all pending "after" events
         for after_id in root.tk.eval("after info").split():
             root.after_cancel(after_id)
-        logger.debug("Exit: calling destroy...")
-        if logger.isEnabledFor(logging.DEBUG):
-            import threading
-
-            for thread in threading.enumerate():
-                logger.debug(
-                    "Thread %s - alive: %s, daemon: %s",
-                    thread.name,
-                    thread.is_alive(),
-                    thread.daemon,
-                )
-            sleep(1)
         root.destroy()
 
     # Close box exits app
@@ -511,9 +499,22 @@ def main() -> None:  # pylint: disable=too-many-statements
     do4_observer.stop()
     do4_observer.join()
     icast.stop()
-    root.update()
+    # root.update()
     wh_analytics.application_stop(model)
     hub.end_session()
+    client = hub.client
+    if client is not None:
+        client.close(timeout=2.0)
+    if logger.isEnabledFor(logging.DEBUG):
+        import threading
+
+        for thread in threading.enumerate():
+            logger.debug(
+                "Thread %s - alive: %s, daemon: %s",
+                thread.name,
+                thread.is_alive(),
+                thread.daemon,
+            )
 
 
 if __name__ == "__main__":
