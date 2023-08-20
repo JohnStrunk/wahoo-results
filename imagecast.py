@@ -134,6 +134,10 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                 to_disconnect.append(state["cast"])
         for cast in to_disconnect:
             self._disconnect(cast)
+        if self.browser is not None:
+            self.browser.stop_discovery()
+        if self.zconf is not None:
+            self.zconf.close()
 
     @classmethod
     def _disconnect(cls, cast: pychromecast.Chromecast) -> None:
