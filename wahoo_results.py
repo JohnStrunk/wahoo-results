@@ -358,7 +358,7 @@ def initialize_sentry(model: Model) -> None:
     )
 
 
-def main() -> None:  # pylint: disable=too-many-statements
+def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
     """Main program"""
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
