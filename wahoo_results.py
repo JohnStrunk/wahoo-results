@@ -76,7 +76,7 @@ def setup_exit(root: Tk, model: Model) -> None:
         # Cancel all pending "after" events
         for after_id in root.tk.eval("after info").split():
             root.after_cancel(after_id)
-        root.destroy()
+        root.quit()  # Exit mainloop
 
     # Close box exits app
     root.protocol("WM_DELETE_WINDOW", exit_fn)
@@ -494,13 +494,16 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
         autotest.run_scenario(scenario)
 
     root.mainloop()
+    root.update()
 
     scb_observer.stop()
     scb_observer.join()
     do4_observer.stop()
     do4_observer.join()
     icast.stop()
+    root.update()
     wh_analytics.application_stop(model)
+    root.update()
     hub.end_session()
     client = hub.client
     if client is not None:
