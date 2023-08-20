@@ -24,6 +24,7 @@ import os
 import platform
 import re
 import sys
+import threading
 import webbrowser
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
@@ -499,15 +500,12 @@ def main() -> None:  # pylint: disable=too-many-statements
     do4_observer.stop()
     do4_observer.join()
     icast.stop()
-    # root.update()
     wh_analytics.application_stop(model)
     hub.end_session()
     client = hub.client
     if client is not None:
         client.close(timeout=2.0)
     if logger.isEnabledFor(logging.DEBUG):
-        import threading
-
         for thread in threading.enumerate():
             logger.debug(
                 "Thread %s - alive: %s, daemon: %s",
