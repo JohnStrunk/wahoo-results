@@ -106,7 +106,6 @@ def _build_cc_scenario(
                 operations,
             ),
             Enqueue(model, model.menu_exit.run),
-            _FlushQueue(model),
         ]
     )
 
@@ -325,7 +324,6 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 0,
             ),
             Enqueue(model, model.menu_exit.run),  # Exit the application
-            _FlushQueue(model),
         ]
     )
 
@@ -398,7 +396,6 @@ def _build_random_scenario(
             ),
             Enqueue(model, mem_snapshot),
             Enqueue(model, model.menu_exit.run),
-            _FlushQueue(model),
         ]
     )
 

@@ -24,6 +24,7 @@ import os
 import platform
 import re
 import sys
+import threading
 import webbrowser
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
@@ -62,9 +63,11 @@ def setup_exit(root: Tk, model: Model) -> None:
     """Set up handlers for application exit"""
 
     def exit_fn() -> None:
+        logger.info("Exit called")
         try:
             model.save(CONFIG_FILE)
         except PermissionError as err:
+            logger.debug("Error saving configuration")
             messagebox.showerror(
                 title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
@@ -73,7 +76,7 @@ def setup_exit(root: Tk, model: Model) -> None:
         # Cancel all pending "after" events
         for after_id in root.tk.eval("after info").split():
             root.after_cancel(after_id)
-        root.destroy()
+        root.quit()  # Exit mainloop
 
     # Close box exits app
     root.protocol("WM_DELETE_WINDOW", exit_fn)
@@ -355,7 +358,7 @@ def initialize_sentry(model: Model) -> None:
     )
 
 
-def main() -> None:  # pylint: disable=too-many-statements
+def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
     """Main program"""
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
@@ -491,6 +494,7 @@ def main() -> None:  # pylint: disable=too-many-statements
         autotest.run_scenario(scenario)
 
     root.mainloop()
+    root.update()
 
     scb_observer.stop()
     scb_observer.join()
@@ -499,7 +503,19 @@ def main() -> None:  # pylint: disable=too-many-statements
     icast.stop()
     root.update()
     wh_analytics.application_stop(model)
+    root.update()
     hub.end_session()
+    client = hub.client
+    if client is not None:
+        client.close(timeout=2.0)
+    if logger.isEnabledFor(logging.DEBUG):
+        for thread in threading.enumerate():
+            logger.debug(
+                "Thread %s - alive: %s, daemon: %s",
+                thread.name,
+                thread.is_alive(),
+                thread.daemon,
+            )
 
 
 if __name__ == "__main__":
