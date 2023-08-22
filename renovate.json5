@@ -1,42 +1,42 @@
 {
-  // JSON5 spec: https://json5.org/
-  // Renovate docs: https://docs.renovatebot.com/configuration-options/
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",  // Use Renovate best-practices
-    ":enablePreCommit",       // Enable updates to pre-commit repos
-    ":gitSignOff",            // Add Signed-off-by line to commit messages
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    ':enablePreCommit',
+    ':gitSignOff',
   ],
-  "labels": [
-    "dependencies",
+  labels: [
+    'dependencies',
   ],
-  "regexManagers": [
+  regexManagers: [
     {
-      "description": "Pipenv version updates",
-      "fileMatch": [
-        "^.github/(?:workflows|actions)/.+\\.ya?ml$",
-        "\\.md$",
+      customType: 'regex',
+      description: 'Pipenv version updates',
+      fileMatch: [
+        '^.github/(?:workflows|actions)/.+\\.ya?ml$',
+        '\\.md$',
       ],
-      "matchStrings": [
-        "PIPENV_INSTALL_VERSION: \"(?<currentValue>.+?)\"",
-        "pipenv==(?<currentValue>\\d+\\.\\d+\\.\\d+)",
+      matchStrings: [
+        'PIPENV_INSTALL_VERSION: "(?<currentValue>.+?)"',
+        'pipenv==(?<currentValue>\\d+\\.\\d+\\.\\d+)',
       ],
-      "depNameTemplate": "pipenv",
-      "datasourceTemplate": "pypi",
+      depNameTemplate: 'pipenv',
+      datasourceTemplate: 'pypi',
     },
     {
-      "description": "UPX version updates",
-      "fileMatch": [
-        "^.github/(?:workflows|actions)/.+\\.ya?ml$",
-        "\\.md$",
+      customType: 'regex',
+      description: 'UPX version updates',
+      fileMatch: [
+        '^.github/(?:workflows|actions)/.+\\.ya?ml$',
+        '\\.md$',
       ],
-      "matchStrings": [
-        "UPX_VERSION: \"(?<currentValue>.+?)\"",
-        "upx --version (?<currentValue>\\d+\\.\\d+\\.\\d+)",
+      matchStrings: [
+        'UPX_VERSION: "(?<currentValue>.+?)"',
+        'upx --version (?<currentValue>\\d+\\.\\d+\\.\\d+)',
       ],
-      "depNameTemplate": "upx/upx",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$",
+      depNameTemplate: 'upx/upx',
+      datasourceTemplate: 'github-releases',
+      extractVersionTemplate: '^v(?<version>.*)$',
     },
   ],
 }
