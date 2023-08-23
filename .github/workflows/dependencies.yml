@@ -7,7 +7,7 @@ on:
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2023.8.22"
+  PIPENV_INSTALL_VERSION: "2023.8.23"
 
 jobs:
   test:
