@@ -499,10 +499,13 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
     root.update()
 
     logger.debug("Stopping watchers")
+    scb_observer.unschedule_all()
     scb_observer.stop()
     scb_observer.join()
+    scb_observer.unschedule_all()
     do4_observer.stop()
     do4_observer.join()
+    logger.debug("Watchers stopped")
     icast.stop()
     root.update()
     wh_analytics.application_stop(model)
