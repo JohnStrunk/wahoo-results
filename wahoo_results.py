@@ -73,9 +73,7 @@ def setup_exit(root: Tk, model: Model) -> None:
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.",
             )
-        # Cancel all pending "after" events
-        for after_id in root.tk.eval("after info").split():
-            root.after_cancel(after_id)
+        logger.debug("Exiting main loop")
         root.quit()  # Exit mainloop
 
     # Close box exits app
@@ -494,8 +492,13 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
         autotest.run_scenario(scenario)
 
     root.mainloop()
+    logger.debug("Cancelling all 'after' events")
+    for after_id in root.tk.eval("after info").split():
+        root.after_cancel(after_id)
+
     root.update()
 
+    logger.debug("Stopping watchers")
     scb_observer.stop()
     scb_observer.join()
     do4_observer.stop()
@@ -504,6 +507,7 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
     root.update()
     wh_analytics.application_stop(model)
     root.update()
+    logger.debug("Shutting down Sentry")
     hub.end_session()
     client = hub.client
     if client is not None:
