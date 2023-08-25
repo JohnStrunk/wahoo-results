@@ -37,8 +37,11 @@ repos:
     hooks:
       - id: mypy  # Run mypy to check typeing
         additional_dependencies:
+          - types-docutils
+          - types-pillow
           - types-python-dateutil
           - types-requests
+          - types-urllib3
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
