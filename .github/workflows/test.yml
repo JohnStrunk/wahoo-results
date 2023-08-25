@@ -104,6 +104,10 @@ jobs:
         shell: cmd
         run: pipenv run pre-commit run -a
 
+      - name: Run pre-commit gc
+        shell: cmd
+        run: pipenv run pre-commit gc
+
       - name: Run tests
         shell: cmd
         run: pipenv run pytest -v
