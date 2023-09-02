@@ -501,10 +501,10 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
     logger.debug("Stopping watchers")
     scb_observer.unschedule_all()
     scb_observer.stop()
-    scb_observer.join()
-    scb_observer.unschedule_all()
+    # scb_observer.join()  # This causes an intermittent hang
+    do4_observer.unschedule_all()
     do4_observer.stop()
-    do4_observer.join()
+    # do4_observer.join()  # This causes an intermittent hang
     logger.debug("Watchers stopped")
     icast.stop()
     root.update()

@@ -213,7 +213,6 @@ jobs:
         shell: cmd
         run: wahoo-results.exe --loglevel=debug --test scripted:${{ env.TEST_DURATION_SECONDS }}
 
-
   success:
     name: Successful CI
     needs: [autotest, test]
