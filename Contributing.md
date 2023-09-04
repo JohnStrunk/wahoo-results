@@ -51,11 +51,13 @@ testing.
   - Specific scenario tests: `wahoo-results.exe --loglevel=debug
     --logfile=debug.log --test=scripted:<duration_secs>`
   - Randomized testing: `wahoo-results.exe --loglevel=debug --logfile=debug.log
-    --test=random:<operation_delay_secs>,<runtime_secs>,<max_num_operations>`
+    --test=random:<operation_delay_secs>:<runtime_secs>:<max_num_operations>`
 
 ## Release procedure
 
 - Update release notes in [Changelog.md](Changelog.md)
+- Update download link in documentation (docs/download.rst)
+- Commit above items: "Updates for vX.Y.Z release"
 - Tag the repo with the appropriate version tag (e.g. `vX.Y.Z`)
 - Push the tag to GitHub, and the automation will create a draft release
 - Edit the draft release to add the release notes
