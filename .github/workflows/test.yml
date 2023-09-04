@@ -168,7 +168,6 @@ jobs:
         run: pipenv run python build.py
 
       - name: Save executable as artifact
-        # https://github.com/actions/upload-artifact
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce  # v3.1.2
         with:
           name: wahoo-results.exe
@@ -182,13 +181,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        # https://github.com/actions/checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           fetch-depth: 0
 
       - name: Load executable artifact
-        # https://github.com/actions/download-artifact
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a  # v3.0.2
         with:
           name: wahoo-results.exe
@@ -232,15 +229,41 @@ jobs:
       discussions: write
 
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1  # v4.7.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # Add Scripts directory to the path so that utilities can be used once installed
+      - name: Add python Scripts directory to path
+        shell: cmd
+        # Code-page switch is needed to write the env file as utf-8
+        run: |
+          chcp 65001
+          python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
+          chcp 1252
+
+      - name: Install sentry-cli
+        shell: cmd
+        run: python -m pip install --user sentry-cli
+
       - name: Download executable as artifact
-        # https://github.com/actions/download-artifact
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a  # v3.0.2
         with:
           name: wahoo-results.exe
 
+      - name: Create sentry release
+        shell: cmd
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: wahoo-results
+          SENTRY_PROJECT: wahoo-results
+        run: |
+          sentry-cli releases new --finalize wahoo-results@${{ github.ref_name }}
+          sentry-cli releases set-commits wahoo-results@${{ github.ref_name }} --commit JohnStrunk/wahoo-results@${{ github.ref_name }}
+
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
-        # https://github.com/softprops/action-gh-release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844  # v0.1.15
         with:
           name: Release ${{ github.ref_name }}
