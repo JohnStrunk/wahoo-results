@@ -8,6 +8,7 @@ on:
 env:
   # https://github.com/pypa/pipenv/releases
   PIPENV_INSTALL_VERSION: "2023.9.8"
+  CATEGORIES: "packages,dev-packages,docs"
 
 jobs:
   test:
@@ -42,15 +43,19 @@ jobs:
 
       - name: Save current package version information
         shell: bash
-        run: pipenv requirements --dev | cut -f1 -d ' ' | sort > requirements.old
+        run: pipenv requirements --categories ${{ env.CATEGORIES }} | cut -f1 -d ' ' | sort > requirements.old
 
       - name: Update dependencies
         shell: bash
-        run: pipenv update --dev
+        run: pipenv update --categories ${{ env.CATEGORIES }}
 
       - name: Save new package version information
         shell: bash
-        run: pipenv requirements --dev | cut -f1 -d ' ' | sort > requirements.new
+        run: pipenv requirements --categories ${{ env.CATEGORIES }} | cut -f1 -d ' ' | sort > requirements.new
+
+      - name: Update requirements.txt in docs
+        shell: bash
+        run: pipenv requirements --categories docs > docs/requirements.txt
 
       - name: Create update text
         shell: bash
@@ -73,13 +78,14 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
           add-paths: |
+            docs/requirements.txt
             Pipfile.lock
           branch: workflow/update-dependencies
           delete-branch: true
           author: 'GitHub <noreply@github.com>'
           commit-message: '[workflow] Update dependencies in Pipfile.lock'
           signoff: true
-          title: '[workflow] Update dependencies in Pipfile.lock'
+          title: '[workflow] Update dependencies in lockfiles'
           labels: dependencies
           body: ${{ env.UPDATES }}
           draft: false  # Set to true to to prevent automerge by Mergify

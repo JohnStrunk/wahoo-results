@@ -19,6 +19,7 @@ segment-analytics-python = "<3.0"
 ipinfo = "*"
 
 [dev-packages]
+mkdocs-material = "*"
 mypy = "*"
 pylint = "*"
 pytest = "*"
@@ -37,3 +38,6 @@ esbonio = "*"
 
 [requires]
 python_version = "3.11"
+
+[docs]
+mkdocs-material = "*"
