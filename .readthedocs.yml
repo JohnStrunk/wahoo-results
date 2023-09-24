@@ -7,11 +7,10 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
-sphinx:
-  builder: html
-  configuration: docs/conf.py
-formats:
-  - pdf
+
+mkdocs:
+  configuration: mkdocs.yml
+
 python:
   install:
     - requirements: docs/requirements.txt

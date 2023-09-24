@@ -1,0 +1,10 @@
+---
+# pipenv sync --categories docs
+# pipenv run mkdocs serve --strict
+site_name: Wahoo! Results
+theme:
+  name: material
+extra:
+  analytics:
+    provider: google
+    property: G-2Q6S3GZ3SE
