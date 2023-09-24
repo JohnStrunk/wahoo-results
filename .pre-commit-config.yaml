@@ -1,3 +1,4 @@
+---
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
@@ -10,16 +11,16 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-      - id: check-added-large-files  # Prevents giant files from being committed
+      - id: check-added-large-files  # Check for large files
         exclude: |
           (?x)^(
                 chromecast-receiver/cc-receiver-logo\.png|
                 media/cc-receiver-logo\.svg|
                 testdata/.*
             )$
-      - id: check-merge-conflict     # Check for files that contain merge conflict strings
-      - id: check-yaml               # Checks yaml files for parseable syntax
-      - id: end-of-file-fixer        # Ensures that a file is either empty, or ends with one newline
+      - id: check-merge-conflict     # Check for merge conflict strings
+      - id: fix-byte-order-marker    # Forbid utf-8 byte order marker
+      - id: end-of-file-fixer        # Files end w/ newline
         exclude: |
           (?x)^(
                 testdata/.*
@@ -32,13 +33,17 @@ repos:
                 testdata/.*
             )$
 
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.10.0
+  - repo: https://github.com/adrienverge/yamllint
+    rev: "v1.32.0"
     hooks:
-      - id: rst-backticks                  # Detect common mistake of using single backticks when writing rst
-      - id: rst-directive-colons           # Detect mistake of rst directive not ending with double colon or space before the double colon
-      - id: rst-inline-touching-normal     # Detect mistake of inline code touching normal text in rst
-      - id: text-unicode-replacement-char  # Forbid files which have a UTF-8 Unicode replacement character
+      - id: yamllint
+        args: ["--strict"]
+
+  - repo: https://github.com/markdownlint/markdownlint
+    rev: "v0.12.0"
+    hooks:
+      - id: markdownlint
+        args: ["--style", ".mdl-style.rb"]
 
   - repo: https://github.com/psf/black
     rev: "23.9.1"

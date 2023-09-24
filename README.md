@@ -41,16 +41,16 @@ Once you've downloaded the application, make sure to [read the documentation](ht
 
 1. Once the meet has been seeded in your meet management software, export "CTS
    start list" files as you would for a normal scoreboard.
-2. Use Wahoo! Results to generate the event file for the Dolphin software
+1. Use Wahoo! Results to generate the event file for the Dolphin software
    based on the start list files.
-3. Configure Wahoo! Results to watch for the Dolphin `*.do4` race result
+1. Configure Wahoo! Results to watch for the Dolphin `*.do4` race result
    files.
-4. When new race result files are created by the Dolphin, Wahoo Results will
+1. When new race result files are created by the Dolphin, Wahoo Results will
    display race results including both names (from the start list files) and
    times (from the Dolphin result files) onto one or more Chromecast devices
    on the local network.
 
 ## License
 
-This software is licensed under the GNU Affero General Public License version
-3. See the [LICENSE](LICENSE) file for full details.
+This software is licensed under the GNU Affero General Public License
+version 3. See the [LICENSE](LICENSE) file for full details.

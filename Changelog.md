@@ -2,6 +2,8 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## Version history
+
 ### [Unreleased]
 
 ### [1.2.0] - 2023-09-04
@@ -142,7 +144,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 #### Changed
 
-- :information_source: Releases will now be signed zips instead of bare exe files to avoid warnings on download and allow authentication of releases
+- :information_source: Releases will now be signed zips instead of bare exe
+  files to avoid warnings on download and allow authentication of releases
 
 ### [0.3.2] - 2021-01-16
 
@@ -161,7 +164,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 #### Added
 
-- :sparkles: Option to suppress final time if the individual times have >0.3s spread
+- :sparkles: Option to suppress final time if the individual times have >0.3s
+  spread
 - :sparkles: Option to run the scoreboard in fullscreen mode
 
 #### Fixed
@@ -174,17 +178,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 #### Added
 
 - :sparkles: Number of lanes can be customized within the application
-- :sparkles: Many new scoreboard configuration options: Fonts, colors, and background image
+- :sparkles: Many new scoreboard configuration options: Fonts, colors, and
+  background image
 - :sparkles: Custom colors for 1st-3rd place
-- :sparkles: Test button to show a scoreboard mockup demonstrating the current customization settings
+- :sparkles: Test button to show a scoreboard mockup demonstrating the current
+  customization settings
 
 #### Changed
 
-- :information_source: (internal) Switched from using widgets for the scoreboard to placing text on a Canvas object
+- :information_source: (internal) Switched from using widgets for the scoreboard
+  to placing text on a Canvas object
 
 #### Fixed
 
-- :bug: There were instances where the incorrect final time was calculated due to imprecision in floating point arithmetic
+- :bug: There were instances where the incorrect final time was calculated due
+  to imprecision in floating point arithmetic
 
 ### [0.1.0] - 2020-09-06
 

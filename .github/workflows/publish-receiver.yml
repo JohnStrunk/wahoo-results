@@ -1,7 +1,8 @@
+---
 # Based on: Simple workflow for deploying static content to GitHub Pages
 name: Deploy Chromecast receiver
 
-on:
+on:  # yamllint disable-line rule:truthy
   push:
     branches: ["master"]
   workflow_dispatch:
