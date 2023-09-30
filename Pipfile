@@ -30,9 +30,11 @@ types-requests = "*"
 pytest-cov = "*"
 types-pillow = "*"
 pre-commit = "*"
+mkdocs-macros-plugin = "*"
 
 [requires]
 python_version = "3.11"
 
 [docs]
 mkdocs-material = "*"
+mkdocs-macros-plugin = "*"

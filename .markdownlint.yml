@@ -1,0 +1,17 @@
+---
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+default: true
+MD007:  # Unordered list indentation
+  indent: 2
+MD009:  # Trailing spaces
+  br_spaces: 2
+MD013:  # Line length
+  code_blocks: false
+  tables: false
+MD024:  # Multiple headers with same content
+  allow_different_nesting: true
+MD026: false  # Trailing punctuation in header
+MD033: false  # Inline HTML
+MD046: # Code block style
+  style: fenced
