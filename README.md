@@ -35,7 +35,8 @@ page](https://github.com/JohnStrunk/wahoo-results/releases).
 The program a single executable w/ no installation necessary. Configuration
 preferences are saved into a `wahoo-results.ini` file in the same directory.
 
-Once you've downloaded the application, make sure to [read the documentation](https://wahoo-results.readthedocs.io/).
+Once you've downloaded the application, make sure to [read the
+documentation](https://wahoo-results.com/).
 
 ## How it works
 

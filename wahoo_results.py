@@ -424,7 +424,7 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
                 f"ajs_uid={model.client_id.get()}",
             ]
         )
-        webbrowser.open("https://wahoo-results.readthedocs.io/?" + query_params)
+        webbrowser.open("https://wahoo-results.com/?" + query_params)
 
     model.menu_docs.add(docs_fn)
     check_for_update(model)
