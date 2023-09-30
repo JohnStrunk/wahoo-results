@@ -26,18 +26,18 @@
 
     /* Primary color */
     /* Text bg on top nav bar */
-    --md-primary-fg-color:              rgb(0, 45, 98);
-    --md-primary-fg-color--light:       rgb(0, 180, 230);
-    --md-primary-fg-color--dark:        rgb(0, 32, 91);
+    --md-primary-fg-color:              hsl(212, 100%, 19%);
+    --md-primary-fg-color--light:       hsl(193, 100%, 45%);
+    --md-primary-fg-color--dark:        hsl(219, 100%, 18%);
     /* Text color on top nav bar */
     --md-primary-bg-color:              rgb(255, 255, 255);
     --md-primary-bg-color--light:       rgba(255, 255, 255, 0.7);
 
     /* Accent color */
-    --md-accent-fg-color:               rgb(186, 12, 47);
-    --md-accent-fg-color--transparent:  rgba(186, 12, 47, 0.1);
-    --md-accent-bg-color:               rgb(138, 141, 143);
-    --md-accent-bg-color--light:        rgba(138, 141, 143, 0.7);
+    --md-accent-fg-color:               hsl(348, 88%, 39%);
+    --md-accent-fg-color--transparent:  hsla(348, 88%, 39%, 0.1);
+    --md-accent-bg-color:               hsl(204, 2%, 55%);
+    --md-accent-bg-color--light:        hsla(204, 2%, 55%, 0.7);
 
     --md-typeset-a-color:               hsl(193, 100%, 30%);
 }
