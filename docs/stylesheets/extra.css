@@ -1,0 +1,43 @@
+:root {
+    /* https://github.com/squidfunk/mkdocs-material/blob/master/src/templates/assets/stylesheets/main/_colors.scss */
+
+    /****************************************
+    Colors from USA-S visual identity standards
+
+    Primary:
+      PANTONE282_DKBLUE: rgb(0, 45, 98)
+      PANTONE200_RED: rgb(186, 12, 47)
+
+    Secondary:
+      BLACK: rgb(0, 0, 0)
+      PANTONE428_LTGRAY: rgb(193, 198, 200)
+      PANTONE877METALIC_MDGRAY: rgb(138, 141, 143)
+
+    Tertiary:
+      PANTONE281_MDBLUE: rgb(0, 32, 91)
+      PANTONE306_LTBLUE: rgb(0, 179, 228)
+      PANTONE871METALICGOLD: rgb(133, 117, 78)
+      PANTONE4505FLATGOLD: rgb(177, 149, 58)
+    *****************************************/
+
+    /* Base colors */
+    --md-default-fg-color:              rgb(0, 0, 0);
+    --md-default-bg-color:              rgb(255, 255, 255);
+
+    /* Primary color */
+    /* Text bg on top nav bar */
+    --md-primary-fg-color:              rgb(0, 45, 98);
+    --md-primary-fg-color--light:       rgb(0, 180, 230);
+    --md-primary-fg-color--dark:        rgb(0, 32, 91);
+    /* Text color on top nav bar */
+    --md-primary-bg-color:              rgb(255, 255, 255);
+    --md-primary-bg-color--light:       rgba(255, 255, 255, 0.7);
+
+    /* Accent color */
+    --md-accent-fg-color:               rgb(186, 12, 47);
+    --md-accent-fg-color--transparent:  rgba(186, 12, 47, 0.1);
+    --md-accent-bg-color:               rgb(138, 141, 143);
+    --md-accent-bg-color--light:        rgba(138, 141, 143, 0.7);
+
+    --md-typeset-a-color:               hsl(193, 100%, 30%);
+}

@@ -32,6 +32,15 @@ theme:
     - search.suggest  # Suggest as you type
     - toc.follow  # Auto scroll sidebar
     # - toc.integrate  # Section headers in left sidebar
+  font:
+    text: Source Sans 3
+    code: Source Code Pro
+  palette:
+    scheme: custom
+    primary: custom
+    accent: custom
+extra_css:
+  - stylesheets/extra.css
 extra:
   analytics:
     provider: google
