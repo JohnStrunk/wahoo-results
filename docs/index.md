@@ -4,18 +4,24 @@ hide:
   - toc         # Right TOC
   - footer      # Prev, next page links
 ---
-<!-- markdownlint-disable-next-line MD013 MD041 -->
-<div class="mycard" markdown style="background: linear-gradient(135deg, white, 80%, var(--md-accent-bg-color)); padding:2em">
+<!-- markdownlint-disable-next-line MD041 -->
+<style>
+  body {
+    background: linear-gradient(135deg, white, var(--md-accent-bg-color));
+    background-attachment: fixed;
+  }
+</style>
+<div class="mycard" markdown>
 
 # Wahoo! Results
 
 ![Example scoreboard](images/demo1.png){width=40% align=right loading=lazy}
 
-{{ WR }} is a free swimming scoreboard that you can use to display race results
-at your meets. It combines start list data from your meet management software
-(e.g., {{ HMM }} or {{ SMM }}) with data files from a {{ CD }} to produce an
-attractive scoreboard that keeps swimmers, coaches, and spectators informed of
-race results in real-time.
+{{ WR }} is a free swimming scoreboard to display race results at your meets. It
+combines start list data from your meet management software (e.g., {{ HMM }} or
+{{ SMM }}) with timing data from a {{ CD }} to produce an attractive scoreboard
+that keeps swimmers, coaches, and spectators informed of race results in
+real-time.
 
 The scoreboard is transmitted to Chromecast devices, allowing the results to be
 available on many displays at your facility.
@@ -33,7 +39,6 @@ available on many displays at your facility.
 </div>
 
 <div class="mygrid" markdown>
-
 <div class="mycard" markdown>
 
 ## Features
@@ -51,11 +56,11 @@ The {{ WR }} scoreboard is customizable to meet the needs of your swim team.
 
 ## Requirements
 
+- {{ CD }}
 - {{ HMM }}, {{ SMM }}, or other meet management software that can generate
   scoreboard "CTS start list" files
-- {{ CD }}
 - Windows 10/11 PC to run {{ WR }} (It can be shared with either of the above.)
-- One or more {{ CC }} devices
+- One or more {{ CC }} devices to display the scoreboard
 
 </div>
 
@@ -78,7 +83,8 @@ reports](https://github.com/JohnStrunk/wahoo-results/issues)
 :material-download: [Download the source
 code](https://github.com/JohnStrunk/wahoo-results)
 
-:material-account-hard-hat: [Contribute enhancements](https://github.com/JohnStrunk/wahoo-results/pulls)
+:material-account-hard-hat: [Contribute
+enhancements](https://github.com/JohnStrunk/wahoo-results/pulls)
 
 ## License
 

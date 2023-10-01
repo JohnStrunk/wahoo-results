@@ -63,3 +63,15 @@ h1 {  /* Make page titles bold */
 .mycard h2{
   margin-top: 0.5em;
 }
+
+.green {
+  color: darkgreen;
+}
+
+.yellow {
+  color: darkgoldenrod;
+}
+
+.red {
+  color: darkred;
+}

@@ -112,12 +112,6 @@ plugins:
       post_readtime: true
       post_url_date_format: yyyy
   - macros  # mkdocs-macros-plugin - jinja templating
-  - minify:  # mkdocs-minify-plugin
-      minify_html: true
-      minify_js: true
-      minify_css: true
-      htmlmin_opts:
-        remove_comments: true
   - search
   # Social needs Cairo Graphics, and that needs to be installed separately on
   # Windows. Unclear if it would work on RTD.
