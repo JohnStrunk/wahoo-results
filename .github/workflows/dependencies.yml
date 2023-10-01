@@ -54,10 +54,6 @@ jobs:
         shell: bash
         run: pipenv requirements --categories ${{ env.CATEGORIES }} | cut -f1 -d ' ' | sort > requirements.new
 
-      - name: Update requirements.txt in docs
-        shell: bash
-        run: pipenv requirements --categories docs > docs/requirements.txt
-
       - name: Create update text
         shell: bash
         run: |

@@ -2,8 +2,9 @@
 # pipenv sync --categories docs
 # pipenv run mkdocs serve
 site_name: Wahoo! Results
-site_description: Wahoo! Results is a swimming scoreboard for use with CTS
-  Dolphin timing systems
+site_description: >-
+  A swimming scoreboard for CTS Dolphin timing systems. Send live race results
+  to any Chromecast device.
 site_url: https://wahoo-results.com
 copyright: Copyright &copy; 2020 &ndash; 2023 John Strunk
 repo_name: JohnStrunk/wahoo-results
@@ -18,6 +19,7 @@ nav:
   - blog/index.md
 theme:
   name: material
+  # custom_dir: docs/overrides
   logo: images/wr-icon.png  # Logo in upper left corner
   favicon: images/wr-icon.png  # Favicon in browser tab
   features:
@@ -110,6 +112,12 @@ plugins:
       post_readtime: true
       post_url_date_format: yyyy
   - macros  # mkdocs-macros-plugin - jinja templating
+  - minify:  # mkdocs-minify-plugin
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
   - search
   # Social needs Cairo Graphics, and that needs to be installed separately on
   # Windows. Unclear if it would work on RTD.

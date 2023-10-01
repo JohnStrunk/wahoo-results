@@ -31,6 +31,7 @@ pytest-cov = "*"
 types-pillow = "*"
 pre-commit = "*"
 mkdocs-macros-plugin = "*"
+mkdocs-minify-plugin = "*"
 
 [requires]
 python_version = "3.11"
@@ -38,3 +39,4 @@ python_version = "3.11"
 [docs]
 mkdocs-material = "*"
 mkdocs-macros-plugin = "*"
+mkdocs-minify-plugin = "*"

@@ -41,3 +41,25 @@
 
     --md-typeset-a-color:               hsl(193, 100%, 30%);
 }
+
+h1 {  /* Make page titles bold */
+  font-weight: bold !important;
+}
+
+.mygrid {  /* For creating a grid layout */
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(16rem,1fr));
+  grid-gap: 1em;
+  margin: 1em 0;
+}
+
+.mycard {  /* For creating material design card */
+  background-color: var(--md-primary-bg-color);
+  border-radius: 2px;
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+  padding: 1em;
+}
+
+.mycard h2{
+  margin-top: 0.5em;
+}
