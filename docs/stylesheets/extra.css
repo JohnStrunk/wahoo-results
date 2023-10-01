@@ -1,0 +1,77 @@
+:root {
+    /* https://github.com/squidfunk/mkdocs-material/blob/master/src/templates/assets/stylesheets/main/_colors.scss */
+
+    /****************************************
+    Colors from USA-S visual identity standards
+
+    Primary:
+      PANTONE282_DKBLUE: rgb(0, 45, 98)
+      PANTONE200_RED: rgb(186, 12, 47)
+
+    Secondary:
+      BLACK: rgb(0, 0, 0)
+      PANTONE428_LTGRAY: rgb(193, 198, 200)
+      PANTONE877METALIC_MDGRAY: rgb(138, 141, 143)
+
+    Tertiary:
+      PANTONE281_MDBLUE: rgb(0, 32, 91)
+      PANTONE306_LTBLUE: rgb(0, 179, 228)
+      PANTONE871METALICGOLD: rgb(133, 117, 78)
+      PANTONE4505FLATGOLD: rgb(177, 149, 58)
+    *****************************************/
+
+    /* Base colors */
+    --md-default-fg-color:              rgb(0, 0, 0);
+    --md-default-bg-color:              rgb(255, 255, 255);
+
+    /* Primary color */
+    /* Text bg on top nav bar */
+    --md-primary-fg-color:              hsl(212, 100%, 19%);
+    --md-primary-fg-color--light:       hsl(193, 100%, 45%);
+    --md-primary-fg-color--dark:        hsl(219, 100%, 18%);
+    /* Text color on top nav bar */
+    --md-primary-bg-color:              rgb(255, 255, 255);
+    --md-primary-bg-color--light:       rgba(255, 255, 255, 0.7);
+
+    /* Accent color */
+    --md-accent-fg-color:               hsl(348, 88%, 39%);
+    --md-accent-fg-color--transparent:  hsla(348, 88%, 39%, 0.1);
+    --md-accent-bg-color:               hsl(204, 2%, 55%);
+    --md-accent-bg-color--light:        hsla(204, 2%, 55%, 0.7);
+
+    --md-typeset-a-color:               hsl(193, 100%, 30%);
+}
+
+h1 {  /* Make page titles bold */
+  font-weight: bold !important;
+}
+
+.mygrid {  /* For creating a grid layout */
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(16rem,1fr));
+  grid-gap: 1em;
+  margin: 1em 0;
+}
+
+.mycard {  /* For creating material design card */
+  background-color: var(--md-primary-bg-color);
+  border-radius: 2px;
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+  padding: 1em;
+}
+
+.mycard h2{
+  margin-top: 0.5em;
+}
+
+.green {
+  color: darkgreen;
+}
+
+.yellow {
+  color: darkgoldenrod;
+}
+
+.red {
+  color: darkred;
+}

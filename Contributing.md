@@ -24,7 +24,8 @@ testing.
 ### Environment setup
 
 - Install Python 3  
-  Chocolatey is a good way to install Python on Windows: `choco install python3`  
+  Chocolatey is a good way to install Python on Windows:
+  `choco install python3`  
   The version of Python currently being used can be found at the botton of the
   [Pipfile](Pipfile).
 - Install dependencies:

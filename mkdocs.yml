@@ -1,0 +1,118 @@
+---
+# pipenv sync --categories docs
+# pipenv run mkdocs serve
+site_name: Wahoo! Results
+site_description: >-
+  A swimming scoreboard for CTS Dolphin timing systems. Send live race results
+  to any Chromecast device.
+site_url: https://wahoo-results.com
+copyright: Copyright &copy; 2020 &ndash; 2023 John Strunk
+repo_name: JohnStrunk/wahoo-results
+repo_url: https://github.com/JohnStrunk/wahoo-results
+nav:
+  - Home: index.md
+  - download.md
+  - quickstart.md
+  - configuration.md
+  - cc-compat.md
+  - faq.md
+  - blog/index.md
+theme:
+  name: material
+  # custom_dir: docs/overrides
+  logo: images/wr-icon.png  # Logo in upper left corner
+  favicon: images/wr-icon.png  # Favicon in browser tab
+  features:
+    - content.tabs.link  # Active content tabs are linked together
+    - navigation.footer  # Show footer at bottom of page
+    # Allow section overview pages (conflicts with integrate)
+    # - navigation.indexes
+    - navigation.instant
+    - navigation.path  # Show breadcrumbs at top of page
+    - navigation.top  # Return to top button
+    - navigation.tracking  # Update URL when navigating
+    - search.highlight  # Highlight search terms
+    - search.suggest  # Suggest as you type
+    - toc.follow  # Auto scroll sidebar
+    # - toc.integrate  # Section headers in left sidebar
+  font:
+    text: Source Sans 3
+    code: Source Code Pro
+  palette:
+    scheme: custom
+    primary: custom
+    accent: custom
+extra_css:
+  - stylesheets/extra.css
+extra:
+  analytics:
+    provider: google
+    property: G-2Q6S3GZ3SE
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/JohnStrunk
+      name: "GitHub: JohnStrunk"
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/johnstrunk/
+      name: "LinkedIn: John Strunk"
+    - icon: fontawesome/brands/mastodon
+      link: https://fosstodon.org/@JohnStrunk
+      name: "Mastodon: @JohnStrunk@fosstodon.org"
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/TheJohnStrunk
+      name: "Twitter: @TheJohnStrunk"
+  # Macro definitions
+  WR: >-
+    Wahoo! Results
+  CC: >-
+    [Google Chromecast](https://store.google.com/us/product/chromecast)
+  CD: >-
+    [Colorado Dolphin wireless timing
+    system](https://www.coloradotime.com/dolphin-wireless-swim-timing/)
+  HMM: >-
+    [HyTek Meet Manager](https://hytek.active.com/swim-meet-software.html)
+  SMM: >-
+    [SwimTopia Meet
+    Maestro](https://www.swimtopia.com/products/meet-maestro/swim-meet-management-software/)
+  CLEARFLOAT: >-
+    <div style="clear: both;"></div>
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - pymdownx.betterem  # Improved handling of bold/italic
+  - pymdownx.caret  # Add caret to indicate superscript
+  - pymdownx.details  # Collapsible callouts
+  - pymdownx.highlight:
+      auto_title: true  # Add language name to code block
+      line_spans: __span  # Required for highlighting to work??? see docs
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.keys  # Ability to render keyboard keystrokes
+  - pymdownx.snippets  # Include contents of other files
+  - pymdownx.superfences
+  - pymdownx.tabbed:  # Allow creating tabbed content
+      alternate_style: true
+  - pymdownx.tilde  # Subscript
+  - tables
+  - toc:  # Table of contents on right side of page
+      title: "Page contents"
+      permalink: true  # Para marks at end of headers for permalinks
+      permalink_title: "Link to this section"
+plugins:
+  - blog:
+      archive: false
+      blog_toc: true
+      post_date_format: long
+      post_excerpt: required  # Must add <!-- more --> as separator in post
+      post_readtime: true
+      post_url_date_format: yyyy
+  - macros  # mkdocs-macros-plugin - jinja templating
+  - search
+  # Social needs Cairo Graphics, and that needs to be installed separately on
+  # Windows. Unclear if it would work on RTD.
+  # - social

@@ -19,6 +19,7 @@ segment-analytics-python = "<3.0"
 ipinfo = "*"
 
 [dev-packages]
+mkdocs-material = "*"
 mypy = "*"
 pylint = "*"
 pytest = "*"
@@ -26,14 +27,14 @@ pytest-pylint = "*"
 pytest-mypy = "*"
 types-python-dateutil = "*"
 types-requests = "*"
-plantweb = "*"
-rstcheck = "*"
-sphinx-rtd-theme = "*"
-sphinx-tabs = "*"
 pytest-cov = "*"
 types-pillow = "*"
 pre-commit = "*"
-esbonio = "*"
+mkdocs-macros-plugin = "*"
 
 [requires]
 python_version = "3.11"
+
+[docs]
+mkdocs-material = "*"
+mkdocs-macros-plugin = "*"
