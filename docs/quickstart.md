@@ -20,7 +20,7 @@ that the Chromecast devices will be able to fetch the scoreboard images.
 
 ## Set the number of lanes
 
-![Configuration tab](images/wr-config.png){width=50% align=right loading=lazy}
+![Configuration tab](images/wr-config.png){ width=685 height=416 .rfloat }
 
 The first screen that comes up will be the "Configuration" tab. For now, the
 only setting to change is the number of lanes that are displayed.
@@ -66,7 +66,8 @@ into a directory that {{ WR }} will be able to access.
 
 ## Set the start list directory
 
-![Directories tab](images/wr-dirs.png){width=50% align=right loading=lazy}
+<!-- markdownlint-disable-next-line MD013 -->
+![Directories tab](images/wr-dirs.png){ width=685 height=416 .rfloat loading=lazy }
 
 Now you will tell {{ WR }} where to find the start list files.
 
@@ -88,7 +89,7 @@ contains the event data for the Dolphin timing software.
 ## Import the event file
 
 <!-- markdownlint-disable-next-line MD013 -->
-![Dolphin "Events" configuration](images/DolphinEvents.png){width=50% align=right loading=lazy}
+![Dolphin "Events" configuration](images/DolphinEvents.png){ width=902 height=740 .rfloat loading=lazy }
 
 You will now load the event list into the Dolphin software. It will provide the
 event numbers, descriptions, and number of heats for each event. **Having the
@@ -103,7 +104,8 @@ event screen with all the events and their heat counts.
 
 ## Configure result files
 
-![Dolphin "Settings" screen](images/DolphinSettings.png){width=50% align=right loading=lazy}
+<!-- markdownlint-disable-next-line MD013 -->
+![Dolphin "Settings" screen](images/DolphinSettings.png){ width=902 height=740 .rfloat loading=lazy }
 
 Still in the Dolphin software, switch to the "Settings" screen. Here, you will
 configure the location and type of race results the Dolphin software will
@@ -133,7 +135,7 @@ be displayed. The race results are ordered by time.
 
 ## Connect Chromecast(s)
 
-![Run tab](images/wr-run.png){width=50% align=right loading=lazy}
+![Run tab](images/wr-run.png){ width=685 height=416 .rfloat loading=lazy }
 
 The final step is to connect the Chromecast devices that will be used to display
 the scoreboard.

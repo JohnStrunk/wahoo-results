@@ -15,7 +15,7 @@ hide:
 
 # Wahoo! Results
 
-![Example scoreboard](images/demo1.png){width=40% align=right loading=lazy}
+![Example scoreboard](images/demo1.png){ width=1280 height=720 .rfloat }
 
 {{ WR }} is a free swimming scoreboard to display race results at your meets. It
 combines start list data from your meet management software (e.g., {{ HMM }} or
