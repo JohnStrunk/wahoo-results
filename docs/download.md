@@ -1,11 +1,14 @@
 # Download
 
-!!! success "Download the latest version"
+!!! success "Latest version: v1.2.0 - 09/04/2023"
 
     <!-- markdownlint-disable-line MD046 -->
-    Version 1.2.0 - 09/04/2023 -
-    [wahoo-results.exe](https://github.com/JohnStrunk/wahoo-results/releases/download/v1.2.0/wahoo-results.exe)  
-    See it (and previous releases) on the  [GitHub releases
+    <div style="text-align:center" markdown>
+    [:material-download:{style="vertical-align:middle"}
+    wahoo-results.exe](https://github.com/JohnStrunk/wahoo-results/releases/download/v1.2.0/wahoo-results.exe){ .md-button .md-button--primary style="margin:1em"}
+    </div>
+
+    See it (and previous releases) on the [GitHub releases
     page.](https://github.com/JohnStrunk/wahoo-results/releases)
 
 The scoreboard is packaged as a single executable, and no installation is

@@ -25,7 +25,7 @@ The application is divided into three main tabs:
 
 ## Configuration tab
 
-![Configuration tab](images/wr-config.png){width=50% align=right loading=lazy}
+![Configuration tab](images/wr-config.png){ width=685 height=416 .rfloat }
 
 The left side of the configuration tab allows customizing the appearance of
 the scoreboard.
@@ -91,7 +91,8 @@ potentially unreliable or incorrect times from being shown to spectators.
 
 ## Directories tab
 
-![Directories tab](images/wr-dirs.png){width=50% align=right loading=lazy}
+<!-- markdownlint-disable-next-line MD013 -->
+![Directories tab](images/wr-dirs.png){ width=685 height=416 .rfloat loading=lazy }
 
 The Directories tab configures where the scoreboard will search for start list
 (`*.ECB`) files and race result (`*.DO4`) files.
@@ -113,7 +114,7 @@ ordered by their timestamp.
 
 ## Run tab
 
-![Run tab](images/wr-run.png){width=50% align=right loading=lazy}
+![Run tab](images/wr-run.png){ width=685 height=416 .rfloat loading=lazy }
 
 The Run tab shows live results as the scoreboard is updated.
 

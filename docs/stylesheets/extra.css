@@ -46,6 +46,12 @@ h1 {  /* Make page titles bold */
   font-weight: bold !important;
 }
 
+.rfloat {
+  float: right;
+  width: 40%;
+  margin-left: 1em;
+}
+
 .mygrid {  /* For creating a grid layout */
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(16rem,1fr));

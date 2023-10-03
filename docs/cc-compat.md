@@ -12,7 +12,7 @@ The table below summarizes their support status in {{ WR }}:
 
 -----
 
-![Gen 1](images/cc-gen1.jpg){loading=lazy}
+![Gen 1](images/cc-gen1.jpg){ width=320 height=240 }
 
 <sub>Image attribution: [© Raimond Spekking / CC BY-SA 4.0](https://en.wikipedia.org/wiki/File:Chromecast_(1st_generation)-0869.jpg)<sub>
 </div>
@@ -24,7 +24,7 @@ The table below summarizes their support status in {{ WR }}:
 
 -----
 
-![Gen 2](images/cc-gen2.jpg){loading=lazy}
+![Gen 2](images/cc-gen2.jpg){ width=306 height=240 }
 
 <sub>Image attribution: [© Y2kcrazyjoker4 / CC BY-SA 4.0](https://en.wikipedia.org/wiki/File:Chromecast-2015.jpg)</sub>
 </div>
@@ -36,7 +36,7 @@ The table below summarizes their support status in {{ WR }}:
 
 -----
 
-![Gen 3](images/cc-gen3.jpg){loading=lazy}
+![Gen 3](images/cc-gen3.jpg){ width=240 height=240 }
 
 <sub>Image attribution: [© Qurren / CC BY-SA 4.0](https://en.wikipedia.org/wiki/File:Chromecast_(3rd_generation).jpg)</sub>
 </div>
@@ -49,7 +49,7 @@ The table below summarizes their support status in {{ WR }}:
 
 -----
 
-![CC w/ GTV](images/cc-gtv.jpg){loading=lazy}
+![CC w/ GTV](images/cc-gtv.jpg){ width=320 height=213 }
 
 <sub>Image attribution: [© Y2kcrazyjoker4 / CC BY-SA 4.0](https://en.wikipedia.org/wiki/File:Chromecast-with-Google-TV-snow-color-on-wood-table2.jpg)</sub>
 </div>
