@@ -14,7 +14,7 @@
     "labels": [
       "dependencies"
     ],
-    "regexManagers": [
+    "customManagers": [
       {
         "customType": "regex",
         "description": "Pipenv version updates",
