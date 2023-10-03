@@ -9,7 +9,7 @@ your meets, this may be for you!
 :arrow_right: [Download the latest version
 here](https://github.com/JohnStrunk/wahoo-results/releases/latest) :arrow_left:
 
-![Example scoreboard](docs/media/demo1.png)
+![Example scoreboard](docs/images/demo1.png)
 
 ## Requirements
 
