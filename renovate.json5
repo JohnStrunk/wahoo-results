@@ -47,5 +47,7 @@
     ],
     "schedule": [
       "before 7am on Thursday"  // Update weekly
-    ]
+    ],
+    "semanticCommits": "disabled",
+    "timezone": "America/New_York"
   }
