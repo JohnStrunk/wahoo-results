@@ -13,11 +13,20 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8000],
+	//"forwardPorts": [8000],
 
-	"postStartCommand": {
-		"Install pre-commit hooks": "pre-commit install -f",
-		"Install env": "pipenv --rm; pipenv sync --categories docs"
+	"containerEnv": {
+		// Ensure pipenv puts the virtualenv in the repo directory
+		"PIPENV_VENV_IN_PROJECT": "1"
+	},
+
+	"postCreateCommand": {
+		// This container is primarily for docs, so only install that category.
+		// Other packages could be added later, manually
+		"Setup Pipenv venv": "pipenv --rm; pipenv sync --categories docs",
+		// The pre-commit environment takes a long time to install, so spawn it
+		// in the background so that we can get started sooner
+		"Initialize pre-commit environment": "nohup sh -c 'pre-commit install -f --install-hooks &' > /dev/null"
 	}
 
 	// Configure tool-specific properties.
