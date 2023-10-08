@@ -15,8 +15,10 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [8000],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip install --upgrade pre-commit; pre-commit install -f; pipenv --rm; pipenv sync --categories docs"
+	"postStartCommand": {
+		"Install pre-commit hooks": "pre-commit install -f",
+		"Install env": "pipenv --rm; pipenv sync --categories docs"
+	}
 
 	// Configure tool-specific properties.
 	// "customizations": {},
