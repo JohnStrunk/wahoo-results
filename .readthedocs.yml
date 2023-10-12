@@ -11,6 +11,12 @@ build:
     post_create_environment:
       - pip install pipenv
       - pipenv requirements --categories docs > docs/requirements.txt
+    post_build:
+      # Override the default sitemap.xml with a custom one that we refer to from
+      # our custom robots.txt
+      - cp "$READTHEDOCS_OUTPUT/html/sitemap.xml"
+        "$READTHEDOCS_OUTPUT/html/sitemap-custom.xml"
+      - cat "$READTHEDOCS_OUTPUT/html/sitemap-custom.xml"
 
 mkdocs:
   configuration: mkdocs.yml
