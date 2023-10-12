@@ -36,7 +36,7 @@ theme:
     - toc.follow  # Auto scroll sidebar
     # - toc.integrate  # Section headers in left sidebar
   font:
-    text: Source Sans 3
+    text: Source Sans Pro
     code: Source Code Pro
   palette:
     scheme: custom
