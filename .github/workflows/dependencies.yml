@@ -75,7 +75,6 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
           add-paths: |
-            docs/requirements.txt
             Pipfile.lock
           branch: workflow/update-dependencies
           delete-branch: true
