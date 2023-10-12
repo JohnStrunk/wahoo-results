@@ -19,7 +19,7 @@ nav:
   - blog/index.md
 theme:
   name: material
-  # custom_dir: docs/overrides
+  custom_dir: docs/overrides
   logo: images/wr-icon.png  # Logo in upper left corner
   favicon: images/wr-icon.png  # Favicon in browser tab
   features:
