@@ -103,6 +103,7 @@ markdown_extensions:
       title: "Page contents"
       permalink: true  # Para marks at end of headers for permalinks
       permalink_title: "Link to this section"
+  - mdx_truly_sane_lists  # Fix nested lists
 plugins:
   - blog:
       archive: false
