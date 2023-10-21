@@ -36,6 +36,11 @@ available on many displays at your facility.
 
 {{ CLEARFLOAT }}
 
+<div style="text-align:right" markdown>
+[Latest news on the {{ WR }} blog
+:material-chevron-right:{ style="vertical-align:middle"}](blog/index.md)
+</div>
+
 </div>
 
 <div class="mygrid" markdown>
