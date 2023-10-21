@@ -13,8 +13,6 @@ evolved, and some of the lessons I’ve learned during the process.
 
 <!-- more -->
 
-## Introduction
-
 Sometimes a project is just a small one. It’s not too complicated; it’s designed
 to solve a specific, well-defined use-case, and it has a specific end-state
 (e.g., building a bookshelf). Other times, something that starts as a small
@@ -37,22 +35,22 @@ Association](https://www.swimrsa.org/page/home) — that’s the RSA Wahoos, by 
 way. Now you know where the name came from.
 
 As we got into the summer of 2020, restrictions eased a bit, practices resumed,
-and we started having small intrasquad meets. The team had just purchased a set
-of Dolphin watches a few months prior, so we now had electronic timing, but no
-way to display the results.
+and we started having small intrasquad meets. The team had purchased a set of
+Dolphin watches a few months prior, so we now had electronic timing, but no way
+to display the results.
 
-There happened to be a large TV on deck that was periodically used for
-instruction or to review swimming footage, so at one of these meets, I brought
-an [AnyCast](https://any-cast.com/) device and proceeded to mirror the Dolphin
-window to the TV— I mean, why not show some times, right? Well, it turned out to
-be a big hit with both the swimmers and the coaches. Everyone enjoyed seeing the
+There happened to be a large TV on deck that was primarily used for instruction
+or to review swimming footage. At one of these intrasquad meets, I brought an
+[AnyCast](https://any-cast.com/) device and decised to mirror the Dolphin window
+to the TV— I mean, why not show some times, right? Well, it turned out to be a
+big hit with both the swimmers and the coaches. Everyone enjoyed seeing the
 results at the end of the race.
 
-To make it more “scoreboard-ish”, I wrote a quick program
-[events2dolphin](https://github.com/JohnStrunk/events2dolphin) that would take a
-start list and write the event list to CSV for the Dolphin software. This meant
-that at the next meet, we had the event name and heat displayed on our makeshift
-“scoreboard.”
+To make it more “scoreboard-ish”, I wrote a quick program,
+[events2dolphin](https://github.com/JohnStrunk/events2dolphin), for our next
+meet that would take a start list and write the event list to CSV for the
+Dolphin software. This meant that at the next meet, we had the event name and
+heat displayed on our makeshift “scoreboard.”
 
 ## Evolution of the scoreboard
 
@@ -79,7 +77,7 @@ building a real scoreboard:
 </figure>
 </div>
 
-The first iteration lacked a bit of polish, to say the least… Shown here is the
+The first iteration lacked a bit of polish to say the least… Shown here is the
 first tagged version of the code. I was just happy to be able to get the text up
 on the screen at this point. The app had a minimal set of configuration options,
 and the scoreboard was just displayed in a window that the user had to maximize
@@ -129,16 +127,17 @@ the UI layout as well as the structure of the code behind it.
 <!-- markdownlint-restore -->
 
 When I started work on the scoreboard, I had very little experience with
-properly structuring UI code. While I had at least *heard of*
-[MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller), I
-wasn't familiar enough with its benefits to pursue it. As a result, the UI code
-was mixed in with the program logic, making it difficult to maintain and extend.
-This seems to be a case where I failed to consider [Chesteron’s
-fence](https://fs.blog/chestertons-fence/).
+properly structuring UI code. While I had at least *heard of* the
+[MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)
+design pattern, I wasn't familiar enough with its benefits to pursue it. As a
+result, the UI code was mixed in with the program logic, making it difficult to
+maintain and extend. This seems to be a case where I failed to consider
+[Chesteron’s fence](https://fs.blog/chestertons-fence/): there's a reason the
+pattern is used even though there is a cost to implementing it.
 
 So, with version 1.0.0, I took the time to restructure the code, separating the
 UI, the data model, and the program logic. While there may be more code overall,
-it is much easier to maintain and extend.
+it has been much easier to maintain and extend.
 
 ## Lessons learned
 
@@ -158,27 +157,27 @@ specification for the Dolphin DO4 file format.
 While the above are good unit-level tests, in v1.2.0, I added randomized
 end-to-end testing. In addition to running the unit tests with each code change,
 it now runs a scripted set of end-to-end operations, followed by a random set of
-operations for a configurable amount of time. This led to v1.2.0 having the
-highest number of bugs fixed of any release to-date.
+operations for a configurable amount of time. This automated testing led to
+v1.2.0 having the highest number of bugs fixed of any release to-date.
 
 Even with the automated tests, releasing a new version is still a bit nerve
 wracking.
 
 ### My collection of Chromecasts
 
-I have managed to build a small collection of various Chromecasts to test with.
-I initially developed with a 1st generation Chromecast because that's what I
-owned at the time. I then acquired a 3rd generation Chromecast for improved
-performance. At that point I assumed that what would work on one would work on
-them all... I was wrong.
+Over the course of the project, I have managed to build a small collection of
+various Chromecasts to test with. I initially developed with a 1st generation
+Chromecast because that's what I owned at the time. I then acquired a 3rd
+generation Chromecast for improved performance. At that point I assumed that
+what would work on one would work on them all... I was wrong.
 
-After telling someone about how the scoreboard worked, I advised them to buy the
-latest Chromecast device (a Chromecast with GoogleTV), and that it would work
+After introducing someone to the scoreboard, I advised them to buy the latest
+Chromecast device (a Chromecast with GoogleTV), and I just assumed it would work
 without any problems. Well, when they attempted to use it, they had a terrible
 time. The scoreboard display would go blank or return to the ambient slideshow
-every few minutes.
+every few minutes during the meet.
 
-This led me to expand my collection and figure out what the problem was. It
+This led me to expand my collection of devices and dig into the problem. It
 turns out that these devices seem to have a different method for detecting when
 the screen is idle, so the method that I use in {{ WR }} doesn't work on these
 devices. The result was a [workaround described on the compatibility
