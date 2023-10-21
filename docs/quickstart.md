@@ -90,14 +90,14 @@ Now you will tell {{ WR }} where to find the start list files.
 Switch back to the {{ WR }} application and go to the "Directories" tab. The
 left side is where you set the location for the start list files.
 
-Click "Browse" and navigate to the directory where you saved the start lists in
-the previous step.
+Click ++"Browse..."++ and navigate to the directory where you saved the start
+lists in the previous step.
 
 {{ WR }} will read all the start lists and summarize them in the window. It will
 list the event number, description, and the number of heats in each event.
 
-If this looks good, press the "Export events to Dolphin..." button. This will
-write a `dolphin_events.csv` file into the start list directory. This file
+If this looks good, press the ++"Export events to Dolphin..."++ button. This
+will write a `dolphin_events.csv` file into the start list directory. This file
 contains the event data for the Dolphin timing software.
 
 {{ CLEARFLOAT }}
@@ -149,8 +149,8 @@ You will now set the location where {{ WR }} will look for race results.
 Switch back to the {{ WR }} program, still in the "Directories" tab. The right
 side of the window is for race results.
 
-Click "Browse..." and navigate to the "Log file directory" that was set in the
-Dolphin software.
+Click ++"Browse..."++ and navigate to the "Log file directory" that was set in
+the Dolphin software.
 
 In the right half of the window, any existing race results that are found will
 be displayed. The race results are ordered by time.
