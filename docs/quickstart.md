@@ -20,7 +20,10 @@ that the Chromecast devices will be able to fetch the scoreboard images.
 
 ## Set the number of lanes
 
-![Configuration tab](images/wr-config.png){ width=685 height=416 .rfloat }
+<figure class="rfloat" markdown>
+  ![Configuration tab](images/wr-config.png){ width=685 height=416 }
+  <figcaption>Configuration tab</figcaption>
+</figure>
 
 The first screen that comes up will be the "Configuration" tab. For now, the
 only setting to change is the number of lanes that are displayed.
@@ -41,22 +44,33 @@ swimmers in each heat.
 === "Meet Manager"
 
     <!-- markdownlint-disable-line MD046 -->
+    <figure class="rfloat" style="width:20% !important" markdown>
+      ![Exporting start lists from Meet Manager](images/mm_startlist_export.png){ width=1241 height=747 loading=lazy}
+      <figcaption>(enlarge)</figcaption>
+    </figure>
+
     In Meet Manager, start lists can be created by selecting:
 
-    File > Export > Start Lists for Scoreboard > Start Lists for CTS
-    [(example)](images/mm_startlist_export.png)
+    File :material-chevron-right: Export :material-chevron-right: Start Lists
+    for Scoreboard :material-chevron-right: Start Lists for CTS
 
 === "Meet Maestro"
 
     <!-- markdownlint-disable-line MD046 -->
+    <figure class="rfloat" style="width:20% !important" markdown>
+      ![Exporting start lists from Meet Maestro](images/MaestroStartListExport.png){ width=1906 height=1153 loading=lazy}
+      <figcaption>(enlarge)</figcaption>
+    </figure>
+
     The desktop version of Meet Maestro (free from Swimtopia's web site)
     is required to generate the start list files. They cannot be exported
     by the web version currently.
 
     To export the start lists:
 
-    Settings (gear icon in the upper right) > Timing Setup > Scoreboards >
-    "Export start lists for CTS" [(example)](images/MaestroStartListExport.png)
+    Settings (gear icon in the upper right) :material-chevron-right: Timing
+    Setup :material-chevron-right: Scoreboards :material-chevron-right:
+    Export start lists for CTS
 
 -----
 
@@ -66,30 +80,35 @@ into a directory that {{ WR }} will be able to access.
 
 ## Set the start list directory
 
-<!-- markdownlint-disable-next-line MD013 -->
-![Directories tab](images/wr-dirs.png){ width=685 height=416 .rfloat loading=lazy }
+<figure class="rfloat" markdown>
+  ![Directories tab](images/wr-dirs.png){ width=685 height=416 loading=lazy }
+  <figcaption>Directories tab</figcaption>
+</figure>
 
 Now you will tell {{ WR }} where to find the start list files.
 
 Switch back to the {{ WR }} application and go to the "Directories" tab. The
 left side is where you set the location for the start list files.
 
-Click "Browse" and navigate to the directory where you saved the start lists in
-the previous step.
+Click ++"Browse..."++ and navigate to the directory where you saved the start
+lists in the previous step.
 
 {{ WR }} will read all the start lists and summarize them in the window. It will
 list the event number, description, and the number of heats in each event.
 
-If this looks good, press the "Export events to Dolphin..." button. This will
-write a `dolphin_events.csv` file into the start list directory. This file
+If this looks good, press the ++"Export events to Dolphin..."++ button. This
+will write a `dolphin_events.csv` file into the start list directory. This file
 contains the event data for the Dolphin timing software.
 
 {{ CLEARFLOAT }}
 
 ## Import the event file
 
-<!-- markdownlint-disable-next-line MD013 -->
-![Dolphin "Events" configuration](images/DolphinEvents.png){ width=902 height=740 .rfloat loading=lazy }
+<figure class="rfloat" markdown>
+  <!-- markdownlint-disable-next-line MD013 -->
+  ![Dolphin "Events" screen](images/DolphinEvents.png){ width=902 height=740 loading=lazy }
+  <figcaption>Dolphin "Events" screen</figcaption>
+</figure>
 
 You will now load the event list into the Dolphin software. It will provide the
 event numbers, descriptions, and number of heats for each event. **Having the
@@ -104,8 +123,11 @@ event screen with all the events and their heat counts.
 
 ## Configure result files
 
-<!-- markdownlint-disable-next-line MD013 -->
-![Dolphin "Settings" screen](images/DolphinSettings.png){ width=902 height=740 .rfloat loading=lazy }
+<figure class="rfloat" markdown>
+  <!-- markdownlint-disable-next-line MD013 -->
+  ![Dolphin "Settings" screen](images/DolphinSettings.png){ width=902 height=740 loading=lazy }
+  <figcaption>Dolphin "Settings" screen</figcaption>
+</figure>
 
 Still in the Dolphin software, switch to the "Settings" screen. Here, you will
 configure the location and type of race results the Dolphin software will
@@ -127,15 +149,18 @@ You will now set the location where {{ WR }} will look for race results.
 Switch back to the {{ WR }} program, still in the "Directories" tab. The right
 side of the window is for race results.
 
-Click "Browse..." and navigate to the "Log file directory" that was set in the
-Dolphin software.
+Click ++"Browse..."++ and navigate to the "Log file directory" that was set in
+the Dolphin software.
 
 In the right half of the window, any existing race results that are found will
 be displayed. The race results are ordered by time.
 
 ## Connect Chromecast(s)
 
-![Run tab](images/wr-run.png){ width=685 height=416 .rfloat loading=lazy }
+<figure class="rfloat" markdown>
+  ![Run tab](images/wr-run.png){ width=685 height=416 loading=lazy }
+  <figcaption>Run tab</figcaption>
+</figure>
 
 The final step is to connect the Chromecast devices that will be used to display
 the scoreboard.

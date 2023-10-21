@@ -31,6 +31,8 @@ pytest-cov = "*"
 types-pillow = "*"
 pre-commit = "*"
 mkdocs-macros-plugin = "*"
+mdx-truly-sane-lists = "*"
+mkdocs-glightbox = "*"
 
 [requires]
 python_version = "3.11"
@@ -38,3 +40,5 @@ python_version = "3.11"
 [docs]
 mkdocs-material = "*"
 mkdocs-macros-plugin = "*"
+mdx-truly-sane-lists = "*"
+mkdocs-glightbox = "*"

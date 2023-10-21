@@ -103,6 +103,7 @@ markdown_extensions:
       title: "Page contents"
       permalink: true  # Para marks at end of headers for permalinks
       permalink_title: "Link to this section"
+  - mdx_truly_sane_lists  # Fix nested lists
 plugins:
   - blog:
       archive: false
@@ -111,6 +112,9 @@ plugins:
       post_excerpt: required  # Must add <!-- more --> as separator in post
       post_readtime: true
       post_url_date_format: yyyy
+  - glightbox:  # Image lightbox
+      auto_caption: true
+      caption_position: bottom
   - macros  # mkdocs-macros-plugin - jinja templating
   - search
   # Social needs Cairo Graphics, and that needs to be installed separately on
