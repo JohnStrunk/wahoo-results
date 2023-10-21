@@ -48,26 +48,36 @@ h1 {  /* Make page titles bold */
 
 .rfloat {
   float: right;
-  width: 40%;
-  margin-left: 1em;
+  width: 40% !important;
+  margin: 0 0 0 1rem !important;
+}
+
+/* Images are placed inside a p element in the figure element. */
+figure > p {
+  margin: 0 !important;
+}
+
+figcaption {
+  font-size: smaller;
+  margin: 0.25rem 0 !important;
 }
 
 .mygrid {  /* For creating a grid layout */
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(16rem,1fr));
-  grid-gap: 1em;
-  margin: 1em 0;
+  grid-gap: 1rem;
+  margin: 1rem 0;
 }
 
 .mycard {  /* For creating material design card */
   background-color: var(--md-primary-bg-color);
   border-radius: 2px;
   box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
-  padding: 1em;
+  padding: 1rem;
 }
 
 .mycard h2{
-  margin-top: 0.5em;
+  margin-top: 0.5rem;
 }
 
 .green {
