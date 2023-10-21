@@ -68,9 +68,15 @@ building a real scoreboard:
 ### The early days
 
 <div class="rfloat" markdown>
-![Scoreboard image v0.1.0](v0.1.0-scoreboard.png){ width=1366 height=721 }
+<figure markdown>
+  ![Scoreboard image v0.1.0](v0.1.0-scoreboard.png){ width=1366 height=721 }
+  <figcaption>Scoreboard v0.1.0</figcaption>
+</figure>
 
-![Confoguration screen v0.1.0](v0.1.0-config.png){ width=402 height=332 }
+<figure markdown>
+  ![Configuration screen v0.1.0](v0.1.0-config.png){ width=402 height=332 }
+  <figcaption>Config screen v0.1.0</figcaption>
+</figure>
 </div>
 
 The first iteration lacked a bit of polish, to say the least… Shown here is the
@@ -115,10 +121,10 @@ the UI layout as well as the structure of the code behind it.
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable -->
 <figure markdown>
-  ![UI for v0.8.1](v0.8.1-config.png){ width=710 height=537 style="width:40%;display:inline-block" }
+  ![User interface for v0.8.1](v0.8.1-config.png){ width=710 height=537 style="width:40%;display:inline-block" }
   <span style="width:10%;display:inline-block"></span>
-  ![UI for v1.0.0](v1.0.0-config.png){ width=685 height=411 style="width:40%;display:inline-block" }
-  <figcaption>UI for v0.8.1 (left) and v1.0.0 (right)</figcaption>
+  ![User interface for v1.0.0](v1.0.0-config.png){ width=685 height=411 style="width:40%;display:inline-block" }
+  <figcaption style="max-width:100%">UI for v0.8.1 (left) and v1.0.0 (right)</figcaption>
 </figure>
 <!-- markdownlint-restore -->
 
