@@ -45,7 +45,7 @@ repos:
       - id: markdownlint
 
   - repo: https://github.com/psf/black
-    rev: "23.10.0"
+    rev: "23.10.1"
     hooks:
       - id: black  # Run "black" for standardized code formatting
 
