@@ -1,14 +1,13 @@
 ---
 authors:
   - JohnStrunk
-date: 2099-01-01
-draft: true
+date: 2023-11-06
 ---
 
 # The history of {{ WR }}
 
 Everything of significance has an origin story: Superman, Spider-Man, even SWIMS
-3.0. This is the origin story of {{ WR }} — why I wrote it, how it has
+3.0[^1]. This is the origin story of {{ WR }} — why I wrote it, how it has
 evolved, and some of the lessons I’ve learned during the process.
 
 <!-- more -->
@@ -189,3 +188,5 @@ Google](https://issuetracker.google.com/issues/282046056).
 Unfortunately, our family no longer swims with RSA, so my access to the Dolphin
 equipment is limited. However, I still enjoy working on the scoreboard, and I'm
 happy to see other teams adopting it.
+
+[^1]: I'd love to hear the story behind that one. :head_bandage:
