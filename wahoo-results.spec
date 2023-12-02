@@ -3,25 +3,19 @@
 # Initially created by:
 # pipenv run pyi-makespec --onefile --noconsole --add-data media\wr-icon.ico;media --icon media\wr-icon.ico --name wahoo-results --splash media\wr-card2.png --manifest wahoo-results.fileinfo wahoo_results.py
 
+import inspect
+
 # Figure out where ipinfo's data file is located
 import os.path
-import inspect
-import ipinfo
-ipinfo_dir = os.path.dirname(inspect.getsourcefile(ipinfo))
 
 block_cipher = None
 
 a = Analysis(
-    ['wahoo_results.py'],
+    ["wahoo_results.py"],
     pathex=[],
     binaries=[],
     datas=[
-        ('media\\wr-icon.ico', 'media'),
-        (os.path.join(ipinfo_dir, 'countries.json'), 'ipinfo'),
-        (os.path.join(ipinfo_dir, 'eu.json'), 'ipinfo'),
-        (os.path.join(ipinfo_dir, 'flags.json'), 'ipinfo'),
-        (os.path.join(ipinfo_dir, 'currency.json'), 'ipinfo'),
-        (os.path.join(ipinfo_dir, 'continent.json'), 'ipinfo'),
+        ("media\\wr-icon.ico", "media"),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -36,12 +30,12 @@ a = Analysis(
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 splash = Splash(
     #'media\\wr-card2.png',
-    'chromecast-receiver\\cc-receiver-logo.png',
+    "chromecast-receiver\\cc-receiver-logo.png",
     binaries=a.binaries,
     datas=a.datas,
     text_pos=(10, 365),
     text_size=10,
-    text_color='white',
+    text_color="white",
     minify_script=True,
     always_on_top=True,
 )
@@ -55,7 +49,7 @@ exe = EXE(
     splash,
     splash.binaries,
     [],
-    name='wahoo-results',
+    name="wahoo-results",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -68,6 +62,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='media\\wr-icon.ico',
-    version='wahoo-results.fileinfo',
+    icon="media\\wr-icon.ico",
+    version="wahoo-results.fileinfo",
 )

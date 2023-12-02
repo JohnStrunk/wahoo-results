@@ -198,6 +198,8 @@ def _setup_context(screen_size: Tuple[int, int]) -> Dict[str, Any]:
             "longitude": ipdetails.longitude,
         }
         context["timezone"] = ipdetails.timezone
+    except AttributeError:  # Tried to get a non-existant mapping from `ipdetails`
+        pass
     except requests.HTTPError:  # General HTTP error
         pass
     except requests.JSONDecodeError:  # Invalid JSON returned
