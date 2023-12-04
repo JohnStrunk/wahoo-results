@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+### [1.2.1] - 2023-12-03
+
+#### Changed
+
+- :information_source: Updated documentation link
+
+#### Fixed
+
+- :bug: Handle AttributeError from ipinfo lib
+
 ### [1.2.0] - 2023-09-04
 
 #### Added
@@ -200,7 +210,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/JohnStrunk/wahoo-results/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/JohnStrunk/wahoo-results/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/JohnStrunk/wahoo-results/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/JohnStrunk/wahoo-results/compare/v1.0.0...v1.0.1
