@@ -1,11 +1,11 @@
 # Download
 
-!!! success "Latest version: v1.2.0 - 09/04/2023"
+!!! success "Latest version: v1.2.1 - 12/03/2023"
 
     <!-- markdownlint-disable-line MD046 -->
     <div style="text-align:center" markdown>
     [:material-download:{style="vertical-align:middle"}
-    wahoo-results.exe](https://github.com/JohnStrunk/wahoo-results/releases/download/v1.2.0/wahoo-results.exe){ .md-button .md-button--primary style="margin:1em"}
+    wahoo-results.exe](https://github.com/JohnStrunk/wahoo-results/releases/download/v1.2.1/wahoo-results.exe){ .md-button .md-button--primary style="margin:1em"}
     </div>
 
     See it (and previous releases) on the [GitHub releases
