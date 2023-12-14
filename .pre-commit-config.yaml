@@ -50,7 +50,7 @@ repos:
       - id: black  # Run "black" for standardized code formatting
 
   - repo: https://github.com/PyCQA/isort
-    rev: "5.12.0"
+    rev: "5.13.2"
     hooks:
       - id: isort  # Sort imports
         args: ["--profile", "black", "--filter-files"]
