@@ -17,7 +17,11 @@ a = Analysis(
     datas=[
         ("media\\wr-icon.ico", "media"),
     ],
-    hiddenimports=[],
+    hiddenimports=[
+        # Needed starting with zeroconf 0.128.0 -> 0.131.0 transition
+        "zeroconf._handlers.answers",
+        "zeroconf._utils.ipaddress",
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
