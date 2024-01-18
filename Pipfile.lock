@@ -851,10 +851,10 @@
         },
         "pychromecast": {
             "hashes": [
-                "sha256:acbee4cd5e4a65cc8057b22ea994680c0996effff23a9648bb242adfb524aefe",
-                "sha256:e4b7523db137f8de05eedcc6154113b68532848629442b448c2334fac966a447"
+                "sha256:08e61a8b54bd2119d3c9ab1ec0136d3d8563aa97e0a3b57841588b9be60c2676",
+                "sha256:cac3c6d740deb2d4fd5ac4101a1f8fd2404eab1a32cf40292ea9477075315663"
             ],
-            "version": "==13.0.8"
+            "version": "==13.1.0"
         },
         "pyinstaller": {
             "hashes": [
@@ -1362,7 +1362,7 @@
                 "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44",
                 "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"
             ],
-            "markers": "sys_platform == 'win32'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6'",
             "version": "==0.4.6"
         },
         "coverage": {
@@ -1621,12 +1621,12 @@
         },
         "mkdocs-material": {
             "hashes": [
-                "sha256:5899219f422f0a6de784232d9d40374416302ffae3c160cacc72969fcc1ee372",
-                "sha256:76c93a8525cceb0b395b9cedab3428bf518cf6439adef2b940f1c1574b775d89"
+                "sha256:3d196ee67fad16b2df1a458d650a8ac1890294eaae368d26cee71bc24ad41c40",
+                "sha256:efd7cc8ae03296d728da9bd38f4db8b07ab61f9738a0cbd0dfaf2a15a50e7343"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==9.5.3"
+            "version": "==9.5.4"
         },
         "mkdocs-material-extensions": {
             "hashes": [
@@ -2362,12 +2362,12 @@
         },
         "mkdocs-material": {
             "hashes": [
-                "sha256:5899219f422f0a6de784232d9d40374416302ffae3c160cacc72969fcc1ee372",
-                "sha256:76c93a8525cceb0b395b9cedab3428bf518cf6439adef2b940f1c1574b775d89"
+                "sha256:3d196ee67fad16b2df1a458d650a8ac1890294eaae368d26cee71bc24ad41c40",
+                "sha256:efd7cc8ae03296d728da9bd38f4db8b07ab61f9738a0cbd0dfaf2a15a50e7343"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==9.5.3"
+            "version": "==9.5.4"
         },
         "mkdocs-material-extensions": {
             "hashes": [
