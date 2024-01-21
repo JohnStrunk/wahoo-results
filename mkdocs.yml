@@ -6,7 +6,7 @@ site_description: >-
   A swimming scoreboard for CTS Dolphin timing systems. Send live race results
   to any Chromecast device.
 site_url: https://wahoo-results.com
-copyright: Copyright &copy; 2020 &ndash; 2023 John Strunk
+copyright: Copyright &copy; 2020 &ndash; 2024 John Strunk
 repo_name: JohnStrunk/wahoo-results
 repo_url: https://github.com/JohnStrunk/wahoo-results
 nav:
@@ -120,3 +120,5 @@ plugins:
   # Social needs Cairo Graphics, and that needs to be installed separately on
   # Windows. Unclear if it would work on RTD.
   # - social
+strict: true
+use_directory_urls: false
