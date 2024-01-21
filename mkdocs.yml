@@ -2,6 +2,7 @@
 # pipenv sync --categories docs
 # pipenv run mkdocs serve
 site_name: Wahoo! Results
+site_author: John Strunk
 site_description: >-
   A swimming scoreboard for CTS Dolphin timing systems. Send live race results
   to any Chromecast device.
