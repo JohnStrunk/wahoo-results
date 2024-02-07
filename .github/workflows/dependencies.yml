@@ -8,7 +8,7 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2023.11.15"
+  PIPENV_INSTALL_VERSION: "2023.12.0"
   CATEGORIES: "packages,dev-packages,docs"
 
 jobs:
@@ -71,7 +71,7 @@ jobs:
 
       - name: Create PR to update lockfile
         # https://github.com/peter-evans/create-pull-request
-        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38  # v5.0.2
+        uses: peter-evans/create-pull-request@b1ddad2c994a25fbc81a28b3ec0e368bb2021c50 # v6.0.0
         with:
           token: ${{ secrets.PAT_TOKEN }}
           add-paths: |

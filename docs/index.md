@@ -3,6 +3,7 @@ hide:
   - navigation  # Left navigation
   - toc         # Right TOC
   - footer      # Prev, next page links
+title: Wahoo! Results swimming scoreboard
 ---
 <!-- markdownlint-disable-next-line MD041 -->
 <style>
@@ -13,6 +14,7 @@ hide:
 </style>
 <div class="mycard" markdown>
 
+<!-- markdownlint-disable-next-line MD025 -->
 # Wahoo! Results
 
 ![Example scoreboard](images/demo1.png){ width=1280 height=720 .rfloat }
