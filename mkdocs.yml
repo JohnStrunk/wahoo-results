@@ -45,6 +45,8 @@ theme:
     accent: custom
 extra_css:
   - stylesheets/extra.css
+extra_javascript:
+  - javascripts/clarity.js
 extra:
   analytics:
     provider: google
