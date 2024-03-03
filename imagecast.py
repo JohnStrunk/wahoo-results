@@ -16,7 +16,8 @@
 
 """
 This file provides the ImageCast class that can be used to publish static PNG
-images to Chromecast devices.
+images to Chromecast devices. It abstracts the interactions with the Chromecast
+devices by managing connections and providing an integrated web server.
 """
 
 import logging
@@ -69,7 +70,8 @@ class ICController(BaseMediaPlayer):
     def quick_play(self, url: str, mime_type: str, **kwargs):
         """Quick Play helper for Scoreboard images"""
         super().quick_play(
-            url,
+            media_id=url,
+            timeout=2,
             media_type=mime_type,
             metadata={"metadataType": 0, "title": ""},
             **kwargs,
@@ -269,6 +271,8 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
         self._refresh_thread = threading.Thread(target=_refresh_run, daemon=True)
         self._refresh_thread.start()
 
+    # The listener thread handles discovery of new Chromecast devices and
+    # adds/removes them from the device list.
     def _start_listener(self) -> None:
         parent = self
 
@@ -278,6 +282,8 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             def add_cast(self, uuid: UUID, service):
                 logger.debug("Got add cast: %s", str(uuid))
                 self.update_cast(uuid, service)
+                # We don't trigger the callback here because update_cast will do
+                # it for us.
 
             def remove_cast(self, uuid: UUID, service, cast_info):
                 logger.debug("Got remove cast: %s", str(uuid))
@@ -310,7 +316,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                             != pychromecast.CAST_TYPE_CHROMECAST
                         ):
                             logger.debug("Not cast-able. Ignoring: %s", cast.name)
-                            cast.disconnect(blocking=False)
+                            cast.disconnect(timeout=0)  # don't block
                             return
                         logger.debug("Adding to device list: %s", cast.name)
                         parent.devices[uuid] = {"cast": cast, "enabled": False}
