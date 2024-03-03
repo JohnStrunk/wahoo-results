@@ -22,7 +22,7 @@ from datetime import datetime
 
 import pytest
 
-from racetimes import DO4, RaceTimes, RawTime, Time
+from racetimes import DO4, RaceTimes, RawTime, SpecialTime, StandardResolver, Time
 from startlist import StartList
 
 now = datetime.now()
@@ -224,3 +224,37 @@ def test_noshow(do4_one_time) -> None:
     assert not race.is_noshow(1)  # invalid, but not NS
     assert not race.is_noshow(2)
     assert race.is_noshow(9)  # all lanes have names
+
+
+def test_standardresolver() -> None:
+    resolver203 = StandardResolver(min_times=2, threshold=RawTime("0.30"))
+    # No times is a no-show
+    assert resolver203.resolve([]) == SpecialTime.NO_SHOW
+    # Fewer than 2 times is inconsistent
+    assert resolver203.resolve([RawTime("60.00")]) == SpecialTime.INCONSISTENT
+    # 2 times get averaged
+    assert resolver203.resolve([RawTime("60.00"), RawTime("60.50")]) == RawTime("60.25")
+    # 3 times takes the median
+    assert resolver203.resolve(
+        [RawTime("60.00"), RawTime("60.10"), RawTime("60.15")]
+    ) == RawTime("60.10")
+    # If a time is more than threshold from the candidate, it's inconsistent
+    assert (
+        resolver203.resolve([RawTime("60.00"), RawTime("60.10"), RawTime("60.50")])
+        == SpecialTime.INCONSISTENT
+    )
+    # For 6 times, the 2 middle times are averaged
+    assert resolver203.resolve(
+        [
+            RawTime("60.09"),
+            RawTime("60.19"),
+            RawTime("60.20"),
+            RawTime("60.30"),
+            RawTime("60.40"),
+            RawTime("60.47"),
+        ]
+    ) == RawTime("60.25")
+
+    resolver103 = StandardResolver(min_times=1, threshold=RawTime("0.30"))
+    # With min_times=1, a single time is valid and resolves to itself
+    assert resolver103.resolve([RawTime("65.43")]) == RawTime("65.43")
