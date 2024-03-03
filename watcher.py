@@ -56,7 +56,7 @@ class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
         super().__init__(patterns=["*.do4"], ignore_directories=True)
         self._callback = callback
 
-    def on_created(self, event: watchdog.events.FileCreatedEvent):
+    def on_created(self, event: watchdog.events.FileSystemEvent):
         logger.debug(
             "DO4Watcher: operation=%s, path=%s", event.event_type, event.src_path
         )
