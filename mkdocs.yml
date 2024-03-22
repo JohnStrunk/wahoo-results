@@ -7,7 +7,10 @@ site_description: >-
   A swimming scoreboard for CTS Dolphin timing systems. Send live race results
   to any Chromecast device.
 site_url: https://wahoo-results.com
-copyright: Copyright &copy; 2020 &ndash; 2024 John Strunk
+copyright: >-
+  Documentation &copy; 2020 &ndash; 2024 by John Strunk is licensed
+  under <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA
+  4.0</a>
 repo_name: JohnStrunk/wahoo-results
 repo_url: https://github.com/JohnStrunk/wahoo-results
 nav:
