@@ -54,4 +54,7 @@ documentation](https://wahoo-results.com/).
 ## License
 
 This software is licensed under the GNU Affero General Public License
-version 3. See the [LICENSE](LICENSE) file for full details.
+version 3. See the [LICENSE](LICENSE) file for full details.  
+The documentation &copy; 2020 &ndash; 2024 by John Strunk is licensed under
+[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA
+4.0)](http://creativecommons.org/licenses/by-sa/4.0/)
