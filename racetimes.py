@@ -37,6 +37,9 @@ class SpecialTime(Enum):
     INCONSISTENT = "Inconsistent"
 
 
+NO_SHOW = SpecialTime.NO_SHOW
+INCONSISTENT = SpecialTime.INCONSISTENT
+
 # RawTimes are retrieved from a timing system
 RawTime = Decimal
 # ResolvedTimes are calculated based on a set of RawTimes and a resolution
@@ -44,7 +47,7 @@ RawTime = Decimal
 ResolvedTime = Union[RawTime, SpecialTime]
 
 
-class TimeResolver(ABC):
+class TimeResolver(ABC):  # pylint: disable=too-few-public-methods
     """Abstract class for resolving a time from a list of raw times"""
 
     @abstractmethod
@@ -52,7 +55,7 @@ class TimeResolver(ABC):
         """Resolve a list of raw times into a single time"""
 
 
-class StandardResolver(TimeResolver):
+class StandardResolver(TimeResolver):  # pylint: disable=too-few-public-methods
     """
     This implements the time resolution method used by Wahoo Results.
 
@@ -81,11 +84,11 @@ class StandardResolver(TimeResolver):
         num_times = len(times)
         # If no times are reported, the result is a NO_SHOW
         if num_times == 0:
-            return SpecialTime.NO_SHOW
+            return NO_SHOW
         # If fewer than the minimum number of times are reported, the result is
         # INCONSISTENT
         if num_times < self.min_times:
-            return SpecialTime.INCONSISTENT
+            return INCONSISTENT
         # Calculate the candidate final time
         times.sort()
         if num_times >= 3:
@@ -101,7 +104,7 @@ class StandardResolver(TimeResolver):
         # than the maximum allowable time difference, the result is INCONSISTENT
         for time in times:
             if abs(time - final) > self.threshold:
-                return SpecialTime.INCONSISTENT
+                return INCONSISTENT
         return final
 
 

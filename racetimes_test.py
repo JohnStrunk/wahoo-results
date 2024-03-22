@@ -22,7 +22,15 @@ from datetime import datetime
 
 import pytest
 
-from racetimes import DO4, RaceTimes, RawTime, SpecialTime, StandardResolver, Time
+from racetimes import (
+    DO4,
+    INCONSISTENT,
+    NO_SHOW,
+    RaceTimes,
+    RawTime,
+    StandardResolver,
+    Time,
+)
 from startlist import StartList
 
 now = datetime.now()
@@ -229,9 +237,9 @@ def test_noshow(do4_one_time) -> None:
 def test_standardresolver() -> None:
     resolver203 = StandardResolver(min_times=2, threshold=RawTime("0.30"))
     # No times is a no-show
-    assert resolver203.resolve([]) == SpecialTime.NO_SHOW
+    assert resolver203.resolve([]) == NO_SHOW
     # Fewer than 2 times is inconsistent
-    assert resolver203.resolve([RawTime("60.00")]) == SpecialTime.INCONSISTENT
+    assert resolver203.resolve([RawTime("60.00")]) == INCONSISTENT
     # 2 times get averaged
     assert resolver203.resolve([RawTime("60.00"), RawTime("60.50")]) == RawTime("60.25")
     # 3 times takes the median
@@ -241,7 +249,7 @@ def test_standardresolver() -> None:
     # If a time is more than threshold from the candidate, it's inconsistent
     assert (
         resolver203.resolve([RawTime("60.00"), RawTime("60.10"), RawTime("60.50")])
-        == SpecialTime.INCONSISTENT
+        == INCONSISTENT
     )
     # For 6 times, the 2 middle times are averaged
     assert resolver203.resolve(
