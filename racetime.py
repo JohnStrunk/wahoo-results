@@ -16,10 +16,9 @@
 
 """Primitives for handling times from a race"""
 
-from abc import ABC, abstractmethod
 from decimal import Decimal
 from enum import Enum
-from typing import List, Union
+from typing import Callable, List, Union
 
 
 class _SpecialTime(Enum):
@@ -42,47 +41,40 @@ RawTime = Decimal
 # procedure as defined by a TimeResolver
 ResolvedTime = Union[RawTime, _SpecialTime]
 
-
-class TimeResolver(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract class for resolving a time from a list of raw times"""
-
-    @abstractmethod
-    def resolve(self, times: List[RawTime]) -> ResolvedTime:
-        """Resolve a list of raw times into a single time"""
+# A TimeResolver converts a list of RawTimes into a final time
+TimeResolver = Callable[[List[RawTime]], ResolvedTime]
 
 
-class StandardResolver(TimeResolver):  # pylint: disable=too-few-public-methods
+def standard_resolver(min_times: int, threshold: RawTime) -> TimeResolver:
     """
-    This implements the time resolution method used by Wahoo Results. It is
-    based on the time resolution rules of USA Swimming.
+    This returns a TimeResolver that implements the time resolution method used
+    by Wahoo Results. It is based on the time resolution rules of USA Swimming.
 
-    The times are resolved based on 2 thresholds: - The minimum number of times
-    required - The maximum allowable time difference
+    The times are resolved based on 2 thresholds:
+    - The minimum number of times required
+    - The maximum allowable time difference
 
-    Resolution proceeds as follows: - If no times are reported, the result is a
-    NO_SHOW - If fewer than the minimum number of times are reported, the result
-    is
+    Resolution proceeds as follows:
+    - If no times are reported, the result is a NO_SHOW
+    - If fewer than the minimum number of times are reported, the result is
       INCONSISTENT
-    - A candidate final time is calculated: - If 3 or more times are reported,
-      the median is used - If 2 times are reported, the average is used - If 1
-      time is reported, it is used
+    - A candidate final time is calculated:
+      - If 3 or more times are reported, the median is used
+      - If 2 times are reported, the average is used
+      - If 1 time is reported, it is used
     - If any of the RawTimes differ from the candidate final time by more than
       the maximum allowable time difference, the result is INCONSISTENT
     - Otherwise, the candidate final time is returned
     """
 
-    def __init__(self, min_times: int, threshold: RawTime):
-        self.min_times = min_times
-        self.threshold = threshold
-
-    def resolve(self, times: List[RawTime]) -> ResolvedTime:
+    def resolver(times: List[RawTime]) -> ResolvedTime:
         num_times = len(times)
         # If no times are reported, the result is a NO_SHOW
         if num_times == 0:
             return NO_SHOW
         # If fewer than the minimum number of times are reported, the result is
         # INCONSISTENT
-        if num_times < self.min_times:
+        if num_times < min_times:
             return INCONSISTENT
         # Calculate the candidate final time
         times.sort()
@@ -98,6 +90,8 @@ class StandardResolver(TimeResolver):  # pylint: disable=too-few-public-methods
         # If any of the RawTimes differ from the candidate final time by more
         # than the maximum allowable time difference, the result is INCONSISTENT
         for time in times:
-            if abs(time - final) > self.threshold:
+            if abs(time - final) > threshold:
                 return INCONSISTENT
         return final
+
+    return resolver
