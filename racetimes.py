@@ -1,5 +1,5 @@
 # Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
-# Copyright (C) 2022 - John D. Strunk
+# Copyright (C) 2022-2024 - John D. Strunk
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -24,88 +24,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import ROUND_DOWN, Decimal
-from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional
 
+from racetime import RawTime
 from startlist import StartList
-
-
-class SpecialTime(Enum):
-    """Special values for a resolved time"""
-
-    NO_SHOW = "NoShow"
-    INCONSISTENT = "Inconsistent"
-
-
-NO_SHOW = SpecialTime.NO_SHOW
-INCONSISTENT = SpecialTime.INCONSISTENT
-
-# RawTimes are retrieved from a timing system
-RawTime = Decimal
-# ResolvedTimes are calculated based on a set of RawTimes and a resolution
-# procedure as defined by a TimeResolver
-ResolvedTime = Union[RawTime, SpecialTime]
-
-
-class TimeResolver(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract class for resolving a time from a list of raw times"""
-
-    @abstractmethod
-    def resolve(self, times: List[RawTime]) -> ResolvedTime:
-        """Resolve a list of raw times into a single time"""
-
-
-class StandardResolver(TimeResolver):  # pylint: disable=too-few-public-methods
-    """
-    This implements the time resolution method used by Wahoo Results.
-
-    The times are resolved based on 2 thresholds:
-    - The minimum number of times required
-    - The maximum allowable time difference
-
-    Resolution proceeds as follows:
-    - If no times are reported, the result is a NO_SHOW
-    - If fewer than the minimum number of times are reported, the result is
-      INCONSISTENT
-    - A candidate final time is calculated:
-      - If 3 or more times are reported, the median is used
-      - If 2 times are reported, the average is used
-      - If 1 time is reported, it is used
-    - If any of the RawTimes differ from the candidate final time by more than
-      the maximum allowable time difference, the result is INCONSISTENT
-    - Otherwise, the candidate final time is returned
-    """
-
-    def __init__(self, min_times: int, threshold: RawTime):
-        self.min_times = min_times
-        self.threshold = threshold
-
-    def resolve(self, times: List[RawTime]) -> ResolvedTime:
-        num_times = len(times)
-        # If no times are reported, the result is a NO_SHOW
-        if num_times == 0:
-            return NO_SHOW
-        # If fewer than the minimum number of times are reported, the result is
-        # INCONSISTENT
-        if num_times < self.min_times:
-            return INCONSISTENT
-        # Calculate the candidate final time
-        times.sort()
-        if num_times >= 3:
-            if num_times % 2 == 0:
-                final = (times[num_times // 2 - 1] + times[num_times // 2]) / 2
-            else:
-                final = times[num_times // 2]
-        elif num_times == 2:
-            final = (times[0] + times[1]) / 2
-        else:
-            final = times[0]
-        # If any of the RawTimes differ from the candidate final time by more
-        # than the maximum allowable time difference, the result is INCONSISTENT
-        for time in times:
-            if abs(time - final) > self.threshold:
-                return INCONSISTENT
-        return final
 
 
 @dataclass
