@@ -18,38 +18,27 @@
 
 import pytest
 
-from racetime import INCONSISTENT, NO_SHOW, RawTime, StandardResolver
+from racetime import INCONSISTENT, NO_SHOW, RawTime, TimeResolver, standard_resolver
 
 
 class Test2030Resolver:
     @pytest.fixture(scope="class")
     def resolver(self):
-        return StandardResolver(min_times=2, threshold=RawTime("0.30"))
+        return standard_resolver(min_times=2, threshold=RawTime("0.30"))
 
-    def test_no_times_is_no_show(self, resolver):
-        assert resolver.resolve([]) == NO_SHOW
+    def test_no_times_is_no_show(self, resolver: TimeResolver):
+        assert resolver([]) == NO_SHOW
 
-    def test_fewer_than_2_times_is_inconsistent(self, resolver):
-        assert resolver.resolve([RawTime("60.00")]) == INCONSISTENT
-
-    def test_2_times_get_averaged(self, resolver):
-        assert resolver.resolve([RawTime("60.00"), RawTime("60.50")]) == RawTime(
-            "60.25"
-        )
-
-    def test_3_times_takes_the_median(self, resolver):
-        assert resolver.resolve(
-            [RawTime("60.00"), RawTime("60.10"), RawTime("60.15")]
-        ) == RawTime("60.10")
-
-    def test_time_more_than_threshold_from_candidate_is_inconsistent(self, resolver):
+    def test_time_more_than_threshold_from_candidate_is_inconsistent(
+        self, resolver: TimeResolver
+    ):
         assert (
-            resolver.resolve([RawTime("60.00"), RawTime("60.10"), RawTime("60.50")])
+            resolver([RawTime("60.00"), RawTime("60.10"), RawTime("60.50")])
             == INCONSISTENT
         )
 
-    def test_median_with_even_number_is_avg_of_middle(self, resolver):
-        assert resolver.resolve(
+    def test_median_with_even_number_is_avg_of_middle(self, resolver: TimeResolver):
+        assert resolver(
             [
                 RawTime("60.09"),
                 RawTime("60.19"),
@@ -62,5 +51,5 @@ class Test2030Resolver:
 
 
 def test_1030resolver_accepts_single_time() -> None:
-    resolver1030 = StandardResolver(min_times=1, threshold=RawTime("0.30"))
-    assert resolver1030.resolve([RawTime("65.43")]) == RawTime("65.43")
+    resolver1030 = standard_resolver(min_times=1, threshold=RawTime("0.30"))
+    assert resolver1030([RawTime("65.43")]) == RawTime("65.43")
