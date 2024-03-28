@@ -41,7 +41,7 @@ testing.
 
 - To run the app (for development): `pipenv run python wahoo_results.py`
 - To build the executable version:
-  - Install UPX: `choco install upx --version 4.2.2`
+  - Install UPX: `choco install upx --version 4.2.3`
   - Run the build script: `pipenv run python build.py`
 
 ### Testing

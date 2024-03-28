@@ -18,7 +18,7 @@ env:
   # How long to run the executable automated tests
   TEST_DURATION_SECONDS: 60
   # https://github.com/upx/upx/releases
-  UPX_VERSION: "4.2.2"
+  UPX_VERSION: "4.2.3"
 
 jobs:
   pipenv-cache:
