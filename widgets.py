@@ -42,7 +42,7 @@ from model import (
     RaceResultVar,
     StartListVar,
 )
-from racetimes import RawTime
+from racetimes import NumericTime
 
 TkContainer = Any
 
@@ -299,7 +299,7 @@ class RaceResultView(ttk.LabelFrame):
                     scoreboard.format_time(t) if t is not None else "" for t in rawtimes
                 ]
                 final = result.final_time(lane)
-                if final.value == RawTime("0"):
+                if final.value == NumericTime("0"):
                     finalstr = ""
                 else:
                     finalstr = scoreboard.format_time(final.value)

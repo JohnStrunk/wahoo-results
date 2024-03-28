@@ -21,8 +21,8 @@ from enum import Enum
 from typing import Callable, List, Union
 
 
-class _SpecialTime(Enum):
-    """Special values for a resolved time"""
+class SpecialTime(Enum):
+    """Special (non-numeric) values for a resolved time"""
 
     NO_SHOW = "NoShow"
     INCONSISTENT = "Inconsistent"
@@ -30,22 +30,21 @@ class _SpecialTime(Enum):
 
 # A special time designator to indicate that a swimmer did not show up for an
 # event
-NO_SHOW = _SpecialTime.NO_SHOW
+NO_SHOW = SpecialTime.NO_SHOW
 # A special time designator to indicate that a final time could not be
 # automatically resolved from the raw times
-INCONSISTENT = _SpecialTime.INCONSISTENT
+INCONSISTENT = SpecialTime.INCONSISTENT
 
-# RawTimes are retrieved from a timing system
-RawTime = Decimal
-# ResolvedTimes are calculated based on a set of RawTimes and a resolution
-# procedure as defined by a TimeResolver
-ResolvedTime = Union[RawTime, _SpecialTime]
+# NumericTimes are retrieved from a timing system
+NumericTime = Decimal
+# A Time is either a NumericTime or a special time designator
+Time = Union[NumericTime, SpecialTime]
 
-# A TimeResolver converts a list of RawTimes into a final time
-TimeResolver = Callable[[List[RawTime]], ResolvedTime]
+# A TimeResolver converts a list of NumericTimes into a final time
+TimeResolver = Callable[[List[NumericTime]], Time]
 
 
-def standard_resolver(min_times: int, threshold: RawTime) -> TimeResolver:
+def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
     """
     This returns a TimeResolver that implements the time resolution method used
     by Wahoo Results. It is based on the time resolution rules of USA Swimming.
@@ -67,7 +66,7 @@ def standard_resolver(min_times: int, threshold: RawTime) -> TimeResolver:
     - Otherwise, the candidate final time is returned
     """
 
-    def resolver(times: List[RawTime]) -> ResolvedTime:
+    def resolver(times: List[NumericTime]) -> Time:
         num_times = len(times)
         # If no times are reported, the result is a NO_SHOW
         if num_times == 0:

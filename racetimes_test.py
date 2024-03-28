@@ -22,7 +22,7 @@ from datetime import datetime
 
 import pytest
 
-from racetimes import DO4, RaceTimes, RawTime, Time
+from racetimes import DO4, NumericTime, RaceTimes, Time
 from startlist import StartList
 
 now = datetime.now()
@@ -97,57 +97,57 @@ def do4_one_time():
 
 def test_can_parse_header(do4_mising_one_time) -> None:
     """Ensure we can parse the event/heat header"""
-    race: RaceTimes = DO4(do4_mising_one_time, 2, RawTime(0.30), now, meet_seven)
+    race: RaceTimes = DO4(do4_mising_one_time, 2, NumericTime(0.30), now, meet_seven)
     assert race.event == 69
     assert race.heat == 1
 
 
 def test_resolve_times(do4_mising_one_time) -> None:
     """Ensure we can calculate final times correctly"""
-    race: RaceTimes = DO4(do4_mising_one_time, 2, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(do4_mising_one_time, 2, NumericTime("0.30"), now, meet_seven)
 
     assert len(race.times(1)) == 3
     assert race.final_time(1).is_valid
-    assert race.final_time(1).value == RawTime("143.37")
+    assert race.final_time(1).value == NumericTime("143.37")
 
     assert len(race.times(3)) == 3
     assert race.final_time(3).is_valid
-    assert race.final_time(3).value == RawTime("128.14")
+    assert race.final_time(3).value == NumericTime("128.14")
 
 
 def test_toofew_times(do4_mising_one_time) -> None:
     """Final time is invalid if too few raw times"""
-    race: RaceTimes = DO4(do4_mising_one_time, 3, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(do4_mising_one_time, 3, NumericTime("0.30"), now, meet_seven)
     assert len(race.times(3)) == 3
     assert not race.final_time(3).is_valid
-    assert race.final_time(3).value == RawTime("128.14")
+    assert race.final_time(3).value == NumericTime("128.14")
 
 
 def test_largedelta_times(do4_big_delta) -> None:
     """Final time is invalid if too few raw times"""
 
-    race: RaceTimes = DO4(do4_big_delta, 2, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(do4_big_delta, 2, NumericTime("0.30"), now, meet_seven)
     assert len(race.times(1)) == 3
     assert not race.final_time(1).is_valid
-    assert race.final_time(1).value == RawTime("130.63")
+    assert race.final_time(1).value == NumericTime("130.63")
 
     times = race.times(1)
-    assert times[0] == Time(RawTime("160.72"), False)
-    assert times[1] == Time(RawTime("130.63"), True)
-    assert times[2] == Time(RawTime("130.61"), True)
+    assert times[0] == Time(NumericTime("160.72"), False)
+    assert times[1] == Time(NumericTime("130.63"), True)
+    assert times[2] == Time(NumericTime("130.61"), True)
 
 
 def test_one_zero_times(do4_one_time) -> None:
     """Ensure we can calculate final times correctly"""
-    race: RaceTimes = DO4(do4_one_time, 2, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(do4_one_time, 2, NumericTime("0.30"), now, meet_seven)
 
-    assert race.times(1) == [None, Time(RawTime("55.92"), True), None]
+    assert race.times(1) == [None, Time(NumericTime("55.92"), True), None]
     assert not race.final_time(1).is_valid
-    assert race.final_time(1).value == RawTime("55.92")
+    assert race.final_time(1).value == NumericTime("55.92")
 
     assert len(race.times(7)) == 3
     assert not race.final_time(7).is_valid
-    assert race.final_time(7).value == RawTime("0")
+    assert race.final_time(7).value == NumericTime("0")
 
 
 def test_places() -> None:
@@ -169,7 +169,7 @@ def test_places() -> None:
         9EF6F5121A02D2D5"""
         )
     )
-    race: RaceTimes = DO4(data, 2, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(data, 2, NumericTime("0.30"), now, meet_seven)
     assert race.place(4) == 1  # Lane 4 is 1st
     assert race.place(3) == 2  # Lane 3 is 2nd
     assert race.place(2) == 3  # Lane 2 tied for 3rd
@@ -197,7 +197,7 @@ class MockStartList(StartList):
 
 
 def test_names(do4_one_time) -> None:
-    race: RaceTimes = DO4(do4_one_time, 2, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(do4_one_time, 2, NumericTime("0.30"), now, meet_seven)
     race.set_names(MockStartList())
 
     assert race.event_name == "Mock event name"
@@ -206,7 +206,7 @@ def test_names(do4_one_time) -> None:
 
 
 def test_default_names(do4_one_time) -> None:
-    race: RaceTimes = DO4(do4_one_time, 2, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(do4_one_time, 2, NumericTime("0.30"), now, meet_seven)
 
     assert race.event_name == ""
     assert race.name(4) == ""
@@ -214,7 +214,7 @@ def test_default_names(do4_one_time) -> None:
 
 
 def test_noshow(do4_one_time) -> None:
-    race: RaceTimes = DO4(do4_one_time, 2, RawTime("0.30"), now, meet_seven)
+    race: RaceTimes = DO4(do4_one_time, 2, NumericTime("0.30"), now, meet_seven)
     # We haven't loaded any names, so lanes w/o times should not be NS
     assert not race.is_noshow(1)  # invalid, but not NS
     assert not race.is_noshow(2)

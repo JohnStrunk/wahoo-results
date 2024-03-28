@@ -48,7 +48,7 @@ import wh_analytics
 import wh_version
 from about import about
 from model import Model
-from racetimes import RaceTimes, RawTime, from_do4
+from racetimes import NumericTime, RaceTimes, from_do4
 from scoreboard import ScoreboardImage, waiting_screen
 from startlist import events_to_csv, from_scb, load_all_scb
 from template import get_template
@@ -201,7 +201,7 @@ def summarize_racedir(directory: str) -> List[RaceTimes]:
                 continue
             try:
                 # min times and threshold don't matter for the summary
-                racetime = from_do4(file.path, 1, RawTime(99.9))
+                racetime = from_do4(file.path, 1, NumericTime(99.9))
                 contents.append(racetime)
                 #'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
             except ValueError:
@@ -219,7 +219,7 @@ def load_result(model: Model, filename: str) -> Optional[RaceTimes]:
     for tries in range(1, 6):
         try:
             racetime = from_do4(
-                filename, model.min_times.get(), RawTime(model.time_threshold.get())
+                filename, model.min_times.get(), NumericTime(model.time_threshold.get())
             )
         except ValueError:
             sleep(0.05 * tries)

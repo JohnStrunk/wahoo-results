@@ -21,7 +21,7 @@ A scoreboard template for previews and theming
 from datetime import datetime
 from typing import List, Optional
 
-from racetimes import RaceTimes, RawTime
+from racetimes import NumericTime, RaceTimes
 from startlist import StartList
 
 
@@ -46,7 +46,7 @@ def get_template() -> RaceTimes:
     >>> t.team(3)
     'TEAM'
     """
-    race = _TemplateRace(2, RawTime("0.30"))
+    race = _TemplateRace(2, NumericTime("0.30"))
     race.set_names(_TemplateStartList())
     return race
 
@@ -60,12 +60,12 @@ class _TemplateRace(RaceTimes):
     def heat(self) -> int:
         return 99
 
-    def raw_times(self, lane: int) -> List[Optional[RawTime]]:
+    def raw_times(self, lane: int) -> List[Optional[NumericTime]]:
         if lane == 2:
             return [None, None, None]  # no-show
         if lane == 3:
-            return [RawTime("1"), None, None]  # Too few times -> invalid
-        time = RawTime("59.99") + RawTime("60") * RawTime("99")
+            return [NumericTime("1"), None, None]  # Too few times -> invalid
+        time = NumericTime("59.99") + NumericTime("60") * NumericTime("99")
         time = time + lane - 10
         return [time, time, time]
 
