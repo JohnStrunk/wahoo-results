@@ -26,7 +26,7 @@ from datetime import datetime
 from decimal import ROUND_DOWN, Decimal
 from typing import List, Optional
 
-from racetime import RawTime
+from racetime import NumericTime
 from startlist import StartList
 
 
@@ -34,21 +34,21 @@ from startlist import StartList
 class Time:
     """Class to represent a result time."""
 
-    value: RawTime  # The measured (or calculated) time to the hundredths
+    value: NumericTime  # The measured (or calculated) time to the hundredths
     is_valid: bool  # True if the time is valid/consistent/within bounds
 
 
-def _truncate_hundredths(time: RawTime) -> RawTime:
+def _truncate_hundredths(time: NumericTime) -> NumericTime:
     """
     Truncates a Time to two decimal places.
 
-    >>> _truncate_hundredths(RawTime('100.00'))
+    >>> _truncate_hundredths(NumericTime('100.00'))
     Decimal('100.00')
-    >>> _truncate_hundredths(RawTime('99.999'))
+    >>> _truncate_hundredths(NumericTime('99.999'))
     Decimal('99.99')
-    >>> _truncate_hundredths(RawTime('10.987'))
+    >>> _truncate_hundredths(NumericTime('10.987'))
     Decimal('10.98')
-    >>> _truncate_hundredths(RawTime('100.123'))
+    >>> _truncate_hundredths(NumericTime('100.123'))
     Decimal('100.12')
     """
     return time.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
@@ -66,7 +66,7 @@ class RaceTimes(ABC):
     for the heat.
     """
 
-    def __init__(self, min_times: int, threshold: RawTime):
+    def __init__(self, min_times: int, threshold: NumericTime):
         """
         Parameters:
         - min_times: The minimum number of times required for the lane time to
@@ -107,7 +107,7 @@ class RaceTimes(ABC):
         )
 
     @abstractmethod
-    def raw_times(self, lane: int) -> List[Optional[RawTime]]:
+    def raw_times(self, lane: int) -> List[Optional[NumericTime]]:
         """
         Retrieve the measured times from the specified lane.
 
@@ -135,7 +135,7 @@ class RaceTimes(ABC):
 
     def final_time(self, lane: int) -> Time:
         """Retrieve the calculated final time for a lane"""
-        times: List[RawTime] = []
+        times: List[NumericTime] = []
         for time in self.raw_times(lane):
             if time is not None:
                 times.append(time)
@@ -148,7 +148,7 @@ class RaceTimes(ABC):
         elif len(times) == 1:  # 1 time -> use it
             final = times[0]
         else:
-            return Time(RawTime(0), False)
+            return Time(NumericTime(0), False)
 
         valid = True
         # If we don't have enough times, final is not valid
@@ -223,7 +223,7 @@ class DO4(RaceTimes):
         self,
         stream: io.TextIOBase,
         min_times: int,
-        threshold: RawTime,
+        threshold: NumericTime,
         when: datetime,
         meet_id: str,
     ):
@@ -243,24 +243,24 @@ class DO4(RaceTimes):
         lines = stream.readlines()
         if len(lines) != 11:
             raise ValueError("Invalid number of lines in file")
-        self._lanes: List[List[Optional[RawTime]]] = []
+        self._lanes: List[List[Optional[NumericTime]]] = []
         for lane in range(10):
             match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[lane])
             if not match:
                 raise ValueError("Unable to parse times")
-            lane_times: List[Optional[RawTime]] = []
+            lane_times: List[Optional[NumericTime]] = []
             for index in range(1, 4):
                 match_txt = match.group(index)
-                time = RawTime(0)
+                time = NumericTime(0)
                 if match_txt != "":
-                    time = RawTime(match_txt)
+                    time = NumericTime(match_txt)
                 if time > 0:
                     lane_times.append(time)
                 else:
                     lane_times.append(None)
             self._lanes.append(lane_times)
 
-    def raw_times(self, lane: int) -> List[Optional[RawTime]]:
+    def raw_times(self, lane: int) -> List[Optional[NumericTime]]:
         return self._lanes[lane - 1]
 
     @property
@@ -281,7 +281,7 @@ class DO4(RaceTimes):
         return self._meet_id
 
 
-def from_do4(filename: str, min_times: int, threshold: RawTime) -> RaceTimes:
+def from_do4(filename: str, min_times: int, threshold: NumericTime) -> RaceTimes:
     """Create a RaceTimes from a D04 race result file"""
     with open(filename, "r", encoding="cp1252") as file:
         meet_id = "???"
