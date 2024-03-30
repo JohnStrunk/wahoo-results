@@ -24,21 +24,31 @@ from typing import Callable, List, Union
 class SpecialTime(Enum):
     """Special (non-numeric) values for a resolved time"""
 
+    DQ = "DQ"
     NO_SHOW = "NoShow"
     INCONSISTENT = "Inconsistent"
 
 
-# A special time designator to indicate that a swimmer did not show up for an
-# event
-NO_SHOW = SpecialTime.NO_SHOW
-# A special time designator to indicate that a final time could not be
-# automatically resolved from the raw times
-INCONSISTENT = SpecialTime.INCONSISTENT
+DQ = SpecialTime.DQ
+"""Indicates that a swimmer was disqualified from a race"""
 
-# NumericTimes are retrieved from a timing system
+NO_SHOW = SpecialTime.NO_SHOW
+"""Indicates that a swimmer did not show up for an event"""
+
+INCONSISTENT = SpecialTime.INCONSISTENT
+"""Indicates that a final time could not be automatically resolved"""
+
 NumericTime = Decimal
-# A Time is either a NumericTime or a special time designator
+"""NumericTimes are retrieved from a timing system"""
+
 Time = Union[NumericTime, SpecialTime]
+"""A Time is either a NumericTime or a special time designator"""
+
+
+def is_special_time(time: Time) -> bool:
+    """Returns True if the time is a special time designator"""
+    return isinstance(time, SpecialTime)
+
 
 # A TimeResolver converts a list of NumericTimes into a final time
 TimeResolver = Callable[[List[NumericTime]], Time]
