@@ -17,6 +17,7 @@
 """RaceResult class"""
 
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from racetime import NumericTime
 
@@ -47,8 +48,8 @@ class RaceResult:
         """True if the lane is marked empty"""
 
         def __post_init__(self):
-            # Mark the lane as empty if there are no times
-            if not self.times:
+            # Mark the lane as empty if there are no times or all times are zero
+            if all(time == NumericTime(0) for time in self.times):
                 self.is_empty = True
             # Individual times must be greater or equal to zero
             for time in self.times:
@@ -66,11 +67,13 @@ class RaceResult:
     heat: int
     """The heat number"""
 
-    description: str
-    """Text description of the event such as 'Boys 100 Meter Freestyle'"""
-
     lanes: list[Lane] = field(default_factory=list)
     """The results for each lane"""
+
+    time_recorded: datetime = field(default_factory=datetime.now)
+
+    meet_id: str = ""
+    """The meet ID"""
 
     def __post_init__(self):
         # Ensure that we have 10 lanes
@@ -83,3 +86,9 @@ class RaceResult:
         # Heat number must be greater than zero
         if self.heat < 1:
             raise ValueError("Heat number must be greater than zero")
+
+    def lane(self, lane_number: int) -> Lane:
+        """Retrieve the lane object for a given lane number"""
+        if lane_number < 1 or lane_number > 10:
+            raise ValueError("Lane number must be between 1 and 10")
+        return self.lanes[lane_number - 1]

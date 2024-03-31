@@ -31,7 +31,6 @@ class TestRaceResult:
         self.race_result = RaceResult(
             event="1S",
             heat=1,
-            description="Boys 100 Meter Freestyle",
             lanes=[self.lane],
         )
 
@@ -44,7 +43,6 @@ class TestRaceResult:
     def test_race_result_init(self):
         assert self.race_result.event == "1S"
         assert self.race_result.heat == 1
-        assert self.race_result.description == "Boys 100 Meter Freestyle"
         assert len(self.race_result.lanes) == 10
         assert self.race_result.lanes[0] == self.lane
 
@@ -56,7 +54,6 @@ class TestRaceResult:
             RaceResult(
                 event="1S",
                 heat=0,
-                description="Boys 100 Meter Freestyle",
                 lanes=[self.lane],
             )
 
@@ -65,7 +62,6 @@ class TestRaceResult:
             RaceResult(
                 event="1S",
                 heat=1,
-                description="Boys 100 Meter Freestyle",
                 lanes=[self.lane] * 11,
             )
 
@@ -74,5 +70,31 @@ class TestRaceResult:
             RaceResult.Lane(times=[NumericTime(-1.0)], is_dq=False, is_empty=False)
 
     def test_lane_empty(self):
-        lane = RaceResult.Lane()
-        assert lane.is_empty == True
+        nt_lane = RaceResult.Lane()
+        assert nt_lane.is_empty == True
+        zero_lane = RaceResult.Lane(times=[NumericTime(0.0), NumericTime(0.0)])
+        assert zero_lane.is_empty == True
+
+    def lane_returns_correct(self):
+        """Ensure that the lane method returns the correct lane object"""
+        lane1 = RaceResult.Lane(times=[NumericTime(1.0)], is_dq=False, is_empty=False)
+        lane2 = RaceResult.Lane(times=[NumericTime(2.0)], is_dq=False, is_empty=False)
+        lane3 = RaceResult.Lane(times=[NumericTime(1.0)], is_dq=True, is_empty=False)
+        result = RaceResult(
+            event="1S",
+            heat=1,
+            lanes=[lane1, lane2, lane3],
+        )
+        assert result.lane(1) == lane1
+        assert result.lane(2) == lane2
+        assert result.lane(3) == lane3
+
+    def test_lane_between_1_and_10(self):
+        result = RaceResult(
+            event="33",
+            heat=12,
+        )
+        with pytest.raises(ValueError):
+            result.lane(0)
+        with pytest.raises(ValueError):
+            result.lane(11)
