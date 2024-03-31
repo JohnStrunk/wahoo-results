@@ -16,9 +16,18 @@
 
 """Tests for racetime"""
 
+from operator import is_
+
 import pytest
 
-from racetime import INCONSISTENT, NO_SHOW, NumericTime, TimeResolver, standard_resolver
+from racetime import (
+    INCONSISTENT,
+    NO_SHOW,
+    NumericTime,
+    TimeResolver,
+    is_special_time,
+    standard_resolver,
+)
 
 
 class Test2030Resolver:
@@ -27,7 +36,9 @@ class Test2030Resolver:
         return standard_resolver(min_times=2, threshold=NumericTime("0.30"))
 
     def test_no_times_is_no_show(self, resolver: TimeResolver):
-        assert resolver([]) == NO_SHOW
+        resolved = resolver([])
+        assert resolved == NO_SHOW
+        assert is_special_time(resolved)
 
     def test_time_more_than_threshold_from_candidate_is_inconsistent(
         self, resolver: TimeResolver
@@ -48,6 +59,20 @@ class Test2030Resolver:
                 NumericTime("60.47"),
             ]
         ) == NumericTime("60.25")
+
+    def test_average_with_quantization(self, resolver: TimeResolver):
+        """The average should always be rounded down to the nearest hundredth"""
+        assert resolver(
+            [
+                NumericTime("1.00"),
+                NumericTime("1.03"),
+            ]
+        ) == NumericTime("1.01")
+
+    def test_fewer_than_min_times_is_inconsistent(self, resolver: TimeResolver):
+        resolved = resolver([NumericTime("60.00")])
+        assert resolved == INCONSISTENT
+        assert is_special_time(resolved)
 
 
 def test_1030resolver_accepts_single_time() -> None:

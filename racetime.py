@@ -16,7 +16,7 @@
 
 """Primitives for handling times from a race"""
 
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 from enum import Enum
 from typing import Callable, List, Union
 
@@ -48,6 +48,22 @@ Time = Union[NumericTime, SpecialTime]
 def is_special_time(time: Time) -> bool:
     """Returns True if the time is a special time designator"""
     return isinstance(time, SpecialTime)
+
+
+def _truncate_hundredths(time: NumericTime) -> NumericTime:
+    """
+    Truncates a Time to two decimal places.
+
+    >>> _truncate_hundredths(NumericTime('100.00'))
+    Decimal('100.00')
+    >>> _truncate_hundredths(NumericTime('99.999'))
+    Decimal('99.99')
+    >>> _truncate_hundredths(NumericTime('10.987'))
+    Decimal('10.98')
+    >>> _truncate_hundredths(NumericTime('100.123'))
+    Decimal('100.12')
+    """
+    return time.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
 
 
 # A TimeResolver converts a list of NumericTimes into a final time
@@ -101,6 +117,6 @@ def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
         for time in times:
             if abs(time - final) > threshold:
                 return INCONSISTENT
-        return final
+        return _truncate_hundredths(final)
 
     return resolver
