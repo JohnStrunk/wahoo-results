@@ -22,21 +22,25 @@ from typing import Callable, List, Union
 
 
 class SpecialTime(Enum):
-    """Special (non-numeric) values for a resolved time"""
+    """Special (non-numeric) values for a time"""
 
     DQ = "DQ"
-    NO_SHOW = "NoShow"
     INCONSISTENT = "Inconsistent"
+    NO_SHOW = "NoShow"
+    NT = "NT"
 
 
 DQ = SpecialTime.DQ
 """Indicates that a swimmer was disqualified from a race"""
 
+INCONSISTENT = SpecialTime.INCONSISTENT
+"""Indicates that a final time could not be automatically resolved"""
+
 NO_SHOW = SpecialTime.NO_SHOW
 """Indicates that a swimmer did not show up for an event"""
 
-INCONSISTENT = SpecialTime.INCONSISTENT
-"""Indicates that a final time could not be automatically resolved"""
+NT = SpecialTime.NT
+"""Indicates that a swimmer does not have a seed time for an event"""
 
 NumericTime = Decimal
 """NumericTimes are retrieved from a timing system"""
@@ -93,7 +97,9 @@ def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
     """
 
     def resolver(times: List[NumericTime]) -> Time:
-        num_times = len(times)
+        # Filter out any times that are less than or equal to zero
+        real_times = [time for time in times if time > 0]
+        num_times = len(real_times)
         # If no times are reported, the result is a NO_SHOW
         if num_times == 0:
             return NO_SHOW
@@ -102,19 +108,21 @@ def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
         if num_times < min_times:
             return INCONSISTENT
         # Calculate the candidate final time
-        times.sort()
+        real_times.sort()
         if num_times >= 3:
             if num_times % 2 == 0:
-                final = (times[num_times // 2 - 1] + times[num_times // 2]) / 2
+                final = (
+                    real_times[num_times // 2 - 1] + real_times[num_times // 2]
+                ) / 2
             else:
-                final = times[num_times // 2]
+                final = real_times[num_times // 2]
         elif num_times == 2:
-            final = (times[0] + times[1]) / 2
+            final = (real_times[0] + real_times[1]) / 2
         else:
-            final = times[0]
+            final = real_times[0]
         # If any of the RawTimes differ from the candidate final time by more
         # than the maximum allowable time difference, the result is INCONSISTENT
-        for time in times:
+        for time in real_times:
             if abs(time - final) > threshold:
                 return INCONSISTENT
         return _truncate_hundredths(final)
