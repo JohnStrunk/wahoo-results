@@ -21,8 +21,7 @@ from datetime import datetime
 
 import pytest
 
-from dolphin_result_do4 import parse_do4
-from raceresult import RaceResult
+from dolphin_do4 import parse_do4
 from racetime import NumericTime
 
 _now = datetime.now()
@@ -133,47 +132,49 @@ class TestDolphinDo4:
 
     def test_can_parse_header(self, do4_mising_one_time) -> None:
         """Ensure we can parse the event/heat header"""
-        race = parse_do4(do4_mising_one_time, _now, _meet_seven)
+        race = parse_do4(do4_mising_one_time)
         assert race.event == "69"
         assert race.heat == 1
-        # And the items that are passed in directly
-        assert race.meet_id == _meet_seven
-        assert race.time_recorded == _now
 
     def test_invalid_header(self, do4_bad_header) -> None:
         """Ensure we catch an invalid header"""
         with pytest.raises(ValueError):
-            parse_do4(do4_bad_header, _now, _meet_seven)
+            parse_do4(do4_bad_header)
 
     def test_invalid_number_of_lines(self, do4_too_few_lines) -> None:
         """Ensure we catch an invalid number of lines"""
         with pytest.raises(ValueError):
-            parse_do4(do4_too_few_lines, _now, _meet_seven)
+            parse_do4(do4_too_few_lines)
 
     def test_invalid_lane_data(self, do4_corrupt_lane) -> None:
         """Ensure we catch a corrupt lane"""
         with pytest.raises(ValueError):
-            parse_do4(do4_corrupt_lane, _now, _meet_seven)
+            parse_do4(do4_corrupt_lane)
 
     def test_handle_missing_times(self, do4_mising_one_time, do4_one_time) -> None:
         """Ensure we can handle lanes that are missing times"""
-        missingt1l3 = parse_do4(do4_mising_one_time, _now, _meet_seven)
+        missingt1l3 = parse_do4(do4_mising_one_time)
         assert missingt1l3.lane(3).times == [
             NumericTime(0),
             NumericTime("128.21"),
             NumericTime("128.08"),
         ]
 
-        one_time = parse_do4(do4_one_time, _now, _meet_seven)
+        one_time = parse_do4(do4_one_time)
         assert one_time.lane(1).times == [
             NumericTime("0"),
             NumericTime("55.92"),
             NumericTime("0"),
         ]
 
+    def test_no_description(self, do4_one_time) -> None:
+        """DO4 files don't have an event description"""
+        no_desc = parse_do4(do4_one_time)
+        assert no_desc.description == ""
+
     def test_detect_noshow(self, do4_one_time) -> None:
         """Ensure we can detect a no-show"""
-        noshow = parse_do4(do4_one_time, _now, _meet_seven)
+        noshow = parse_do4(do4_one_time)
         assert noshow.lane(6).times == [NumericTime(0), NumericTime(0), NumericTime(0)]
         assert noshow.lane(6).is_empty
         assert noshow.lane(6).is_dq == False

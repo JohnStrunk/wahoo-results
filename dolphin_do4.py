@@ -23,11 +23,11 @@ import re
 from datetime import datetime
 from typing import List
 
-from raceresult import RaceResult
+from heatdata import HeatData
 from racetime import NumericTime
 
 
-def parse_do4_file(file_path: str) -> RaceResult:
+def parse_do4_file(file_path: str) -> HeatData:
     """
     Parse a DO4 file from a Colorado Dolphin timing system
 
@@ -41,21 +41,23 @@ def parse_do4_file(file_path: str) -> RaceResult:
         ValueError: If the data is not in the expected format
     """
 
+    meet_id = "???"
+    race_number = 1
+    matcher = re.match(r"^(\d+)-\d+-\d+\w-(\d+)\.", os.path.basename(file_path))
+    if matcher is not None:
+        meet_id = matcher.group(1)
+        race_number = int(matcher.group(2))
+    stinfo = os.stat(file_path)
+    mtime = datetime.fromtimestamp(stinfo.st_mtime)
     with open(file_path, "r", encoding="cp1252") as file:
-        meet_id = "???"
-        meet_match = re.match(r"^(\d+)-", os.path.basename(file_path))
-        if meet_match is not None:
-            meet_id = meet_match.group(1)
-        stinfo = os.stat(file_path)
-        mtime = datetime.fromtimestamp(stinfo.st_mtime)
-        return parse_do4(file, mtime, meet_id)
+        data = parse_do4(file)
+    data.meet_id = meet_id
+    data.race = race_number
+    data.time_recorded = mtime
+    return data
 
 
-def parse_do4(
-    stream: io.TextIOBase,
-    when: datetime,
-    meet_id: str,
-) -> RaceResult:
+def parse_do4(stream: io.TextIOBase) -> HeatData:
     """
     Parse a DO4 file from a Colorado Dolphin timing system
 
@@ -80,7 +82,7 @@ def parse_do4(
     lines = stream.readlines()
     if len(lines) != 11:
         raise ValueError("Invalid number of lines in file")
-    lanes: List[RaceResult.Lane] = []
+    lanes: List[HeatData.Lane] = []
     for lane in range(10):
         match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[lane])
         if not match:
@@ -92,5 +94,5 @@ def parse_do4(
             if match_txt != "":
                 time = max(NumericTime(match_txt), time)
             lane_times.append(time)
-        lanes.append(RaceResult.Lane(times=lane_times))
-    return RaceResult(event, heat, lanes, when, meet_id)
+        lanes.append(HeatData.Lane(times=lane_times))
+    return HeatData(event=event, heat=heat, lanes=lanes)
