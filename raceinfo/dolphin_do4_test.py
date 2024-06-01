@@ -16,13 +16,12 @@
 
 import io
 import textwrap
-from ast import Num
 from datetime import datetime
 
 import pytest
 
-from dolphin_do4 import parse_do4
-from racetime import NumericTime
+from .dolphin_do4 import parse_do4
+from .times import NumericTime
 
 _now = datetime.now()
 _meet_seven = "007"

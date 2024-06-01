@@ -20,7 +20,7 @@ from dataclasses import InitVar, dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from racetime import NT, NumericTime, Time, TimeResolver
+from .times import NT, NumericTime, Time, TimeResolver
 
 
 @dataclass(kw_only=True)
