@@ -17,10 +17,9 @@
 """Tests for HeatData"""
 
 import pytest
-from numpy import empty
 
-from heatdata import HeatData
-from racetime import NO_SHOW, NT, NumericTime, Time
+from .heatdata import HeatData
+from .times import NO_SHOW, NT, NumericTime, Time
 
 
 class TestHeatData:

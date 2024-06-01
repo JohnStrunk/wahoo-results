@@ -336,7 +336,7 @@ def initialize_sentry(model: Model) -> None:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         sample_rate=1.0,
-        traces_sample_rate=1.0,
+        traces_sample_rate=0.3 if execution_environment == "executable" else 0,
         environment=execution_environment,
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
         include_local_variables=True,

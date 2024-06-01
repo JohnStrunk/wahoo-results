@@ -23,22 +23,22 @@ import re
 from datetime import datetime
 from typing import List
 
-from heatdata import HeatData
-from racetime import NumericTime
+from .heatdata import HeatData
+from .times import NumericTime
 
 
 def parse_do4_file(file_path: str) -> HeatData:
     """
     Parse a DO4 file from a Colorado Dolphin timing system
 
-    Args:
-        file_path: The path to the DO4 file
+    Parameters:
+        - file_path: The path to the DO4 file
 
     Returns:
         A RaceResult object that represents the parsed data
 
     Raises:
-        ValueError: If the data is not in the expected format
+        - ValueError: If the data is not in the expected format
     """
 
     meet_id = "???"
@@ -61,16 +61,14 @@ def parse_do4(stream: io.TextIOBase) -> HeatData:
     """
     Parse a DO4 file from a Colorado Dolphin timing system
 
-    Args:
-        stream: A file-like object that contains the DO4 data
-        when: The time the race was completed
-        meet_id: The ID/number of the meet
+    Parameters:
+        - stream: A file-like object that contains the DO4 data
 
     Returns:
-        A RaceResult object that represents the parsed data
+        A HeatData object that represents the parsed data
 
     Raises:
-        ValueError: If the data is not in the expected format
+        - ValueError: If the data is not in the expected format
     """
     header = stream.readline()
     match = re.match(r"^(\d+);(\d+);\w+;\w+$", header)
