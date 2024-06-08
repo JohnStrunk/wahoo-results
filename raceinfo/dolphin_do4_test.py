@@ -129,6 +129,33 @@ class TestDolphinDo4:
             )
         )
 
+    @pytest.fixture
+    def do4_no_event(self):
+        """
+        File with no event number
+
+        This is a valid do4 file, and happens when there are no events loaded
+        into the Dolphin software. See:
+        https://github.com/JohnStrunk/wahoo-results/issues/576
+        """
+        return io.StringIO(
+            textwrap.dedent(
+                """\
+            ;1;1;All
+            Lane1;45.37;;
+            Lane2;41.82;;
+            Lane3;40.04;;
+            Lane4;38.99;;
+            Lane5;42.58;;
+            Lane6;44.68;;
+            Lane7;0;0;0
+            Lane8;0;0;0
+            Lane9;0;0;0
+            Lane10;0;0;0
+            2D1675FF291271FB"""
+            )
+        )
+
     def test_can_parse_header(self, do4_mising_one_time) -> None:
         """Ensure we can parse the event/heat header"""
         race = parse_do4(do4_mising_one_time)
@@ -178,3 +205,16 @@ class TestDolphinDo4:
         assert noshow.lane(6).is_empty
         assert noshow.lane(6).is_dq == False
         assert noshow.lane(10).is_empty
+
+    def test_parse_no_event(self, do4_no_event) -> None:
+        """Ensure we can parse a file with no event number"""
+        no_event = parse_do4(do4_no_event)
+        # Since there's no event number, we just get an empty string
+        assert no_event.event == ""
+        # Ensure the rest of the data is correct
+        assert no_event.heat == 1
+        assert no_event.lane(2).times == [
+            NumericTime("41.82"),
+            NumericTime("0"),
+            NumericTime("0"),
+        ]

@@ -71,7 +71,7 @@ def parse_do4(stream: io.TextIOBase) -> HeatData:
         - ValueError: If the data is not in the expected format
     """
     header = stream.readline()
-    match = re.match(r"^(\d+);(\d+);\w+;\w+$", header)
+    match = re.match(r"^(\d*);(\d+);\w+;\w+$", header)
     if not match:
         raise ValueError("Unable to parse header")
     event = match.group(1)
