@@ -82,7 +82,12 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
             ):
                 raise ValueError("Seed time must be non-negative or NT")
             # Mark the lane as empty if there are no times or all times are zero
-            if all(time == NumericTime(0) for time in self.times):
+            # and there's no name or team
+            if (
+                all(time == NumericTime(0) for time in self.times)
+                and not self.name
+                and not self.team
+            ):
                 self.is_empty = True
             # Individual times must be greater or equal to zero
             for time in self.times:

@@ -40,7 +40,7 @@ def parse_scb(stream: io.TextIOBase) -> List[HeatData]:
     Example:
         with open(filename, "r", encoding="cp1252") as file:
             try:
-                slist = StartList(file)
+                heat_list = parse_scb(file)
             except ValueError as err: # Parse error
                 ...
     """
