@@ -29,7 +29,7 @@ _meet_seven = "007"
 
 class TestDolphinDo4:
     @pytest.fixture()
-    def do4_mising_one_time(self):
+    def do4_missing_one_time(self):
         """Lane 3 is missing a time"""
         return io.StringIO(
             textwrap.dedent(
@@ -156,9 +156,9 @@ class TestDolphinDo4:
             )
         )
 
-    def test_can_parse_header(self, do4_mising_one_time) -> None:
+    def test_can_parse_header(self, do4_missing_one_time) -> None:
         """Ensure we can parse the event/heat header"""
-        race = parse_do4(do4_mising_one_time)
+        race = parse_do4(do4_missing_one_time)
         assert race.event == "69"
         assert race.heat == 1
 
@@ -177,9 +177,9 @@ class TestDolphinDo4:
         with pytest.raises(ValueError):
             parse_do4(do4_corrupt_lane)
 
-    def test_handle_missing_times(self, do4_mising_one_time, do4_one_time) -> None:
+    def test_handle_missing_times(self, do4_missing_one_time, do4_one_time) -> None:
         """Ensure we can handle lanes that are missing times"""
-        missingt1l3 = parse_do4(do4_mising_one_time)
+        missingt1l3 = parse_do4(do4_missing_one_time)
         assert missingt1l3.lane(3).times == [
             NumericTime(0),
             NumericTime("128.21"),

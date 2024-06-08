@@ -43,6 +43,11 @@ def parse_do4_file(file_path: str) -> HeatData:
 
     meet_id = "???"
     race_number = 1
+    # do4 files are named like "001-002-003A-0004.do4"
+    # 001 is the meet id, 002 is the event number, 003 is the heat number, 0004
+    # is the race number
+    # We're only parsing the items from the file name that we can't get from
+    # the file contents.
     matcher = re.match(r"^(\d+)-\d+-\d+\w-(\d+)\.", os.path.basename(file_path))
     if matcher is not None:
         meet_id = matcher.group(1)
