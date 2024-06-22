@@ -25,7 +25,7 @@ from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.ImageEnhance import Brightness
 
 from model import Model
-from racetimes import RaceTimes, RawTime
+from racetimes import NumericTime, RaceTimes
 from startlist import NameMode, format_name
 
 
@@ -277,7 +277,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         if self._race.is_noshow(lane):
             return "NS"
         final_time = self._race.final_time(lane)
-        if final_time.value == RawTime("0"):
+        if final_time.value == NumericTime("0"):
             return ""
         if not final_time.is_valid:
             return "--:--.--"
@@ -295,18 +295,18 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         )  # up 1/2 the inter-line space
 
 
-def format_time(seconds: RawTime) -> str:
+def format_time(seconds: NumericTime) -> str:
     """
-    >>> format_time(RawTime('1.2'))
+    >>> format_time(NumericTime('1.2'))
     '01.20'
-    >>> format_time(RawTime('9.87'))
+    >>> format_time(NumericTime('9.87'))
     '09.87'
-    >>> format_time(RawTime('50'))
+    >>> format_time(NumericTime('50'))
     '50.00'
-    >>> format_time(RawTime('120.0'))
+    >>> format_time(NumericTime('120.0'))
     '2:00.00'
     """
-    sixty = RawTime("60")
+    sixty = NumericTime("60")
     minutes = seconds // sixty
     seconds = seconds % sixty
     if minutes == 0:

@@ -103,7 +103,7 @@ class RaceResultVar(GVar[Optional[RaceTimes]]):
     """A race result"""
 
 
-class Model:  # pylint: disable=too-many-instance-attributes,too-few-public-methods
+class Model:  # pylint: disable=too-many-instance-attributes
     """Defines the state variables (model) for the main UI"""
 
     ## Colors from USA-S visual identity standards
