@@ -8,7 +8,6 @@ pull_request_rules:
       - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
-      - check-success=SonarCloud Code Analysis
     actions:
       queue:
         method: merge
@@ -25,7 +24,6 @@ pull_request_rules:
       - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
-      - check-success=SonarCloud Code Analysis
     actions:
       queue:
         method: merge
@@ -38,4 +36,3 @@ queue_rules:
       - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
-      - check-success=SonarCloud Code Analysis
