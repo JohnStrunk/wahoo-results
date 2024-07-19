@@ -14,7 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Primitives for handling times from a race"""
+"""
+Primitives for handling times from a race.
+
+The top-level type is `Time`, which is subdivided into:
+
+- `NumericTime`: An actual numeric "time", in seconds (e.g., 28.03).
+- `SpecialTime`: These are special values to handle cases such as
+  disqualifications, no-shows, etc.
+"""
 
 from decimal import ROUND_DOWN, Decimal
 from enum import Enum
@@ -70,27 +78,37 @@ def _truncate_hundredths(time: NumericTime) -> NumericTime:
     return time.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
 
 
-# A TimeResolver converts a list of NumericTimes into a final time
 TimeResolver = Callable[[List[NumericTime]], Time]
+"""
+A TimeResolver converts a list of NumericTimes into a final time.
+
+It takes a list of NumericTimes and combines them into a single Time
+(NumericTime or SpecialTime) by some resolution method.
+"""
 
 
 def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
     """
     This returns a TimeResolver that implements the time resolution method used
-    by Wahoo Results. It is based on the time resolution rules of USA Swimming.
+    by Wahoo Results. It is based on the time resolution rules of USA Swimming
+    (see rule 102.23.4).
 
     The times are resolved based on 2 thresholds:
+
     - The minimum number of times required
     - The maximum allowable time difference
 
     Resolution proceeds as follows:
+
     - If no times are reported, the result is a NO_SHOW
     - If fewer than the minimum number of times are reported, the result is
       INCONSISTENT
     - A candidate final time is calculated:
+
       - If 3 or more times are reported, the median is used
       - If 2 times are reported, the average is used
       - If 1 time is reported, it is used
+
     - If any of the RawTimes differ from the candidate final time by more than
       the maximum allowable time difference, the result is INCONSISTENT
     - Otherwise, the candidate final time is returned
