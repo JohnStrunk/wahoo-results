@@ -26,7 +26,7 @@ from datetime import datetime
 from decimal import ROUND_DOWN, Decimal
 from typing import List, Optional
 
-from raceinfo.times import NumericTime
+from raceinfo import NumericTime
 from startlist import StartList
 
 
