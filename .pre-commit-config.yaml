@@ -30,7 +30,8 @@ repos:
         exclude: |
           (?x)^(
                 startlist_test\.py|
-                testdata/.*
+                testdata/.*|
+                raceinfo/colorado_scb_test\.py
             )$
 
   - repo: https://github.com/adrienverge/yamllint
