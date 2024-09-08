@@ -66,15 +66,13 @@ class ICController(BaseMediaPlayer):
     def __init__(self):
         super().__init__(_WAHOO_RESULTS_APP_ID)
 
-    # pylint: disable-next=arguments-differ
-    def quick_play(self, url: str, mime_type: str, **kwargs):
-        """Quick Play helper for Scoreboard images"""
+    def send_image(self, url: str, mime_type: str):
+        """Send an image to the Chromecast"""
         super().quick_play(
             media_id=url,
-            timeout=2,
             media_type=mime_type,
+            timeout=2,
             metadata={"metadataType": 0, "title": ""},
-            **kwargs,
         )
 
 
@@ -209,7 +207,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                 return
             # Use the local address of the socket to handle environments with
             # multiple NICs and cases where the host IP changes.
-            sock = cast.socket_client.get_socket()
+            sock = cast.socket_client.socket
             if sock is None:
                 return
             try:
@@ -224,7 +222,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             cast.register_handler(controller)
             logger.debug("Publishing to %s", cast.name)
             try:
-                controller.quick_play(url, "image/png")
+                controller.send_image(url, "image/png")
             except NotConnected:
                 logger.debug("Error: NotConnected while publishing to %s", cast.name)
             except pychromecast.PyChromecastError:
@@ -316,7 +314,10 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                             != pychromecast.CAST_TYPE_CHROMECAST
                         ):
                             logger.debug("Not cast-able. Ignoring: %s", cast.name)
-                            cast.disconnect(timeout=0)  # don't block
+                            try:
+                                cast.disconnect(timeout=0)  # don't block
+                            except TimeoutError:
+                                pass  # Since we're not blocking, this is expected
                             return
                         logger.debug("Adding to device list: %s", cast.name)
                         parent.devices[uuid] = {"cast": cast, "enabled": False}
