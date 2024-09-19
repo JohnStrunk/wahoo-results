@@ -56,6 +56,6 @@ repos:
         args: ["--profile", "black", "--filter-files"]
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: "38.77.1"
+    rev: "38.88.0"
     hooks:
       - id: renovate-config-validator
