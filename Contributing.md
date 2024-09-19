@@ -30,7 +30,7 @@ testing.
   [Pipfile](Pipfile).
 - Install dependencies:
   - Install [pipenv](https://pipenv.pypa.io): `pip install --user --upgrade
-    pipenv==2024.0.1`
+    pipenv==2024.0.2`
   - Install project dependencies: `pipenv sync --dev`
 - (Optional) Install [pre-commit](https://pre-commit.com) to verify code style
   before committing
