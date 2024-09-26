@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
 	"name": "Python 3",
-	"image": "mcr.microsoft.com/devcontainers/python:1-3.11-bullseye@sha256:081aadda79913f05c57ed944dfb23aded25ec0df03eaa48b18a7e8738f19bb52",
+	"image": "mcr.microsoft.com/devcontainers/python:1-3.11-bullseye@sha256:536f2a4fde91b99eee1513cef94bd4a0110727cf3aca74f7d38d45f8bb901223",
 	"features": {
 		"ghcr.io/devcontainers-contrib/features/pipenv:2.0.17": {},
 		"ghcr.io/devcontainers-contrib/features/pre-commit:2.0.17": {}
