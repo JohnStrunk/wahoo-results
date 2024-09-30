@@ -427,6 +427,11 @@ class _runTab(ttk.Frame):
         latestres.grid(column=0, row=0, rowspan=2, sticky="news")
         ToolTip(latestres, "Raw data from the latest race result")
 
+    def clear_time(self):
+        race_times = self._vm.latest_result.get()
+        race_times.clear_time()
+        self._vm.latest_result.set(race_times)
+
     def _cc_selector(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Available Chromecasts")
         frame.columnconfigure(0, weight=1)
@@ -442,4 +447,6 @@ class _runTab(ttk.Frame):
         frame.rowconfigure(0, weight=1)
         widgets.Preview(frame, self._vm.scoreboard).grid(column=0, row=0)
         ToolTip(frame, "Current contents of the scoreboard")
+        button = ttk.Button(parent, text="Clear", command=self.clear_time)
+        
         return frame
