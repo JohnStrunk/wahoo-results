@@ -66,16 +66,16 @@ class ICController(BaseMediaPlayer):
     def __init__(self):
         super().__init__(_WAHOO_RESULTS_APP_ID)
 
-    # pylint: disable-next=arguments-differ
-    def quick_play(self, url: str, mime_type: str, **kwargs):
-        """Quick Play helper for Scoreboard images"""
+    def send_image(self, url: str, mime_type: str):
+        """Send an image to the Chromecast"""
+        logger.debug("Sending image via quick_play to Chromecast: %s", url)
         super().quick_play(
             media_id=url,
-            timeout=2,
             media_type=mime_type,
+            timeout=30.0,
             metadata={"metadataType": 0, "title": ""},
-            **kwargs,
         )
+        logger.debug("quick_play done")
 
 
 class ImageCast:  # pylint: disable=too-many-instance-attributes
@@ -209,7 +209,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                 return
             # Use the local address of the socket to handle environments with
             # multiple NICs and cases where the host IP changes.
-            sock = cast.socket_client.get_socket()
+            sock = cast.socket_client.socket
             if sock is None:
                 return
             try:
@@ -221,10 +221,11 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             url = f"http://{local_addr}:{self._server_port}/image-{sec}.png"
             # Set media controller to use our app
             controller = ICController()
+            logger.debug("Setting controller for %s", cast.name)
             cast.register_handler(controller)
             logger.debug("Publishing to %s", cast.name)
             try:
-                controller.quick_play(url, "image/png")
+                controller.send_image(url, "image/png")
             except NotConnected:
                 logger.debug("Error: NotConnected while publishing to %s", cast.name)
             except pychromecast.PyChromecastError:
@@ -232,6 +233,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                     "Error: PyChromecastError while publishing to %s", cast.name
                 )
             finally:
+                logger.debug("Unregistering controller for %s", cast.name)
                 cast.unregister_handler(controller)
 
     def _start_webserver(self) -> None:
@@ -279,13 +281,15 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
         class Listener(pychromecast.discovery.AbstractCastListener):
             """Receive chromecast discovery updates"""
 
-            def add_cast(self, uuid: UUID, service):
+            def add_cast(self, uuid: UUID, service: str):
                 logger.debug("Got add cast: %s", str(uuid))
                 self.update_cast(uuid, service)
                 # We don't trigger the callback here because update_cast will do
                 # it for us.
 
-            def remove_cast(self, uuid: UUID, service, cast_info):
+            def remove_cast(
+                self, uuid: UUID, service: str, cast_info: pychromecast.CastInfo
+            ):
                 logger.debug("Got remove cast: %s", str(uuid))
                 try:
                     del parent.devices[uuid]
@@ -296,7 +300,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                 if parent.callback_fn is not None:
                     parent.callback_fn()
 
-            def update_cast(self, uuid: UUID, service) -> None:
+            def update_cast(self, uuid: UUID, service: str) -> None:
                 with sentry_sdk.start_transaction(
                     op="cc_update", name="Chromecast update recieved"
                 ):
@@ -316,7 +320,10 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                             != pychromecast.CAST_TYPE_CHROMECAST
                         ):
                             logger.debug("Not cast-able. Ignoring: %s", cast.name)
-                            cast.disconnect(timeout=0)  # don't block
+                            try:
+                                cast.disconnect(timeout=0)  # don't block
+                            except TimeoutError:
+                                pass  # Since we're not blocking, this is expected
                             return
                         logger.debug("Adding to device list: %s", cast.name)
                         parent.devices[uuid] = {"cast": cast, "enabled": False}
