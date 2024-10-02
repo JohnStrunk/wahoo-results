@@ -219,7 +219,7 @@ class DO4(RaceTimes):
     Implementation of RaceTimes class for CTS Dolphin w/ Splits (.do4 files).
     """
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
         stream: io.TextIOBase,
