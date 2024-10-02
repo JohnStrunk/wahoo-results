@@ -68,12 +68,14 @@ class ICController(BaseMediaPlayer):
 
     def send_image(self, url: str, mime_type: str):
         """Send an image to the Chromecast"""
+        logger.debug("Sending image via quick_play to Chromecast: %s", url)
         super().quick_play(
             media_id=url,
             media_type=mime_type,
-            timeout=2,
+            timeout=30.0,
             metadata={"metadataType": 0, "title": ""},
         )
+        logger.debug("quick_play done")
 
 
 class ImageCast:  # pylint: disable=too-many-instance-attributes
@@ -219,6 +221,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
             url = f"http://{local_addr}:{self._server_port}/image-{sec}.png"
             # Set media controller to use our app
             controller = ICController()
+            logger.debug("Setting controller for %s", cast.name)
             cast.register_handler(controller)
             logger.debug("Publishing to %s", cast.name)
             try:
@@ -230,6 +233,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                     "Error: PyChromecastError while publishing to %s", cast.name
                 )
             finally:
+                logger.debug("Unregistering controller for %s", cast.name)
                 cast.unregister_handler(controller)
 
     def _start_webserver(self) -> None:
@@ -277,13 +281,15 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
         class Listener(pychromecast.discovery.AbstractCastListener):
             """Receive chromecast discovery updates"""
 
-            def add_cast(self, uuid: UUID, service):
+            def add_cast(self, uuid: UUID, service: str):
                 logger.debug("Got add cast: %s", str(uuid))
                 self.update_cast(uuid, service)
                 # We don't trigger the callback here because update_cast will do
                 # it for us.
 
-            def remove_cast(self, uuid: UUID, service, cast_info):
+            def remove_cast(
+                self, uuid: UUID, service: str, cast_info: pychromecast.CastInfo
+            ):
                 logger.debug("Got remove cast: %s", str(uuid))
                 try:
                     del parent.devices[uuid]
@@ -294,7 +300,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                 if parent.callback_fn is not None:
                     parent.callback_fn()
 
-            def update_cast(self, uuid: UUID, service) -> None:
+            def update_cast(self, uuid: UUID, service: str) -> None:
                 with sentry_sdk.start_transaction(
                     op="cc_update", name="Chromecast update recieved"
                 ):
