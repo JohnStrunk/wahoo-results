@@ -13,7 +13,7 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2024.0.3"
+  PIPENV_INSTALL_VERSION: "2024.1.0"
   PYTHON_VERSION: "3.11"
   # How long to run the executable automated tests
   TEST_DURATION_SECONDS: 60
