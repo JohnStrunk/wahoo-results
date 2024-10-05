@@ -40,7 +40,7 @@ repos:
         args: ["--strict", "-c", ".github/yamllint-config.yml"]
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: "v0.41.0"
+    rev: "v0.42.0"
     hooks:
       - id: markdownlint
 
