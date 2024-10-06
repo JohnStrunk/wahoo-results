@@ -271,8 +271,7 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
             model.scoreboard.set(scoreboard.image)
             model.latest_result.set(result)
             num_cc = len([x for x in model.cc_status.get() if x.enabled])
-            has_names = any(result.lane(l).name for l in range(1, 11))
-            wh_analytics.results_received(has_names, num_cc)
+            wh_analytics.results_received(result.has_names(), num_cc)
             process_racedir()  # update the UI
 
     def do4_dir_updated() -> None:

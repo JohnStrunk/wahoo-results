@@ -33,6 +33,7 @@ from tkinter import DoubleVar, IntVar, StringVar
 from typing import Callable, List
 
 from model import Model
+from raceinfo import INCONSISTENT, NO_SHOW, is_special_time
 
 TESTING = False
 
@@ -167,7 +168,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: model.latest_result.get().has_names,  # type: ignore
+                lambda: model.latest_result.get().has_names(),  # type: ignore
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
@@ -177,7 +178,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 lambda: reduce(
                     lambda a, b: a and b,
                     [
-                        len(model.latest_result.get().name(i)) > 0  # type: ignore
+                        len(model.latest_result.get().lane(i).name) > 0  # type: ignore
                         for i in range(1, 6)
                     ],
                 ),
@@ -187,7 +188,8 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 lambda: reduce(
                     lambda a, b: a and b,
                     [
-                        model.latest_result.get().final_time(i).is_valid  # type: ignore
+                        # pylint: disable=line-too-long
+                        not is_special_time(model.latest_result.get().lane(i).time())  # type: ignore
                         for i in range(1, 6)
                     ],
                 ),
@@ -201,15 +203,15 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: model.latest_result.get().has_names,  # type: ignore
+                lambda: model.latest_result.get().has_names(),  # type: ignore
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
-                lambda: not model.latest_result.get().is_noshow(2),  # type: ignore
+                lambda: model.latest_result.get().lane(2).time() != NO_SHOW,  # type: ignore
                 "Lane 2 IS NOT a no-show",
             ),
             Validate(
-                lambda: model.latest_result.get().is_noshow(5),  # type: ignore
+                lambda: model.latest_result.get().lane(5).time() == NO_SHOW,  # type: ignore
                 "Lane 5 IS a no-show",
             ),
             # Race w/ an unexpected swimmer (no name)
@@ -220,15 +222,16 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: model.latest_result.get().has_names,  # type: ignore
+                lambda: model.latest_result.get().has_names(),  # type: ignore
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
-                lambda: len(model.latest_result.get().name(1)) == 0,  # type: ignore
+                lambda: len(model.latest_result.get().lane(1).name) == 0,  # type: ignore
                 "Lane 1 should not have a name",
             ),
             Validate(
-                lambda: model.latest_result.get().final_time(1).is_valid,  # type: ignore
+                # pylint: disable=line-too-long
+                lambda: not is_special_time(model.latest_result.get().lane(1).time()),  # type: ignore
                 "Lane 1 should have a valid time",
             ),
             # Race w/ an extra heat (no names)
@@ -239,11 +242,12 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: len(model.latest_result.get().name(3)) == 0,  # type: ignore
+                lambda: len(model.latest_result.get().lane(3).name) == 0,  # type: ignore
                 "SCB should NOT have names for the heat",
             ),
             Validate(
-                lambda: model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                # pylint: disable=line-too-long
+                lambda: not is_special_time(model.latest_result.get().lane(3).time()),  # type: ignore
                 "Lane 3 should have a valid time",
             ),
             # Race w/o a corresponding scb file
@@ -254,11 +258,12 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: not model.latest_result.get().has_names,  # type: ignore
+                lambda: not model.latest_result.get().has_names(),  # type: ignore
                 "There should not be an SCB for the event",
             ),
             Validate(
-                lambda: model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                # pylint: disable=line-too-long
+                lambda: not is_special_time(model.latest_result.get().lane(3).time()),  # type: ignore
                 "Lane 3 should have a valid time",
             ),
             # Race w/ too much time delta
@@ -269,15 +274,15 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: model.latest_result.get().has_names,  # type: ignore
+                lambda: model.latest_result.get().has_names(),  # type: ignore
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
-                lambda: not model.latest_result.get().final_time(3).is_valid,  # type: ignore
+                lambda: model.latest_result.get().lane(3).time() == INCONSISTENT,  # type: ignore
                 "Lane 3 should not have a valid time (2 times differ by greater than threshold)",
             ),
             Validate(
-                lambda: not model.latest_result.get().is_noshow(3),  # type: ignore
+                lambda: not model.latest_result.get().lane(3).time() == NO_SHOW,  # type: ignore
                 "Lane 3 IS NOT a no-show",
             ),
             # Race w/ too few watch times
@@ -288,19 +293,20 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: model.latest_result.get().has_names,  # type: ignore
+                lambda: model.latest_result.get().has_names(),  # type: ignore
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
-                lambda: not model.latest_result.get().final_time(1).is_valid,  # type: ignore
+                lambda: model.latest_result.get().lane(1).time() == INCONSISTENT,  # type: ignore
                 "Lane 1 should not have a valid time (only 1 watch time, threshold is 2)",
             ),
             Validate(
-                lambda: not model.latest_result.get().is_noshow(1),  # type: ignore
+                lambda: model.latest_result.get().lane(1).time() != NO_SHOW,  # type: ignore
                 "Lane 1 IS NOT a no-show",
             ),
             Validate(
-                lambda: model.latest_result.get().final_time(2).is_valid,  # type: ignore
+                # pylint: disable=line-too-long
+                lambda: not is_special_time(model.latest_result.get().lane(2).time()),  # type: ignore
                 "Lane 2 should have a valid time",
             ),
             ############################################################

@@ -182,6 +182,20 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
                 place += 1
         return place
 
+    def has_names(self) -> bool:
+        """
+        Returns True if any lane has a name.
+
+        Example:
+        >>> heat = HeatData(event="1", heat=1, lanes=[HeatData.Lane(name="Alice")])
+        >>> heat.has_names()
+        True
+        >>> heat = HeatData(event="1", heat=1, lanes=[HeatData.Lane()])
+        >>> heat.has_names()
+        False
+        """
+        return any(lane.name for lane in self._lanes)
+
     def merge(
         self,
         info_from: Optional["HeatData"] = None,
