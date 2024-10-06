@@ -26,8 +26,7 @@ from typing import Callable, Generic, List, Optional, Set, TypeVar
 import PIL.Image as PILImage
 
 from imagecast import DeviceStatus
-from racetimes import RaceTimes
-from startlist import StartList
+from raceinfo import HeatData, StartList
 
 CallbackFn = Callable[[], None]
 
@@ -95,11 +94,11 @@ class StartListVar(GVar[List[StartList]]):
     """An ordered list of start lists"""
 
 
-class RaceResultListVar(GVar[List[RaceTimes]]):
+class RaceResultListVar(GVar[List[HeatData]]):
     """Holds an ordered list of race results."""
 
 
-class RaceResultVar(GVar[Optional[RaceTimes]]):
+class RaceResultVar(GVar[Optional[HeatData]]):
     """A race result"""
 
 

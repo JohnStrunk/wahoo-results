@@ -46,4 +46,6 @@ data file types:
 from .colorado_scb import *
 from .dolphin_do4 import *
 from .heatdata import *
+from .nameformat import *
+from .startlist import *
 from .times import *

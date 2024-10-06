@@ -210,7 +210,7 @@ class TestHeatData:
         )
         return HeatData(event="230", heat=10, lanes=[info1, info2])
 
-    def test_merge_ri(self, result, info):
+    def test_merge_ri(self, result: HeatData, info: HeatData):
         result.merge(info_from=info)
         assert result.event == "230"
         assert result.heat == 10
@@ -223,7 +223,7 @@ class TestHeatData:
             NumericTime(1.6),
         ]
 
-    def test_merge_ir(self, result, info):
+    def test_merge_ir(self, result: HeatData, info: HeatData):
         info.merge(results_from=result)
         assert info.event == "230"
         assert info.heat == 10
@@ -235,3 +235,33 @@ class TestHeatData:
             NumericTime(1.4),
             NumericTime(1.6),
         ]
+
+
+class TestHeatDataPlace:
+    @pytest.fixture(scope="class")
+    def result(self):
+        # Simple time resolver that takes the first time
+        def take_first(times: list[NumericTime]) -> Time:
+            if not times:
+                return NO_SHOW
+            return times[0]
+
+        return HeatData(
+            event="23",
+            heat=1,
+            meet_id="8",
+            race=321,
+            lanes=[
+                HeatData.Lane(times=[NumericTime(1.4), NumericTime(1.6)]),
+                HeatData.Lane(times=[NumericTime(1.8), NumericTime(2.0)]),
+                HeatData.Lane(times=[]),
+                HeatData.Lane(times=[NumericTime(1.0), NumericTime(1.2)]),
+            ],
+            time_resolver=take_first,
+        )
+
+    def test_place(self, result: HeatData):
+        assert result.place(1) == 2
+        assert result.place(2) == 3
+        assert result.place(3) is None
+        assert result.place(4) == 1

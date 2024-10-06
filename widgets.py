@@ -42,7 +42,7 @@ from model import (
     RaceResultVar,
     StartListVar,
 )
-from racetimes import NumericTime
+from raceinfo import DQ, NO_SHOW, NumericTime, is_special_time
 
 TkContainer = Any
 
@@ -132,11 +132,13 @@ class StartListTreeView(ttk.Frame):
         self.tview.delete(*self.tview.get_children())
         local_list = self.startlist.get()
         for entry in local_list:
+            if not entry:
+                continue
             self.tview.insert(
                 "",
                 "end",
-                id=str(entry.event_num),
-                values=[str(entry.event_num), entry.event_name, str(entry.heats)],
+                id=entry[0].event,
+                values=[entry[0].event, entry[0].description, str(len(entry))],
             )
 
 
@@ -294,15 +296,20 @@ class RaceResultView(ttk.LabelFrame):
                     "", "end", id=str(lane), values=[str(lane), "", "", "", ""]
                 )
             else:
-                rawtimes = result.raw_times(lane)
+                rawtimes = result.lane(lane).times
                 timestr = [
                     scoreboard.format_time(t) if t is not None else "" for t in rawtimes
                 ]
-                final = result.final_time(lane)
-                if final.value == NumericTime("0"):
-                    finalstr = ""
+                final = result.lane(lane).time()
+                if not is_special_time(final):
+                    assert isinstance(final, NumericTime)
+                    finalstr = scoreboard.format_time(final)
+                elif final == NO_SHOW:
+                    finalstr = "NS"
+                elif final == DQ:
+                    finalstr = "DQ"
                 else:
-                    finalstr = scoreboard.format_time(final.value)
+                    finalstr = "????"
                 self.tview.insert(
                     "",
                     "end",

@@ -18,13 +18,15 @@
 
 
 import io
+import os
 import re
 from typing import List
 
 from .heatdata import HeatData
+from .startlist import StartList
 
 
-def parse_scb(stream: io.TextIOBase) -> List[HeatData]:
+def parse_scb(stream: io.TextIOBase) -> StartList:
     """
     Construct a StartList from a text stream (file)
 
@@ -86,7 +88,7 @@ def parse_scb(stream: io.TextIOBase) -> List[HeatData]:
     return heatlist
 
 
-def parse_scb_file(file_path: str) -> List[HeatData]:
+def parse_scb_file(file_path: str) -> StartList:
     """
     Read a CTS start list file
 
@@ -101,3 +103,20 @@ def parse_scb_file(file_path: str) -> List[HeatData]:
     """
     with open(file_path, "r", encoding="cp1252") as file:
         return parse_scb(file)
+
+
+def load_all_scb(directory: str) -> List[StartList]:
+    """Load all the start list .scb files from a directory"""
+    files = os.scandir(directory)
+    startlists: List[StartList] = []
+    for file in files:
+        if file.name.endswith(".scb"):
+            try:
+                startlist = parse_scb_file(file.path)
+                startlists.append(startlist)
+            except ValueError:  # Problem parsing the file
+                pass
+            except FileNotFoundError:  # File was deleted after we read the dir
+                pass
+    startlists.sort(key=lambda x: x[0])
+    return startlists

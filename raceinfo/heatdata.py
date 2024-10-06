@@ -16,11 +16,12 @@
 
 """Information describing a heat"""
 
+import re
 from dataclasses import InitVar, dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from .times import NT, NumericTime, Time, TimeResolver
+from .times import NT, NumericTime, Time, TimeResolver, is_special_time
 
 
 @dataclass(kw_only=True)
@@ -162,6 +163,25 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
             raise ValueError("Lane number must be between 1 and 10")
         return self._lanes[lane_number - 1]
 
+    def place(self, lane_number: int) -> Optional[int]:
+        """Retrieve the place for a given lane number"""
+        if self.resolver is None:
+            raise ValueError("No time resolver set")
+        lane = self.lane(lane_number)
+        time = lane.time()
+        if lane.is_empty or lane.is_dq or is_special_time(time):
+            return None
+        assert isinstance(time, NumericTime)  # checked via is_special_time
+        place = 1
+        for other_lane in self._lanes:
+            other_time = other_lane.time()
+            if other_lane.is_empty or other_lane.is_dq or is_special_time(other_time):
+                continue
+            assert isinstance(other_time, NumericTime)  # checked via is_special_time
+            if other_time < time:
+                place += 1
+        return place
+
     def merge(
         self,
         info_from: Optional["HeatData"] = None,
@@ -206,3 +226,40 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
                 dest.times = src.times
                 dest.is_dq = src.is_dq
                 dest.is_empty = src.is_empty
+
+    def __lt__(self, other: "HeatData") -> bool:
+        """
+        Compare two HeatData objects for sorting
+
+        >>> e5h1 = HeatData(event="5", heat=1, lanes=[])
+        >>> e5h2 = HeatData(event="5", heat=2, lanes=[])
+        >>> e5Sh1 = HeatData(event="5S", heat=1, lanes=[])
+        >>> e6h1 = HeatData(event="6", heat=1, lanes=[])
+        >>> e6h2 = HeatData(event="6", heat=2, lanes=[])
+        >>> abcd = HeatData(event="ABCD", heat=1, lanes=[])
+        >>> defg = HeatData(event="defg", heat=1, lanes=[])
+        >>> sorted([e6h2, e6h1, e5Sh1, e5h1, e5h2]) == [e5h1, e5h2, e5Sh1, e6h1, e6h2]
+        True
+        >>> sorted([abcd, e5h1, defg]) == [e5h1, abcd, defg]
+        True
+        """
+        # Sort by event then by heat
+        # The event number is a string, composed of a number and an optional
+        # letter. Sort by the number first, then by the letter. For example,
+        # '1Z' comes before '10S'
+        pattern = r"^(\d+)([A-Z]*)$"
+        self_match = re.match(pattern, self.event.upper())
+        other_match = re.match(pattern, other.event.upper())
+        if not self_match or not other_match:
+            return (
+                self.event.upper() < other.event.upper()
+            )  # Fallback to string comparison
+        self_number = int(self_match.group(1))
+        other_number = int(other_match.group(1))
+        if self_number != other_number:
+            return self_number < other_number
+        self_letter = self_match.group(2)
+        other_letter = other_match.group(2)
+        if self_letter != other_letter:
+            return self_letter < other_letter
+        return self.heat < other.heat
