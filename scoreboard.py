@@ -25,8 +25,15 @@ from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.ImageEnhance import Brightness
 
 from model import Model
-from racetimes import RaceTimes, RawTime
-from startlist import NameMode, format_name
+from raceinfo import (
+    INCONSISTENT,
+    NO_SHOW,
+    HeatData,
+    NameMode,
+    NumericTime,
+    format_name,
+    is_special_time,
+)
 
 
 def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
@@ -67,7 +74,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         size: Tuple[int, int],
-        race: RaceTimes,
+        race: HeatData,
         model: Model,
         background: bool = True,
     ):
@@ -175,7 +182,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         )
         dstart = edge_l + draw.textlength(self._HEAT_SIZE, self._normal_font)
         dwidth = width - dstart
-        desc_txt = self._race.event_name
+        desc_txt = self._race.description
         while draw.textlength(desc_txt, self._normal_font) > dwidth:
             desc_txt = desc_txt[:-1]
         draw.text(
@@ -253,7 +260,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
                 fill=pl_color,
             )
             # Name
-            name_variants = format_name(NameMode.NONE, self._race.name(i))
+            name_variants = format_name(NameMode.NONE, self._race.lane(i).name)
             while draw.textlength(name_variants[0], self._normal_font) > name_width:
                 name_variants.pop(0)
             name = name_variants[0]
@@ -273,15 +280,20 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
                 fill=color,
             )
 
-    def _time_text(self, lane: int) -> str:
-        if self._race.is_noshow(lane):
+    def _time_text(self, lane_num: int) -> str:
+        lane = self._race.lane(lane_num)
+        final_time = lane.time()
+        # Only print NS if someone was supposed to be there
+        if lane.is_empty or final_time == NO_SHOW:
+            if lane.name == "":
+                return ""
             return "NS"
-        final_time = self._race.final_time(lane)
-        if final_time.value == RawTime("0"):
-            return ""
-        if not final_time.is_valid:
+        if final_time == INCONSISTENT:
             return "--:--.--"
-        return format_time(final_time.value)
+        if not is_special_time(final_time):
+            assert isinstance(final_time, NumericTime)
+            return format_time(final_time)
+        return ""
 
     def _baseline(self, line: int) -> int:
         """
@@ -295,18 +307,18 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
         )  # up 1/2 the inter-line space
 
 
-def format_time(seconds: RawTime) -> str:
+def format_time(seconds: NumericTime) -> str:
     """
-    >>> format_time(RawTime('1.2'))
+    >>> format_time(NumericTime('1.2'))
     '01.20'
-    >>> format_time(RawTime('9.87'))
+    >>> format_time(NumericTime('9.87'))
     '09.87'
-    >>> format_time(RawTime('50'))
+    >>> format_time(NumericTime('50'))
     '50.00'
-    >>> format_time(RawTime('120.0'))
+    >>> format_time(NumericTime('120.0'))
     '2:00.00'
     """
-    sixty = RawTime("60")
+    sixty = NumericTime("60")
     minutes = seconds // sixty
     seconds = seconds % sixty
     if minutes == 0:

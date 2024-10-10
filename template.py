@@ -18,86 +18,66 @@
 A scoreboard template for previews and theming
 """
 
-from datetime import datetime
-from typing import List, Optional
-
-from racetimes import RaceTimes, RawTime
-from startlist import StartList
+from raceinfo import HeatData, NumericTime, standard_resolver
 
 
-def get_template() -> RaceTimes:
+def get_template() -> HeatData:
     """
     Returns template data to create a scoreboard mockup
 
     >>> from scoreboard import format_time
+    >>> from raceinfo import NO_SHOW, INCONSISTENT
     >>> t = get_template()
     >>> t.event
-    999
-    >>> t.final_time(1).is_valid
+    '999'
+    >>> isinstance(t.lane(1).time(), NumericTime)
     True
-    >>> format_time(t.final_time(1).value)
+    >>> format_time(t.lane(1).time())
     '99:50.99'
-    >>> t.final_time(2).is_valid
-    False
-    >>> t.final_time(3).is_valid
-    False
-    >>> t.name(3)
-    'BRADY, JUNE A'
-    >>> t.team(3)
+    >>> t.lane(2).time() == NO_SHOW
+    True
+    >>> t.lane(3).time() == INCONSISTENT
+    True
+    >>> t.lane(3).name
+    'Brady, June A'
+    >>> t.lane(3).team
     'TEAM'
     """
-    race = _TemplateRace(2, RawTime("0.30"))
-    race.set_names(_TemplateStartList())
-    return race
-
-
-class _TemplateRace(RaceTimes):
-    @property
-    def event(self) -> int:
-        return 999
-
-    @property
-    def heat(self) -> int:
-        return 99
-
-    def raw_times(self, lane: int) -> List[Optional[RawTime]]:
-        if lane == 2:
-            return [None, None, None]  # no-show
-        if lane == 3:
-            return [RawTime("1"), None, None]  # Too few times -> invalid
-        time = RawTime("59.99") + RawTime("60") * RawTime("99")
-        time = time + lane - 10
-        return [time, time, time]
-
-    @property
-    def time_recorded(self) -> datetime:
-        return datetime.now()
-
-    @property
-    def meet_id(self) -> str:
-        return "000"
-
-
-class _TemplateStartList(StartList):
-    @property
-    def event_name(self) -> str:
-        return "GIRLS 15&O 200 MEDLEY RELAY"
-
-    def name(self, _heat: int, lane: int) -> str:
-        # https://randomwordgenerator.com/name.php
-        names = (
-            "Hutchins, Lorraine O",
-            "English, Cheryl M",
-            "Brady, June A",
-            "Sloan, Michelle T",
-            "Downing, Doreen S",
-            "Collier, Julie G",
-            "Chase, Constance H",
-            "Clark, Leslie J",
-            "Jensen, Kelli N",
-            "Parsons, Marsha L",
-        )
-        return names[lane - 1].upper()
-
-    def team(self, _heat: int, _lane: int) -> str:
-        return "TEAM"
+    basetime = NumericTime("59.99") + NumericTime("60") * NumericTime("99")
+    lt = [basetime + i - 10 for i in range(1, 11)]
+    return HeatData(
+        event="999",
+        heat=99,
+        description="GIRLS 15&O 200 MEDLEY RELAY",
+        lanes=[
+            HeatData.Lane(
+                name="Hutchins, Lorraine O",
+                team="TEAM",
+                times=[lt[0], lt[0], lt[0]],
+            ),
+            HeatData.Lane(name="English, Cheryl M", team="TEAM", times=[]),
+            HeatData.Lane(name="Brady, June A", team="TEAM", times=[NumericTime(1)]),
+            HeatData.Lane(
+                name="Sloan, Michelle T", team="TEAM", times=[lt[3], lt[3], lt[3]]
+            ),
+            HeatData.Lane(
+                name="Downing, Doreen S", team="TEAM", times=[lt[4], lt[4], lt[4]]
+            ),
+            HeatData.Lane(
+                name="Collier, Julie G", team="TEAM", times=[lt[5], lt[5], lt[5]]
+            ),
+            HeatData.Lane(
+                name="Chase, Constance H", team="TEAM", times=[lt[6], lt[6], lt[6]]
+            ),
+            HeatData.Lane(
+                name="Clark, Leslie J", team="TEAM", times=[lt[7], lt[7], lt[7]]
+            ),
+            HeatData.Lane(
+                name="Jensen, Kelli N", team="TEAM", times=[lt[8], lt[8], lt[8]]
+            ),
+            HeatData.Lane(
+                name="Parsons, Marsha L", team="TEAM", times=[lt[9], lt[9], lt[9]]
+            ),
+        ],
+        time_resolver=standard_resolver(2, NumericTime(0.30)),
+    )

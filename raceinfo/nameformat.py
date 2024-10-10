@@ -1,5 +1,5 @@
 # Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
-# Copyright (C) 2022 - John D. Strunk
+# Copyright (C) 2024 - John D. Strunk
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -14,134 +14,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Manipulation of CTS Start Lists"""
+"""Functions for (re)-formatting names"""
 
-import io
-import os
+
 import re
-from abc import ABC
 from enum import Enum, auto, unique
-from typing import Dict, List
-
-
-class StartList(ABC):
-    """Represents the start list for an event"""
-
-    @property
-    def heats(self) -> int:
-        """The number of heats in the event"""
-        return 0
-
-    @property
-    def event_name(self) -> str:
-        """Get the event name (description)"""
-        return ""
-
-    @property
-    def event_num(self) -> int:
-        """Get the event number"""
-        return 0
-
-    def name(self, _heat: int, _lane: int) -> str:
-        """Retrieve the Swimmer's name for a heat/lane"""
-        return ""
-
-    def team(self, _heat: int, _lane: int) -> str:
-        """Retrieve the Swimmer's team for a heat/lane"""
-        return ""
-
-    def is_empty_lane(self, heat: int, lane: int) -> bool:
-        """Returns true if the specified heat/lane has no name or team"""
-        return self.name(heat, lane) == "" and self.team(heat, lane) == ""
-
-
-class CTSStartList(StartList):
-    """Implementation of StartList based on the CTS file format"""
-
-    _event_name: str
-    _event_num: int
-    _heats: List[List[Dict[str, str]]]
-
-    def __init__(self, stream: io.TextIOBase):
-        """
-        Construct a StartList from a text stream (file)
-
-        Example:
-            with open(filename, "r", encoding="cp1252") as file:
-                try:
-                    slist = StartList(file)
-                except ValueError as err: # Parse error
-                    ...
-        """
-        super().__init__()
-        # The following assumes event numbers are always numeric. I believe
-        # this is ok given that we are parsing SCB format start lists. MM
-        # won't export start lists for event numbers containing letters (e.g.,
-        # 10X or 10S)
-        header = stream.readline()
-        match = re.match(r"^#(\d+)\s+(.*)$", header)
-        if not match:
-            raise ValueError("Unable to parse header")
-        self._event_num = int(match.group(1))
-        self._event_name = match.group(2)
-
-        # The format always has 10 lines (lanes) per heat
-        lines = stream.readlines()
-        if len(lines) % 10:
-            raise ValueError("Length is not a multiple of 10")
-        heats = (len(lines)) // 10
-
-        # Reverse the lines because we're going to pop() them later and we
-        # want to read them in order.
-        lines.reverse()
-        self._heats = []
-        for _h in range(heats):
-            heat = []
-            for _lane in range(10):
-                line = lines.pop()
-                # Each entry is fixed length:
-                #  - Swimmer name: 20 char
-                #  - Literal: "--"
-                #  - Swimmer team: 16 char
-                # Total line length: 38 char
-                # Excess area is space-filled
-                match = re.match(r"^(.{20})--(.{16})$", line)
-                if not match:
-                    raise ValueError(f"Unable to parse line: '{line}'")
-                heat.append(
-                    {
-                        "name": match.group(1).strip(),
-                        "team": match.group(2).strip(),
-                    }
-                )
-            self._heats.append(heat)
-
-    @property
-    def heats(self) -> int:
-        """Get the number of heats in the event"""
-        return len(self._heats)
-
-    @property
-    def event_name(self) -> str:
-        """Get the event name (description)"""
-        return self._event_name
-
-    @property
-    def event_num(self) -> int:
-        """Get the event number"""
-        return self._event_num
-
-    def name(self, heat: int, lane: int) -> str:
-        """Retrieve the Swimmer's name for a heat/lane"""
-        if heat > len(self._heats) or heat < 1 or lane > 10 or lane < 1:
-            return ""
-        return self._heats[heat - 1][lane - 1]["name"]
-
-    def team(self, heat: int, lane: int) -> str:
-        """Retrieve the Swimmer's team for a heat/lane"""
-        if heat > len(self._heats) or heat < 1 or lane > 10 or lane < 1:
-            return ""
-        return self._heats[heat - 1][lane - 1]["team"]
+from typing import List
 
 
 @unique
@@ -263,34 +141,3 @@ def _shorter_strings(string: str) -> List[str]:
         shortened = string[:-1]
         return [shortened] + _shorter_strings(shortened)
     return []
-
-
-def from_scb(filename: str) -> StartList:
-    """Create a StartList from a CTS startlist (.SCB) file"""
-    with open(filename, "r", encoding="cp1252") as file:
-        return CTSStartList(file)
-
-
-def events_to_csv(startlists: List[StartList]) -> List[str]:
-    """Convert a list of StartLists to a CSV for the CTS Dolphin"""
-    csv = []
-    for slist in startlists:
-        csv.append(f"{slist.event_num},{slist.event_name},{slist.heats},1,A\n")
-    return csv
-
-
-def load_all_scb(directory: str) -> List[StartList]:
-    """Load all the start list .scb files from a directory"""
-    files = os.scandir(directory)
-    startlists: List[StartList] = []
-    for file in files:
-        if file.name.endswith(".scb"):
-            try:
-                startlist = from_scb(file.path)
-                startlists.append(startlist)
-            except ValueError:  # Problem parsing the file
-                pass
-            except FileNotFoundError:  # File was deleted after we read the dir
-                pass
-    startlists.sort(key=lambda l: l.event_num)
-    return startlists
