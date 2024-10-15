@@ -160,6 +160,10 @@ class RaceTimes(ABC):
             if abs(time - final) > self.threshold:
                 valid = False
         return Time(final, valid)
+    
+    def clear_time(self):
+        """Clear all the times from the scoreboard"""
+        pass
 
     def place(self, lane: int) -> Optional[int]:
         """
@@ -263,6 +267,10 @@ class DO4(RaceTimes):
 
     def raw_times(self, lane: int) -> List[Optional[RawTime]]:
         return self._lanes[lane - 1]
+    
+    def clear_time(self):
+        for time in range(10):
+            self._lanes = [None, None, None]
 
     @property
     def event(self) -> int:
