@@ -48,9 +48,16 @@ import wh_analytics
 import wh_version
 from about import about
 from model import Model
-from racetimes import RaceTimes, RawTime, from_do4
+from raceinfo import (
+    HeatData,
+    NumericTime,
+    load_all_scb,
+    parse_do4_file,
+    parse_scb_file,
+    standard_resolver,
+    startlists_to_csv,
+)
 from scoreboard import ScoreboardImage, waiting_screen
-from startlist import events_to_csv, from_scb, load_all_scb
 from template import get_template
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 from watcher import DO4Watcher, SCBWatcher
@@ -190,20 +197,18 @@ def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
     scb_dir_updated()
 
 
-def summarize_racedir(directory: str) -> List[RaceTimes]:
+def summarize_racedir(directory: str) -> List[HeatData]:
     """Summarize all race results in a directory"""
     files = os.scandir(directory)
-    contents: List[RaceTimes] = []
+    contents: List[HeatData] = []
     for file in files:
         if file.name.endswith(".do4"):
             match = re.match(r"^(\d+)-", file.name)
             if match is None:
                 continue
             try:
-                # min times and threshold don't matter for the summary
-                racetime = from_do4(file.path, 1, RawTime(99.9))
-                contents.append(racetime)
-                #'time': str(filetime.strftime("%Y-%m-%d %H:%M:%S"))
+                result = parse_do4_file(file.path)
+                contents.append(result)
             except ValueError:
                 pass
             except OSError:
@@ -211,31 +216,34 @@ def summarize_racedir(directory: str) -> List[RaceTimes]:
     return contents
 
 
-def load_result(model: Model, filename: str) -> Optional[RaceTimes]:
+def load_result(model: Model, filename: str) -> Optional[HeatData]:
     """Load a result file and corresponding startlist"""
-    racetime: Optional[RaceTimes] = None
+    result: Optional[HeatData] = None
     # Retry mechanism since we get errors if we try to read while it's
     # still being written.
     for tries in range(1, 6):
         try:
-            racetime = from_do4(
-                filename, model.min_times.get(), RawTime(model.time_threshold.get())
+            result = parse_do4_file(filename)
+            result.resolver = standard_resolver(
+                model.min_times.get(), NumericTime(model.time_threshold.get())
             )
+            break
         except ValueError:
             sleep(0.05 * tries)
         except OSError:
             sleep(0.05 * tries)
-    if racetime is None:
+    if result is None:
         return None
-    efilename = f"E{racetime.event:0>3}.scb"
+    efilename = f"E{result.event:0>3}.scb"
     try:
-        startlist = from_scb(os.path.join(model.dir_startlist.get(), efilename))
-        racetime.set_names(startlist)
+        startlist = parse_scb_file(os.path.join(model.dir_startlist.get(), efilename))
+        if len(startlist) >= result.heat:
+            result.merge(info_from=startlist[result.heat - 1])
     except OSError:
         pass
     except ValueError:
         pass
-    return racetime
+    return result
 
 
 def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
@@ -256,14 +264,14 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
     def process_new_result(file: str) -> None:
         """Process a new race result that has been detected"""
         with sentry_sdk.start_transaction(op="new_result", name="New race result"):
-            racetime = load_result(model, file)
-            if racetime is None:
+            result = load_result(model, file)
+            if result is None:
                 return
-            scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, racetime, model)
+            scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, result, model)
             model.scoreboard.set(scoreboard.image)
-            model.latest_result.set(racetime)
+            model.latest_result.set(result)
             num_cc = len([x for x in model.cc_status.get() if x.enabled])
-            wh_analytics.results_received(racetime.has_names, num_cc)
+            wh_analytics.results_received(result.has_names(), num_cc)
             process_racedir()  # update the UI
 
     def do4_dir_updated() -> None:
@@ -336,7 +344,7 @@ def initialize_sentry(model: Model) -> None:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         sample_rate=1.0,
-        traces_sample_rate=1.0,
+        traces_sample_rate=0.3 if execution_environment == "executable" else 0,
         environment=execution_environment,
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
         include_local_variables=True,
@@ -446,7 +454,7 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
     def write_dolphin_csv():
         directory = model.dir_startlist.get()
         slists = load_all_scb(directory)
-        csv = events_to_csv(slists)
+        csv = startlists_to_csv(slists)
         filename = os.path.join(directory, "dolphin_events.csv")
         with open(filename, "w", encoding="cp1252") as file:
             file.writelines(csv)
