@@ -60,3 +60,4 @@ repos:
     rev: "38.115.1"
     hooks:
       - id: renovate-config-validator
+        language_version: lts # Use the LTS version of Node.js
