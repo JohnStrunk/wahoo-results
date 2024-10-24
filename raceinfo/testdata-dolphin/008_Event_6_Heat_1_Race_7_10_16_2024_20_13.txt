@@ -1,0 +1,45 @@
+Event 6  Chars - && in event name
+Heat 1
+Race Number 7
+
+Lane 1
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 2
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 3
+   Timer A       Timer B       Timer C        Final
+=====================================================
+    15.20         15.23         15.22         15.22     
+
+Lane 4
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 5
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 6
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 7
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 8
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 9
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 10
+   Timer A       Timer B       Timer C        Final
+=====================================================
+

@@ -16,14 +16,21 @@ repos:
           (?x)^(
                 chromecast-receiver/cc-receiver-logo\.png|
                 media/cc-receiver-logo\.svg|
-                testdata/.*
+                testdata/.*|
+                raceinfo/testdata-dolphin/.*
             )$
       - id: check-merge-conflict # Check for merge conflict strings
       - id: fix-byte-order-marker # Forbid utf-8 byte order marker
+        exclude: |
+          (?x)^(
+                testdata/.*|
+                raceinfo/testdata-dolphin/.*
+            )$
       - id: end-of-file-fixer # Files end w/ newline
         exclude: |
           (?x)^(
-                testdata/.*
+                testdata/.*|
+                raceinfo/testdata-dolphin/.*
             )$
       - id: trailing-whitespace # Trims trailing whitespace
         args: [--markdown-linebreak-ext=md]
@@ -31,7 +38,8 @@ repos:
           (?x)^(
                 startlist_test\.py|
                 testdata/.*|
-                raceinfo/colorado_scb_test\.py
+                raceinfo/colorado_scb_test\.py|
+                raceinfo/testdata-dolphin/.*
             )$
 
   - repo: https://github.com/adrienverge/yamllint

@@ -1,0 +1,45 @@
+Event 7  Round Prelim
+Heat 1
+Race Number 8
+
+Lane 1
+   Timer A       Timer B       Timer C        Final
+=====================================================
+    12.29         12.28         12.28         12.28     
+
+Lane 2
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 3
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 4
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 5
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 6
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 7
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 8
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 9
+   Timer A       Timer B       Timer C        Final
+=====================================================
+
+Lane 10
+   Timer A       Timer B       Timer C        Final
+=====================================================
+

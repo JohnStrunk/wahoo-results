@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Data>
+  <CTSWirelessTimingSystem>CTS Wireless Timing System Results File Version 1.0</CTSWirelessTimingSystem>
+  <EventNumber>5</EventNumber>
+  <EventName>Three intermediate splits</EventName>
+  <HeatNumber>1</HeatNumber>
+  <Time>10/16/2024 8:13:18 PM</Time>
+  <Lanes>
+    <Lane>
+      <LaneNumber>1</LaneNumber>
+      <Splits>
+        <Split>
+          <TimerA>15.20</TimerA>
+          <TimerB>15.19</TimerB>
+          <TimerC>15.18</TimerC>
+          <SplitFinal>15.19</SplitFinal>
+        </Split>
+        <Split>
+          <TimerA>22.98</TimerA>
+          <TimerB>23.01</TimerB>
+          <TimerC>22.99</TimerC>
+          <SplitFinal>22.99</SplitFinal>
+        </Split>
+        <Split>
+          <TimerA>31.43</TimerA>
+          <TimerB>31.45</TimerB>
+          <TimerC>31.42</TimerC>
+          <SplitFinal>31.43</SplitFinal>
+        </Split>
+        <Split>
+          <TimerA>40.51</TimerA>
+          <TimerB>40.53</TimerB>
+          <TimerC>40.51</TimerC>
+          <SplitFinal>40.51</SplitFinal>
+        </Split>
+      </Splits>
+      <FinalTime>40.51</FinalTime>
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>2</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>3</LaneNumber>
+      <Splits>
+        <Split>
+          <TimerA />
+          <TimerB>01:46.54</TimerB>
+          <TimerC />
+          <SplitFinal>01:46.54</SplitFinal>
+        </Split>
+        <Split>
+          <TimerA />
+          <TimerB>01:53.70</TimerB>
+          <TimerC />
+          <SplitFinal>01:53.70</SplitFinal>
+        </Split>
+        <Split>
+          <TimerA />
+          <TimerB>02:00.46</TimerB>
+          <TimerC />
+          <SplitFinal>02:00.46</SplitFinal>
+        </Split>
+        <Split>
+          <TimerA />
+          <TimerB>02:07.65</TimerB>
+          <TimerC />
+          <SplitFinal>02:07.65</SplitFinal>
+        </Split>
+      </Splits>
+      <FinalTime>02:07.65</FinalTime>
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>4</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>5</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>6</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>7</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>8</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>9</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+    <Lane>
+      <LaneNumber>10</LaneNumber>
+      <Splits />
+      <FinalTime />
+      <Empty>False</Empty>
+      <DQ>False</DQ>
+    </Lane>
+  </Lanes>
+</Data>
