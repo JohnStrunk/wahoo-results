@@ -1,0 +1,12 @@
+Lane,TimerA,TimerB,TimerC,Final,Empty,DQ
+1,,,,,False,False
+2,,31.23,,31.23,False,False
+3,,,,,True,False
+4,52.87,53.38,53.91,53.38,True,False
+5,,,,,False,True
+6,01:15.84,01:16.15,01:16.92,01:16.15,False,True
+7,,,,,False,False
+8,,,,,False,False
+9,,,,,False,False
+10,,,,,False,False
+
