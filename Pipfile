@@ -16,7 +16,7 @@ segment-analytics-python = "~=2.3"
 semver = "~=3.0"
 sentry-sdk = "~=2.13"
 ttkwidgets = "*"
-watchdog = "~=4.0"
+watchdog = "~=5.0"
 
 [dev-packages]
 mdx-truly-sane-lists = "~=1.3"
