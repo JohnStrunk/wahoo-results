@@ -60,4 +60,7 @@ class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
         logger.debug(
             "DO4Watcher: operation=%s, path=%s", event.event_type, event.src_path
         )
-        self._callback(event.src_path)
+        path = event.src_path
+        if isinstance(path, bytes):
+            path = path.decode()
+        self._callback(str(path))
