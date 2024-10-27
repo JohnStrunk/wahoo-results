@@ -53,7 +53,7 @@ def swatch(width: int, height: int, color: str) -> ImageTk.PhotoImage:
     return ImageTk.PhotoImage(img)
 
 
-class ColorButton2(ttk.Button):  # pylint: disable=too-many-ancestors
+class ColorButton2(ttk.Button):
     """Displays a button that allows choosing a color."""
 
     SWATCH_SIZE = 12

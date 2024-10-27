@@ -1,0 +1,16 @@
+target-version = "py311"
+
+[lint]
+select = [
+    "E101", # Pycodestyle: mixed spaces and tabs
+    "E4",   # Pycodestyle: Imports
+    "E7",   # Pycodestyle: misc
+    "E9",   # Pycodestyle: error
+    "F",    # Pyflakes
+    "I",    # isort
+    "PL",   # pylint
+    "RUF",  # Ruff-specific
+]
+
+[format]
+docstring-code-format = true

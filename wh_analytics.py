@@ -40,7 +40,7 @@ def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
     """Event for application startup"""
     analytics.write_key = version.SEGMENT_WRITE_KEY
     analytics.send = model.analytics.get()
-    global _CONTEXT  # pylint: disable=global-statement
+    global _CONTEXT  # noqa: PLW0603
     _CONTEXT = {
         "context": _setup_context(screen_size),
         "race_count": 0,

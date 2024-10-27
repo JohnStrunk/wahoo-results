@@ -42,11 +42,11 @@ logger = logging.getLogger(__name__)
 
 def set_test_mode() -> None:
     """Set the application to test mode"""
-    global TESTING  # pylint: disable=global-statement
+    global TESTING  # noqa: PLW0603
     TESTING = True
 
 
-class Scenario(abc.ABC):  # pylint: disable=too-few-public-methods
+class Scenario(abc.ABC):
     """Base class for test actions"""
 
     @abc.abstractmethod
@@ -152,7 +152,8 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
             Enqueue(model, lambda: model.num_lanes.set(6)),  # Set the number of lanes
             Enqueue(model, lambda: model.min_times.set(2)),  # Set the minimum times
             Enqueue(
-                model, lambda: model.time_threshold.set(0.30)  # Set the time threshold
+                model,
+                lambda: model.time_threshold.set(0.30),  # Set the time threshold
             ),
             ############################################################
             ## Validate creation of event CSV file
@@ -188,7 +189,6 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 lambda: reduce(
                     lambda a, b: a and b,
                     [
-                        # pylint: disable=line-too-long
                         not is_special_time(model.latest_result.get().lane(i).time())  # type: ignore
                         for i in range(1, 6)
                     ],
@@ -230,7 +230,6 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "Lane 1 should not have a name",
             ),
             Validate(
-                # pylint: disable=line-too-long
                 lambda: not is_special_time(model.latest_result.get().lane(1).time()),  # type: ignore
                 "Lane 1 should have a valid time",
             ),
@@ -246,7 +245,6 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "SCB should NOT have names for the heat",
             ),
             Validate(
-                # pylint: disable=line-too-long
                 lambda: not is_special_time(model.latest_result.get().lane(3).time()),  # type: ignore
                 "Lane 3 should have a valid time",
             ),
@@ -262,7 +260,6 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "There should not be an SCB for the event",
             ),
             Validate(
-                # pylint: disable=line-too-long
                 lambda: not is_special_time(model.latest_result.get().lane(3).time()),  # type: ignore
                 "Lane 3 should have a valid time",
             ),
@@ -305,7 +302,6 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "Lane 1 IS NOT a no-show",
             ),
             Validate(
-                # pylint: disable=line-too-long
                 lambda: not is_special_time(model.latest_result.get().lane(2).time()),  # type: ignore
                 "Lane 2 should have a valid time",
             ),
@@ -417,7 +413,7 @@ def eventually(bool_fn: Callable[[], bool], interval_secs: float, tries: int) ->
     return False
 
 
-class Counter:  # pylint: disable=too-few-public-methods
+class Counter:
     """A counter that tracks how often a Tk.Variable has been updated"""
 
     def __init__(self, var: tkinter.Variable) -> None:
@@ -438,7 +434,7 @@ class Counter:  # pylint: disable=too-few-public-methods
         return self._value
 
 
-class Delay(Scenario):  # pylint: disable=too-few-public-methods
+class Delay(Scenario):
     """A scenario that does nothing for a specified amount of time"""
 
     def __init__(self, seconds: float) -> None:
@@ -450,14 +446,14 @@ class Delay(Scenario):  # pylint: disable=too-few-public-methods
         time.sleep(self._seconds)
 
 
-class Fail(Scenario):  # pylint: disable=too-few-public-methods
+class Fail(Scenario):
     """A scenario that always fails"""
 
     def run(self) -> None:
         assert False, "This scenario always fails"
 
 
-class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
+class Repeatedly(Scenario):
     """Run an action repeatedly"""
 
     def __init__(
@@ -488,7 +484,7 @@ class Repeatedly(Scenario):  # pylint: disable=too-few-public-methods
             total_ops += 1
 
 
-class Sequentially(Scenario):  # pylint: disable=too-few-public-methods
+class Sequentially(Scenario):
     """Run each item in a list of actions"""
 
     def __init__(self, actions: List[Scenario]) -> None:
@@ -500,7 +496,7 @@ class Sequentially(Scenario):  # pylint: disable=too-few-public-methods
             action.run()
 
 
-class OneOf(Scenario):  # pylint: disable=too-few-public-methods
+class OneOf(Scenario):
     """Randomly choose one of a list of actions to run"""
 
     def __init__(self, actions: List[Scenario]) -> None:
@@ -511,7 +507,7 @@ class OneOf(Scenario):  # pylint: disable=too-few-public-methods
         random.choice(self._actions).run()
 
 
-class Enqueue(Scenario):  # pylint: disable=too-few-public-methods
+class Enqueue(Scenario):
     """A test operation that runs a function"""
 
     def __init__(self, model: Model, func: Callable[[], None]) -> None:
@@ -533,7 +529,7 @@ class Enqueue(Scenario):  # pylint: disable=too-few-public-methods
         self._model.enqueue(self._fn)
 
 
-class Validate(Scenario):  # pylint: disable=too-few-public-methods
+class Validate(Scenario):
     """A test operation that runs a function"""
 
     def __init__(self, func: Callable[[], bool], message: str = "") -> None:
@@ -552,7 +548,7 @@ class Validate(Scenario):  # pylint: disable=too-few-public-methods
         assert self._fn(), self._message
 
 
-class SetInt(Scenario):  # pylint: disable=too-few-public-methods
+class SetInt(Scenario):
     """Set an integer variable to a random value"""
 
     def __init__(self, model: Model, var: IntVar, minimum: int, maximum: int) -> None:
@@ -576,7 +572,7 @@ class SetInt(Scenario):  # pylint: disable=too-few-public-methods
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
-class SetDouble(Scenario):  # pylint: disable=too-few-public-methods
+class SetDouble(Scenario):
     """Set a double variable to a random value"""
 
     def __init__(
@@ -602,7 +598,7 @@ class SetDouble(Scenario):  # pylint: disable=too-few-public-methods
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
-class SetString(Scenario):  # pylint: disable=too-few-public-methods
+class SetString(Scenario):
     """Set a string variable to a random value"""
 
     def __init__(
@@ -632,7 +628,7 @@ class SetString(Scenario):  # pylint: disable=too-few-public-methods
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
-class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
+class AddStartlist(Scenario):
     """Copy a startlist file into the startlists directory"""
 
     def __init__(self, testdatadir: str, startlistdir: str) -> None:
@@ -668,7 +664,7 @@ class AddStartlist(Scenario):  # pylint: disable=too-few-public-methods
             shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)
 
 
-class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
+class RemoveStartlist(Scenario):
     """Remove a startlist file from the startlists directory"""
 
     def __init__(self, startlistdir: str) -> None:
@@ -693,7 +689,7 @@ class RemoveStartlist(Scenario):  # pylint: disable=too-few-public-methods
             os.remove(os.path.join(self._startlistdir, startlist))
 
 
-class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
+class AddDO4(Scenario):
     """Copy a specific do4 file into the do4 directory"""
 
     def __init__(
@@ -735,7 +731,7 @@ class AddDO4(Scenario):  # pylint: disable=too-few-public-methods
             ), "DO4 file was not processed"
 
 
-class AddRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
+class AddRandomDO4(Scenario):
     """Copy a random do4 file into the do4 directory"""
 
     def __init__(self, testdatadir: str, do4dir: str, counters: List[Counter]) -> None:
@@ -764,7 +760,7 @@ class AddRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
             AddDO4(self._testdatadir, self._do4dir, do4, self._counters).run()
 
 
-class RemoveRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
+class RemoveRandomDO4(Scenario):
     """Remove a do4 file from the do4 directory"""
 
     def __init__(self, do4dir: str) -> None:
@@ -787,7 +783,7 @@ class RemoveRandomDO4(Scenario):  # pylint: disable=too-few-public-methods
             os.remove(os.path.join(self._do4dir, do4))
 
 
-class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
+class GenDolphinCSV(Scenario):
     """Generate the dolphin event CSV file and verify its contents"""
 
     def __init__(self, model: Model, startlistdir: str) -> None:
@@ -826,7 +822,7 @@ class GenDolphinCSV(Scenario):  # pylint: disable=too-few-public-methods
             return []
 
 
-class LoadAllSCB(Scenario):  # pylint: disable=too-few-public-methods
+class LoadAllSCB(Scenario):
     """Load all SCB files in the startlists directory"""
 
     def __init__(self, testdatadir: str, startlistdir: str) -> None:
@@ -856,7 +852,7 @@ class LoadAllSCB(Scenario):  # pylint: disable=too-few-public-methods
             shutil.copy(os.path.join(self._testdatadir, startlist), self._startlistdir)
 
 
-class EnableChromecast(Scenario):  # pylint: disable=too-few-public-methods
+class EnableChromecast(Scenario):
     """Enable a random Chromecast device"""
 
     def __init__(self, model: Model) -> None:
@@ -883,7 +879,7 @@ class EnableChromecast(Scenario):  # pylint: disable=too-few-public-methods
             ).run()  # Ensure the queue is serviced before returning
 
 
-class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
+class DisableChromecast(Scenario):
     """Disable a random Chromecast device"""
 
     def __init__(self, model: Model) -> None:
@@ -910,7 +906,7 @@ class DisableChromecast(Scenario):  # pylint: disable=too-few-public-methods
             ).run()  # Ensure the queue is serviced before returning
 
 
-class ToggleChromecast(Scenario):  # pylint: disable=too-few-public-methods
+class ToggleChromecast(Scenario):
     """Toggle a random Chromecast device"""
 
     def __init__(self, model: Model) -> None:
@@ -939,7 +935,7 @@ class ToggleChromecast(Scenario):  # pylint: disable=too-few-public-methods
             ).run()  # Ensure the queue is serviced before returning
 
 
-class _FlushQueue(Scenario):  # pylint: disable=too-few-public-methods
+class _FlushQueue(Scenario):
     """Flush the model's queue"""
 
     def __init__(self, model: Model) -> None:

@@ -102,7 +102,7 @@ class RaceResultVar(GVar[Optional[HeatData]]):
     """A race result"""
 
 
-class Model:  # pylint: disable=too-many-instance-attributes
+class Model:
     """Defines the state variables (model) for the main UI"""
 
     ## Colors from USA-S visual identity standards

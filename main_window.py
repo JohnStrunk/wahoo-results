@@ -140,8 +140,7 @@ class _configTab(ttk.Frame):
         self._options_frame(self).grid(column=1, row=0, sticky="news")
         self._preview(self).grid(column=1, row=1, sticky="news")
 
-    # pylint: disable=too-many-statements
-    def _appearance(self, parent: Widget) -> Widget:
+    def _appearance(self, parent: Widget) -> Widget:  # noqa: PLR0915
         mainframe = ttk.LabelFrame(parent, text="Appearance")
 
         txt_frame = ttk.Frame(mainframe)
