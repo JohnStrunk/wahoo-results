@@ -16,7 +16,6 @@
 
 """Functions to read results from a Colorado Dolphin timing system"""
 
-
 import io
 import os
 import re
@@ -83,7 +82,7 @@ def parse_do4(stream: io.TextIOBase) -> HeatData:
     heat = int(match.group(2))
 
     lines = stream.readlines()
-    if len(lines) != 11:
+    if len(lines) != 11:  # noqa: PLR2004
         raise ValueError("Invalid number of lines in file")
     lanes: List[HeatData.Lane] = []
     for lane in range(10):

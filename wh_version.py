@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """Version information"""
+
 import datetime
 import re
 from typing import List, Optional
@@ -25,7 +26,6 @@ import requests
 import semver.version  # type: ignore
 
 
-# pylint: disable=too-few-public-methods
 class ReleaseInfo:
     """
     ReleaseInfo describes a single release from a GitHub repository.
@@ -74,10 +74,12 @@ def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
     version tag. Assumes the tag is the semver string with an optional leading
     "v" (e.g., "1.2" or "v1.2")
 
-    >>> rdict = {"html_url": "",
-    ...          "draft": False,
-    ...          "prerelease": False,
-    ...          "published_at": "2020-01-01 00:00:00"}
+    >>> rdict = {
+    ...     "html_url": "",
+    ...     "draft": False,
+    ...     "prerelease": False,
+    ...     "published_at": "2020-01-01 00:00:00",
+    ... }
     >>> v1 = ReleaseInfo(rdict | {"tag_name": "v1.0.0"})
     >>> v2 = ReleaseInfo(rdict | {"tag_name": "v2.0.0"})
     >>> v3 = ReleaseInfo(rdict | {"tag_name": "v3.0.0"})
@@ -102,11 +104,11 @@ def git_semver(wrv: str) -> str:
     identifier.
 
     Git describe should be converted:
-    >>> git_semver('v0.3.2-2-g97e7a82')
+    >>> git_semver("v0.3.2-2-g97e7a82")
     '0.3.3-dev.2+97e7a82'
 
     Don't bump patch if it's a pre-release
-    >>> git_semver('v1.2.3-pre4-5-gbadbeef')
+    >>> git_semver("v1.2.3-pre4-5-gbadbeef")
     '1.2.3-pre4.dev.5+badbeef'
     """
     # groups: tag (w/o v), commits, hash (w/ g)
@@ -142,10 +144,12 @@ def is_latest_version(latest_version: Optional[ReleaseInfo], wrv: str) -> bool:
     """
     Returns true if the running version is the most recent
 
-    >>> rdict = {"html_url": "",
-    ...          "draft": False,
-    ...          "prerelease": False,
-    ...          "published_at": "2020-01-01 00:00:00"}
+    >>> rdict = {
+    ...     "html_url": "",
+    ...     "draft": False,
+    ...     "prerelease": False,
+    ...     "published_at": "2020-01-01 00:00:00",
+    ... }
     >>> is_latest_version(ReleaseInfo(rdict | {"tag_name": "v1.0.0"}), "0.9.0")
     False
     >>> is_latest_version(ReleaseInfo(rdict | {"tag_name": "v1.0.0"}), "1.9.0")

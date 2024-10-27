@@ -78,7 +78,7 @@ class ICController(BaseMediaPlayer):
         logger.debug("quick_play done")
 
 
-class ImageCast:  # pylint: disable=too-many-instance-attributes
+class ImageCast:
     """
     The ImageCast class encapsulates everything necessary to cast images to a
     set of Chromecast devices.
@@ -242,7 +242,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
         class WSHandler(BaseHTTPRequestHandler):
             """Handle web requests coming from the CCs"""
 
-            def do_GET(self):  # pylint: disable=invalid-name
+            def do_GET(self):
                 """Respond to CC w/ the current image"""
                 with sentry_sdk.start_transaction(op="http", name="GET"):
                     self.send_response(200)
@@ -251,7 +251,7 @@ class ImageCast:  # pylint: disable=too-many-instance-attributes
                     if parent.image is not None:
                         parent.image.save(self.wfile, "PNG", optimize=True)
 
-            def log_message(self, format, *args):  # pylint: disable=redefined-builtin
+            def log_message(self, format, *args):
                 logger.debug(format, *args)
 
         def _webserver_run():

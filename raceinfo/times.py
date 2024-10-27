@@ -56,6 +56,9 @@ NumericTime = Decimal
 Time = Union[NumericTime, SpecialTime]
 """A Time is either a NumericTime or a special time designator"""
 
+ZERO_TIME = NumericTime("0.00")
+"""A time of zero seconds"""
+
 
 def is_special_time(time: Time) -> bool:
     """Returns True if the time is a special time designator"""
@@ -66,13 +69,13 @@ def _truncate_hundredths(time: NumericTime) -> NumericTime:
     """
     Truncates a Time to two decimal places.
 
-    >>> _truncate_hundredths(NumericTime('100.00'))
+    >>> _truncate_hundredths(NumericTime("100.00"))
     Decimal('100.00')
-    >>> _truncate_hundredths(NumericTime('99.999'))
+    >>> _truncate_hundredths(NumericTime("99.999"))
     Decimal('99.99')
-    >>> _truncate_hundredths(NumericTime('10.987'))
+    >>> _truncate_hundredths(NumericTime("10.987"))
     Decimal('10.98')
-    >>> _truncate_hundredths(NumericTime('100.123'))
+    >>> _truncate_hundredths(NumericTime("100.123"))
     Decimal('100.12')
     """
     return time.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
@@ -127,14 +130,14 @@ def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
             return INCONSISTENT
         # Calculate the candidate final time
         real_times.sort()
-        if num_times >= 3:
+        if num_times >= 3:  # noqa: PLR2004
             if num_times % 2 == 0:
                 final = (
                     real_times[num_times // 2 - 1] + real_times[num_times // 2]
                 ) / 2
             else:
                 final = real_times[num_times // 2]
-        elif num_times == 2:
+        elif num_times == 2:  # noqa: PLR2004
             final = (real_times[0] + real_times[1]) / 2
         else:
             final = real_times[0]

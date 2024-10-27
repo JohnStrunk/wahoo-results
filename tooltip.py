@@ -12,7 +12,7 @@ Modified to include a delay time by Victor Zaccardo, 25mar16
 import tkinter as tk
 
 
-class ToolTip:  # pylint: disable=too-few-public-methods
+class ToolTip:
     """
     create a tooltip for a given widget
     """
@@ -46,7 +46,6 @@ class ToolTip:  # pylint: disable=too-few-public-methods
             self.widget.after_cancel(my_id)
 
     def _showtip(self, _=None):
-        # pylint: disable=invalid-name
         x = y = 0
         x, y, _, _ = self.widget.bbox("insert")
         x += self.widget.winfo_rootx() + 25

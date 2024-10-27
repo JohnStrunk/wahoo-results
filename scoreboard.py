@@ -17,6 +17,7 @@
 """
 Generates an image of the scoreboard from a RaceTimes object.
 """
+
 from typing import Optional, Tuple
 
 import sentry_sdk
@@ -49,7 +50,7 @@ def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
     return img
 
 
-class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
+class ScoreboardImage:
     """
     Generate a scoreboard image from a RaceTimes object.
 
@@ -193,7 +194,7 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
             fill=self._model.color_event.get(),
         )
 
-    def _draw_lanes(self) -> None:  # pylint: disable=too-many-locals
+    def _draw_lanes(self) -> None:
         draw = ImageDraw.Draw(self._img)
         edge_l = int(self.size[0] * self._BORDER_FRACTION)
         edge_r = int(self.size[0] * (1 - self._BORDER_FRACTION))
@@ -247,9 +248,9 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
             pl_color = color
             if pl_num == 1:
                 pl_color = self._model.color_first.get()
-            if pl_num == 2:
+            if pl_num == 2:  # noqa: PLR2004
                 pl_color = self._model.color_second.get()
-            if pl_num == 3:
+            if pl_num == 3:  # noqa: PLR2004
                 pl_color = self._model.color_third.get()
             ptxt = format_place(pl_num)
             draw.text(
@@ -309,13 +310,13 @@ class ScoreboardImage:  # pylint: disable=too-many-instance-attributes
 
 def format_time(seconds: NumericTime) -> str:
     """
-    >>> format_time(NumericTime('1.2'))
+    >>> format_time(NumericTime("1.2"))
     '01.20'
-    >>> format_time(NumericTime('9.87'))
+    >>> format_time(NumericTime("9.87"))
     '09.87'
-    >>> format_time(NumericTime('50'))
+    >>> format_time(NumericTime("50"))
     '50.00'
-    >>> format_time(NumericTime('120.0'))
+    >>> format_time(NumericTime("120.0"))
     '2:00.00'
     """
     sixty = NumericTime("60")
@@ -356,8 +357,8 @@ def format_place(place: Optional[int]) -> str:
         return ""
     if place == 1:
         return "1st"
-    if place == 2:
+    if place == 2:  # noqa: PLR2004
         return "2nd"
-    if place == 3:
+    if place == 3:  # noqa: PLR2004
         return "3rd"
     return f"{place}th"

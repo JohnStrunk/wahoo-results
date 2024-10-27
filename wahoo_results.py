@@ -364,7 +364,7 @@ def initialize_sentry(model: Model) -> None:
     )
 
 
-def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
+def main() -> None:  # noqa: PLR0915
     """Main program"""
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
@@ -485,7 +485,6 @@ def main() -> None:  # pylint: disable=too-many-statements,too-many-locals
     # and we're running in exe mode
     try:
         root.update()
-        # pylint: disable=import-error,import-outside-toplevel
         import pyi_splash  # type: ignore
 
         if pyi_splash.is_alive():

@@ -213,12 +213,12 @@ class TestColoradoSCB:
 
     def test_can_read_event(self, scb_two_heats):
         heatlist = parse_scb(scb_two_heats)
-        assert len(heatlist) == 2
+        assert len(heatlist) == 2  # noqa: PLR2004
         for heat in heatlist:
             assert heat.event == "18"
             assert heat.description == "BOYS 10&U 50 FLY"
         assert heatlist[0].heat == 1
-        assert heatlist[1].heat == 2
+        assert heatlist[1].heat == 2  # noqa: PLR2004
 
     def test_invalid_header_throws(self, scb_invalid_header):
         with pytest.raises(ValueError):

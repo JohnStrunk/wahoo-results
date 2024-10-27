@@ -16,6 +16,8 @@
 
 """Tests for HeatData"""
 
+# ruff: noqa: PLR2004 - Ignore magic numbers
+
 import pytest
 
 from .heatdata import HeatData

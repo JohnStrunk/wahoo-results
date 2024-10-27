@@ -16,7 +16,6 @@
 
 """Functions for (re)-formatting names"""
 
-
 import re
 from enum import Enum, auto, unique
 from typing import List
@@ -42,8 +41,7 @@ class NameMode(Enum):
     """Format name as: Last"""
 
 
-# pylint: disable=too-many-return-statements
-def arrange_name(how: NameMode, name: str) -> str:
+def arrange_name(how: NameMode, name: str) -> str:  # noqa: PLR0911
     """
     Change the format of a name from a start list.
 
@@ -129,7 +127,7 @@ def format_name(how: NameMode, name: str) -> List[str]:
         variants = format_name(NameMode.LAST, name)
     if how == NameMode.LAST:
         variants = _shorter_strings(arrange_name(how, name))
-    return [arrange_name(how, name)] + variants
+    return [arrange_name(how, name), *variants]
 
 
 def _shorter_strings(string: str) -> List[str]:
@@ -139,5 +137,5 @@ def _shorter_strings(string: str) -> List[str]:
     """
     if len(string) > 0:
         shortened = string[:-1]
-        return [shortened] + _shorter_strings(shortened)
+        return [shortened, *_shorter_strings(shortened)]
     return []

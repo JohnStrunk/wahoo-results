@@ -16,7 +16,6 @@
 
 """Functions to read CTS start list files"""
 
-
 import io
 import os
 import re

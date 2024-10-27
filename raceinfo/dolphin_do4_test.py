@@ -203,7 +203,7 @@ class TestDolphinDo4:
         noshow = parse_do4(do4_one_time)
         assert noshow.lane(6).times == [NumericTime(0), NumericTime(0), NumericTime(0)]
         assert noshow.lane(6).is_empty
-        assert noshow.lane(6).is_dq == False
+        assert noshow.lane(6).is_dq is False
         assert noshow.lane(10).is_empty
 
     def test_parse_no_event(self, do4_no_event) -> None:

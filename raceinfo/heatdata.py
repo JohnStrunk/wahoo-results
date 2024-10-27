@@ -21,11 +21,11 @@ from dataclasses import InitVar, dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from .times import NT, NumericTime, Time, TimeResolver, is_special_time
+from .times import NT, ZERO_TIME, NumericTime, Time, TimeResolver, is_special_time
 
 
 @dataclass(kw_only=True)
-class HeatData:  # pylint: disable=too-many-instance-attributes
+class HeatData:
     """
     Information describing a heat
 
@@ -49,7 +49,7 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
     """
 
     @dataclass(kw_only=True)
-    class Lane:  # pylint: disable=too-many-instance-attributes
+    class Lane:
         """The per-lane information for a heat"""
 
         # Swimmer information
@@ -57,7 +57,7 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
         """The name of the swimmer"""
         team: str = ""
         """The name of the swimmer's team"""
-        seed_time: Time = NumericTime(0)
+        seed_time: Time = ZERO_TIME
         """The swimmer's seed time (0 if not available)"""
         age: int = 0
         """The swimmer's age (0=unknown)"""
@@ -146,9 +146,9 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
     def __post_init__(self, lanes: list[Lane], time_resolver: Optional[TimeResolver]):
         self._lanes = lanes
         # Ensure that we have 10 lanes, even if they are empty
-        if len(self._lanes) > 10:
+        if len(self._lanes) > 10:  # noqa: PLR2004
             raise ValueError("The maximum number of lanes is 10")
-        while len(self._lanes) < 10:
+        while len(self._lanes) < 10:  # noqa: PLR2004
             self._lanes.append(self.Lane(is_empty=True))
         self.event = self.event.upper()
         if self.heat < 1:
@@ -159,7 +159,7 @@ class HeatData:  # pylint: disable=too-many-instance-attributes
 
     def lane(self, lane_number: int) -> Lane:
         """Retrieve the lane object for a given lane number"""
-        if lane_number < 1 or lane_number > 10:
+        if lane_number < 1 or lane_number > 10:  # noqa: PLR2004
             raise ValueError("Lane number must be between 1 and 10")
         return self._lanes[lane_number - 1]
 
