@@ -75,6 +75,48 @@ jobs:
         shell: cmd
         run: pre-commit gc
 
+  docs:
+    name: Documentation
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        # https://github.com/actions/checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Python
+        # https://github.com/actions/setup-python
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pipenv'
+
+      # Add Scripts directory to the path so that pipenv (and associated
+      # utilities) can be used once installed
+      - name: Add python Scripts directory to path
+        shell: cmd
+        # Code-page switch is needed to write the env file as utf-8
+        run: |
+          chcp 65001
+          python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
+          chcp 1252
+
+      - name: Install pipx
+        shell: cmd
+        run: python -m pip install pipx
+
+      - name: Install pipenv
+        shell: cmd
+        run: pipx install pipenv==${{ env.PIPENV_INSTALL_VERSION }}
+
+      - name: Initialize virtual environment
+        shell: cmd
+        run: pipenv sync --no-site-packages -v --categories docs
+
+      - name: Build docs
+        shell: cmd
+        run: pipenv run mkdocs build --strict
+
   test:
     name: Test
     runs-on: windows-latest
@@ -216,7 +258,7 @@ jobs:
 
   success:
     name: Successful CI
-    needs: [autotest, precommit, test]
+    needs: [autotest, docs, precommit, test]
     runs-on: windows-latest
     steps:
       - name: Success
