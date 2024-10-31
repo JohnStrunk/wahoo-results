@@ -8,7 +8,7 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2024.2.0"
+  PIPENV_INSTALL_VERSION: "2024.3.1"
   CATEGORIES: "packages,dev-packages,docs"
 
 jobs:
