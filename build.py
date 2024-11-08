@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Python script to build Wahoo! Results executable"""
+"""Python script to build Wahoo! Results executable."""
 
 import os
 import shutil
@@ -45,7 +45,7 @@ print(f"Building Wahoo Results, version: {wr_version}")
 version = semver.version.Version.parse(wr_version)
 
 with open("version.py", "w") as f:
-    f.write('"""Version information"""\n\n')
+    f.write('"""Version information."""\n\n')
     f.write(f'WAHOO_RESULTS_VERSION = "{wr_version}"\n')
 
     # Sentry API key
@@ -83,32 +83,32 @@ v = vinfo.VSVersionInfo(
         subtype=0x0,
     ),
     kids=[
-        vinfo.StringFileInfo(
+        vinfo.StringFileInfo(  # type: ignore
             [
-                vinfo.StringTable(
+                vinfo.StringTable(  # type: ignore
                     "040904e4",
                     [
                         # https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
                         # Required fields:
-                        vinfo.StringStruct("CompanyName", "John D. Strunk"),
-                        vinfo.StringStruct("FileDescription", "Wahoo! Results"),
-                        vinfo.StringStruct("FileVersion", wr_version),
-                        vinfo.StringStruct("InternalName", "wahoo_results"),
-                        vinfo.StringStruct("ProductName", "Wahoo! Results"),
-                        vinfo.StringStruct("ProductVersion", wr_version),
-                        vinfo.StringStruct("OriginalFilename", "wahoo-results.exe"),
+                        vinfo.StringStruct("CompanyName", "John D. Strunk"),  # type: ignore
+                        vinfo.StringStruct("FileDescription", "Wahoo! Results"),  # type: ignore
+                        vinfo.StringStruct("FileVersion", wr_version),  # type: ignore
+                        vinfo.StringStruct("InternalName", "wahoo_results"),  # type: ignore
+                        vinfo.StringStruct("ProductName", "Wahoo! Results"),  # type: ignore
+                        vinfo.StringStruct("ProductVersion", wr_version),  # type: ignore
+                        vinfo.StringStruct("OriginalFilename", "wahoo-results.exe"),  # type: ignore
                         # Optional fields
-                        vinfo.StringStruct(
+                        vinfo.StringStruct(  # type: ignore
                             "LegalCopyright", "(c) John D. Strunk - AGPL-3.0-or-later"
                         ),
                     ],
                 )
             ]
         ),
-        vinfo.VarFileInfo(
+        vinfo.VarFileInfo(  # type: ignore
             [
                 # 1033 -> Engligh; 1252 -> charsetID
-                vinfo.VarStruct("Translation", [1033, 1252])
+                vinfo.VarStruct("Translation", [1033, 1252])  # type: ignore
             ]
         ),
     ],

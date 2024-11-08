@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Version information"""
+"""Version information."""
 
 import datetime
 import re
@@ -27,9 +27,7 @@ import semver.version  # type: ignore
 
 
 class ReleaseInfo:
-    """
-    ReleaseInfo describes a single release from a GitHub repository.
-    """
+    """ReleaseInfo describes a single release from a GitHub repository."""
 
     tag: str  # The git tag of the release
     url: str  # The url to the release page
@@ -38,7 +36,11 @@ class ReleaseInfo:
     published: datetime.datetime  # When the release was published
     semver: str  # The version corresponding to the tag
 
-    def __init__(self, release_json):
+    def __init__(self, release_json: dict):
+        """Construct a ReleaseInfo object from a JSON dictionary.
+
+        :param release_json: The JSON dictionary from the GitHub API
+        """
         self.tag = release_json["tag_name"]
         self.url = release_json["html_url"]
         self.draft = release_json["draft"]
@@ -51,9 +53,13 @@ class ReleaseInfo:
 
 
 def releases(user_repo: str) -> List[ReleaseInfo]:
-    """
-    Retrieves the list of releases for the provided repo. user_repo should be
-    of the form "user/repo" (i.e., "JohnStrunk/wahoo-results")
+    """Retrieve the list of releases for the provided repo.
+
+    user_repo should be of the form "user/repo" (i.e.,
+    "JohnStrunk/wahoo-results")
+
+    :param user_repo: The GitHub user/repo to retrieve releases from
+    :returns: A list of ReleaseInfo objects
     """
     url = f"https://api.github.com/repos/{user_repo}/releases"
     # The timeout may be too fast, but it's going to hold up displaying the
@@ -69,10 +75,10 @@ def releases(user_repo: str) -> List[ReleaseInfo]:
 
 
 def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
-    """
-    Takes a list of releases and returns the one with the highest semantic
-    version tag. Assumes the tag is the semver string with an optional leading
-    "v" (e.g., "1.2" or "v1.2")
+    """Take a list of releases and return the one with the highest semantic version tag.
+
+    Assumes the tag is the semver string with an optional leading "v" (e.g.,
+    "1.2" or "v1.2")
 
     >>> rdict = {
     ...     "html_url": "",
@@ -99,9 +105,10 @@ def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
 
 
 def git_semver(wrv: str) -> str:
-    """
-    Returns a legal semver description of the Wahoo Results version
-    identifier.
+    """Return a legal semver description of the Wahoo Results version identifier.
+
+    :param wrv: The wahoo-results version string
+    :returns: A semver string
 
     Git describe should be converted:
     >>> git_semver("v0.3.2-2-g97e7a82")
@@ -133,7 +140,7 @@ def git_semver(wrv: str) -> str:
 
 
 def latest() -> Optional[ReleaseInfo]:
-    """Retrieves the latest release info"""
+    """Retrieve the latest release info."""
     rlist = releases("JohnStrunk/wahoo-results")
     if len(rlist) == 0:
         return None
@@ -141,8 +148,7 @@ def latest() -> Optional[ReleaseInfo]:
 
 
 def is_latest_version(latest_version: Optional[ReleaseInfo], wrv: str) -> bool:
-    """
-    Returns true if the running version is the most recent
+    """Return true if the running version is the most recent.
 
     >>> rdict = {
     ...     "html_url": "",

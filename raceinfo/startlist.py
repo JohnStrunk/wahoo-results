@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Functions for manipulating Startlists"""
+"""Functions for manipulating Startlists."""
 
 from .heatdata import HeatData
 
@@ -31,15 +31,13 @@ They should:
 
 def is_valid(startlist: StartList) -> bool:
     """
-    Check if a StartList is valid
+    Check if a StartList is valid.
 
-    Parameters:
-        - startlist: The StartList to check
+    :param startlist: The StartList to check
+    :returns: True if the StartList is valid, False otherwise
 
-    Returns:
-        True if the StartList is valid, False otherwise
-
-    Example:
+    Example usage::
+    .. code-block:: python
         if not is_valid(startlist):
             ...
     """
@@ -58,15 +56,13 @@ def is_valid(startlist: StartList) -> bool:
 
 def startlists_to_csv(startlists: list[StartList]) -> list[str]:
     """
-    Convert a list of StartLists to a list of CSV strings
+    Convert a list of StartLists to a list of CSV strings.
 
-    Parameters:
-        - startlists: The list of StartLists to convert
+    :param startlists: The list of StartLists to convert
+    :returns: A list of CSV strings, one for each StartList
 
-    Returns:
-        A list of CSV strings, one for each StartList
-
-    Example:
+    Example usage::
+    .. code-block:: python
         csv_strings = startlists_to_csv(startlists)
     """
     csv: list[str] = []

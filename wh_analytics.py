@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Application usage analytics"""
+"""Application usage analytics."""
 
 import locale
 import platform
@@ -37,7 +37,11 @@ _CONTEXT: Dict[str, Any] = {}
 
 
 def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
-    """Event for application startup"""
+    """Event for application startup.
+
+    :param model: Application model object
+    :param screen_size: Screen size in pixels
+    """
     analytics.write_key = version.SEGMENT_WRITE_KEY
     analytics.send = model.analytics.get()
     global _CONTEXT  # noqa: PLW0603
@@ -61,7 +65,10 @@ def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
 
 
 def application_stop(model: Model) -> None:
-    """Event for application shutdown"""
+    """Event for application shutdown.
+
+    :param model: Application model object
+    """
     _send_event(
         "Scoreboard stopped",
         {
@@ -80,7 +87,11 @@ def application_stop(model: Model) -> None:
 
 
 def results_received(has_names: bool, chromecasts: int) -> None:
-    """Event for race results"""
+    """Event for race results.
+
+    :param has_names: True if names are included in the results
+    :param chromecasts: Number of Chromecast devices currently enabled
+    """
     _CONTEXT["race_count"] += 1
     if has_names:
         _CONTEXT["race_count_with_names"] += 1
@@ -90,17 +101,20 @@ def results_received(has_names: bool, chromecasts: int) -> None:
 
 
 def documentation_link() -> None:
-    """Follow link to docs event"""
+    """Follow link to online docs."""
     _send_event("Documentation click")
 
 
 def update_link() -> None:
-    """Follow link to dl latest version event"""
+    """Follow link to download latest version."""
     _send_event("DownloadUpdate click")
 
 
 def set_cts_directory(changed: bool) -> None:
-    """Set CTS start list directory"""
+    """Set CTS start list directory.
+
+    :param changed: True if the directory was changed
+    """
     _send_event(
         "Browse CTS directory",
         {
@@ -110,7 +124,10 @@ def set_cts_directory(changed: bool) -> None:
 
 
 def wrote_dolphin_csv(num_events: int) -> None:
-    """Dolphin CSV event list written"""
+    """Dolphin CSV event list written.
+
+    :param num_events: Number of events in the CSV file
+    """
     _send_event(
         "Write Dolphin CSV",
         {
@@ -120,7 +137,10 @@ def wrote_dolphin_csv(num_events: int) -> None:
 
 
 def set_do4_directory(changed: bool) -> None:
-    """Set directory to watch for do4 files"""
+    """Set directory to watch for do4 files.
+
+    :param changed: True if the directory was changed
+    """
     _send_event(
         "Browse D04 directory",
         {
@@ -130,7 +150,10 @@ def set_do4_directory(changed: bool) -> None:
 
 
 def cc_toggle(enable: bool) -> None:
-    """Enable/disable Chromecast"""
+    """Enable/disable a Chromecast.
+
+    :param enable: True to enable, False to disable
+    """
     _send_event(
         "Set Chromecast state",
         {

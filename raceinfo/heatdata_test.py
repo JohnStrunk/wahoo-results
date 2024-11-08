@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Tests for HeatData"""
+"""Tests for HeatData object."""
 
 # ruff: noqa: PLR2004 - Ignore magic numbers
 
@@ -25,8 +25,11 @@ from .times import NO_SHOW, NT, NumericTime, Time
 
 
 class TestHeatData:
+    """Tests for HeatData object."""
+
     @pytest.fixture(scope="class")
     def setup_startlist(self) -> HeatData:
+        """Create a HeatData object that is a startlist."""
         return HeatData(
             description="100 Fly",
             event="123Z",
@@ -51,13 +54,13 @@ class TestHeatData:
         )
 
     def test_startlist_init(self, setup_startlist: HeatData):
-        """Initialization of HeatData object"""
+        """Initialization of HeatData object."""
         assert setup_startlist.description == "100 Fly"
         assert setup_startlist.event == "123Z"
         assert setup_startlist.heat == 3
 
     def test_startlist_lane_init(self, setup_startlist: HeatData):
-        """Initialization of Lane object"""
+        """Initialization of Lane object."""
         lane = setup_startlist.lane(1)
         assert lane.name == "Alice"
         assert lane.team == "Team A"
@@ -70,6 +73,7 @@ class TestHeatData:
         assert lane.age == 99
 
     def test_startlist_max_lanes(self):
+        """Ensure we can't have more than 10 lanes."""
         with pytest.raises(ValueError):
             HeatData(
                 description="200 Freestyle",
@@ -79,6 +83,7 @@ class TestHeatData:
             )
 
     def test_startlist_negative_age(self):
+        """Ensure we can't have a negative age."""
         with pytest.raises(ValueError):
             HeatData.Lane(
                 name="Alice",
@@ -88,6 +93,7 @@ class TestHeatData:
             )
 
     def test_startlist_negative_seed_time(self):
+        """Ensure we can't have a negative seed time."""
         with pytest.raises(ValueError):
             HeatData.Lane(
                 name="Alice",
@@ -97,15 +103,17 @@ class TestHeatData:
             )
 
     def test_startlist_seed_time_nt(self):
+        """Start list seed time can be NT."""
         lane = HeatData.Lane(
             name="Alice",
             team="Team A",
             seed_time=NT,
             age=10,
         )
-        lane.seed_time = NT
+        assert lane.seed_time == NT
 
     def test_startlist_invalid_seed_time(self):
+        """Ensure we can't have an invalid seed time."""
         with pytest.raises(ValueError):
             HeatData.Lane(
                 name="Alice",
@@ -115,7 +123,7 @@ class TestHeatData:
             )
 
     def test_results_init(self):
-        """Initialization of HeatData object"""
+        """Initialization of HeatData object that is a race result."""
         lane = HeatData.Lane(times=[NumericTime(1.0)], is_dq=False, is_empty=False)
         data = HeatData(
             event="1S",
@@ -132,6 +140,7 @@ class TestHeatData:
         assert data.lane(2).is_empty
 
     def test_lane_empty(self):
+        """Test if a lane is empty."""
         empty_lane = HeatData.Lane()  # No times
         assert empty_lane.is_empty
         marked_empty = HeatData.Lane(
@@ -142,6 +151,7 @@ class TestHeatData:
         assert not not_empty.is_empty
 
     def test_lane_dq(self):
+        """Test if a lane is DQ."""
         dq_lane = HeatData.Lane(times=[NumericTime(1.0)], is_dq=True)
         assert dq_lane.is_dq
         not_dq = HeatData.Lane(times=[NumericTime(1.0)], is_dq=False)
@@ -150,24 +160,28 @@ class TestHeatData:
         assert not default.is_dq
 
     def test_neg_lane_time(self):
+        """Ensure we can't have a negative time."""
         with pytest.raises(ValueError):
             HeatData.Lane(times=[NumericTime(-1.0)])
         with pytest.raises(ValueError):
             HeatData.Lane(times=[NumericTime(1.0), NumericTime(-1.0)])
 
     def test_heat_range(self):
+        """Ensure we can't have a heat number less than 1."""
         with pytest.raises(ValueError):
             HeatData(event="23", heat=0, lanes=[])
         with pytest.raises(ValueError):
             HeatData(event="23", heat=-1, lanes=[])
 
     def test_race_range(self):
+        """Ensure we can't have a race number less than 1."""
         with pytest.raises(ValueError):
             HeatData(event="23", race=0, heat=1, lanes=[])
         with pytest.raises(ValueError):
             HeatData(event="23", race=-1, heat=1, lanes=[])
 
     def test_lane_range(self):
+        """Ensure we can't have a lane number less than 1 or greater than 10."""
         with pytest.raises(ValueError):
             HeatData(event="23", heat=1, lanes=[]).lane(0)
         with pytest.raises(ValueError):
@@ -175,6 +189,7 @@ class TestHeatData:
         HeatData(event="23", heat=1, lanes=[]).lane(5)  # Ok
 
     def test_resolver(self):
+        """Test the time resolver function."""
         resolver_calls = 0
 
         def take_first(times: list[NumericTime]) -> Time:
@@ -196,6 +211,7 @@ class TestHeatData:
 
     @pytest.fixture(scope="class")
     def result(self):
+        """Create a Heat with results."""
         result1 = HeatData.Lane(times=[NumericTime(1.0), NumericTime(1.2)])
         result2 = HeatData.Lane(times=[NumericTime(1.4), NumericTime(1.6)])
         return HeatData(
@@ -204,6 +220,7 @@ class TestHeatData:
 
     @pytest.fixture(scope="class")
     def info(self):
+        """Create a Heat with start list info."""
         info1 = HeatData.Lane(
             name="Alice", team="Team A", seed_time=NumericTime(10.0), age=10
         )
@@ -213,6 +230,7 @@ class TestHeatData:
         return HeatData(event="230", heat=10, lanes=[info1, info2])
 
     def test_merge_ri(self, result: HeatData, info: HeatData):
+        """Test merging info into results."""
         result.merge(info_from=info)
         assert result.event == "230"
         assert result.heat == 10
@@ -226,6 +244,7 @@ class TestHeatData:
         ]
 
     def test_merge_ir(self, result: HeatData, info: HeatData):
+        """Test merging results into info."""
         info.merge(results_from=result)
         assert info.event == "230"
         assert info.heat == 10
@@ -240,8 +259,12 @@ class TestHeatData:
 
 
 class TestHeatDataPlace:
+    """Tests for HeatData.place()."""
+
     @pytest.fixture(scope="class")
     def result(self):
+        """Create a Heat with results."""
+
         # Simple time resolver that takes the first time
         def take_first(times: list[NumericTime]) -> Time:
             if not times:
@@ -263,6 +286,7 @@ class TestHeatDataPlace:
         )
 
     def test_place(self, result: HeatData):
+        """Test the place() method."""
         assert result.place(1) == 2
         assert result.place(2) == 3
         assert result.place(3) is None

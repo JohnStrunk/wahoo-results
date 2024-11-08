@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Data model"""
+"""Wahoo! Results data model."""
 
 import logging
 import queue
@@ -38,30 +38,31 @@ logger = logging.getLogger(__name__)
 
 
 class GVar(Variable, Generic[_T]):
-    """
-    Create a generic variable in the flavor of StringVar, IntVar, etc.
-
-    - master: the master widget.
-    - value: the initial value for the variable
-    """
+    """A generic variable in the flavor of StringVar, IntVar, etc."""
 
     def __init__(self, value: _T, master=None):
+        """
+        Create a generic variable in the flavor of StringVar, IntVar, etc.
+
+        :param value: the initial value for the variable
+        :param master: the master widget
+        """
         super().__init__(master=master, value=0)
         self._value = value
 
     def get(self) -> _T:
-        """Returns the value of the variable."""
+        """Return the value of the variable."""
         _x = super().get()
         return self._value
 
     def set(self, value: _T) -> None:
-        """Sets the variable to a new value."""
+        """Set the variable to a new value."""
         self._value = value
         super().set(super().get() + 1)
 
 
 class ChromecastStatusVar(GVar[List[DeviceStatus]]):
-    """Holds a list of Chromecast devices and whether they are enabled"""
+    """A list of Chromecast devices and whether they are enabled."""
 
 
 class ImageVar(GVar[PILImage.Image]):
@@ -69,29 +70,36 @@ class ImageVar(GVar[PILImage.Image]):
 
 
 class CallbackList:
-    """A list of callback functions"""
+    """A list of callback functions."""
 
     _callbacks: Set[CallbackFn]
 
     def __init__(self):
+        """Initialize a set of callback functions."""
         self._callbacks = set()
 
     def run(self) -> None:
-        """Invoke all registered callback functions"""
+        """Invoke all registered callback functions."""
         for func in self._callbacks:
             func()
 
     def add(self, callback) -> None:
-        """Add a callback function to the set"""
+        """Add a callback function to the set.
+
+        :param callback: the function to add
+        """
         self._callbacks.add(callback)
 
     def remove(self, callback) -> None:
-        """Remove a callback function from the set"""
+        """Remove a callback function from the set.
+
+        :param callback: the function to remove
+        """
         self._callbacks.discard(callback)
 
 
 class StartListVar(GVar[List[StartList]]):
-    """An ordered list of start lists"""
+    """An ordered list of start lists."""
 
 
 class RaceResultListVar(GVar[List[HeatData]]):
@@ -99,11 +107,11 @@ class RaceResultListVar(GVar[List[HeatData]]):
 
 
 class RaceResultVar(GVar[Optional[HeatData]]):
-    """A race result"""
+    """A race result."""
 
 
 class Model:
-    """Defines the state variables (model) for the main UI"""
+    """Defines the state variables (model) for the main UI."""
 
     ## Colors from USA-S visual identity standards
     PANTONE282_DKBLUE = "#041e42"  # Primary
@@ -117,6 +125,10 @@ class Model:
     PANTONE4505FLATGOLD = "#b1953a"  # Tertiary
 
     def __init__(self, root: Tk):
+        """Initialize the state variables (model) for the main UI.
+
+        :param root: the root Tkinter window
+        """
         self.root = root
 
         # Initialize the event queue and start the dispatch loop
@@ -175,7 +187,10 @@ class Model:
         self.statusclick = CallbackList()
 
     def load(self, filename: str) -> None:
-        """Load user's preferences"""
+        """Load the user's preferences.
+
+        :param filename: the name of the file to load
+        """
         config = ConfigParser(interpolation=None)
         config.read(filename, encoding="utf-8")
         if _INI_HEADING not in config:
@@ -215,7 +230,10 @@ class Model:
         self.analytics.set(data.getboolean("analytics", True))
 
     def save(self, filename: str) -> None:
-        """Save user's preferences"""
+        """Save the user's preferences.
+
+        :param filename: the name of the file to save
+        """
         config = ConfigParser(interpolation=None)
         config[_INI_HEADING] = {
             "font_normal": self.font_normal.get(),
@@ -244,7 +262,10 @@ class Model:
             config.write(file)
 
     def enqueue(self, func: Callable[[], None]) -> None:
-        """Enqueue a function to be executed by the tkinter main thread"""
+        """Enqueue a function to be executed by the tkinter main thread.
+
+        :param func: the function to enqueue
+        """
         self._event_queue.put(func)
 
     def _dispatch_event(self) -> None:

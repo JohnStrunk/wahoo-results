@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Functions to read results from a Colorado Dolphin timing system"""
+"""Functions to read results from a Colorado Dolphin timing system."""
 
 import io
 import os
@@ -28,18 +28,13 @@ from .times import NumericTime
 
 def parse_do4_file(file_path: str) -> HeatData:
     """
-    Parse a DO4 file from a Colorado Dolphin timing system
+    Parse a DO4 file from a Colorado Dolphin timing system.
 
-    Parameters:
-        - file_path: The path to the DO4 file
-
-    Returns:
-        A RaceResult object that represents the parsed data
-
-    Raises:
-        - ValueError: If the data is not in the expected format
+    :param file_path: The path to the DO4 file
+    :returns: A HeatData object that represents the parsed data
+    :raises ValueError: If the data is not in the expected format
+    :raises FileNotFoundError: If the file does not exist
     """
-
     meet_id = "???"
     race_number = 1
     # do4 files are named like "001-002-003A-0004.do4"
@@ -63,16 +58,11 @@ def parse_do4_file(file_path: str) -> HeatData:
 
 def parse_do4(stream: io.TextIOBase) -> HeatData:
     """
-    Parse a DO4 file from a Colorado Dolphin timing system
+    Parse a DO4 file from a Colorado Dolphin timing system.
 
-    Parameters:
-        - stream: A file-like object that contains the DO4 data
-
-    Returns:
-        A HeatData object that represents the parsed data
-
-    Raises:
-        - ValueError: If the data is not in the expected format
+    :param stream: A file-like object that contains the DO4 data
+    :returns: A HeatData object that represents the parsed data
+    :raises ValueError: If the data is not in the expected format
     """
     header = stream.readline()
     match = re.match(r"^(\d*);(\d+);\w+;\w+$", header)

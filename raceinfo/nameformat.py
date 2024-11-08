@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Functions for (re)-formatting names"""
+"""Functions for (re)-formatting names."""
 
 import re
 from enum import Enum, auto, unique
@@ -23,7 +23,7 @@ from typing import List
 
 @unique
 class NameMode(Enum):
-    """Formatting options for swimmer names"""
+    """Formatting options for swimmer names."""
 
     NONE = auto()
     """Verbatim as in the start list file"""
@@ -101,9 +101,11 @@ def arrange_name(how: NameMode, name: str) -> str:  # noqa: PLR0911
 
 def format_name(how: NameMode, name: str) -> List[str]:
     """
-    Returns a name formatted according to "how", along w/ shorter variants in
-    case the requested format doesn't fit in the alloted space on the
-    scoreboard.
+    Return a name formatted according to "how", along w/ shorter variants in case the requested format doesn't fit in the alloted space on the scoreboard.
+
+    :param how: The desired format for the name
+    :param name: The name to format
+    :return: A list of formatted variants of the name
 
     >>> format_name(NameMode.NONE, "Last, First M")
     ['Last, First M', 'Last, First', 'Last, F', 'Last', 'Las', 'La', 'L', '']
@@ -132,6 +134,11 @@ def format_name(how: NameMode, name: str) -> List[str]:
 
 def _shorter_strings(string: str) -> List[str]:
     """
+    Generate shorter variants of a string.
+
+    :param string: The string to shorten
+    :returns: A list of shorter variants of the string
+
     >>> _shorter_strings("foobar")
     ['fooba', 'foob', 'foo', 'fo', 'f', '']
     """

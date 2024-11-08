@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Information describing a heat"""
+"""Information describing a heat."""
 
 import re
 from dataclasses import InitVar, dataclass, field
@@ -27,7 +27,7 @@ from .times import NT, ZERO_TIME, NumericTime, Time, TimeResolver, is_special_ti
 @dataclass(kw_only=True)
 class HeatData:
     """
-    Information describing a heat
+    Information describing a heat.
 
     HeatData can be used for both heat information (e.g. from a start list) and
     for race results (e.g. times from a timing system). Each supported data
@@ -35,22 +35,31 @@ class HeatData:
     object. The merge() method can be used to combine the data from both sources
     into a single HeatData object.
 
-    Parameters:
-    - event: The event number
-    - heat: The heat number
-    - description: The name of the event
-    - meet_id: The meet ID
-    - race: The race number
-    - time_recorded: The time the results were recorded
-    - time_resolver: The function to resolve times for this heat
-    - lanes: The data for each lane
-
-    Raises: ValueError if any of the parameters are invalid
+    :param event: The event number
+    :param heat: The heat number
+    :param description: The name of the event
+    :param meet_id: The meet ID
+    :param race: The race number
+    :param time_recorded: The time the results were recorded
+    :param time_resolver: The function to resolve times for this heat
+    :param lanes: The data for each lane
+    :raises: ValueError if any of the parameters are invalid
     """
 
     @dataclass(kw_only=True)
     class Lane:
-        """The per-lane information for a heat"""
+        """
+        The per-lane information for a heat.
+
+        :param name: The name of the swimmer
+        :param team: The name of the swimmer's team
+        :param seed_time: The swimmer's seed time (0 if not available)
+        :param age: The swimmer's age (0=unknown)
+        :param times: The raw times for this lane
+        :param is_dq: True if the swimmer was disqualified
+        :param is_empty: True if the lane is marked empty
+        :raises: ValueError if any of the parameters are invalid
+        """
 
         # Swimmer information
         name: str = ""
@@ -73,6 +82,7 @@ class HeatData:
         resolver: Optional[TimeResolver] = field(init=False, default=None)
 
         def __post_init__(self):
+            """Validate the lane data."""
             if self.age < 0:
                 raise ValueError("Age must be non-negative")
             if (
@@ -96,7 +106,12 @@ class HeatData:
                     raise ValueError("Times must be greater or equal to zero")
 
         def time(self) -> Time:
-            """Resolve the time for this lane"""
+            """
+            Resolve the time for this lane.
+
+            :returns: The final time for this lane as determined by the resolver and the individual times
+            :raises: ValueError if no resolver is set
+            """
             if not self.resolver:
                 raise ValueError("No time resolver set")
             return self.resolver(self.times)
@@ -134,7 +149,7 @@ class HeatData:
 
     @property
     def resolver(self) -> Optional[TimeResolver]:
-        """The time resolver that will be used to resolve times for this heat"""
+        """The time resolver that will be used to resolve times for this heat."""
         return self._resolver
 
     @resolver.setter
@@ -144,6 +159,7 @@ class HeatData:
             lane.resolver = value
 
     def __post_init__(self, lanes: list[Lane], time_resolver: Optional[TimeResolver]):
+        """Validate the heat data."""
         self._lanes = lanes
         # Ensure that we have 10 lanes, even if they are empty
         if len(self._lanes) > 10:  # noqa: PLR2004
@@ -158,13 +174,28 @@ class HeatData:
         self.resolver = time_resolver
 
     def lane(self, lane_number: int) -> Lane:
-        """Retrieve the lane object for a given lane number"""
+        """
+        Retrieve the lane object for a given lane number.
+
+        :param lane_number: The lane number (1-10)
+        :returns: The lane object
+        :raises: ValueError if the lane number is invalid
+        """
         if lane_number < 1 or lane_number > 10:  # noqa: PLR2004
             raise ValueError("Lane number must be between 1 and 10")
         return self._lanes[lane_number - 1]
 
     def place(self, lane_number: int) -> Optional[int]:
-        """Retrieve the place for a given lane number"""
+        """
+        Retrieve the place for a given lane number.
+
+        The place is determined by the time of the lane. If the lane is empty,
+        disqualified, or has a special time, None is returned.
+
+        :param lane_number: The lane number (1-10)
+        :returns: The place for the lane or None
+        :raises: ValueError if no resolver is set
+        """
         if self.resolver is None:
             raise ValueError("No time resolver set")
         lane = self.lane(lane_number)
@@ -184,7 +215,7 @@ class HeatData:
 
     def has_names(self) -> bool:
         """
-        Returns True if any lane has a name.
+        Return True if any lane has a name.
 
         Example:
         >>> heat = HeatData(event="1", heat=1, lanes=[HeatData.Lane(name="Alice")])
@@ -212,9 +243,8 @@ class HeatData:
         - meet_id, race, time_recorded, time_resolver
         - Lanes: times, is_dq, is_empty
 
-        Parameters:
-        - info_from: Merge the heat information into this one
-        - results_from: Merge the race results into this one
+        :param info_from: Merge the heat information into this one
+        :param results_from: Merge the race results into this one
         """
         if info_from is not None:
             self.event = info_from.event
@@ -243,7 +273,7 @@ class HeatData:
 
     def __lt__(self, other: "HeatData") -> bool:
         """
-        Compare two HeatData objects for sorting
+        Compare two HeatData objects for sorting.
 
         >>> e5h1 = HeatData(event="5", heat=1, lanes=[])
         >>> e5h2 = HeatData(event="5", heat=2, lanes=[])

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Functions to read CTS start list files"""
+"""Functions to read CTS start list files."""
 
 import io
 import os
@@ -27,22 +27,18 @@ from .startlist import StartList
 
 def parse_scb(stream: io.TextIOBase) -> StartList:
     """
-    Construct a StartList from a text stream (file)
+    Construct a StartList from a text stream (file).
 
-    Parameters:
-        - stream: The text stream to read
+    :param stream: The text stream to read
+    :returns: A list of HeatData objects, one for each heat in the start list
+    :raises ValueError: If the data is not in the expected format
 
-    Returns:
-        A list of HeatData objects, one for each heat in the start list
-
-    Raises:
-        - ValueError: If the data is not in the expected format
-
-    Example:
+    Example usage::
+    .. code-block:: python
         with open(filename, "r", encoding="cp1252") as file:
             try:
                 heat_list = parse_scb(file)
-            except ValueError as err: # Parse error
+            except ValueError as err:  # Parse error
                 ...
     """
     header = stream.readline()
@@ -89,23 +85,23 @@ def parse_scb(stream: io.TextIOBase) -> StartList:
 
 def parse_scb_file(file_path: str) -> StartList:
     """
-    Read a CTS start list file
+    Read a CTS start list file.
 
-    Parameters:
-        - file_path: The path to the file to read
-
-    Returns:
-        A list of HeatData objects, one for each heat in the start list
-
-    Raises:
-        - ValueError: If the data is not in the expected format
+    :param file_path: The path to the file to read
+    :returns: A list of HeatData objects, one for each heat in the start list
+    :raises ValueError: If the data is not in the expected format
+    :raises FileNotFoundError: If the file does not exist
     """
     with open(file_path, "r", encoding="cp1252") as file:
         return parse_scb(file)
 
 
 def load_all_scb(directory: str) -> List[StartList]:
-    """Load all the start list .scb files from a directory"""
+    """Load all the start list .scb files from a directory.
+
+    :param directory: The directory to scan for .scb files
+    :returns: A list of StartList objects, one for each .scb file found
+    """
     files = os.scandir(directory)
     startlists: List[StartList] = []
     for file in files:

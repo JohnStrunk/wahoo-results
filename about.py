@@ -14,9 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Display an "about" dialog
-"""
+"""Display an "about" dialog."""
 
 import textwrap
 from tkinter import Text, Tk, Toplevel, font, ttk
@@ -25,8 +23,10 @@ from version import WAHOO_RESULTS_VERSION
 
 
 def about(root: Tk) -> None:
-    """Displays a modal dialog containing the application "about" info"""
+    """Display a modal dialog containing the application "about" info.
 
+    :param root: The main application window
+    """
     dlg = Toplevel(root)
     dlg.resizable(False, False)  # don't allow resizing
 

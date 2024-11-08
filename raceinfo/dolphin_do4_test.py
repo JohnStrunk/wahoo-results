@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Tests for the Dolphin d04 file format."""
+
 import io
 import textwrap
 from datetime import datetime
@@ -28,9 +30,11 @@ _meet_seven = "007"
 
 
 class TestDolphinDo4:
+    """Tests for the Dolphin do4 file format."""
+
     @pytest.fixture()
     def do4_missing_one_time(self):
-        """Lane 3 is missing a time"""
+        """Lane 3 is missing a time."""
         return io.StringIO(
             textwrap.dedent(
                 """\
@@ -51,7 +55,7 @@ class TestDolphinDo4:
 
     @pytest.fixture
     def do4_one_time(self):
-        """Lane 1 only has 1 time"""
+        """Lane 1 only has 1 time."""
         return io.StringIO(
             textwrap.dedent(
                 """\
@@ -72,7 +76,7 @@ class TestDolphinDo4:
 
     @pytest.fixture
     def do4_bad_header(self):
-        """Invalid header"""
+        """Invalid header."""
         return io.StringIO(
             textwrap.dedent(
                 """\
@@ -93,7 +97,7 @@ class TestDolphinDo4:
 
     @pytest.fixture
     def do4_too_few_lines(self):
-        """Invalid number of lines in file"""
+        """Invalid number of lines in file."""
         return io.StringIO(
             textwrap.dedent(
                 """\
@@ -110,7 +114,7 @@ class TestDolphinDo4:
 
     @pytest.fixture
     def do4_corrupt_lane(self):
-        """Lane6 has bad format"""
+        """Lane6 has bad format."""
         return io.StringIO(
             textwrap.dedent(
                 """\
@@ -132,7 +136,7 @@ class TestDolphinDo4:
     @pytest.fixture
     def do4_no_event(self):
         """
-        File with no event number
+        File with no event number.
 
         This is a valid do4 file, and happens when there are no events loaded
         into the Dolphin software. See:
@@ -157,28 +161,28 @@ class TestDolphinDo4:
         )
 
     def test_can_parse_header(self, do4_missing_one_time) -> None:
-        """Ensure we can parse the event/heat header"""
+        """Ensure we can parse the event/heat header."""
         race = parse_do4(do4_missing_one_time)
         assert race.event == "69"
         assert race.heat == 1
 
     def test_invalid_header(self, do4_bad_header) -> None:
-        """Ensure we catch an invalid header"""
+        """Ensure we catch an invalid header."""
         with pytest.raises(ValueError):
             parse_do4(do4_bad_header)
 
     def test_invalid_number_of_lines(self, do4_too_few_lines) -> None:
-        """Ensure we catch an invalid number of lines"""
+        """Ensure we catch an invalid number of lines."""
         with pytest.raises(ValueError):
             parse_do4(do4_too_few_lines)
 
     def test_invalid_lane_data(self, do4_corrupt_lane) -> None:
-        """Ensure we catch a corrupt lane"""
+        """Ensure we catch a corrupt lane."""
         with pytest.raises(ValueError):
             parse_do4(do4_corrupt_lane)
 
     def test_handle_missing_times(self, do4_missing_one_time, do4_one_time) -> None:
-        """Ensure we can handle lanes that are missing times"""
+        """Ensure we can handle lanes that are missing times."""
         missingt1l3 = parse_do4(do4_missing_one_time)
         assert missingt1l3.lane(3).times == [
             NumericTime(0),
@@ -194,12 +198,12 @@ class TestDolphinDo4:
         ]
 
     def test_no_description(self, do4_one_time) -> None:
-        """DO4 files don't have an event description"""
+        """DO4 files don't have an event description."""
         no_desc = parse_do4(do4_one_time)
         assert no_desc.description == ""
 
     def test_detect_noshow(self, do4_one_time) -> None:
-        """Ensure we can detect a no-show"""
+        """Ensure we can detect a no-show."""
         noshow = parse_do4(do4_one_time)
         assert noshow.lane(6).times == [NumericTime(0), NumericTime(0), NumericTime(0)]
         assert noshow.lane(6).is_empty
@@ -207,7 +211,7 @@ class TestDolphinDo4:
         assert noshow.lane(10).is_empty
 
     def test_parse_no_event(self, do4_no_event) -> None:
-        """Ensure we can parse a file with no event number"""
+        """Ensure we can parse a file with no event number."""
         no_event = parse_do4(do4_no_event)
         # Since there's no event number, we just get an empty string
         assert no_event.event == ""

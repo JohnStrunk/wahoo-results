@@ -30,7 +30,7 @@ from typing import Callable, List, Union
 
 
 class SpecialTime(Enum):
-    """Special (non-numeric) values for a time"""
+    """Special (non-numeric) values for a time."""
 
     DQ = "DQ"
     INCONSISTENT = "Inconsistent"
@@ -61,13 +61,20 @@ ZERO_TIME = NumericTime("0.00")
 
 
 def is_special_time(time: Time) -> bool:
-    """Returns True if the time is a special time designator"""
+    """Determine if a time is a SpecialTime.
+
+    :param time: The time to check
+    :returns: True if the time is a SpecialTime, False otherwise
+    """
     return isinstance(time, SpecialTime)
 
 
 def _truncate_hundredths(time: NumericTime) -> NumericTime:
     """
-    Truncates a Time to two decimal places.
+    Truncate a Time to two decimal places.
+
+    :param time: The time to truncate
+    :returns: The truncated time
 
     >>> _truncate_hundredths(NumericTime("100.00"))
     Decimal('100.00')
@@ -92,9 +99,7 @@ It takes a list of NumericTimes and combines them into a single Time
 
 def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
     """
-    This returns a TimeResolver that implements the time resolution method used
-    by Wahoo Results. It is based on the time resolution rules of USA Swimming
-    (see rule 102.23.4).
+    Return a TimeResolver that implements the time resolution method used by Wahoo Results. It is based on the time resolution rules of USA Swimming (see rule 102.23.4).
 
     The times are resolved based on 2 thresholds:
 
@@ -115,6 +120,10 @@ def standard_resolver(min_times: int, threshold: NumericTime) -> TimeResolver:
     - If any of the RawTimes differ from the candidate final time by more than
       the maximum allowable time difference, the result is INCONSISTENT
     - Otherwise, the candidate final time is returned
+
+    :param min_times: The minimum number of times required to resolve a final time
+    :param threshold: The maximum allowable time difference
+    :returns: A TimeResolver that implements the resolution method
     """
 
     def resolver(times: List[NumericTime]) -> Time:

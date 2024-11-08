@@ -14,9 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Generates an image of the scoreboard from a RaceTimes object.
-"""
+"""Generate an image of the scoreboard from a RaceTimes object."""
 
 from typing import Optional, Tuple
 
@@ -38,7 +36,12 @@ from raceinfo import (
 
 
 def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
-    """Generate a "waiting" image to display on the scoreboard."""
+    """Generate a "waiting" image to display on the scoreboard.
+
+    :param size: The size of the image in pixels
+    :param model: The application model state
+    :returns: An image to display on the scoreboard
+    """
     img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
     center = (int(size[0] * 0.5), int(size[1] * 0.8))
     normal = fontname_to_file(model.font_normal.get())
@@ -51,16 +54,7 @@ def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
 
 
 class ScoreboardImage:
-    """
-    Generate a scoreboard image from a RaceTimes object.
-
-    Parameters:
-
-    - size: A tuple representing the size of the image in pixels
-    - race: The RaceTimes object containing the race result (and optionally
-      the swimmer names/teams)
-    - model: The model state that contains the rendering preferences
-    """
+    """Generate a scoreboard image from a RaceTimes object."""
 
     _BORDER_FRACTION = 0.05  # Fraction of image left as a border around all sides
     _EVENT_SIZE = "E:MMM"
@@ -79,6 +73,13 @@ class ScoreboardImage:
         model: Model,
         background: bool = True,
     ):
+        """
+        Generate a scoreboard image from a RaceTimes object.
+
+        :param size: A tuple representing the size of the image in pixels
+        :param race: The RaceTimes object containing the race result (and optionally the swimmer names/teams)
+        :param model: The model state that contains the rendering preferences
+        """
         with sentry_sdk.start_span(op="render_image", description="Render image"):
             self._race = race
             self._model = model
@@ -98,12 +99,12 @@ class ScoreboardImage:
 
     @property
     def image(self) -> Image.Image:
-        """The image of the scoreboard"""
+        """The image of the scoreboard."""
         return self._img
 
     @property
     def size(self):
-        """Get the size of the image"""
+        """Get the size of the image."""
         return self._img.size
 
     def _add_bg_image(self) -> None:
@@ -297,10 +298,7 @@ class ScoreboardImage:
         return ""
 
     def _baseline(self, line: int) -> int:
-        """
-        Return the y-coordinate for the baseline of the n-th line of text from
-        the top.
-        """
+        """Return the y-coordinate for the baseline of the n-th line of text from the top."""
         return int(
             self._img.size[1] * self._BORDER_FRACTION  # skip top border
             + line * self._line_height  # move down to proper line
@@ -309,7 +307,11 @@ class ScoreboardImage:
 
 
 def format_time(seconds: NumericTime) -> str:
-    """
+    """Format a time in minutes, seconds, and hundredths.
+
+    :param seconds: The time in seconds
+    :returns: A string representation of the time
+
     >>> format_time(NumericTime("1.2"))
     '01.20'
     >>> format_time(NumericTime("9.87"))
@@ -328,7 +330,11 @@ def format_time(seconds: NumericTime) -> str:
 
 
 def fontname_to_file(name: str) -> str:
-    """Convert a font name (Roboto) to its corresponding file name"""
+    """Convert a font name (Roboto) to its corresponding filename.
+
+    :param name: The name of the font
+    :returns: The filename of the font
+    """
     properties = font_manager.FontProperties(family=name, weight="bold")
     filename = font_manager.findfont(properties)
     return filename

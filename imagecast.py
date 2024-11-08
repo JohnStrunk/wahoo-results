@@ -14,11 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-This file provides the ImageCast class that can be used to publish static PNG
-images to Chromecast devices. It abstracts the interactions with the Chromecast
-devices by managing connections and providing an integrated web server.
-"""
+"""Abstract interactions with Chromecast devices."""
 
 import logging
 import threading
@@ -50,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DeviceStatus:
-    """The status of a Chromecast device"""
+    """The status of a Chromecast device."""
 
     uuid: UUID  # UUID for the device
     name: str  # Friendly name for the device
@@ -61,13 +57,18 @@ DiscoveryCallbackFn = Callable[[], None]
 
 
 class ICController(BaseMediaPlayer):
-    """Media controller for ImageCast"""
+    """Media controller for ImageCast."""
 
     def __init__(self):
+        """Media controller for ImageCast."""
         super().__init__(_WAHOO_RESULTS_APP_ID)
 
     def send_image(self, url: str, mime_type: str):
-        """Send an image to the Chromecast"""
+        """Send an image to the Chromecast.
+
+        :param url: The URL of the image the Chromecast whould display
+        :param mime_type: The MIME type of the image
+        """
         logger.debug("Sending image via quick_play to Chromecast: %s", url)
         super().quick_play(
             media_id=url,
@@ -79,10 +80,7 @@ class ICController(BaseMediaPlayer):
 
 
 class ImageCast:
-    """
-    The ImageCast class encapsulates everything necessary to cast images to a
-    set of Chromecast devices.
-    """
+    """The ImageCast class sends images to a set of Chromecast devices."""
 
     _server_port: int  # port for the web server
     # _devices maps the chromecast uuid to a map of:
@@ -100,9 +98,7 @@ class ImageCast:
         """
         Create an instance to communicate with a set of Chromecast devices.
 
-        Parameters:
-            - server_port: The port on the local machine that will host the
-              embedded web server for the Chromecast(s) to connect to.
+        :param server_port: The port on the local machine that will host the embedded web server for the Chromecast(s) to connect to.
         """
         self._server_port = server_port
         self.devices = {}
@@ -114,19 +110,16 @@ class ImageCast:
         self.browser = None
 
     def start(self):
-        """
-        Start the background processes. This must be called before publishing
-        images.
+        """Start the background processes.
+
+        This must be called before publishing images.
         """
         self._start_webserver()
         self._start_listener()
         self._start_refresh()
 
     def stop(self) -> None:
-        """
-        Shut down the background processes and disconnect from the
-        Chromecast(s).
-        """
+        """Shut down the background processes and disconnect from the Chromecast(s)."""
         logger.debug("Stopping ImageCast and disconnecting from Chromecasts")
         # Separate generating the list from disconnecting becase disconnecting
         # can alter the list
@@ -151,16 +144,17 @@ class ImageCast:
                 pass
 
     def set_discovery_callback(self, func: DiscoveryCallbackFn) -> None:
-        """
-        Sets the callback function that will be called when the list of
-        discovered Chromecasts changes.
+        """Set the callback function that will be called when the list of discovered Chromecasts changes.
+
+        :param func: The callback function
         """
         self.callback_fn = func
 
     def enable(self, uuid: UUID, enabled: bool) -> None:
-        """
-        Set whether to include or exclude a specific Chromecast device from
-        receiving the published images.
+        """Set whether to include or exclude a specific Chromecast device from receiving the published images.
+
+        :param uuid: The UUID of the Chromecast device
+        :param enabled: Whether to enable or disable the device
         """
         with sentry_sdk.start_transaction(
             op="enable_cc", name="Enable/disable Chromecast"
@@ -176,9 +170,9 @@ class ImageCast:
                     self._disconnect(self.devices[uuid]["cast"])
 
     def get_devices(self) -> List[DeviceStatus]:
-        """
-        Get the current list of known Chromecast devices and whether they are
-        currently enabled.
+        """Get the current list of known Chromecast devices and whether they are currently enabled.
+
+        :returns: A list of DeviceStatus objects
         """
         devs: List[DeviceStatus] = []
         for uuid, state in self.devices.items():
@@ -190,8 +184,9 @@ class ImageCast:
         return devs
 
     def publish(self, image: Image.Image) -> None:
-        """
-        Publish a new image to the currently enabled Chromecast devices.
+        """Publish a new image to the currently enabled Chromecast devices.
+
+        :param image: The image to send to the Chromecast devices
         """
         with sentry_sdk.start_transaction(
             op="publish_image", name="Publish image"
@@ -240,10 +235,10 @@ class ImageCast:
         parent = self
 
         class WSHandler(BaseHTTPRequestHandler):
-            """Handle web requests coming from the CCs"""
+            """Handle web requests coming from the CCs."""
 
             def do_GET(self):
-                """Respond to CC w/ the current image"""
+                """Respond to CC w/ the current image."""
                 with sentry_sdk.start_transaction(op="http", name="GET"):
                     self.send_response(200)
                     self.send_header("Content-type", "image/png")
@@ -279,7 +274,7 @@ class ImageCast:
         parent = self
 
         class Listener(pychromecast.discovery.AbstractCastListener):
-            """Receive chromecast discovery updates"""
+            """Receive chromecast discovery updates."""
 
             def add_cast(self, uuid: UUID, service: str):
                 logger.debug("Got add cast: %s", str(uuid))
@@ -340,7 +335,7 @@ class ImageCast:
 
 
 def _main():
-    """Simple test of the ImageCast class."""
+    """Test the ImageCast class."""
     image = Image.open("file.png")
 
     # Simple callback when CC device status changes. We just print what's
