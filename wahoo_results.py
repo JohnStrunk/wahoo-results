@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Wahoo Results!"""
+"""Wahoo Results!"""  # noqa: D400
 
 import argparse
 import copy
@@ -67,9 +67,14 @@ logger = logging.getLogger(__name__)
 
 
 def setup_exit(root: Tk, model: Model) -> None:
-    """Set up handlers for application exit"""
+    """Set up handlers for application exit.
+
+    :param root: The Tk root window
+    :param model: The application model
+    """
 
     def exit_fn() -> None:
+        """Exit the application."""
         logger.info("Exit called")
         try:
             model.save(CONFIG_FILE)
@@ -90,9 +95,13 @@ def setup_exit(root: Tk, model: Model) -> None:
 
 
 def setup_template(model: Model) -> None:
-    """Setup handler for exporting scoreboard template"""
+    """Set up handler for exporting scoreboard template.
+
+    :param model: The application model
+    """
 
     def do_export() -> None:
+        """Export the current template to a file."""
         filename = filedialog.asksaveasfilename(
             confirmoverwrite=True,
             defaultextension=".png",
@@ -108,9 +117,10 @@ def setup_template(model: Model) -> None:
 
 
 def setup_save(model: Model) -> None:
-    """Setup handler for saving current scoreboard image"""
+    """Set up handler for saving current scoreboard image."""
 
     def do_save() -> None:
+        """Save the current scoreboard image to a file."""
         filename = filedialog.asksaveasfilename(
             confirmoverwrite=True,
             defaultextension=".png",
@@ -126,9 +136,16 @@ def setup_save(model: Model) -> None:
 
 
 def setup_appearance(model: Model) -> None:
-    """Link model changes to the scoreboard preview"""
+    """Link model changes to the scoreboard preview.
+
+    When one of the model variables that affect the appearance of the scoreboard
+    changes, update the preview.
+
+    :param model: The application model
+    """
 
     def update_preview() -> None:
+        """Update the appearance preview with the current settings."""
         preview = ScoreboardImage(imagecast.IMAGE_SIZE, get_template(), model)
         model.appearance_preview.set(preview.image)
 
@@ -153,6 +170,7 @@ def setup_appearance(model: Model) -> None:
     update_preview()
 
     def handle_bg_import() -> None:
+        """Import a background image."""
         image = filedialog.askopenfilename(
             filetypes=[("image", "*.gif *.jpg *.jpeg *.png")]
         )
@@ -166,22 +184,20 @@ def setup_appearance(model: Model) -> None:
 
 
 def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
-    """Set up file system watcher for startlists"""
+    """Set up handlers for when new scb files are detected.
+
+    :param model: The application model
+    :param observer: The file system observer
+    """
 
     def process_startlists() -> None:
-        """
-        Load all the startlists from the current directory and update the UI
-        with their information.
-        """
+        """Load all the startlists from the current directory and update the UI with their information."""
         directory = model.dir_startlist.get()
         startlists = load_all_scb(directory)
         model.startlist_contents.set(startlists)
 
     def scb_dir_updated() -> None:
-        """
-        When the startlist directory is changed, update the watched to look at
-        the new directory and trigger processing of the startlists.
-        """
+        """When the startlist directory is changed, update the watched to look at the new directory and trigger processing of the startlists."""
         path = model.dir_startlist.get()
         if not os.path.exists(path):
             return
@@ -198,7 +214,11 @@ def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
 
 
 def summarize_racedir(directory: str) -> List[HeatData]:
-    """Summarize all race results in a directory"""
+    """Summarize all race results in a directory.
+
+    :param directory: The directory to process
+    :returns: A list of HeatData objects
+    """
     files = os.scandir(directory)
     contents: List[HeatData] = []
     for file in files:
@@ -217,7 +237,13 @@ def summarize_racedir(directory: str) -> List[HeatData]:
 
 
 def load_result(model: Model, filename: str) -> Optional[HeatData]:
-    """Load a result file and corresponding startlist"""
+    """Load a result file and corresponding startlist.
+
+    :param model: The application model
+    :param filename: The .do4 result file to load
+    :returns: The HeatData object representing the result if successful,
+        otherwise None
+    """
     result: Optional[HeatData] = None
     # Retry mechanism since we get errors if we try to read while it's
     # still being written.
@@ -247,12 +273,14 @@ def load_result(model: Model, filename: str) -> Optional[HeatData]:
 
 
 def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
-    """Set up watches for files/directories and connect to model"""
+    """Set up watches for files/directories and connect to model.
+
+    :param model: The application model
+    :param observer: The watcher for do4 files
+    """
 
     def process_racedir() -> None:
-        """
-        Load all the race results and update the UI
-        """
+        """Load all the race resultsand update the UI."""
         with sentry_sdk.start_span(
             op="update_race_ui", description="Update race summaries in UI"
         ) as span:
@@ -262,7 +290,10 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
             model.results_contents.set(contents)
 
     def process_new_result(file: str) -> None:
-        """Process a new race result that has been detected"""
+        """Process a new race result that has been detected.
+
+        :param file: The new result file to process
+        """
         with sentry_sdk.start_transaction(op="new_result", name="New race result"):
             result = load_result(model, file)
             if result is None:
@@ -275,10 +306,7 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
             process_racedir()  # update the UI
 
     def do4_dir_updated() -> None:
-        """
-        When the raceresult directory is changed, update the watch to look at
-        the new directory and trigger processing of the results.
-        """
+        """When the raceresult directory is changed, update the watch to look at the new directory and trigger processing of the results."""
         path = model.dir_results.get()
         if not os.path.exists(path):
             return
@@ -296,7 +324,10 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
 
 
 def check_for_update(model: Model) -> None:
-    """Notifies if there's a newer released version"""
+    """Notify the user if there's a newer released version of Wahoo Results.
+
+    :param model: The application model
+    """
     current_version = model.version.get()
     try:
         latest_version = wh_version.latest()
@@ -312,13 +343,19 @@ def check_for_update(model: Model) -> None:
 
 
 def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
-    """Link Chromecast discovery/management to the UI"""
+    """Link Chromecast discovery/management to the UI.
+
+    :param model: The application model
+    :param icast: The ImageCast object that manages Chromecast connections
+    """
 
     def cast_discovery() -> None:
+        """Update the list of Chromecasts in the model when the discovered device list changes."""
         dev_list = copy.deepcopy(icast.get_devices())
         model.enqueue(lambda: model.cc_status.set(dev_list))
 
     def update_cc_list() -> None:
+        """Notify the ImageCast object when a device should be en/dis-abled."""
         dev_list = model.cc_status.get()
         for dev in dev_list:
             icast.enable(dev.uuid, dev.enabled)
@@ -333,7 +370,10 @@ def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
 
 
 def initialize_sentry(model: Model) -> None:
-    """Initialize sentry.io crash reporting"""
+    """Initialize sentry.io crash reporting.
+
+    :param model: The application model
+    """
     execution_environment = "source"
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         execution_environment = "executable"
@@ -365,7 +405,7 @@ def initialize_sentry(model: Model) -> None:
 
 
 def main() -> None:  # noqa: PLR0915
-    """Main program"""
+    """Run the main program."""
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
         "--loglevel",

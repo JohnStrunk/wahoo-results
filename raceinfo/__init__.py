@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-Package for interfacing with swimming data files
+Package for interfacing with swimming data files.
 
 This package abstracts the details of various swimming-related data file types
 into a standard interface.

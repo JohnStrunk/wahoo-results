@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Test harness for Wahoo Results"""
+"""Test harness for Wahoo Results."""
 
 import abc
 import logging
@@ -41,21 +41,21 @@ logger = logging.getLogger(__name__)
 
 
 def set_test_mode() -> None:
-    """Set the application to test mode"""
+    """Set the application to test mode."""
     global TESTING  # noqa: PLW0603
     TESTING = True
 
 
 class Scenario(abc.ABC):
-    """Base class for test actions"""
+    """Base class for test actions."""
 
     @abc.abstractmethod
     def run(self) -> None:
-        """Run the action"""
+        """Run the action."""
 
 
 def run_scenario(scenario: Scenario) -> None:
-    """Run a test scenario"""
+    """Run a test scenario."""
     # Cause the application to exit if an exception occurs in the test thread
     old_hook = threading.excepthook
 
@@ -71,7 +71,11 @@ def run_scenario(scenario: Scenario) -> None:
 
 
 def build_scenario(model: Model, test: str) -> Scenario:
-    """Build a test scenario"""
+    """Build a test scenario from a description.
+
+    :param model: The application model
+    :param test: The test description
+    """
     test_name = test.split(":")[0]
     if test_name == "chromecast":
         [delay, seconds, operations] = test.split(":")[1:]
@@ -90,11 +94,13 @@ def build_scenario(model: Model, test: str) -> Scenario:
 def _build_cc_scenario(
     model: Model, delay: float, seconds: float, operations: int
 ) -> Scenario:
-    """
-    Builds a test scenario that manipulates the Chromecast connections
+    """Build a test scenario that manipulates the Chromecast connections.
 
     :param model: The model
-    :param seconds: The amount of time to perform testing
+    :param delay: The mean delay between actions
+    :param seconds: The amount of time to perform testing (0: run forever)
+    :param operations: The maximum number of operations to perform (0: run forever)
+    :returns: The test scenario
     """
     return Sequentially(
         [
@@ -112,13 +118,12 @@ def _build_cc_scenario(
 
 
 def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
-    """
-    Builds a test scenario that executes a pre-defined sequence of actions
+    """Build a test scenario that executes a pre-defined sequence of actions.
 
     :param model: The model
     :param seconds: The amount of time to perform randomized testing
+    :returns: The test scenario
     """
-
     testdatadir = os.path.join(os.curdir, "testdata")
     testdata_exists = os.path.exists(testdatadir)
     tmp_startlist = os.path.join(testdatadir, "tmp_startlists")
@@ -333,8 +338,14 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
 def _build_random_scenario(
     model: Model, delay: float, seconds: float = 0, operations: int = 0
 ) -> Scenario:
-    """Builds a test scenario that executes actions randomly"""
+    """Build a test scenario that executes actions randomly.
 
+    :param model: The application model
+    :param delay: The mean delay between actions
+    :param seconds: The amount of time to perform randomized testing (0: run forever)
+    :param operations: The maximum number of operations to perform (0: run forever)
+    :returns: The test scenario
+    """
     # Prepare test data directories & result scenarios
     startlist_scenarios: List[Scenario] = []
     result_scenarios: List[Scenario] = []
@@ -403,7 +414,13 @@ def _build_random_scenario(
 
 
 def eventually(bool_fn: Callable[[], bool], interval_secs: float, tries: int) -> bool:
-    """Check a boolean function until it returns true or we run out of tries"""
+    """Check a boolean function until it returns true or we run out of tries.
+
+    :param bool_fn: The function to check
+    :param interval_secs: The time between checks
+    :param tries: The number of tries before giving up
+    :returns: True if the function returned true, False otherwise
+    """
     for i in range(tries):
         if bool_fn():
             logger.debug("Eventually() passed in %0.1f seconds", interval_secs * i)
@@ -414,9 +431,13 @@ def eventually(bool_fn: Callable[[], bool], interval_secs: float, tries: int) ->
 
 
 class Counter:
-    """A counter that tracks how often a Tk.Variable has been updated"""
+    """A counter that tracks how often a Tk.Variable has been updated."""
 
     def __init__(self, var: tkinter.Variable) -> None:
+        """Create a counter that tracks the number of times a Tk.Variable is updated.
+
+        :param var: The Tk.Variable to track
+        """
         self._value = 0
         self._var = var
 
@@ -426,41 +447,47 @@ class Counter:
         self._cbname = var.trace_add("write", lambda *_: update())
 
     def __del__(self) -> None:
+        """Remove the trace callback."""
         if self._cbname:
             self._var.trace_remove("write", self._cbname)
 
     def get(self) -> int:
-        """Get the counter's value"""
+        """Get the counter's value."""
         return self._value
 
 
 class Delay(Scenario):
-    """A scenario that does nothing for a specified amount of time"""
+    """A scenario that does nothing for a specified amount of time."""
 
     def __init__(self, seconds: float) -> None:
+        """Create a scenario that pauses for a specified amount of time.
+
+        :param seconds: The number of seconds to pause
+        """
         super().__init__()
         self._seconds = seconds
 
     def run(self) -> None:
+        """Pause for the specified amount of time."""
         logger.info("Delaying for %f seconds", self._seconds)
         time.sleep(self._seconds)
 
 
 class Fail(Scenario):
-    """A scenario that always fails"""
+    """A scenario that always fails."""
 
     def run(self) -> None:
+        """Run the scenario."""
         assert False, "This scenario always fails"
 
 
 class Repeatedly(Scenario):
-    """Run an action repeatedly"""
+    """Run an action repeatedly."""
 
     def __init__(
         self, action: Scenario, delay: float, seconds: float, operations: int
     ) -> None:
-        """
-        Run an action repeatedly
+        """Run an action repeatedly.
 
         :param action: The scenario to run
         :param delay: The mean delay between actions
@@ -474,6 +501,7 @@ class Repeatedly(Scenario):
         self._action = action
 
     def run(self) -> None:
+        """Run the scenario."""
         start = time.time()
         total_ops = 0
         while (self._seconds == 0 or time.time() - start < self._seconds) and (
@@ -485,34 +513,43 @@ class Repeatedly(Scenario):
 
 
 class Sequentially(Scenario):
-    """Run each item in a list of actions"""
+    """Run each item in a list of actions."""
 
     def __init__(self, actions: List[Scenario]) -> None:
+        """Create a scenario that runs each action in a list.
+
+        :param actions: The list of actions to run
+        """
         super().__init__()
         self._actions = actions
 
     def run(self) -> None:
+        """Run the scenario."""
         for action in self._actions:
             action.run()
 
 
 class OneOf(Scenario):
-    """Randomly choose one of a list of actions to run"""
+    """Randomly choose one of a list of actions to run."""
 
     def __init__(self, actions: List[Scenario]) -> None:
+        """Create a scenario that randomly chooses one of the actions to run.
+
+        :param actions: The list of actions to choose from
+        """
         super().__init__()
         self._actions = actions
 
     def run(self) -> None:
+        """Run the scenario."""
         random.choice(self._actions).run()
 
 
 class Enqueue(Scenario):
-    """A test operation that runs a function"""
+    """A test operation that runs a function in the main thread."""
 
     def __init__(self, model: Model, func: Callable[[], None]) -> None:
-        """
-        A simple operation that just runs a function.
+        """Enqueue an operation that runs a function in the main thread.
 
         Note: The function is run asynchronously in the main thread, so it must
         not block, and it will not block the test thread.
@@ -525,35 +562,35 @@ class Enqueue(Scenario):
         self._fn = func
 
     def run(self) -> None:
+        """Run the operation."""
         logger.info("Enqueuing function to run in main thread")
         self._model.enqueue(self._fn)
 
 
 class Validate(Scenario):
-    """A test operation that runs a function"""
+    """A test operation that runs a function."""
 
     def __init__(self, func: Callable[[], bool], message: str = "") -> None:
-        """
-        A simple operation that just runs a function inline.
+        """Run a function inline.
 
-        :param model: the application model
         :param func: the function to run
+        :param message: the message to log when the function fails
         """
         super().__init__()
         self._fn = func
         self._message = message
 
     def run(self) -> None:
+        """Run the operation."""
         logger.info("Validating: %s", self._message)
         assert self._fn(), self._message
 
 
 class SetInt(Scenario):
-    """Set an integer variable to a random value"""
+    """Set an integer variable to a random value."""
 
     def __init__(self, model: Model, var: IntVar, minimum: int, maximum: int) -> None:
-        """
-        Set an integer variable to a random value
+        """Set an integer variable to a random value.
 
         :param model: the application model
         :param var: the integer variable to set
@@ -567,19 +604,19 @@ class SetInt(Scenario):
         self._max = maximum
 
     def run(self) -> None:
+        """Set the variable."""
         newvalue = random.randint(self._min, self._max)
         logger.info("Setting %s to %d", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
 class SetDouble(Scenario):
-    """Set a double variable to a random value"""
+    """Set a double variable to a random value."""
 
     def __init__(
         self, model: Model, var: DoubleVar, minimum: float, maximum: float
     ) -> None:
-        """
-        Set a double variable to a random value
+        """Set a double variable to a random value.
 
         :param model: the application model
         :param var: the variable to set
@@ -593,23 +630,24 @@ class SetDouble(Scenario):
         self._max = maximum
 
     def run(self) -> None:
+        """Set the variable."""
         newvalue = random.random() * (self._max - self._min) + self._min
         logger.info("Setting %s to %f", self._var, newvalue)
         self._model.enqueue(lambda: self._var.set(newvalue))
 
 
 class SetString(Scenario):
-    """Set a string variable to a random value"""
+    """Set a string variable to a random value."""
 
     def __init__(
         self, model: Model, var: StringVar, length_min: int, length_max: int
     ) -> None:
-        """
-        Set a string variable to a random value
+        """Set a string variable to a random value.
 
         :param model: the application model
         :param var: the variable to set
-        :param values: the list of values to choose from
+        :param length_min: the minimum length of the string
+        :param length_max: the maximum length of the string
         """
         super().__init__()
         self._model = model
@@ -618,6 +656,7 @@ class SetString(Scenario):
         self._max = length_max
 
     def run(self) -> None:
+        """Set the variable."""
         newvalue = "".join(
             random.choice(
                 string.ascii_letters + string.digits + string.punctuation + " "
@@ -629,14 +668,13 @@ class SetString(Scenario):
 
 
 class AddStartlist(Scenario):
-    """Copy a startlist file into the startlists directory"""
+    """Copy a startlist file into the startlists directory."""
 
     def __init__(self, testdatadir: str, startlistdir: str) -> None:
-        """
-        Copy a startlist file into the startlists directory
+        """Copy a startlist file into the startlists directory.
 
         :param testdatadir: the directory containing the main test data
-        :param startlistdir: the directory for the startlists
+        :param startlistdir: the destination directory for the startlists
         """
         super().__init__()
         self._testdatadir = testdatadir
@@ -651,6 +689,7 @@ class AddStartlist(Scenario):
         ), "Startlist directory does not exist or is not a directory"
 
     def run(self) -> None:
+        """Copy a random startlist file."""
         startlists_all = filter(
             lambda f: f.endswith(".scb"), os.listdir(self._testdatadir)
         )
@@ -665,11 +704,10 @@ class AddStartlist(Scenario):
 
 
 class RemoveStartlist(Scenario):
-    """Remove a startlist file from the startlists directory"""
+    """Remove a startlist file from the startlists directory."""
 
     def __init__(self, startlistdir: str) -> None:
-        """
-        Remove a startlist file from the startlists directory
+        """Remove a startlist file from the startlists directory.
 
         :param startlistdir: the directory for the startlists
         """
@@ -680,6 +718,7 @@ class RemoveStartlist(Scenario):
         assert os.path.isdir(self._startlistdir), "Startlist directory does not exist"
 
     def run(self) -> None:
+        """Remove a random startlist file."""
         startlists = list(
             filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir))
         )
@@ -690,13 +729,12 @@ class RemoveStartlist(Scenario):
 
 
 class AddDO4(Scenario):
-    """Copy a specific do4 file into the do4 directory"""
+    """Copy a specific do4 file into the do4 directory."""
 
     def __init__(
         self, testdatadir: str, do4dir: str, do4: str, counters: List[Counter]
     ) -> None:
-        """
-        Copy a do4 file into the do4 directory
+        """Copy a do4 file into the do4 directory.
 
         :param testdatadir: the directory containing the main test data
         :param do4dir: the directory for the do4 files
@@ -717,6 +755,7 @@ class AddDO4(Scenario):
         ), "DO4 file does not exist or is not a file"
 
     def run(self) -> None:
+        """Perform the copy."""
         logger.info("Adding do4 %s", self._do4)
         prev_count = []
         for counter in self._counters:
@@ -732,11 +771,10 @@ class AddDO4(Scenario):
 
 
 class AddRandomDO4(Scenario):
-    """Copy a random do4 file into the do4 directory"""
+    """Copy a random do4 file into the do4 directory."""
 
     def __init__(self, testdatadir: str, do4dir: str, counters: List[Counter]) -> None:
-        """
-        Copy a do4 file into the do4 directory
+        """Copy a random do4 file into the do4 directory.
 
         :param testdatadir: the directory containing the main test data
         :param do4dir: the directory for the do4 files
@@ -752,6 +790,7 @@ class AddRandomDO4(Scenario):
         assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
 
     def run(self) -> None:
+        """Copy a random do4 file."""
         do4_all = filter(lambda f: f.endswith(".do4"), os.listdir(self._testdatadir))
         do4_existing = filter(lambda f: f.endswith(".do4"), os.listdir(self._do4dir))
         do4_new = set(do4_all) - set(do4_existing)
@@ -761,11 +800,10 @@ class AddRandomDO4(Scenario):
 
 
 class RemoveRandomDO4(Scenario):
-    """Remove a do4 file from the do4 directory"""
+    """Remove a do4 file from the do4 directory."""
 
     def __init__(self, do4dir: str) -> None:
-        """
-        Remove a do4 file from the do4 directory
+        """Remove a do4 file from the do4 directory.
 
         :param do4dir: the directory for the do4 files
         """
@@ -776,6 +814,7 @@ class RemoveRandomDO4(Scenario):
         assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
 
     def run(self) -> None:
+        """Remove a random do4 file."""
         do4list = list(filter(lambda f: f.endswith(".do4"), os.listdir(self._do4dir)))
         if len(do4list) > 0:
             do4 = random.choice(do4list)
@@ -784,11 +823,10 @@ class RemoveRandomDO4(Scenario):
 
 
 class GenDolphinCSV(Scenario):
-    """Generate the dolphin event CSV file and verify its contents"""
+    """Generate the dolphin event CSV file and verify its contents."""
 
     def __init__(self, model: Model, startlistdir: str) -> None:
-        """
-        Generate the dolphin event CSV file and verify its contents
+        """Generate the dolphin event CSV file and verify its contents.
 
         :param model: the application model
         :param startlistdir: the directory for the startlists
@@ -801,6 +839,7 @@ class GenDolphinCSV(Scenario):
         assert os.path.isdir(self._startlistdir), "Startlist directory does not exist"
 
     def run(self) -> None:
+        """Generate the CSV file and verify its contents."""
         logger.info("Checking CSV")
         # Trigger event CSV export
         self._model.enqueue(self._model.dolphin_export.run)
@@ -823,11 +862,10 @@ class GenDolphinCSV(Scenario):
 
 
 class LoadAllSCB(Scenario):
-    """Load all SCB files in the startlists directory"""
+    """Load all SCB files in the startlists directory."""
 
     def __init__(self, testdatadir: str, startlistdir: str) -> None:
-        """
-        Load all SCB files in the startlists directory
+        """Load all SCB files in the startlists directory.
 
         :param testdatadir: the directory containing the main test data
         :param startlistdir: the directory for the startlists
@@ -843,6 +881,7 @@ class LoadAllSCB(Scenario):
         ), "The startlist directory does not exist"
 
     def run(self) -> None:
+        """Load the SCB files."""
         startlists = list(
             filter(lambda f: f.endswith(".scb"), os.listdir(self._testdatadir))
         )
@@ -853,11 +892,10 @@ class LoadAllSCB(Scenario):
 
 
 class EnableChromecast(Scenario):
-    """Enable a random Chromecast device"""
+    """Enable a random Chromecast device."""
 
     def __init__(self, model: Model) -> None:
-        """
-        Enable a random Chromecast device
+        """Enable a random Chromecast device.
 
         :param model: the application model
         """
@@ -865,6 +903,7 @@ class EnableChromecast(Scenario):
         self._model = model
 
     def run(self) -> None:
+        """Enable a random Chromecast device."""
         devices = self._model.cc_status.get()
         disabled_devices = list(filter(lambda d: not d.enabled, devices))
         if len(disabled_devices) > 0:
@@ -880,11 +919,10 @@ class EnableChromecast(Scenario):
 
 
 class DisableChromecast(Scenario):
-    """Disable a random Chromecast device"""
+    """Disable a random Chromecast device."""
 
     def __init__(self, model: Model) -> None:
-        """
-        Disable a random Chromecast device
+        """Disable a random Chromecast device.
 
         :param model: the application model
         """
@@ -892,6 +930,7 @@ class DisableChromecast(Scenario):
         self._model = model
 
     def run(self) -> None:
+        """Disable a random Chromecast device."""
         devices = self._model.cc_status.get()
         enabled_devices = list(filter(lambda d: d.enabled, devices))
         if len(enabled_devices) > 0:
@@ -907,11 +946,10 @@ class DisableChromecast(Scenario):
 
 
 class ToggleChromecast(Scenario):
-    """Toggle a random Chromecast device"""
+    """Toggle a random Chromecast device."""
 
     def __init__(self, model: Model) -> None:
-        """
-        Toggle a random Chromecast device
+        """Toggle a random Chromecast device.
 
         :param model: the application model
         """
@@ -919,6 +957,7 @@ class ToggleChromecast(Scenario):
         self._model = model
 
     def run(self) -> None:
+        """Toggle a random Chromecast device."""
         devices = self._model.cc_status.get().copy()
         if len(devices) > 0:
             device = random.choice(devices)
@@ -936,11 +975,10 @@ class ToggleChromecast(Scenario):
 
 
 class _FlushQueue(Scenario):
-    """Flush the model's queue"""
+    """Flush the model's event queue."""
 
     def __init__(self, model: Model) -> None:
-        """
-        Flush the model's queue
+        """Flush the model's event queue.
 
         :param model: the application model
         """
@@ -949,7 +987,7 @@ class _FlushQueue(Scenario):
         self._flushed = False
 
     def run(self) -> None:
-        """Flush the queue"""
+        """Flush the queue."""
 
         def _set_flushed() -> None:
             logger.debug("Queue serviced: id=%d", id(self))

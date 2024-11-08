@@ -1,4 +1,6 @@
 """
+Create a tooltip for a given widget on hover.
+
 From: https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
 
 tk_ToolTip_class101.py
@@ -13,11 +15,14 @@ import tkinter as tk
 
 
 class ToolTip:
-    """
-    create a tooltip for a given widget
-    """
+    """Create a tooltip for a given widget."""
 
     def __init__(self, widget, text="widget info"):
+        """Create a tooltip for a given widget.
+
+        :param widget: The widget to bind the tooltip to.
+        :param text: The text to display in the tooltip.
+        """
         self.waittime = 500  # miliseconds
         self.wraplength = 225  # pixels
         self.widget = widget

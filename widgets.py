@@ -14,9 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-TKinter code to display a button that presents a colorpicker.
-"""
+"""TKinter code to display various UI widgets."""
 
 import os
 from tkinter import (
@@ -48,7 +46,12 @@ TkContainer = Any
 
 
 def swatch(width: int, height: int, color: str) -> ImageTk.PhotoImage:
-    """Generate a color swatch"""
+    """Generate a color swatch.
+
+    :param width: Width of the swatch
+    :param height: Height of the swatch
+    :param color: Color for the swatch
+    """
     img = PILImage.new("RGBA", (width, height), color)
     return ImageTk.PhotoImage(img)
 
@@ -59,11 +62,14 @@ class ColorButton2(ttk.Button):
     SWATCH_SIZE = 12
 
     def __init__(self, parent: Widget, color_var: StringVar):
+        """Create a Button that allows choosing a color.
+
+        :param parent: Parent widget
+        :param color_var: StringVar to hold the associated color value
+        """
         if color_var.get() == "":
             color_var.set("#000000")
         self._img = swatch(self.SWATCH_SIZE, self.SWATCH_SIZE, color_var.get())
-        # super().__init__(parent, bg=color_var.get(), relief="solid",
-        #                  padx=9, command=self._btn_cb)
         super().__init__(parent, command=self._btn_cb, image=self._img, padding=0)
         self._color_var = color_var
 
@@ -83,19 +89,24 @@ class ColorButton2(ttk.Button):
 
 
 class Preview(Canvas):
-    """A widget that displays a scoreboard preview image"""
+    """A widget that displays a scoreboard preview image."""
 
     WIDTH = 320
     HEIGHT = 180
 
     def __init__(self, parent: Widget, image_var: ImageVar):
+        """Create a preview widget for a scoreboard image.
+
+        :param parent: Parent widget
+        :param image_var: Variable to hold the associated image
+        """
         super().__init__(parent, width=self.WIDTH, height=self.HEIGHT)
         self._pimage: Optional[ImageTk.PhotoImage] = None
         self._image_var = image_var
         image_var.trace_add("write", lambda *_: self._set_image(self._image_var.get()))
 
     def _set_image(self, image: PILImage.Image) -> None:
-        """Set the preview image"""
+        """Set the preview image."""
         self.delete("all")
         scaled = image.resize((self.WIDTH, self.HEIGHT))
         # Note: In order for the image to display on the canvas, we need to
@@ -106,9 +117,14 @@ class Preview(Canvas):
 
 
 class StartListTreeView(ttk.Frame):
-    """Widget to display a set of startlists"""
+    """Widget to display a set of startlists."""
 
     def __init__(self, parent: Widget, startlist: StartListVar):
+        """Widget to display a set of startlists.
+
+        :param parent: Parent widget
+        :param startlist: Variable containing startlists to display
+        """
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -143,9 +159,14 @@ class StartListTreeView(ttk.Frame):
 
 
 class DirSelection(ttk.Frame):
-    """Directory selector widget"""
+    """Directory selector widget."""
 
     def __init__(self, parent: Widget, directory: StringVar):
+        """Directory selector widget.
+
+        :param parent: Parent widget
+        :param directory: Variable containing the selected directory (path)
+        """
         super().__init__(parent)
         self.dir = directory
         self.columnconfigure(1, weight=1)
@@ -170,9 +191,14 @@ class DirSelection(ttk.Frame):
 
 
 class RaceResultTreeView(ttk.Frame):
-    """Widget that displays a table of completed races"""
+    """Widget that displays a table of completed races."""
 
     def __init__(self, parent: Widget, racelist: RaceResultListVar):
+        """Widget that displays a table of completed races.
+
+        :param parent: Parent widget
+        :param racelist: Variable containing a list of race results
+        """
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -211,9 +237,14 @@ class RaceResultTreeView(ttk.Frame):
 
 
 class ChromcastSelector(ttk.Frame):
-    """Widget that allows enabling/disabling a set of Chromecast devices"""
+    """Widget that allows enabling/disabling a set of Chromecast devices."""
 
     def __init__(self, parent: Widget, statusvar: ChromecastStatusVar) -> None:
+        """Widget that allows enabling/disabling a set of Chromecast devices.
+
+        :param parent: Parent widget
+        :param statusvar: Variable containing Chromecast device status
+        """
         super().__init__(parent)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -258,9 +289,14 @@ class ChromcastSelector(ttk.Frame):
 
 
 class RaceResultView(ttk.LabelFrame):
-    """Widget that displays a RaceResult"""
+    """Widget that displays a RaceResult."""
 
     def __init__(self, parent: Widget, resultvar: RaceResultVar) -> None:
+        """Widget that displays a RaceResult.
+
+        :param parent: Parent widget
+        :param resultvar: Variable containing the result of a race
+        """
         super().__init__(parent, text="Latest result")
         self._resultvar = resultvar
         self._resultvar.trace_add("write", lambda *_: self._update())

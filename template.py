@@ -14,16 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-A scoreboard template for previews and theming
-"""
+"""A scoreboard template for previews and theming."""
 
 from raceinfo import HeatData, NumericTime, standard_resolver
 
 
 def get_template() -> HeatData:
     """
-    Returns template data to create a scoreboard mockup
+    Return template data to create a scoreboard mockup.
 
     >>> from scoreboard import format_time
     >>> from raceinfo import NO_SHOW, INCONSISTENT

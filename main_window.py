@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Main window"""
+"""The main window."""
 
 import os
 import sys
@@ -35,9 +35,14 @@ _TXT_PAD = (_TXT_X_PAD, _TXT_Y_PAD)
 
 
 class View(ttk.Frame):
-    """Main window view definition"""
+    """Main window view definition."""
 
     def __init__(self, root: Tk, vm: Model):
+        """Create the main window.
+
+        :param root: The Tk root window
+        :param vm: The application model
+        """
         super().__init__(root)
         self._root = root
         self._vm = vm
@@ -99,7 +104,7 @@ class View(ttk.Frame):
         style.configure("TLabelframe", padding=_PADDING)
 
     def _build_menu(self) -> None:
-        """Creates the dropdown menus"""
+        """Create the dropdown menus."""
         self._root.option_add("*tearOff", FALSE)  # We don't use tear-off menus
         menubar = Menu(self)
         self._root["menu"] = menubar

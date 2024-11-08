@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Colorado SCB file format tests."""
+
 import io
 import textwrap
 from datetime import datetime
@@ -28,6 +30,8 @@ _meet_seven = "007"
 
 
 class TestColoradoSCB:
+    """Tests for the Colorado SCB file format."""
+
     @pytest.fixture()
     def scb_invalid_header(self):
         """SCB data with an invalid header (event, descr) line."""
@@ -73,7 +77,7 @@ class TestColoradoSCB:
 
     @pytest.fixture()
     def scb_invalid_line(self):
-        """SCB data with an invalid line"""
+        """SCB data with an invalid line."""
         return io.StringIO(
             textwrap.dedent(
                 """\
@@ -212,6 +216,7 @@ class TestColoradoSCB:
         )
 
     def test_can_read_event(self, scb_two_heats):
+        """Make sure we can read the event number and description."""
         heatlist = parse_scb(scb_two_heats)
         assert len(heatlist) == 2  # noqa: PLR2004
         for heat in heatlist:
@@ -221,18 +226,22 @@ class TestColoradoSCB:
         assert heatlist[1].heat == 2  # noqa: PLR2004
 
     def test_invalid_header_throws(self, scb_invalid_header):
+        """Make sure we throw an error if the header is invalid."""
         with pytest.raises(ValueError):
             parse_scb(scb_invalid_header)
 
     def test_wrong_num_lines_throws(self, scb_wrong_num_lines):
+        """Make sure we throw an error if the number of lines in the file is wrong."""
         with pytest.raises(ValueError):
             parse_scb(scb_wrong_num_lines)
 
     def test_invalid_line_throws(self, scb_invalid_line):
+        """Make sure we throw an error if a line is invalid."""
         with pytest.raises(ValueError):
             parse_scb(scb_invalid_line)
 
     def test_can_read_one_heat(self, scb_one_heat):
+        """Make sure we can read a single heat."""
         heatlist = parse_scb(scb_one_heat)
         assert len(heatlist) == 1
         assert heatlist[0].event == "10"

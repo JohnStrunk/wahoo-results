@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Monitor the startlist directory"""
+"""Monitor the startlist directory."""
 
 import logging
 from typing import Callable
@@ -28,13 +28,21 @@ logger = logging.getLogger(__name__)
 
 
 class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
-    """Monitors a directory for changes to CTS Startlist files"""
+    """Monitors a directory for changes to CTS Startlist files."""
 
     def __init__(self, callback: CallbackFn):
+        """Monitor a directory for changes to CTS Startlist files.
+
+        :param callback: The function to call when a change is detected.
+        """
         super().__init__(patterns=["*.scb"], ignore_directories=True)
         self._callback = callback
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent):
+        """Handle an event in the monitored directory by invoking the callback.
+
+        :param event: The event that occurred.
+        """
         # Limit triggering to only events that modify the contents to avoid
         # creating a loop
         if event.event_type in [
@@ -50,13 +58,21 @@ class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
 
 
 class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
-    """Monitors a directory for new .do4 race result files"""
+    """Monitor a directory for new .do4 race result files."""
 
     def __init__(self, callback: CreatedCallbackFn):
+        """Monitor a directory for new .do4 result files.
+
+        :param callback: The function to call when a new .do4 file is created.
+        """
         super().__init__(patterns=["*.do4"], ignore_directories=True)
         self._callback = callback
 
     def on_created(self, event: watchdog.events.FileSystemEvent):
+        """Handle a new .do4 file creation event by invoking the callback.
+
+        :param event: The creation event
+        """
         logger.debug(
             "DO4Watcher: operation=%s, path=%s", event.event_type, event.src_path
         )
