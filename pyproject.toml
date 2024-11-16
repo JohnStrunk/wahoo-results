@@ -1,0 +1,113 @@
+[project]
+name = "wahoo-results"
+version = "0.1.0"
+description = "A scoreboard for swimming using results from a CTS Dolphin timing system"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "datetime~=5.5",
+    "ipinfo~=5.0",
+    "matplotlib~=3.9",
+    "pillow~=11.0",
+    "pychromecast~=14.0",
+    "pyinstaller~=6.10",
+    "python-dateutil~=2.9",
+    "requests~=2.32",
+    "segment-analytics-python~=2.3",
+    "semver~=3.0",
+    "sentry-sdk~=2.13",
+    "ttkwidgets>=0.13.0",
+    "watchdog~=5.0",
+]
+
+[dependency-groups]
+dev = [
+    "mdx-truly-sane-lists~=1.3",
+    "mkdocs-glightbox>=0.4.0",
+    "mkdocs-macros-plugin~=1.0",
+    "mkdocs-material~=9.5",
+    "mypy~=1.11",
+    "pytest-cov~=6.0",
+    "pytest~=8.3",
+    "pytest-mypy>=0.10.3",
+    "types-pillow>=10.2.0.20240822",
+    "types-python-dateutil~=2.9",
+    "types-requests~=2.32",
+]
+docs = [
+    "mdx-truly-sane-lists~=1.3",
+    "mkdocs-glightbox>=0.4.0",
+    "mkdocs-macros-plugin~=1.0",
+    "mkdocs-material~=9.5",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self.debug",
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc.)?abstractmethod",
+]
+
+ignore_errors = true
+omit = ["*_test.py", "build.py"]
+skip_empty = true
+
+[tool.coverage.run]
+branch = true  # Enable branch coverage
+source = ["."] # Source code directories
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--doctest-modules",
+    "--mypy",
+    "--ignore=build.py",        # Don't check build.py
+    "--cov=.",
+    "--cov-config=.coveragerc",
+    "--cov-report=html",
+    "--cov-report=term",
+    "--cov-report=xml",
+]
+
+filterwarnings = [
+    "error",
+    # Need updates to pytest-pylint for the following:
+    "ignore:Using the __implements__ inheritance pattern for BaseReporter is no longer supported.",
+]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/rules/
+select = [
+    "D",    # Pydocstyle
+    "E101", # Pycodestyle: mixed spaces and tabs
+    "E4",   # Pycodestyle: Imports
+    "E7",   # Pycodestyle: misc
+    "E9",   # Pycodestyle: error
+    "F",    # Pyflakes
+    "I",    # isort
+    "PL",   # pylint
+    "RUF",  # Ruff-specific
+]
+pydocstyle.convention = "pep257"
