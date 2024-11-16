@@ -28,20 +28,6 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Pipenv version updates",
-      "fileMatch": [
-        "^.github/(?:workflows|actions)/.+\\.ya?ml$",
-        "\\.md$"
-      ],
-      "matchStrings": [
-        "PIPENV_INSTALL_VERSION: \"(?<currentValue>.+?)\"",
-        "pipenv==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
-      ],
-      "depNameTemplate": "pipenv",
-      "datasourceTemplate": "pypi"
-    },
-    {
-      "customType": "regex",
       "description": "UPX version updates",
       "fileMatch": [
         "^.github/(?:workflows|actions)/.+\\.ya?ml$",

@@ -75,6 +75,7 @@ output = "coverage.xml"
 
 [tool.pytest.ini_options]
 addopts = [
+    "-rA -q",
     "--doctest-modules",
     "--mypy",
     "--ignore=build.py",        # Don't check build.py
@@ -87,6 +88,10 @@ addopts = [
 
 filterwarnings = [
     "error",
+    # ttkwidgets has invalid escape sequences in its docstrings
+    'ignore:invalid escape sequence:',
+    # ttkwidgets uses "is" with a literal
+    'ignore:"is" with a literal. Did you mean "==":',
     # Need updates to pytest-pylint for the following:
     "ignore:Using the __implements__ inheritance pattern for BaseReporter is no longer supported.",
 ]

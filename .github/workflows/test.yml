@@ -12,9 +12,6 @@ on:  # yamllint disable-line rule:truthy
     - cron: '43 16 * * 5'
 
 env:
-  # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2024.4.0"
-  PYTHON_VERSION: "3.11"
   # How long to run the executable automated tests
   TEST_DURATION_SECONDS: 60
   # https://github.com/upx/upx/releases
@@ -34,7 +31,7 @@ jobs:
         # https://github.com/actions/setup-python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: ".python-version"
 
       - name: Enable cache for pre-commit hooks
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
@@ -84,12 +81,15 @@ jobs:
         # https://github.com/actions/checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: Install uv
+        # https://github.com/astral-sh/setup-uv
+        uses: astral-sh/setup-uv@v3.2.3
+
       - name: Set up Python
         # https://github.com/actions/setup-python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pipenv'
+          python-version-file: ".python-version"
 
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
@@ -101,21 +101,13 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Install pipx
-        shell: cmd
-        run: python -m pip install pipx
-
-      - name: Install pipenv
-        shell: cmd
-        run: pipx install pipenv==${{ env.PIPENV_INSTALL_VERSION }}
-
       - name: Initialize virtual environment
         shell: cmd
-        run: pipenv sync --no-site-packages -v --categories docs
+        run: uv sync --locked --only-group docs
 
       - name: Build docs
         shell: cmd
-        run: pipenv run mkdocs build --strict
+        run: uv run --locked --only-group docs mkdocs build --verbose --strict
 
   test:
     name: Test
@@ -126,12 +118,15 @@ jobs:
         # https://github.com/actions/checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: Install uv
+        # https://github.com/astral-sh/setup-uv
+        uses: astral-sh/setup-uv@v3.2.3
+
       - name: Set up Python
         # https://github.com/actions/setup-python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pipenv'
+          python-version-file: ".python-version"
 
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
@@ -143,25 +138,13 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Install pipx
-        shell: cmd
-        run: python -m pip install pipx
-
-      - name: Install pipenv
-        shell: cmd
-        run: pipx install pipenv==${{ env.PIPENV_INSTALL_VERSION }}
-
       - name: Initialize virtual environment
         shell: cmd
-        run: pipenv sync --dev --no-site-packages -v
+        run: uv sync --locked --group dev
 
       - name: Run tests
         shell: cmd
-        run: pipenv run pytest -v
-
-      - name: Build docs
-        shell: cmd
-        run: pipenv run mkdocs build --verbose --strict
+        run: uv run --locked --group dev pytest
 
   build:
     name: Build
@@ -174,12 +157,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install uv
+        # https://github.com/astral-sh/setup-uv
+        uses: astral-sh/setup-uv@v3.2.3
+
       - name: Set up Python
         # https://github.com/actions/setup-python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pipenv'
+          python-version-file: ".python-version"
 
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
@@ -191,15 +177,9 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Install pipenv
-        shell: cmd
-        run: python -m pip install --user pipenv==${{ env.PIPENV_INSTALL_VERSION }}
-
       - name: Initialize virtual environment
         shell: cmd
-        run: |
-          pipenv sync --no-site-packages -v
-          pipenv clean -v
+        run: uv sync --locked
 
       - name: Install UPX
         shell: cmd
@@ -211,7 +191,7 @@ jobs:
           IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
           SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: pipenv run python build.py
+        run: uv run --locked python build.py
 
       - name: Save executable as artifact
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
@@ -282,7 +262,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: ".python-version"
 
       # Add Scripts directory to the path so that utilities can be used once installed
       - name: Add python Scripts directory to path
