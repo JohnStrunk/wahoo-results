@@ -9,8 +9,8 @@ build:
     python: "3.11"
   jobs:
     post_create_environment:
-      - pip install pipenv
-      - pipenv requirements --categories docs > docs/requirements.txt
+      - pip install uv
+      - uv export --only-group docs --format requirements-txt > docs/requirements.txt
     post_build:
       # Override the default sitemap.xml with a custom one that we refer to from
       # our custom robots.txt

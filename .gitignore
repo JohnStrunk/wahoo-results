@@ -1,4 +1,4 @@
-/__pycache__/
+__pycache__/
 /.coverage
 /.mypy_cache/
 /.pytest_cache/
@@ -9,7 +9,6 @@
 /wahoo-results.exe
 /wahoo-results.ini
 /docs/_build/
-/docs/__pycache__/
 /build/
 /wahoo-results.fileinfo
 /testdata/tmp_*

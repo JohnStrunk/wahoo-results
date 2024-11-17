@@ -6,11 +6,6 @@ on:  # yamllint disable-line rule:truthy
     - cron: '43 16 * * 4'
   workflow_dispatch:
 
-env:
-  # https://github.com/pypa/pipenv/releases
-  PIPENV_INSTALL_VERSION: "2024.4.0"
-  CATEGORIES: "packages,dev-packages,docs"
-
 jobs:
   test:
     name: Update dependencies
@@ -22,11 +17,9 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Python
-        # https://github.com/actions/setup-python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: '3.11'
-          cache: 'pipenv'
+          python-version-file: ".python-version"
 
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
@@ -38,29 +31,17 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Install pipenv
-        shell: cmd
-        run: python -m pip install --user pipenv==${{ env.PIPENV_INSTALL_VERSION }}
-
-      - name: Save current package version information
-        shell: bash
-        run: pipenv requirements --exclude-markers --categories ${{ env.CATEGORIES }} | sort > requirements.old
-
       - name: Update dependencies
         shell: bash
-        run: pipenv update --categories ${{ env.CATEGORIES }}
-
-      - name: Save new package version information
-        shell: bash
-        run: pipenv requirements --exclude-markers --categories ${{ env.CATEGORIES }} | sort > requirements.new
+        run: uv lock --upgrade --resolution=highest --no-progress > packages.txt
 
       - name: Create update text
         shell: bash
         run: |
-          echo 'This is an automated update of the `Pipfile.lock` file.' > updates.txt
+          echo 'This is an automated update of the `uv.lock` file.' > updates.txt
           echo '' >> updates.txt
           echo '```' >> updates.txt
-          diff --side-by-side --suppress-common-lines --width=60 --expand-tabs requirements.old requirements.new >> updates.txt || true
+          cat packages.txt >> updates.txt
           echo '```' >> updates.txt
 
           cat updates.txt
@@ -75,11 +56,11 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
           add-paths: |
-            Pipfile.lock
+            uv.lock
           branch: workflow/update-dependencies
           delete-branch: true
           author: 'GitHub <noreply@github.com>'
-          commit-message: '[workflow] Update dependencies in Pipfile.lock'
+          commit-message: '[workflow] Update dependencies in uv.lock'
           signoff: true
           title: '[workflow] Update dependencies in lockfiles'
           labels: dependencies

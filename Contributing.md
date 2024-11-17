@@ -23,15 +23,13 @@ testing.
 
 ### Environment setup
 
-- Install Python 3  
+- Install Python 3
   Chocolatey is a good way to install Python on Windows:
-  `choco install python3`  
-  The version of Python currently being used can be found at the botton of the
-  [Pipfile](Pipfile).
+  `choco install python3`
+  The version of Python currently being used can be found in the
+  [.python-version](.python-version) file.
 - Install dependencies:
-  - Install [pipenv](https://pipenv.pypa.io): `pip install --user --upgrade
-    pipenv==2024.4.0`
-  - Install project dependencies: `pipenv sync --dev`
+  - Install [uv](https://docs.astral.sh/uv/): `pip install --user --upgrade uv`
 - (Optional) Install [pre-commit](https://pre-commit.com) to verify code style
   before committing
   - Install pre-commit: `pip install --user --upgrade pre-commit`
@@ -39,14 +37,14 @@ testing.
 
 ### Building & running
 
-- To run the app (for development): `pipenv run python wahoo_results.py`
+- To run the app (for development): `uv run wahoo_results.py`
 - To build the executable version:
   - Install UPX: `choco install upx --version 4.2.4`
-  - Run the build script: `pipenv run python build.py`
+  - Run the build script: `uv run python build.py`
 
 ### Testing
 
-- The unit tests can be run via: `pipenv run pytest`
+- The unit tests can be run via: `uv run pytest`
 - There are also end-to-end tests that are build into the program. To run them,
   pass command-line options when running either the `.py` or `.exe` versions.
   - Specific scenario tests: `wahoo-results.exe --loglevel=debug
