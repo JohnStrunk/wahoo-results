@@ -17,7 +17,7 @@ dependencies = [
     "semver~=3.0",
     "sentry-sdk~=2.13",
     "ttkwidgets>=0.13.0",
-    "watchdog~=5.0",
+    "watchdog~=6.0",
 ]
 
 [dependency-groups]
