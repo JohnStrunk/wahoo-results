@@ -12,4 +12,5 @@ rules:
     allow-non-breakable-inline-mappings: true
     ignore: |
       /.github/workflows/**
+      /.readthedocs.yml
   new-lines: disable
