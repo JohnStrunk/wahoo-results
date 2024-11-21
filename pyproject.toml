@@ -11,7 +11,7 @@ dependencies = [
     "pillow==11.0.0",
     "pychromecast==14.0.5",
     "pyinstaller==6.11.1",
-    "python-dateutil==2.9.0",
+    "python-dateutil==2.9.0.post0",
     "requests==2.32.3",
     "segment-analytics-python==2.3.3",
     "semver==3.0.2",
