@@ -1,20 +1,18 @@
----
+
 pull_request_rules:
-  - name: Automatic merge on approval
-    conditions:
+  - name: refactored queue action rule
+    conditions: []
+    actions:
+      queue:
+queue_rules:
+  - name: duplicated default from Automatic merge trusted PRs
+    queue_conditions:
       - "#approved-reviews-by>=1"
       - "#changes-requested-reviews-by=0"
       - label!=do-not-merge
       - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
-    actions:
-      queue:
-        method: merge
-        name: default
-
-  - name: Automatic merge trusted PRs
-    conditions:
       - and:
           - or:
               - author=JohnStrunk
@@ -24,15 +22,20 @@ pull_request_rules:
       - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
-    actions:
-      queue:
-        method: merge
-        name: default
-
-queue_rules:
+    merge_conditions: []
+    merge_method: merge
+    method: merge
   - name: default
-    conditions:
+    queue_conditions:
+      - "#approved-reviews-by>=1"
+      - "#changes-requested-reviews-by=0"
+      - label!=do-not-merge
+      - check-success="Successful CI"
+      - check-success=DCO
+      - check-success=docs/readthedocs.org:wahoo-results
+    merge_conditions:
       # Conditions to get out of the queue (= merged)
       - check-success="Successful CI"
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
+    merge_method: merge
