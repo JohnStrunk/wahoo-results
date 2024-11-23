@@ -9,9 +9,8 @@ pull_request_rules:
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
     actions:
-      queue:
+      merge:
         method: merge
-        name: default
 
   - name: Automatic merge trusted PRs
     conditions:
@@ -25,14 +24,5 @@ pull_request_rules:
       - check-success=DCO
       - check-success=docs/readthedocs.org:wahoo-results
     actions:
-      queue:
+      merge:
         method: merge
-        name: default
-
-queue_rules:
-  - name: default
-    conditions:
-      # Conditions to get out of the queue (= merged)
-      - check-success="Successful CI"
-      - check-success=DCO
-      - check-success=docs/readthedocs.org:wahoo-results
