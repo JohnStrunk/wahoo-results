@@ -16,7 +16,6 @@ dependencies = [
     "segment-analytics-python==2.3.3",
     "semver==3.0.2",
     "sentry-sdk==2.18.0",
-    "ttkwidgets==0.13.0",
     "watchdog==6.0.0",
 ]
 
