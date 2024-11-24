@@ -1489,15 +1489,6 @@ wheels = [
 ]
 
 [[package]]
-name = "ttkwidgets"
-version = "0.13.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pillow" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/12/03/95275645ec464579967d0c6af2764be262b9f2cf7c479cfbd81c79478db8/ttkwidgets-0.13.0.tar.gz", hash = "sha256:9b1d69dffebef1820ee46b244469913d1911a563a15bb9b0823c71c950daead7", size = 86188 }
-
-[[package]]
 name = "types-pillow"
 version = "10.2.0.20240822"
 source = { registry = "https://pypi.org/simple" }
@@ -1561,7 +1552,6 @@ dependencies = [
     { name = "segment-analytics-python" },
     { name = "semver" },
     { name = "sentry-sdk" },
-    { name = "ttkwidgets" },
     { name = "watchdog" },
 ]
 
@@ -1599,7 +1589,6 @@ requires-dist = [
     { name = "segment-analytics-python", specifier = "==2.3.3" },
     { name = "semver", specifier = "==3.0.2" },
     { name = "sentry-sdk", specifier = "==2.18.0" },
-    { name = "ttkwidgets", specifier = "==0.13.0" },
     { name = "watchdog", specifier = "==6.0.0" },
 ]
 

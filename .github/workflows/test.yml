@@ -52,13 +52,9 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Install pipx
-        shell: cmd
-        run: python -m pip install pipx
-
       - name: Install pre-commit
         shell: cmd
-        run: pipx install pre-commit
+        run: python -m pip install pre-commit
 
       - name: Install pre-commit hooks
         shell: cmd
@@ -176,6 +172,10 @@ jobs:
           chcp 65001
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
+
+      - name: Set tcl path
+        shell: cmd
+        run: python -c "import site; import os; print('TCL_LIBRARY=' + os.path.join(site.PREFIXES[0], 'tcl', 'tcl8.6'))" >> %GITHUB_ENV%
 
       - name: Initialize virtual environment
         shell: cmd

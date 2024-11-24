@@ -18,10 +18,8 @@
 
 import os
 import sys
-from tkinter import FALSE, HORIZONTAL, Menu, StringVar, TclError, Tk, Widget, ttk
+from tkinter import FALSE, HORIZONTAL, Menu, StringVar, TclError, Tk, Widget, font, ttk
 
-import ttkwidgets  # type: ignore
-import ttkwidgets.font  # type: ignore
 from PIL import ImageTk
 
 import widgets
@@ -155,8 +153,8 @@ class _configTab(ttk.Frame):
         ttk.Label(txt_frame, text="Main font:", anchor="e").grid(
             column=0, row=0, sticky="news"
         )
-        main_dd = ttkwidgets.font.FontFamilyDropdown(
-            txt_frame, self._vm.font_normal.set
+        main_dd = ttk.Combobox(
+            txt_frame, textvariable=self._vm.font_normal, values=sorted(font.families())
         )
         main_dd.grid(column=1, row=0, sticky="news", pady=_PADDING)
         ToolTip(main_dd, "Main font used for scoreboard text")
@@ -170,7 +168,9 @@ class _configTab(ttk.Frame):
         ttk.Label(txt_frame, text="Time font:", anchor="e").grid(
             column=0, row=1, sticky="news"
         )
-        time_dd = ttkwidgets.font.FontFamilyDropdown(txt_frame, self._vm.font_time.set)
+        time_dd = ttk.Combobox(
+            txt_frame, textvariable=self._vm.font_time, values=sorted(font.families())
+        )
         time_dd.grid(column=1, row=1, sticky="news", pady=_PADDING)
         ToolTip(
             time_dd, "Font for displaying the times - Recommended: fixed-width font"
