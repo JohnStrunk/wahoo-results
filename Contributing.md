@@ -32,7 +32,7 @@ testing.
   - Install [uv](https://docs.astral.sh/uv/): `pip install --user --upgrade uv`
 - (Optional) Install [pre-commit](https://pre-commit.com) to verify code style
   before committing
-  - Install pre-commit: `pip install --user --upgrade pre-commit`
+  - Install pre-commit: `uv tool install pre-commit`
   - Install pre-commit hooks: `pre-commit install`
 
 ### Building & running
