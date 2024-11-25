@@ -97,10 +97,6 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Initialize virtual environment
-        shell: cmd
-        run: uv sync --locked --only-group docs
-
       - name: Build docs
         shell: cmd
         run: uv run --locked --only-group docs mkdocs build --verbose --strict
@@ -134,13 +130,65 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Initialize virtual environment
-        shell: cmd
-        run: uv sync --locked --group dev
-
       - name: Run tests
         shell: cmd
         run: uv run --locked --group dev pytest
+
+  sbom:
+    name: Software Bill of Materials
+    permissions:
+      actions: read
+      contents: write
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        # https://github.com/actions/checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        # https://github.com/astral-sh/setup-uv
+        uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3.2.3
+
+      - name: Set up Python
+        # https://github.com/actions/setup-python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version-file: ".python-version"
+
+      # Add Scripts directory to the path so that pipenv (and associated
+      # utilities) can be used once installed
+      - name: Add python Scripts directory to path
+        shell: cmd
+        # Code-page switch is needed to write the env file as utf-8
+        run: |
+          chcp 65001
+          python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
+          chcp 1252
+
+      - name: Generate requirements.txt
+        shell: cmd
+        run: uv export --locked --format requirements-txt > requirements.txt
+
+      - name: Generate & upload SBOM
+        # https://github.com/anchore/sbom-action
+        uses: anchore/sbom-action@v0.17.8
+        with:
+          artifact-name: sbom-spdx.json
+          dependency-snapshot: true
+          file: requirements.txt
+          format: spdx-json
+
+      - name: Check for security vulnerabilities
+        # https://github.com/pypa/gh-action-pip-audit/
+        uses: pypa/gh-action-pip-audit@v1.1.0
+        with:
+          inputs: requirements.txt
+          require-hashes: true
+          summary: true
+
 
   build:
     name: Build
@@ -177,10 +225,6 @@ jobs:
         shell: cmd
         run: python -c "import site; import os; print('TCL_LIBRARY=' + os.path.join(site.PREFIXES[0], 'tcl', 'tcl8.6'))" >> %GITHUB_ENV%
 
-      - name: Initialize virtual environment
-        shell: cmd
-        run: uv sync --locked
-
       - name: Install UPX
         shell: cmd
         run: choco install -y upx --version ${{ env.UPX_VERSION }}
@@ -191,7 +235,7 @@ jobs:
           IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
           SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: uv run --locked python build.py
+        run: uv run --locked --no-dev python build.py
 
       - name: Save executable as artifact
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
@@ -238,7 +282,7 @@ jobs:
 
   success:
     name: Successful CI
-    needs: [autotest, docs, precommit, test]
+    needs: [autotest, docs, precommit, sbom, test]
     runs-on: windows-latest
     steps:
       - name: Success
