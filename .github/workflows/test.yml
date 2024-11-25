@@ -174,7 +174,7 @@ jobs:
 
       - name: Generate & upload SBOM
         # https://github.com/anchore/sbom-action
-        uses: anchore/sbom-action@v0.17.8
+        uses: anchore/sbom-action@55dc4ee22412511ee8c3142cbea40418e6cec693 # v0.17.8
         with:
           artifact-name: sbom-spdx.json
           dependency-snapshot: true
@@ -183,7 +183,7 @@ jobs:
 
       - name: Check for security vulnerabilities
         # https://github.com/pypa/gh-action-pip-audit/
-        uses: pypa/gh-action-pip-audit@v1.1.0
+        uses: pypa/gh-action-pip-audit@1220774d901786e6f652ae159f7b6bc8fea6d266 # v1.1.0
         with:
           inputs: requirements.txt
           require-hashes: true
