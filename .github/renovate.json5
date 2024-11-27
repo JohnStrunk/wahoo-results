@@ -23,6 +23,15 @@
         "feature"
       ],
       "pinDigests": false
+    },
+    {
+      "description": "Update renovatebot/pre-commit-hooks weekly to decrease noise",
+      "matchPackageNames": [
+        "renovatebot/pre-commit-hooks"
+      ],
+      "schedule": [
+        "before 9am on monday"
+      ]
     }
   ],
   "customManagers": [
