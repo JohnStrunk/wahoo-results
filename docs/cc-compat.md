@@ -1,7 +1,9 @@
 # Chromecast compatibility
 
 Google has made several different versions of it's Chromecast line of devices.
-The table below summarizes their support status in {{ WR }}:
+Additionally, other companies have released similar devices that support the
+Chromecast protocol. The table below summarizes their support status in {{ WR
+}}:
 
 <div class="mygrid" markdown>
 <div class="mycard" markdown>
@@ -52,6 +54,19 @@ The table below summarizes their support status in {{ WR }}:
 ![CC w/ GTV](images/cc-gtv.jpg){ width=320 height=213 }
 
 <sub>Image attribution: [© Y2kcrazyjoker4 / CC BY-SA 4.0](https://en.wikipedia.org/wiki/File:Chromecast-with-Google-TV-snow-color-on-wood-table2.jpg)</sub>
+</div>
+<div class="mycard" markdown>
+
+## TiVo Stream 4K
+
+:material-check-circle:{ .green } &ndash; Working
+
+-----
+<div markdown style="text-align:center">
+![Gen 3](images/tivo-stream-4k.jpg){ width=240 height=240}
+</div>
+
+<sub>Image attribution: [© Xperi Inc.](https://www.tivo.com/products/stream-4k)</sub>
 </div>
 </div>
 
