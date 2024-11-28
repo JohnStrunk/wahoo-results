@@ -4,7 +4,7 @@
         {
             "label": "Serve MkDocs",
             "type": "shell",
-            "command": "pipenv run mkdocs serve",
+            "command": "uv run --group docs mkdocs serve",
             "group": {
                 "kind": "build",
                 "isDefault": true
