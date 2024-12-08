@@ -13,6 +13,9 @@
   "labels": [
     "dependencies"
   ],
+  "lockFileMaintenance": { // Update uv.lock
+    "enabled": true
+  },
   "packageRules": [
     {
       "description": "Devcontainer 'features' don't support digest pinning",
@@ -49,7 +52,7 @@
       "depNameTemplate": "upx/upx",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
-    },
+    }
   ],
   // "schedule": [
   //   "before 7am on Thursday" // Update weekly
