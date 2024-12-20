@@ -79,7 +79,7 @@ jobs:
 
       - name: Install uv
         # https://github.com/astral-sh/setup-uv
-        uses: astral-sh/setup-uv@2af22b5b2dcfc0729ee842c635f300f1fc5a9e9a # v5.0.0
+        uses: astral-sh/setup-uv@180f8b44399608a850e1db031fa65c77746566d3 # v5.0.1
 
       - name: Set up Python
         # https://github.com/actions/setup-python
@@ -112,7 +112,7 @@ jobs:
 
       - name: Install uv
         # https://github.com/astral-sh/setup-uv
-        uses: astral-sh/setup-uv@2af22b5b2dcfc0729ee842c635f300f1fc5a9e9a # v5.0.0
+        uses: astral-sh/setup-uv@180f8b44399608a850e1db031fa65c77746566d3 # v5.0.1
 
       - name: Set up Python
         # https://github.com/actions/setup-python
@@ -150,7 +150,7 @@ jobs:
 
       - name: Install uv
         # https://github.com/astral-sh/setup-uv
-        uses: astral-sh/setup-uv@2af22b5b2dcfc0729ee842c635f300f1fc5a9e9a # v5.0.0
+        uses: astral-sh/setup-uv@180f8b44399608a850e1db031fa65c77746566d3 # v5.0.1
 
       - name: Set up Python
         # https://github.com/actions/setup-python
@@ -205,7 +205,7 @@ jobs:
 
       - name: Install uv
         # https://github.com/astral-sh/setup-uv
-        uses: astral-sh/setup-uv@2af22b5b2dcfc0729ee842c635f300f1fc5a9e9a # v5.0.0
+        uses: astral-sh/setup-uv@180f8b44399608a850e1db031fa65c77746566d3 # v5.0.1
 
       - name: Set up Python
         # https://github.com/actions/setup-python
