@@ -223,10 +223,6 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Set tcl path
-        shell: cmd
-        run: python -c "import site; import os; print('TCL_LIBRARY=' + os.path.join(site.PREFIXES[0], 'tcl', 'tcl8.6'))" >> %GITHUB_ENV%
-
       - name: Install UPX
         shell: cmd
         run: choco install -y upx --version ${{ env.UPX_VERSION }}
