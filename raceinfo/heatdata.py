@@ -86,11 +86,8 @@ class HeatData:
             if self.age < 0:
                 raise ValueError("Age must be non-negative")
             if (
-                not isinstance(self.seed_time, NumericTime)
-                and self.seed_time != NT
-                or isinstance(self.seed_time, NumericTime)
-                and self.seed_time < 0
-            ):
+                not isinstance(self.seed_time, NumericTime) and self.seed_time != NT
+            ) or (isinstance(self.seed_time, NumericTime) and self.seed_time < 0):
                 raise ValueError("Seed time must be non-negative or NT")
             # Mark the lane as empty if there are no times or all times are zero
             # and there's no name or team
