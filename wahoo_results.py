@@ -31,6 +31,7 @@ from tkinter import Tk, filedialog, messagebox
 from typing import List, Optional
 
 import sentry_sdk
+import sentry_sdk.scope
 from requests.exceptions import RequestException
 from sentry_sdk.integrations.socket import SocketIntegration
 from sentry_sdk.integrations.threading import ThreadingIntegration
@@ -388,6 +389,7 @@ def initialize_sentry(model: Model) -> None:
         environment=execution_environment,
         release=f"wahoo-results@{WAHOO_RESULTS_VERSION}",
         include_local_variables=True,
+        send_default_pii=True,
         integrations=[SocketIntegration(), ThreadingIntegration(propagate_hub=True)],
         debug=False,
     )
@@ -445,8 +447,6 @@ def main() -> None:  # noqa: PLR0915
     model.version.set(WAHOO_RESULTS_VERSION)
 
     initialize_sentry(model)
-    hub = sentry_sdk.Hub.current
-    hub.start_session(session_mode="application")
 
     screen_size = (root.winfo_screenwidth(), root.winfo_screenheight())
     wh_analytics.application_start(model, screen_size)
@@ -557,11 +557,12 @@ def main() -> None:  # noqa: PLR0915
     root.update()
     wh_analytics.application_stop(model)
     root.update()
-    logger.debug("Shutting down Sentry")
-    hub.end_session()
-    client = hub.client
-    if client is not None:
-        client.close(timeout=2.0)
+
+    # Sentry v2 has deprecated Hub, so we can't manually close the client
+    # logger.debug("Shutting down Sentry")
+    # client = sentry_sdk.Hub.current.client
+    # if client is not None:
+    #     client.close(timeout=2.0)
     if logger.isEnabledFor(logging.DEBUG):
         for thread in threading.enumerate():
             logger.debug(
