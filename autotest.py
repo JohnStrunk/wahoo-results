@@ -681,12 +681,12 @@ class AddStartlist(Scenario):
         self._startlistdir = startlistdir
 
         # Ensure the directories exist
-        assert os.path.isdir(
-            self._testdatadir
-        ), "Test data directory does not exist or is not a directory"
-        assert os.path.isdir(
-            self._startlistdir
-        ), "Startlist directory does not exist or is not a directory"
+        assert os.path.isdir(self._testdatadir), (
+            "Test data directory does not exist or is not a directory"
+        )
+        assert os.path.isdir(self._startlistdir), (
+            "Startlist directory does not exist or is not a directory"
+        )
 
     def run(self) -> None:
         """Copy a random startlist file."""
@@ -750,9 +750,9 @@ class AddDO4(Scenario):
         # Ensure the directories exist
         assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
         assert os.path.isdir(self._do4dir), "DO4 directory does not exist"
-        assert os.path.isfile(
-            os.path.join(self._testdatadir, self._do4)
-        ), "DO4 file does not exist or is not a file"
+        assert os.path.isfile(os.path.join(self._testdatadir, self._do4)), (
+            "DO4 file does not exist or is not a file"
+        )
 
     def run(self) -> None:
         """Perform the copy."""
@@ -847,9 +847,9 @@ class GenDolphinCSV(Scenario):
         num_startlists = len(
             list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
         )
-        assert eventually(
-            lambda: num_startlists == len(self._read_csv()), 0.1, 100
-        ), "The CSV file does not contain the expected number of events"
+        assert eventually(lambda: num_startlists == len(self._read_csv()), 0.1, 100), (
+            "The CSV file does not contain the expected number of events"
+        )
 
     def _read_csv(self) -> List[str]:
         filename = os.path.join(self._startlistdir, "dolphin_events.csv")
@@ -876,9 +876,9 @@ class LoadAllSCB(Scenario):
 
         # Ensure the directories exist
         assert os.path.isdir(self._testdatadir), "Test data directory does not exist"
-        assert os.path.isdir(
-            self._startlistdir
-        ), "The startlist directory does not exist"
+        assert os.path.isdir(self._startlistdir), (
+            "The startlist directory does not exist"
+        )
 
     def run(self) -> None:
         """Load the SCB files."""
