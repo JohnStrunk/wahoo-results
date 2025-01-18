@@ -1424,11 +1424,11 @@ wheels = [
 
 [[package]]
 name = "semver"
-version = "3.0.2"
+version = "3.0.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/41/6c/a536cc008f38fd83b3c1b98ce19ead13b746b5588c9a0cb9dd9f6ea434bc/semver-3.0.2.tar.gz", hash = "sha256:6253adb39c70f6e51afed2fa7152bcd414c411286088fb4b9effb133885ab4cc", size = 214988 }
+sdist = { url = "https://files.pythonhosted.org/packages/13/f8/071c42ed3e9678f66a6d624c8df4cdd1490de2504dde6a1d47b61a8195e2/semver-3.0.3.tar.gz", hash = "sha256:8769a03a93507fecdf19b6eefb08d5e95b462504871a61e29e09798822888c94", size = 32780 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/77/0cc7a8a3bc7e53d07e8f47f147b92b0960e902b8254859f4aee5c4d7866b/semver-3.0.2-py3-none-any.whl", hash = "sha256:b1ea4686fe70b981f85359eda33199d60c53964284e0cfb4977d243e37cf4bf4", size = 17099 },
+    { url = "https://files.pythonhosted.org/packages/0e/a5/f240eb6341a63e9846a4c5b02222908181deeb3031b24c743a2381d3dd3f/semver-3.0.3-py3-none-any.whl", hash = "sha256:4bf5e5a52f98cd8377cfb99088eb743722f3d47cefc8a37e503c1e5806846b17", size = 17888 },
 ]
 
 [[package]]
@@ -1621,7 +1621,7 @@ requires-dist = [
     { name = "python-dateutil", specifier = "==2.9.0.post0" },
     { name = "requests", specifier = "==2.32.3" },
     { name = "segment-analytics-python", specifier = "==2.3.3" },
-    { name = "semver", specifier = "==3.0.2" },
+    { name = "semver", specifier = "==3.0.3" },
     { name = "sentry-sdk", specifier = "==2.19.2" },
     { name = "watchdog", specifier = "==6.0.0" },
 ]
