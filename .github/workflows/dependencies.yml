@@ -37,7 +37,7 @@ jobs:
 
       - name: Update dependencies
         shell: bash
-        run: uv lock --upgrade --resolution=highest --no-progress > packages.txt
+        run: uv lock --upgrade --resolution=highest --no-progress 2>&1 > packages.txt
 
       - name: Create update text
         shell: bash
