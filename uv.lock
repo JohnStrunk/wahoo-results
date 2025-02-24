@@ -1418,7 +1418,7 @@ wheels = [
 
 [[package]]
 name = "segment-analytics-python"
-version = "2.3.3"
+version = "2.3.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backoff" },
@@ -1426,9 +1426,9 @@ dependencies = [
     { name = "python-dateutil" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/70/01/7a231c76ec80a9b9769317638e59a902726ee60be88675c26f504a43c3c9/segment-analytics-python-2.3.3.tar.gz", hash = "sha256:ce6b3b4387ec9ebc5b55842c44d7dd63b4d4b0b8188e268c4492f909e5eeeed8", size = 34911 }
+sdist = { url = "https://files.pythonhosted.org/packages/66/89/17a69db0da866488462685159c29859d71a2994e7644140f2e05716eb4f8/segment_analytics_python-2.3.4.tar.gz", hash = "sha256:f188e864cc0fed9fb141aff73c21bfaab783a1dd1b97ab1eff44340aed68f50b", size = 35571 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d0/94/6d1512e0e54003eda9e1480cadf0e967bf1fffbd8454f4537bddc47f2a48/segment_analytics_python-2.3.3-py2.py3-none-any.whl", hash = "sha256:769251706d71f4c96d2039391d119222dbd9faf00308400f7b314ec9fb86cfc7", size = 32726 },
+    { url = "https://files.pythonhosted.org/packages/4b/96/c9508caecf4dcfd6ce0bba63a9fd3546edddcc24070040239c4468aad408/segment_analytics_python-2.3.4-py2.py3-none-any.whl", hash = "sha256:ea2b6432bef1c017d24f69bf5f778e45c2385ec9df527242e2b42ee6cefd7367", size = 33335 },
 ]
 
 [[package]]
@@ -1629,7 +1629,7 @@ requires-dist = [
     { name = "pyinstaller", specifier = "==6.12.0" },
     { name = "python-dateutil", specifier = "==2.9.0.post0" },
     { name = "requests", specifier = "==2.32.3" },
-    { name = "segment-analytics-python", specifier = "==2.3.3" },
+    { name = "segment-analytics-python", specifier = "==2.3.4" },
     { name = "semver", specifier = "==3.0.4" },
     { name = "sentry-sdk", specifier = "==2.22.0" },
     { name = "watchdog", specifier = "==6.0.0" },
