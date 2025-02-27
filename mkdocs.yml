@@ -1,6 +1,5 @@
 ---
-# pipenv sync --categories docs
-# pipenv run mkdocs serve
+# uv run --only-group docs mkdocs serve
 site_name: Wahoo! Results
 site_author: John Strunk
 site_description: >-
