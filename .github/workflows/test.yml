@@ -132,7 +132,9 @@ jobs:
 
       - name: Run tests
         shell: cmd
-        run: uv run --locked --group dev pytest
+        run: |
+          uv run --locked --group dev pytest
+          uv run --locked --group dev pyright
 
   sbom:
     name: Software Bill of Materials
