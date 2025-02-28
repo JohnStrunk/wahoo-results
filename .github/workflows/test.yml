@@ -130,9 +130,13 @@ jobs:
           python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
           chcp 1252
 
-      - name: Run tests
+      - name: pytest
         shell: cmd
         run: uv run --locked --group dev pytest
+
+      - name: pyright
+        shell: cmd
+        run: uv run --locked --group dev pyright
 
   sbom:
     name: Software Bill of Materials
