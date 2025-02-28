@@ -19,6 +19,7 @@
 import logging
 import threading
 import time
+import typing
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Callable, Dict, List, Optional
@@ -244,7 +245,10 @@ class ImageCast:
                     self.send_header("Content-type", "image/png")
                     self.end_headers()
                     if parent.image is not None:
-                        parent.image.save(self.wfile, "PNG", optimize=True)
+                        # BaseHTTPRequestHandler's file pointer (wfile) doesn't
+                        # directly convert to a file object
+                        fp = typing.cast(typing.IO[bytes], self.wfile)
+                        parent.image.save(fp, "PNG", optimize=True)
 
             def log_message(self, format, *args):
                 logger.debug(format, *args)

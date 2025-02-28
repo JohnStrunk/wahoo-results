@@ -143,9 +143,9 @@ class ScoreboardImage:
         self._normal_font = ImageFont.truetype(normal_f_file, int(scaled_height))
         self._time_font = ImageFont.truetype(time_f_file, int(scaled_height))
         draw = ImageDraw.Draw(self._img)
-        self._text_height = draw.textbbox((0, 0), self._EVENT_SIZE, self._normal_font)[
-            3
-        ]
+        self._text_height = int(
+            draw.textbbox((0, 0), self._EVENT_SIZE, self._normal_font)[3]
+        )
 
     def _draw_header(self) -> None:
         draw = ImageDraw.Draw(self._img)
