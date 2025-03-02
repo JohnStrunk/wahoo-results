@@ -23,6 +23,8 @@ from typing import Optional
 
 from .times import NT, ZERO_TIME, NumericTime, Time, TimeResolver, is_special_time
 
+# pyright: strict
+
 
 @dataclass(kw_only=True)
 class HeatData:
