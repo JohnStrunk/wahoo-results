@@ -27,13 +27,11 @@ import string
 import threading
 import time
 import tkinter
-import tracemalloc
 from functools import reduce
 from tkinter import DoubleVar, IntVar, StringVar
 from typing import Callable, List
 
 from model import Model
-from raceinfo import INCONSISTENT, NO_SHOW, is_special_time
 
 TESTING = False
 
@@ -194,7 +192,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 lambda: reduce(
                     lambda a, b: a and b,
                     [
-                        not is_special_time(model.latest_result.get().lane(i).time())  # type: ignore
+                        model.latest_result.get().lane(i).final_time is not None  # type: ignore
                         for i in range(1, 6)
                     ],
                 ),
@@ -212,11 +210,11 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
-                lambda: model.latest_result.get().lane(2).time() != NO_SHOW,  # type: ignore
+                lambda: not model.latest_result.get().lane(2).is_noshow,  # type: ignore
                 "Lane 2 IS NOT a no-show",
             ),
             Validate(
-                lambda: model.latest_result.get().lane(5).time() == NO_SHOW,  # type: ignore
+                lambda: model.latest_result.get().lane(5).is_noshow,  # type: ignore
                 "Lane 5 IS a no-show",
             ),
             # Race w/ an unexpected swimmer (no name)
@@ -235,7 +233,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "Lane 1 should not have a name",
             ),
             Validate(
-                lambda: not is_special_time(model.latest_result.get().lane(1).time()),  # type: ignore
+                lambda: model.latest_result.get().lane(1).final_time is not None,  # type: ignore
                 "Lane 1 should have a valid time",
             ),
             # Race w/ an extra heat (no names)
@@ -246,11 +244,11 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 [latest_result_counter, scoreboard_counter],
             ),
             Validate(
-                lambda: len(model.latest_result.get().lane(3).name) == 0,  # type: ignore
+                lambda: model.latest_result.get().lane(3).name is None,  # type: ignore
                 "SCB should NOT have names for the heat",
             ),
             Validate(
-                lambda: not is_special_time(model.latest_result.get().lane(3).time()),  # type: ignore
+                lambda: model.latest_result.get().lane(3).final_time is not None,  # type: ignore
                 "Lane 3 should have a valid time",
             ),
             # Race w/o a corresponding scb file
@@ -265,7 +263,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "There should not be an SCB for the event",
             ),
             Validate(
-                lambda: not is_special_time(model.latest_result.get().lane(3).time()),  # type: ignore
+                lambda: model.latest_result.get().lane(3).final_time is not None,  # type: ignore
                 "Lane 3 should have a valid time",
             ),
             # Race w/ too much time delta
@@ -280,11 +278,11 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
-                lambda: model.latest_result.get().lane(3).time() == INCONSISTENT,  # type: ignore
+                lambda: model.latest_result.get().lane(3).final_time is None,  # type: ignore
                 "Lane 3 should not have a valid time (2 times differ by greater than threshold)",
             ),
             Validate(
-                lambda: not model.latest_result.get().lane(3).time() == NO_SHOW,  # type: ignore
+                lambda: not model.latest_result.get().lane(3).is_noshow,  # type: ignore
                 "Lane 3 IS NOT a no-show",
             ),
             # Race w/ too few watch times
@@ -299,15 +297,15 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "SCB should have an entry for the heat/event",
             ),
             Validate(
-                lambda: model.latest_result.get().lane(1).time() == INCONSISTENT,  # type: ignore
+                lambda: model.latest_result.get().lane(1).final_time is None,  # type: ignore
                 "Lane 1 should not have a valid time (only 1 watch time, threshold is 2)",
             ),
             Validate(
-                lambda: model.latest_result.get().lane(1).time() != NO_SHOW,  # type: ignore
+                lambda: not model.latest_result.get().lane(1).is_noshow,  # type: ignore
                 "Lane 1 IS NOT a no-show",
             ),
             Validate(
-                lambda: not is_special_time(model.latest_result.get().lane(2).time()),  # type: ignore
+                lambda: model.latest_result.get().lane(2).final_time is not None,  # type: ignore
                 "Lane 2 should have a valid time",
             ),
             ############################################################
@@ -385,14 +383,6 @@ def _build_random_scenario(
         SetDouble(model, model.time_threshold, 0.01, 3.0),
     ]
 
-    def mem_snapshot() -> None:
-        snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics("lineno")
-        for stat in top_stats[:25]:
-            print(stat)
-
-    tracemalloc.start()
-
     return Sequentially(
         [
             Repeatedly(
@@ -407,7 +397,6 @@ def _build_random_scenario(
                 seconds,
                 operations,
             ),
-            Enqueue(model, mem_snapshot),
             Enqueue(model, model.menu_exit.run),
         ]
     )
@@ -764,7 +753,7 @@ class AddDO4(Scenario):
         for i in range(len(self._counters)):
             assert eventually(
                 # i=i is a hack to capture the current value of i
-                lambda i=i: self._counters[i].get() > prev_count[i],  # type: ignore
+                lambda i=i: self._counters[i].get() > prev_count[i],
                 0.1,
                 100,
             ), "DO4 file was not processed"

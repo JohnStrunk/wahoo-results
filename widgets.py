@@ -17,6 +17,7 @@
 """TKinter code to display various UI widgets."""
 
 import os
+from datetime import datetime
 from tkinter import (
     VERTICAL,
     Canvas,
@@ -30,7 +31,7 @@ from tkinter import (
 from typing import Any, Optional
 
 import PIL.Image as PILImage
-from PIL import ImageTk  # type: ignore
+from PIL import ImageTk
 
 import scoreboard
 from model import (
@@ -40,7 +41,7 @@ from model import (
     RaceResultVar,
     StartListVar,
 )
-from raceinfo import DQ, NO_SHOW, NumericTime, is_special_time
+from raceinfo import Time
 
 TkContainer = Any
 
@@ -153,7 +154,7 @@ class StartListTreeView(ttk.Frame):
             self.tview.insert(
                 "",
                 "end",
-                id=entry[0].event,
+                id=entry[0].event or "",  # Not sure about empty string here
                 values=[entry[0].event, entry[0].description, str(len(entry))],
             )
 
@@ -223,15 +224,21 @@ class RaceResultTreeView(ttk.Frame):
     def _update_contents(self):
         self.tview.delete(*self.tview.get_children())
         local_list = self.racelist.get()
+        now = datetime.now()
         # Sort the list by date, descending
         # https://stackoverflow.com/a/39359270
-        local_list.sort(key=lambda e: e.time_recorded, reverse=True)
+        local_list.sort(key=lambda e: e.time_recorded or now, reverse=True)
         for entry in local_list:
-            timetext = entry.time_recorded.strftime("%Y-%m-%d %H:%M:%S")
+            timetext = (
+                entry.time_recorded.strftime("%Y-%m-%d %H:%M:%S")
+                if entry.time_recorded
+                else ""
+            )
+            id = str(entry.meet_id) + str(entry.event) + str(entry.heat)
             self.tview.insert(
                 "",
                 "end",
-                id=str(entry.time_recorded.timestamp()),
+                id=id,
                 values=[str(entry.meet_id), entry.event, entry.heat, timetext],
             )
 
@@ -304,15 +311,17 @@ class RaceResultView(ttk.LabelFrame):
         self.rowconfigure(0, weight=1)
         self.tview = ttk.Treeview(
             self,
-            columns=["lane", "t1", "t2", "t3", "final"],
+            columns=["lane", "pad", "t1", "t2", "t3", "final"],
             selectmode="none",
             show="headings",
         )
         self.tview.grid(column=0, row=0, sticky="news")
         # Column configuration
-        time_width = 70
+        time_width = 60
         self.tview.heading("lane", anchor="e", text="Lane")
-        self.tview.column("lane", anchor="e", width=40)
+        self.tview.column("lane", anchor="e", width=35)
+        self.tview.heading("pad", anchor="e", text="Pad")
+        self.tview.column("pad", anchor="e", width=time_width)
         self.tview.heading("t1", anchor="e", text="Timer #1")
         self.tview.column("t1", anchor="e", width=time_width)
         self.tview.heading("t2", anchor="e", text="Timer #2")
@@ -329,20 +338,24 @@ class RaceResultView(ttk.LabelFrame):
         for lane in range(1, 11):
             if result is None:
                 self.tview.insert(
-                    "", "end", id=str(lane), values=[str(lane), "", "", "", ""]
+                    "", "end", id=str(lane), values=[str(lane), "", "", "", "", ""]
                 )
             else:
-                rawtimes = result.lane(lane).times
+                padtime = result.lane(lane).primary or ""
+                rawtimes: list[Time | None] = [None, None, None]
+                backups = result.lane(lane).backups
+                if backups is not None:
+                    for i, b in enumerate(backups):
+                        rawtimes[i] = b
                 timestr = [
                     scoreboard.format_time(t) if t is not None else "" for t in rawtimes
                 ]
-                final = result.lane(lane).time()
-                if not is_special_time(final):
-                    assert isinstance(final, NumericTime)
+                final = result.lane(lane).final_time
+                if final is not None:
                     finalstr = scoreboard.format_time(final)
-                elif final == NO_SHOW:
+                elif result.lane(lane).is_noshow:
                     finalstr = "NS"
-                elif final == DQ:
+                elif result.lane(lane).is_dq:
                     finalstr = "DQ"
                 else:
                     finalstr = "????"
@@ -350,5 +363,12 @@ class RaceResultView(ttk.LabelFrame):
                     "",
                     "end",
                     id=str(lane),
-                    values=[str(lane), timestr[0], timestr[1], timestr[2], finalstr],
+                    values=[
+                        str(lane),
+                        padtime,
+                        timestr[0],
+                        timestr[1],
+                        timestr[2],
+                        finalstr,
+                    ],
                 )

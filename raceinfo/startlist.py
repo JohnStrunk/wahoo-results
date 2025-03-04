@@ -16,9 +16,9 @@
 
 """Functions for manipulating Startlists."""
 
-from .heatdata import HeatData
+from .heat import Heat
 
-StartList = list[HeatData]
+StartList = list[Heat]
 """
 A StartList is a list of HeatData objects, one for each heat in an event.
 
@@ -33,6 +33,10 @@ def is_valid(startlist: StartList) -> bool:
     """
     Check if a StartList is valid.
 
+    - All heats must have the same event number
+    - All heats must have a heat number
+    - The heats must be in order by heat number
+
     :param startlist: The StartList to check
     :returns: True if the StartList is valid, False otherwise
 
@@ -44,8 +48,12 @@ def is_valid(startlist: StartList) -> bool:
     if not startlist:
         return False
     event = startlist[0].event
+    if event is None:
+        return False
     heatnum = 0
     for heat in startlist:
+        if heat.event is None or heat.heat is None:
+            return False
         if heat.event != event:
             return False
         if heat.heat <= heatnum:

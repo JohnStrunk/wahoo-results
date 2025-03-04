@@ -19,20 +19,13 @@
 from typing import Optional, Tuple
 
 import sentry_sdk
-from matplotlib import font_manager  # type: ignore
+from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.ImageEnhance import Brightness
 
 from model import Model
-from raceinfo import (
-    INCONSISTENT,
-    NO_SHOW,
-    HeatData,
-    NameMode,
-    NumericTime,
-    format_name,
-    is_special_time,
-)
+from raceinfo import Heat, NameMode, Time, format_name
+from raceinfo.time import MIN_VALID_TIME
 
 
 def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
@@ -69,7 +62,7 @@ class ScoreboardImage:
     def __init__(
         self,
         size: Tuple[int, int],
-        race: HeatData,
+        race: Heat,
         model: Model,
         background: bool = True,
     ):
@@ -184,7 +177,7 @@ class ScoreboardImage:
         )
         dstart = edge_l + draw.textlength(self._HEAT_SIZE, self._normal_font)
         dwidth = width - dstart
-        desc_txt = self._race.description
+        desc_txt = self._race.description or ""
         while draw.textlength(desc_txt, self._normal_font) > dwidth:
             desc_txt = desc_txt[:-1]
         draw.text(
@@ -262,7 +255,8 @@ class ScoreboardImage:
                 fill=pl_color,
             )
             # Name
-            name_variants = format_name(NameMode.NONE, self._race.lane(i).name)
+            raw_name = self._race.lane(i).name or ""
+            name_variants = format_name(NameMode.NONE, raw_name)
             while draw.textlength(name_variants[0], self._normal_font) > name_width:
                 name_variants.pop(0)
             name = name_variants[0]
@@ -284,18 +278,15 @@ class ScoreboardImage:
 
     def _time_text(self, lane_num: int) -> str:
         lane = self._race.lane(lane_num)
-        final_time = lane.time()
+        final_time = lane.final_time
         # Only print NS if someone was supposed to be there
-        if lane.is_empty or final_time == NO_SHOW:
-            if lane.name == "":
+        if lane.is_empty or lane.is_noshow:
+            if lane.name is None or lane.name == "":
                 return ""
             return "NS"
-        if final_time == INCONSISTENT:
+        if final_time is None:
             return "--:--.--"
-        if not is_special_time(final_time):
-            assert isinstance(final_time, NumericTime)
-            return format_time(final_time)
-        return ""
+        return format_time(final_time)
 
     def _baseline(self, line: int) -> int:
         """Return the y-coordinate for the baseline of the n-th line of text from the top."""
@@ -306,24 +297,46 @@ class ScoreboardImage:
         )  # up 1/2 the inter-line space
 
 
-def format_time(seconds: NumericTime) -> str:
+def format_time(seconds: Time | None) -> str:
     """Format a time in minutes, seconds, and hundredths.
+
+    Times are formatted as follows:
+
+    - If the time is None or less than MIN_VALID_TIME, return an empty string
+    - If the time is less than 1 minute, return the time in MM.SS format
+    - If the time is greater than or equal to 1 minute, return the time in
+      M:SS.SS format
+    - If the time is 100 minutes or greater, return '99:59.99'
 
     :param seconds: The time in seconds
     :returns: A string representation of the time
 
-    >>> format_time(NumericTime("1.2"))
-    '01.20'
-    >>> format_time(NumericTime("9.87"))
-    '09.87'
-    >>> format_time(NumericTime("50"))
+    >>> format_time(None)
+    ''
+    >>> format_time(Time("0.0"))
+    ''
+    >>> format_time(Time("0.01"))
+    ''
+    >>> format_time(Time("15.2"))
+    '15.20'
+    >>> format_time(Time("19.87"))
+    '19.87'
+    >>> format_time(Time("50"))
     '50.00'
-    >>> format_time(NumericTime("120.0"))
+    >>> format_time(Time("120.0"))
     '2:00.00'
+    >>> format_time(Time("1800"))
+    '30:00.00'
+    >>> format_time(Time("9000"))
+    '99:59.99'
     """
-    sixty = NumericTime("60")
+    if seconds is None or seconds < MIN_VALID_TIME:
+        return ""
+    sixty = Time("60")
     minutes = seconds // sixty
     seconds = seconds % sixty
+    if minutes >= 100:  # noqa: PLR2004
+        return "99:59.99"
     if minutes == 0:
         return f"{seconds:05.2f}"
     return f"{minutes}:{seconds:05.2f}"

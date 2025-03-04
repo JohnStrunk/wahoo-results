@@ -22,7 +22,7 @@ import subprocess
 
 import PyInstaller.__main__
 import PyInstaller.utils.win32.versioninfo as vinfo
-import semver  # type: ignore
+import semver
 
 import wh_version
 

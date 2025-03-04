@@ -25,12 +25,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Callable, Dict, List, Optional
 from uuid import UUID
 
-import pychromecast  # type: ignore
+import pychromecast
 import sentry_sdk
 import zeroconf
-from PIL import Image  # type: ignore
-from pychromecast.controllers.media import BaseMediaPlayer  # type: ignore
-from pychromecast.error import NotConnected  # type: ignore
+from PIL import Image
+from pychromecast.controllers.media import BaseMediaPlayer
+from pychromecast.error import NotConnected
 
 # Resolution of images for the Chromecast
 IMAGE_SIZE = (1280, 720)

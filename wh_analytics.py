@@ -23,11 +23,11 @@ import time
 from pprint import pprint
 from typing import Any, Dict, Optional, Tuple
 
-import ipinfo  # type: ignore
-import ipinfo.exceptions  # type: ignore
+import ipinfo
+import ipinfo.exceptions
 import requests
 import sentry_sdk
-from segment import analytics  # type: ignore
+from segment import analytics
 
 import autotest
 import version

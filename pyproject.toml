@@ -71,7 +71,10 @@ output = "coverage.xml"
 [tool.pyright]
 # https://microsoft.github.io/pyright/#/configuration
 include = ["."]
-#strict = ["."]
+reportUnnecessaryTypeIgnoreComment = true
+strict = ["./raceinfo"]
+typeCheckingMode = "standard"
+useLibraryCodeForTypes = true
 verboseOutput = true
 
 [tool.pytest.ini_options]

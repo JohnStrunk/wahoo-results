@@ -50,8 +50,8 @@ import wh_version
 from about import about
 from model import Model
 from raceinfo import (
-    HeatData,
-    NumericTime,
+    Heat,
+    Time,
     load_all_scb,
     parse_do4_file,
     parse_scb_file,
@@ -214,14 +214,14 @@ def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
     scb_dir_updated()
 
 
-def summarize_racedir(directory: str) -> List[HeatData]:
+def summarize_racedir(directory: str) -> List[Heat]:
     """Summarize all race results in a directory.
 
     :param directory: The directory to process
     :returns: A list of HeatData objects
     """
     files = os.scandir(directory)
-    contents: List[HeatData] = []
+    contents: List[Heat] = []
     for file in files:
         if file.name.endswith(".do4"):
             match = re.match(r"^(\d+)-", file.name)
@@ -237,7 +237,7 @@ def summarize_racedir(directory: str) -> List[HeatData]:
     return contents
 
 
-def load_result(model: Model, filename: str) -> Optional[HeatData]:
+def load_result(model: Model, filename: str) -> Optional[Heat]:
     """Load a result file and corresponding startlist.
 
     :param model: The application model
@@ -245,15 +245,16 @@ def load_result(model: Model, filename: str) -> Optional[HeatData]:
     :returns: The HeatData object representing the result if successful,
         otherwise None
     """
-    result: Optional[HeatData] = None
+    result: Optional[Heat] = None
+    resolver = standard_resolver(
+        model.min_times.get(), Time(str(model.time_threshold.get()))
+    )
     # Retry mechanism since we get errors if we try to read while it's
     # still being written.
     for tries in range(1, 6):
         try:
             result = parse_do4_file(filename)
-            result.resolver = standard_resolver(
-                model.min_times.get(), NumericTime(model.time_threshold.get())
-            )
+            result.resolve_times(resolver)
             break
         except ValueError:
             sleep(0.05 * tries)
@@ -264,7 +265,7 @@ def load_result(model: Model, filename: str) -> Optional[HeatData]:
     efilename = f"E{result.event:0>3}.scb"
     try:
         startlist = parse_scb_file(os.path.join(model.dir_startlist.get(), efilename))
-        if len(startlist) >= result.heat:
+        if result.heat is not None and len(startlist) >= result.heat:
             result.merge(info_from=startlist[result.heat - 1])
     except OSError:
         pass

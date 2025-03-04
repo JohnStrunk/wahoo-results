@@ -19,7 +19,7 @@
 import logging
 from typing import Callable
 
-import watchdog.events  # type: ignore
+import watchdog.events
 
 CallbackFn = Callable[[], None]
 CreatedCallbackFn = Callable[[str], None]
