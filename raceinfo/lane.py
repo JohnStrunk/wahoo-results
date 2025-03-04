@@ -14,13 +14,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# pyright: strict
 """The data describing a lane."""
 
 import copy
 from dataclasses import dataclass
 
-from .time import Time
+from .time import MIN_VALID_TIME, ZERO_TIME, Time
 
 
 @dataclass(kw_only=True)
@@ -61,13 +60,13 @@ class Lane:
     # Race data
     primary: Time | None = None
     """The primary (pad) time"""
-    backups: list[list[Time]] | None = None
+    backups: list[Time | None] | None = None
     """
-    The list of secondary/tertiary/etc times
+    The list of backup times.
 
-    backups[0] is the highest priority set of backup times (i.e., the
-    secondary), and each successive index is a lower priority set of backup
-    times (i.e., tertiary, quaternary, etc.).
+    - If backups is None, the timing system does not support backup times.
+    - If an entry in the list is None, the timing system did not capture a
+      backup time for that particular slot.
     """
     splits: list[Time] | None = None
     """The list of intermediate, cumulative split times"""
@@ -95,13 +94,34 @@ class Lane:
             raise ValueError("Primary time must be non-negative")
         if self.final_time is not None and self.final_time < 0:
             raise ValueError("Final time must be non-negative")
-        for backup_set in self.backups or []:
-            for backup in backup_set:
-                if backup < 0:
-                    raise ValueError("Backup times must be non-negative")
+        for backup in self.backups or []:
+            if backup is not None and backup < ZERO_TIME:
+                raise ValueError("Backup times must be non-negative")
         for split in self.splits or []:
             if split < 0:
                 raise ValueError("Splits must be non-negative")
+
+    @property
+    def is_noshow(self) -> bool:
+        """
+        Check if the lane is a no-show.
+
+        A lane is considered a no-show if it doesn't have any valid primary,
+        backup, or split times.
+        """
+        return (
+            (self.primary is None or self.primary < MIN_VALID_TIME)
+            and (
+                self.backups is None
+                or all(
+                    (backup or ZERO_TIME) < MIN_VALID_TIME for backup in self.backups
+                )
+            )
+            and (
+                self.splits is None
+                or all(split < MIN_VALID_TIME for split in self.splits)
+            )
+        )
 
     def merge(
         self,
@@ -134,7 +154,7 @@ class Lane:
             self.is_dq = results_from.is_dq
             self.is_empty = results_from.is_empty
 
-    def is_similar_to(self, other: "Lane") -> bool:  # noqa: PLR0911
+    def is_similar_to(self, other: "Lane") -> bool:
         """
         Check if this lane is similar to another lane.
 
@@ -175,9 +195,6 @@ class Lane:
             if len(self.backups) != len(other.backups):
                 return False
             for backup1, backup2 in zip(self.backups, other.backups):
-                if len(backup1) != len(backup2):
+                if backup1 != backup2:
                     return False
-                for time1, time2 in zip(backup1, backup2):
-                    if time1 != time2:
-                        return False
         return True

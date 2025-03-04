@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# pyright: strict
 """Time resolver(s)."""
 
 from typing import Callable, Literal
@@ -37,7 +36,7 @@ def standard_resolver(min_times: int, threshold: Time) -> TimeResolver:
     Get a standard time resolver for a lane.
 
     The standard resolver will:
-    1. Use the primary time if it is present and supported (within the threshold) by at least one secondary backup time.
+    1. Use the primary time if it is present and supported (within the threshold) by at least one backup time.
     2. If there is no primary, it will use a composite of the backup times (average or median) as long as all backups are within the threshold of the calculated time.
 
     :param min_times: The minimum number of backup times required for them to be used to generate a final time
@@ -46,22 +45,25 @@ def standard_resolver(min_times: int, threshold: Time) -> TimeResolver:
 
     def resolve(lane: Lane) -> None:
         lane.final_time = None
+        if lane.backups is None:  # No backups, so we can't do anything
+            return
+        valid_backups = [
+            backup
+            for backup in lane.backups
+            if backup is not None and backup >= MIN_VALID_TIME
+        ]
         # See if we can use the primary time
         if lane.primary is not None and lane.primary >= MIN_VALID_TIME:
             # Check if the primary is supported by at least one backup time
-            if lane.backups is not None and len(lane.backups) > 0:
-                if _is_supported_by(lane.primary, lane.backups[0], threshold, "any"):
-                    lane.final_time = lane.primary
-                    return
+            if _is_supported_by(lane.primary, valid_backups, threshold, "any"):
+                lane.final_time = lane.primary
+                return
         # We don't have a primary time or it is not supported by any backup times, so we need to use the backups
-        if lane.backups is not None:
-            for backup_times in lane.backups:
-                if len(backup_times) >= min_times:
-                    candidate = _get_candidate(backup_times)
-                    if candidate is not None:
-                        if _is_supported_by(candidate, backup_times, threshold, "all"):
-                            lane.final_time = candidate
-                            break
+        if len(valid_backups) >= min_times:
+            candidate = _get_candidate(valid_backups)
+            if candidate is not None:
+                if _is_supported_by(candidate, valid_backups, threshold, "all"):
+                    lane.final_time = candidate
         return
 
     return resolve

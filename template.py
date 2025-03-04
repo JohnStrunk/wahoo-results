@@ -16,66 +16,57 @@
 
 """A scoreboard template for previews and theming."""
 
-from raceinfo import HeatData, NumericTime, standard_resolver
+from raceinfo import Heat, Lane, Time, standard_resolver
+from raceinfo.time import MIN_VALID_TIME
 
 
-def get_template() -> HeatData:
+def get_template() -> Heat:
     """
     Return template data to create a scoreboard mockup.
 
     >>> from scoreboard import format_time
-    >>> from raceinfo import NO_SHOW, INCONSISTENT
     >>> t = get_template()
     >>> t.event
     '999'
-    >>> isinstance(t.lane(1).time(), NumericTime)
-    True
-    >>> format_time(t.lane(1).time())
+    >>> t.lane(1).final_time
+    Decimal('5990.99')
+    >>> format_time(t.lane(1).final_time)
     '99:50.99'
-    >>> t.lane(2).time() == NO_SHOW
+    >>> t.lane(2).is_noshow
     True
-    >>> t.lane(3).time() == INCONSISTENT
+    >>> t.lane(3).final_time is None
     True
     >>> t.lane(3).name
     'Brady, June A'
     >>> t.lane(3).team
     'TEAM'
     """
-    basetime = NumericTime("59.99") + NumericTime("60") * NumericTime("99")
+    basetime = Time("59.99") + Time("60") * Time("99")
     lt = [basetime + i - 10 for i in range(1, 11)]
-    return HeatData(
+    heat = Heat(
         event="999",
         heat=99,
         description="GIRLS 15&O 200 MEDLEY RELAY",
         lanes=[
-            HeatData.Lane(
+            Lane(
                 name="Hutchins, Lorraine O",
                 team="TEAM",
-                times=[lt[0], lt[0], lt[0]],
+                primary=lt[0],
+                backups=[lt[0]],
             ),
-            HeatData.Lane(name="English, Cheryl M", team="TEAM", times=[]),
-            HeatData.Lane(name="Brady, June A", team="TEAM", times=[NumericTime(1)]),
-            HeatData.Lane(
-                name="Sloan, Michelle T", team="TEAM", times=[lt[3], lt[3], lt[3]]
+            Lane(name="English, Cheryl M", team="TEAM"),
+            Lane(name="Brady, June A", team="TEAM", backups=[MIN_VALID_TIME]),
+            Lane(name="Sloan, Michelle T", team="TEAM", primary=lt[3], backups=[lt[3]]),
+            Lane(name="Downing, Doreen S", team="TEAM", primary=lt[4], backups=[lt[4]]),
+            Lane(name="Collier, Julie G", team="TEAM", primary=lt[5], backups=[lt[5]]),
+            Lane(
+                name="Chase, Constance H", team="TEAM", primary=lt[6], backups=[lt[6]]
             ),
-            HeatData.Lane(
-                name="Downing, Doreen S", team="TEAM", times=[lt[4], lt[4], lt[4]]
-            ),
-            HeatData.Lane(
-                name="Collier, Julie G", team="TEAM", times=[lt[5], lt[5], lt[5]]
-            ),
-            HeatData.Lane(
-                name="Chase, Constance H", team="TEAM", times=[lt[6], lt[6], lt[6]]
-            ),
-            HeatData.Lane(
-                name="Clark, Leslie J", team="TEAM", times=[lt[7], lt[7], lt[7]]
-            ),
-            HeatData.Lane(
-                name="Jensen, Kelli N", team="TEAM", times=[lt[8], lt[8], lt[8]]
-            ),
-            HeatData.Lane(
-                name="Parsons, Marsha L", team="TEAM", times=[lt[9], lt[9], lt[9]]
-            ),
+            Lane(name="Clark, Leslie J", team="TEAM", primary=lt[7], backups=[lt[7]]),
+            Lane(name="Jensen, Kelli N", team="TEAM", primary=lt[8], backups=[lt[8]]),
+            Lane(name="Parsons, Marsha L", team="TEAM", primary=lt[9], backups=[lt[9]]),
         ],
-        time_resolver=standard_resolver(2, NumericTime(0.30)),
     )
+    resolver = standard_resolver(2, Time("0.30"))
+    heat.resolve_times(resolver)
+    return heat

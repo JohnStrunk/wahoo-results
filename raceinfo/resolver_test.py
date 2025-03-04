@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# pyright: strict
 """Test time resolver(s)."""
 
 import pytest
@@ -48,7 +47,7 @@ class TestStandardResolver:
         """The primary time is used if it is supported by at least one backup time."""
         lane = Lane(
             primary=Time("60.00"),
-            backups=[[Time("60.10"), Time("99.99")]],
+            backups=[Time("60.10"), Time("99.99")],
         )
         resolver_2_030(lane)
         assert lane.final_time == Time("60.00")
@@ -58,21 +57,21 @@ class TestStandardResolver:
         # 2 times get averaged
         lane = Lane(
             primary=None,
-            backups=[[Time("60.10"), Time("60.20")]],
+            backups=[Time("60.10"), Time("60.20")],
         )
         resolver_2_030(lane)
         assert lane.final_time == Time("60.15")
         # 3 times get median
         lane = Lane(
             primary=None,
-            backups=[[Time("60.10"), Time("60.20"), Time("60.30")]],
+            backups=[Time("60.10"), Time("60.20"), Time("60.30")],
         )
         resolver_2_030(lane)
         assert lane.final_time == Time("60.20")
         # 1 time is ignored (less than min_times)
         lane = Lane(
             primary=None,
-            backups=[[Time("60.10")]],
+            backups=[Time("60.10")],
         )
         resolver_2_030(lane)
         assert lane.final_time is None
@@ -81,7 +80,7 @@ class TestStandardResolver:
         """Backup times are ignored if they are not supported."""
         lane = Lane(
             primary=None,
-            backups=[[Time("60.10"), Time("60.00"), Time("99.99")]],
+            backups=[Time("60.10"), Time("60.00"), Time("99.99")],
         )
         resolver_2_030(lane)
         assert lane.final_time is None
@@ -92,7 +91,7 @@ class TestStandardResolver:
         """Backup times are used if the primary time is not supported."""
         lane = Lane(
             primary=Time("60.00"),
-            backups=[[Time("70.10"), Time("70.00")]],
+            backups=[Time("70.10"), Time("70.00")],
         )
         resolver_2_030(lane)
         assert lane.final_time == Time("70.05")
@@ -101,10 +100,10 @@ class TestStandardResolver:
         """Times must be more than the min threshold."""
         lane = Lane(
             primary=Time("2.00"),
-            backups=[[Time("2.10")]],
+            backups=[Time("2.10")],
         )
         resolver_2_030(lane)
         assert lane.final_time is None
-        lane = Lane(backups=[[Time("2.10"), Time("2.20")]])
+        lane = Lane(backups=[Time("2.10"), Time("2.20")])
         resolver_2_030(lane)
         assert lane.final_time is None

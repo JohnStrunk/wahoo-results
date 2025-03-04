@@ -23,7 +23,7 @@ from typing import List, Optional
 import dateutil.parser
 import dateutil.tz
 import requests
-import semver.version  # type: ignore
+import semver.version
 
 
 class ReleaseInfo:

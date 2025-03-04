@@ -20,18 +20,18 @@ import io
 import os
 import re
 from datetime import datetime
-from typing import List
 
-from .heatdata import HeatData
-from .times import NumericTime
+from .heat import Heat
+from .lane import Lane
+from .time import ZERO_TIME, Time
 
 
-def parse_do4_file(file_path: str) -> HeatData:
+def parse_do4_file(file_path: str) -> Heat:
     """
     Parse a DO4 file from a Colorado Dolphin timing system.
 
     :param file_path: The path to the DO4 file
-    :returns: A HeatData object that represents the parsed data
+    :returns: A Heat object that represents the parsed data
     :raises ValueError: If the data is not in the expected format
     :raises FileNotFoundError: If the file does not exist
     """
@@ -56,12 +56,12 @@ def parse_do4_file(file_path: str) -> HeatData:
     return data
 
 
-def parse_do4(stream: io.TextIOBase) -> HeatData:
+def parse_do4(stream: io.TextIOBase) -> Heat:
     """
     Parse a DO4 file from a Colorado Dolphin timing system.
 
     :param stream: A file-like object that contains the DO4 data
-    :returns: A HeatData object that represents the parsed data
+    :returns: A Heat object that represents the parsed data
     :raises ValueError: If the data is not in the expected format
     """
     header = stream.readline()
@@ -74,17 +74,19 @@ def parse_do4(stream: io.TextIOBase) -> HeatData:
     lines = stream.readlines()
     if len(lines) != 11:  # noqa: PLR2004
         raise ValueError("Invalid number of lines in file")
-    lanes: List[HeatData.Lane] = []
+    lanes: list[Lane] = []
     for lane in range(10):
         match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[lane])
         if not match:
             raise ValueError("Unable to parse times")
-        lane_times: List[NumericTime] = []
+        lane_times: list[Time | None] = []
         for index in range(1, 4):
+            time: Time | None = None
             match_txt = match.group(index)
-            time = NumericTime("0")
             if match_txt != "":
-                time = max(NumericTime(match_txt), time)
+                time = Time(match_txt)
+                if time == ZERO_TIME:
+                    time = None
             lane_times.append(time)
-        lanes.append(HeatData.Lane(times=lane_times))
-    return HeatData(event=event, heat=heat, lanes=lanes)
+        lanes.append(Lane(backups=lane_times))
+    return Heat(event=event, heat=heat, lanes=lanes)

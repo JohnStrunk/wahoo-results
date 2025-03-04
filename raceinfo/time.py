@@ -16,8 +16,6 @@
 
 """Fundamental timing types."""
 
-# pyright: strict
-
 import decimal
 
 # https://docs.python.org/3/library/decimal.html#signals

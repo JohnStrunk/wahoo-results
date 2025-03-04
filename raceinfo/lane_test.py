@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# pyright: strict
 """Tests for Lane."""
 
 import pytest
@@ -49,7 +48,7 @@ class TestLaneValidation:
     def test_invalid_backups(self):
         """Invalid backups raise ValueError."""
         with pytest.raises(ValueError):
-            Lane(backups=[[Time(-1.0)]])
+            Lane(backups=[Time(-1.0)])
 
     def test_invalid_splits(self):
         """Invalid splits raise ValueError."""
@@ -70,7 +69,7 @@ class TestLaneMerge:
             age=7,
             primary=Time(54.32),
             final_time=Time(54.54),
-            backups=[[Time(1.0), Time(2.0), Time(3.0)], [Time(4.0)]],
+            backups=[Time(1.0), Time(2.0), Time(3.0)],
             splits=[Time(14.0), Time(15.0), Time(16.0)],
             is_dq=True,
             is_empty=False,
@@ -86,7 +85,7 @@ class TestLaneMerge:
             age=8,
             primary=Time(64.32),
             final_time=Time(64.54),
-            backups=[[Time(5.0), Time(6.0), Time(7.0)], [Time(8.0)]],
+            backups=[Time(5.0), Time(6.0), Time(7.0)],
             splits=[Time(24.0), Time(25.0), Time(26.0)],
             is_dq=False,
             is_empty=False,
@@ -103,7 +102,7 @@ class TestLaneMerge:
         # Results from lane1
         assert lane1.primary == Time(54.32)
         assert lane1.final_time == Time(54.54)
-        assert lane1.backups == [[Time(1.0), Time(2.0), Time(3.0)], [Time(4.0)]]
+        assert lane1.backups == [Time(1.0), Time(2.0), Time(3.0)]
         assert lane1.splits == [Time(14.0), Time(15.0), Time(16.0)]
         assert lane1.is_dq is True
         assert lane1.is_empty is False
@@ -123,7 +122,7 @@ class TestLaneMerge:
         # Results from lane2
         assert lane1.primary == Time(64.32)
         assert lane1.final_time == Time(64.54)
-        assert lane1.backups == [[Time(5.0), Time(6.0), Time(7.0)], [Time(8.0)]]
+        assert lane1.backups == [Time(5.0), Time(6.0), Time(7.0)]
         assert lane1.splits == [Time(24.0), Time(25.0), Time(26.0)]
         assert lane1.is_dq is False
         assert lane1.is_empty is False
@@ -200,29 +199,20 @@ class TestLaneSimilarity:
     def test_similar_checks_backups(self):
         """Similarity checks backups."""
         # matching backups are similar
-        lane1 = Lane(backups=[[Time(1.0), Time(2.0), Time(3.0)]])
-        lane2 = Lane(backups=[[Time(1.0), Time(2.0), Time(3.0)]])
+        lane1 = Lane(backups=[Time(1.0), Time(2.0), Time(3.0)])
+        lane2 = Lane(backups=[Time(1.0), Time(2.0), Time(3.0)])
         assert lane1.is_similar_to(lane2)
         assert lane2.is_similar_to(lane1)
         # different backups are not similar
-        lane2.backups = [[Time(1.0), Time(2.0), Time(4.0)]]
+        lane2.backups = [Time(1.0), Time(2.0), Time(4.0)]
         assert not lane1.is_similar_to(lane2)
         assert not lane2.is_similar_to(lane1)
         # different number of backups are not similar
-        lane2.backups = [[Time(1.0), Time(2.0)]]
-        assert not lane1.is_similar_to(lane2)
-        assert not lane2.is_similar_to(lane1)
-        lane2.backups = [[Time(1.0), Time(2.0), Time(3.0)], [Time(4.0)]]
+        lane2.backups = [Time(1.0), Time(2.0)]
         assert not lane1.is_similar_to(lane2)
         assert not lane2.is_similar_to(lane1)
         # missing backups are not similar
         lane2.backups = []
-        assert not lane1.is_similar_to(lane2)
-        assert not lane2.is_similar_to(lane1)
-        lane2.backups = [[]]
-        assert not lane1.is_similar_to(lane2)
-        assert not lane2.is_similar_to(lane1)
-        lane2.backups = [[Time(1.0), Time(2.0), Time(3.0)], []]
         assert not lane1.is_similar_to(lane2)
         assert not lane2.is_similar_to(lane1)
         # not supported backups are similar

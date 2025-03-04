@@ -19,18 +19,25 @@
 import io
 import os
 import re
-from typing import List
 
-from .heatdata import HeatData
+from .heat import Heat
+from .lane import Lane
 from .startlist import StartList
 
 
 def parse_scb(stream: io.TextIOBase) -> StartList:
     """
-    Construct a StartList from a text stream (file).
+    Construct a StartList from a text stream.
+
+    CTS start lists support:
+    - Event number
+    - Event description
+    - Heat number
+    - Swimmer name
+    - Swimmer team
 
     :param stream: The text stream to read
-    :returns: A list of HeatData objects, one for each heat in the start list
+    :returns: A list of Heat objects, one for each heat in the start list
     :raises ValueError: If the data is not in the expected format
 
     Example usage::
@@ -58,9 +65,9 @@ def parse_scb(stream: io.TextIOBase) -> StartList:
     # want to read them in order.
     lines.reverse()
 
-    heatlist: List[HeatData] = []
+    heatlist: list[Heat] = []
     for h_index in range(num_heats):
-        lanes: List[HeatData.Lane] = []
+        lanes: list[Lane] = []
         for _lane in range(10):
             line = lines.pop()
             # Each entry is fixed length:
@@ -72,13 +79,9 @@ def parse_scb(stream: io.TextIOBase) -> StartList:
             match = re.match(r"^(.{20})--(.{16})$", line)
             if not match:
                 raise ValueError(f"Unable to parse line: '{line}'")
-            lanes.append(
-                HeatData.Lane(name=match.group(1).strip(), team=match.group(2).strip())
-            )
+            lanes.append(Lane(name=match.group(1).strip(), team=match.group(2).strip()))
         heatlist.append(
-            HeatData(
-                description=description, event=event, heat=h_index + 1, lanes=lanes
-            )
+            Heat(description=description, event=event, heat=h_index + 1, lanes=lanes)
         )
     return heatlist
 
@@ -87,8 +90,15 @@ def parse_scb_file(file_path: str) -> StartList:
     """
     Read a CTS start list file.
 
+    CTS start lists support:
+    - Event number
+    - Event description
+    - Heat number
+    - Swimmer name
+    - Swimmer team
+
     :param file_path: The path to the file to read
-    :returns: A list of HeatData objects, one for each heat in the start list
+    :returns: A list of Heat objects, one for each heat in the start list
     :raises ValueError: If the data is not in the expected format
     :raises FileNotFoundError: If the file does not exist
     """
@@ -96,14 +106,14 @@ def parse_scb_file(file_path: str) -> StartList:
         return parse_scb(file)
 
 
-def load_all_scb(directory: str) -> List[StartList]:
+def load_all_scb(directory: str) -> list[StartList]:
     """Load all the start list .scb files from a directory.
 
     :param directory: The directory to scan for .scb files
     :returns: A list of StartList objects, one for each .scb file found
     """
     files = os.scandir(directory)
-    startlists: List[StartList] = []
+    startlists: list[StartList] = []
     for file in files:
         if file.name.endswith(".scb"):
             try:
