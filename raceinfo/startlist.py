@@ -16,7 +16,7 @@
 
 """Functions for manipulating Startlists."""
 
-from .heat import Heat
+from .time import Heat
 
 StartList = list[Heat]
 """

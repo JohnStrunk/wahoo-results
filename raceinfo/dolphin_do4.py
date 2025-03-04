@@ -21,9 +21,7 @@ import os
 import re
 from datetime import datetime
 
-from .heat import Heat
-from .lane import Lane
-from .time import ZERO_TIME, Time
+from .time import ZERO_TIME, Heat, Lane, Time
 
 
 def parse_do4_file(file_path: str) -> Heat:

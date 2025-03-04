@@ -18,9 +18,8 @@
 
 import pytest
 
-from .lane import Lane
-from .resolver import TimeResolver, standard_resolver
-from .time import Time
+from raceinfo import Lane, Time
+from resolver import TimeResolver, standard_resolver
 
 
 class TestStandardResolver:

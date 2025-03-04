@@ -55,9 +55,9 @@ from raceinfo import (
     load_all_scb,
     parse_do4_file,
     parse_scb_file,
-    standard_resolver,
     startlists_to_csv,
 )
+from resolver import standard_resolver
 from scoreboard import ScoreboardImage, waiting_screen
 from template import get_template
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION

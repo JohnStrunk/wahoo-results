@@ -18,8 +18,7 @@
 
 import pytest
 
-from .lane import Lane
-from .time import Time
+from .time import Lane, Time
 
 
 class TestLaneValidation:

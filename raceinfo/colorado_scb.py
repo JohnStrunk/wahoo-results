@@ -20,9 +20,8 @@ import io
 import os
 import re
 
-from .heat import Heat
-from .lane import Lane
 from .startlist import StartList
+from .time import Heat, Lane
 
 
 def parse_scb(stream: io.TextIOBase) -> StartList:

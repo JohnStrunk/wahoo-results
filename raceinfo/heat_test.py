@@ -21,9 +21,7 @@ from datetime import datetime
 
 import pytest
 
-from .heat import Heat
-from .lane import Lane
-from .time import Time
+from .time import Heat, Lane, Time
 
 
 class TestHeatValidation:
