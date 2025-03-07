@@ -52,7 +52,7 @@ class TestLaneValidation:
     def test_invalid_splits(self):
         """Invalid splits raise ValueError."""
         with pytest.raises(ValueError):
-            Lane(splits=[Time(-1.0)])
+            Lane(splits=[[Time(-1.0)]])
 
 
 class TestLaneMerge:
@@ -69,7 +69,7 @@ class TestLaneMerge:
             primary=Time(54.32),
             final_time=Time(54.54),
             backups=[Time(1.0), Time(2.0), Time(3.0)],
-            splits=[Time(14.0), Time(15.0), Time(16.0)],
+            splits=[[Time(14.0)], [Time(15.0), Time(16.0)]],
             is_dq=True,
             is_empty=False,
         )
@@ -85,7 +85,7 @@ class TestLaneMerge:
             primary=Time(64.32),
             final_time=Time(64.54),
             backups=[Time(5.0), Time(6.0), Time(7.0)],
-            splits=[Time(24.0), Time(25.0), Time(26.0)],
+            splits=[[Time(24.0)], [Time(25.0), Time(26.0)]],
             is_dq=False,
             is_empty=False,
         )
@@ -102,7 +102,7 @@ class TestLaneMerge:
         assert lane1.primary == Time(54.32)
         assert lane1.final_time == Time(54.54)
         assert lane1.backups == [Time(1.0), Time(2.0), Time(3.0)]
-        assert lane1.splits == [Time(14.0), Time(15.0), Time(16.0)]
+        assert lane1.splits == [[Time(14.0)], [Time(15.0), Time(16.0)]]
         assert lane1.is_dq is True
         assert lane1.is_empty is False
         # None values are merged
@@ -122,7 +122,7 @@ class TestLaneMerge:
         assert lane1.primary == Time(64.32)
         assert lane1.final_time == Time(64.54)
         assert lane1.backups == [Time(5.0), Time(6.0), Time(7.0)]
-        assert lane1.splits == [Time(24.0), Time(25.0), Time(26.0)]
+        assert lane1.splits == [[Time(24.0)], [Time(25.0), Time(26.0)]]
         assert lane1.is_dq is False
         assert lane1.is_empty is False
         # None values are merged
@@ -174,16 +174,19 @@ class TestLaneSimilarity:
     def test_similar_checks_splits(self):
         """Similarity checks splits."""
         # matching splits are similar
-        lane1 = Lane(splits=[Time(1.0), Time(2.0), Time(3.0)])
-        lane2 = Lane(splits=[Time(1.0), Time(2.0), Time(3.0)])
+        lane1 = Lane(splits=[[Time(1.0)], [Time(2.0), Time(3.0)]])
+        lane2 = Lane(splits=[[Time(1.0)], [Time(2.0), Time(3.0)]])
         assert lane1.is_similar_to(lane2)
         assert lane2.is_similar_to(lane1)
         # different splits are not similar
-        lane2.splits = [Time(1.0), Time(2.0), Time(4.0)]
+        lane2.splits = [[Time(1.0)], [Time(2.0), Time(4.0)]]
         assert not lane1.is_similar_to(lane2)
         assert not lane2.is_similar_to(lane1)
         # different number of splits are not similar
-        lane2.splits = [Time(1.0), Time(2.0)]
+        lane2.splits = [[Time(1.0)], [Time(2.0)]]
+        assert not lane1.is_similar_to(lane2)
+        assert not lane2.is_similar_to(lane1)
+        lane2.splits = [[Time(1.0)], [Time(2.0), None]]
         assert not lane1.is_similar_to(lane2)
         assert not lane2.is_similar_to(lane1)
         # missing splits are not similar

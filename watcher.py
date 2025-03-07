@@ -21,6 +21,9 @@ from typing import Callable
 
 import watchdog.events
 
+from raceinfo.colorado_scb import ColoradoSCB
+from raceinfo.dolphin_do4 import DolphinDo4
+
 CallbackFn = Callable[[], None]
 CreatedCallbackFn = Callable[[str], None]
 
@@ -35,7 +38,7 @@ class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
 
         :param callback: The function to call when a change is detected.
         """
-        super().__init__(patterns=["*.scb"], ignore_directories=True)
+        super().__init__(patterns=ColoradoSCB().patterns, ignore_directories=True)
         self._callback = callback
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent):
@@ -65,7 +68,7 @@ class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
 
         :param callback: The function to call when a new .do4 file is created.
         """
-        super().__init__(patterns=["*.do4"], ignore_directories=True)
+        super().__init__(patterns=DolphinDo4().patterns, ignore_directories=True)
         self._callback = callback
 
     def on_created(self, event: watchdog.events.FileSystemEvent):

@@ -52,9 +52,10 @@ def standard_resolver(
                 if backup is not None and backup < min_valid_time:
                     lane.backups[i] = None
         if lane.splits is not None:
-            for i, split in enumerate(lane.splits):
-                if split is not None and split < min_valid_time:
-                    lane.splits[i] = None
+            for i, splitgroup in enumerate(lane.splits):
+                for j, split in enumerate(splitgroup):
+                    if split is not None and split < min_valid_time:
+                        lane.splits[i][j] = None
 
     def resolve_final_time(lane: Lane) -> None:
         lane.final_time = None

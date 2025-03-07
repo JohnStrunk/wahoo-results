@@ -22,10 +22,11 @@ from datetime import datetime
 
 import pytest
 
-from .colorado_scb import parse_scb
+from .colorado_scb import ColoradoSCB
 
 _now = datetime.now()
 _meet_seven = "007"
+_parse = ColoradoSCB()._parse_scb  # type: ignore
 
 
 class TestColoradoSCB:
@@ -216,7 +217,7 @@ class TestColoradoSCB:
 
     def test_can_read_event(self, scb_two_heats: io.StringIO):
         """Make sure we can read the event number and description."""
-        heatlist = parse_scb(scb_two_heats)
+        heatlist = _parse(scb_two_heats)
         assert len(heatlist) == 2  # noqa: PLR2004
         for heat in heatlist:
             assert heat.event == "18"
@@ -227,21 +228,21 @@ class TestColoradoSCB:
     def test_invalid_header_throws(self, scb_invalid_header: io.StringIO):
         """Make sure we throw an error if the header is invalid."""
         with pytest.raises(ValueError):
-            parse_scb(scb_invalid_header)
+            _parse(scb_invalid_header)
 
     def test_wrong_num_lines_throws(self, scb_wrong_num_lines: io.StringIO):
         """Make sure we throw an error if the number of lines in the file is wrong."""
         with pytest.raises(ValueError):
-            parse_scb(scb_wrong_num_lines)
+            _parse(scb_wrong_num_lines)
 
     def test_invalid_line_throws(self, scb_invalid_line: io.StringIO):
         """Make sure we throw an error if a line is invalid."""
         with pytest.raises(ValueError):
-            parse_scb(scb_invalid_line)
+            _parse(scb_invalid_line)
 
     def test_can_read_one_heat(self, scb_one_heat: io.StringIO):
         """Make sure we can read a single heat."""
-        heatlist = parse_scb(scb_one_heat)
+        heatlist = _parse(scb_one_heat)
         assert len(heatlist) == 1
         assert heatlist[0].event == "10"
         assert heatlist[0].description == "BOYS 8&U 50 FLY"

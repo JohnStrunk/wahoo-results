@@ -14,7 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Functions to read results from a Colorado Dolphin timing system."""
+"""Colorado Dolphin timing system.
+
+https://coloradotime.com/products/dolphin-wireless-stopwatch-swim-timing
+"""
 
 import io
 import os
@@ -22,69 +25,67 @@ import re
 from datetime import datetime
 
 from .time import ZERO_TIME, Heat, Lane, Time
+from .timingsystem import TimingSystem
 
 
-def parse_do4_file(file_path: str) -> Heat:
-    """
-    Parse a DO4 file from a Colorado Dolphin timing system.
+class DolphinDo4(TimingSystem):
+    """Colorado Dolphin Wireless Stopwatch - DO4 format."""
 
-    :param file_path: The path to the DO4 file
-    :returns: A Heat object that represents the parsed data
-    :raises ValueError: If the data is not in the expected format
-    :raises FileNotFoundError: If the file does not exist
-    """
-    meet_id = "???"
-    race_number = 1
-    # do4 files are named like "001-002-003A-0004.do4"
-    # 001 is the meet id, 002 is the event number, 003 is the heat number, 0004
-    # is the race number
-    # We're only parsing the items from the file name that we can't get from
-    # the file contents.
-    matcher = re.match(r"^(\d+)-\d+-\d+\w-(\d+)\.", os.path.basename(file_path))
-    if matcher is not None:
-        meet_id = matcher.group(1)
-        race_number = int(matcher.group(2))
-    stinfo = os.stat(file_path)
-    mtime = datetime.fromtimestamp(stinfo.st_mtime)
-    with open(file_path, "r", encoding="cp1252") as file:
-        data = parse_do4(file)
-    data.meet_id = meet_id
-    data.race = race_number
-    data.time_recorded = mtime
-    return data
+    def read(self, filename: str) -> Heat:  # noqa: D102
+        meet_id = "???"
+        race_number = 1
+        # do4 files are named like "001-002-003A-0004.do4"
+        # 001 is the meet id, 002 is the event number, 003 is the heat number, 0004
+        # is the race number
+        # We're only parsing the items from the file name that we can't get from
+        # the file contents.
+        matcher = re.match(r"^(\d+)-\d+-\d+\w-(\d+)\.", os.path.basename(filename))
+        if matcher is not None:
+            meet_id = matcher.group(1)
+            race_number = int(matcher.group(2))
+        stinfo = os.stat(filename)
+        mtime = datetime.fromtimestamp(stinfo.st_mtime)
+        with open(filename, "r", encoding="cp1252") as file:
+            data = self.decode(file)
+        data.meet_id = meet_id
+        data.race = race_number
+        data.time_recorded = mtime
+        return data
 
-
-def parse_do4(stream: io.TextIOBase) -> Heat:
-    """
-    Parse a DO4 file from a Colorado Dolphin timing system.
-
-    :param stream: A file-like object that contains the DO4 data
-    :returns: A Heat object that represents the parsed data
-    :raises ValueError: If the data is not in the expected format
-    """
-    header = stream.readline()
-    match = re.match(r"^(\d*);(\d+);\w+;\w+$", header)
-    if not match:
-        raise ValueError("Unable to parse header")
-    event = match.group(1)
-    heat = int(match.group(2))
-
-    lines = stream.readlines()
-    if len(lines) != 11:  # noqa: PLR2004
-        raise ValueError("Invalid number of lines in file")
-    lanes: list[Lane] = []
-    for lane in range(10):
-        match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[lane])
+    def decode(self, stream: io.TextIOBase) -> Heat:  # noqa: D102
+        header = stream.readline()
+        match = re.match(r"^(\d*);(\d+);\w+;\w+$", header)
         if not match:
-            raise ValueError("Unable to parse times")
-        lane_times: list[Time | None] = []
-        for index in range(1, 4):
-            time: Time | None = None
-            match_txt = match.group(index)
-            if match_txt != "":
-                time = Time(match_txt)
-                if time == ZERO_TIME:
-                    time = None
-            lane_times.append(time)
-        lanes.append(Lane(backups=lane_times))
-    return Heat(event=event, heat=heat, lanes=lanes)
+            raise ValueError("Unable to parse header")
+        event = match.group(1)
+        heat = int(match.group(2))
+
+        lines = stream.readlines()
+        if len(lines) != 11:  # noqa: PLR2004
+            raise ValueError("Invalid number of lines in file")
+        lanes: list[Lane] = []
+        for lane in range(10):
+            match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[lane])
+            if not match:
+                raise ValueError("Unable to parse times")
+            lane_times: list[Time | None] = []
+            for index in range(1, 4):
+                time: Time | None = None
+                match_txt = match.group(index)
+                if match_txt != "":
+                    time = Time(match_txt)
+                    if time == ZERO_TIME:
+                        time = None
+                lane_times.append(time)
+            lanes.append(Lane(backups=lane_times))
+        return Heat(event=event, heat=heat, lanes=lanes)
+
+    def encode(self, heat: Heat) -> str:  # noqa: D102
+        raise NotImplementedError("encode() is not implemented")
+
+    def write(self, filename: str, heat: Heat) -> None:  # noqa: D102
+        raise NotImplementedError("write() is not implemented")
+
+    @property
+    def patterns(self) -> list[str]:  # noqa: D102
+        return ["*.do4"]

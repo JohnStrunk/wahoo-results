@@ -88,7 +88,7 @@ class Lane:
     - If an entry in the list is None, the timing system did not capture a
       backup time for that particular slot.
     """
-    splits: list[Time | None] | None = None
+    splits: list[list[Time | None]] | None = None
     """The list of intermediate, cumulative split times"""
     final_time: Time | None = None
     """
@@ -117,9 +117,10 @@ class Lane:
         for backup in self.backups or []:
             if backup is not None and backup < ZERO_TIME:
                 raise ValueError("Backup times must be non-negative")
-        for split in self.splits or []:
-            if split is not None and split < ZERO_TIME:
-                raise ValueError("Splits must be non-negative")
+        for splitgroup in self.splits or []:
+            for split in splitgroup:
+                if split is not None and split < ZERO_TIME:
+                    raise ValueError("Splits must be non-negative")
 
     @property
     def is_noshow(self) -> bool:
@@ -129,11 +130,17 @@ class Lane:
         A lane is considered a no-show if it doesn't have any valid primary,
         backup, or split times.
         """
-        return (
-            (self.primary is None)
-            and (self.backups is None or all(backup is None for backup in self.backups))
-            and (self.splits is None or all(split is None for split in self.splits))
-        )
+        if self.primary is not None:
+            return False
+        if self.backups is not None and any(
+            backup is not None for backup in self.backups
+        ):
+            return False
+        if self.splits is not None:
+            for splitgroup in self.splits:
+                if any(split is not None for split in splitgroup):
+                    return False
+        return True
 
     def merge(
         self,
@@ -166,7 +173,7 @@ class Lane:
             self.is_dq = results_from.is_dq
             self.is_empty = results_from.is_empty
 
-    def is_similar_to(self, other: "Lane") -> bool:
+    def is_similar_to(self, other: "Lane") -> bool:  # noqa: PLR0911
         """
         Check if this lane is similar to another lane.
 
@@ -197,11 +204,17 @@ class Lane:
                 return False
         # Compare the splits
         if self.splits is not None and other.splits is not None:
+            # Need to have the same number of splits
             if len(self.splits) != len(other.splits):
                 return False
+            # Need to have the same number of splits in each group
             for split1, split2 in zip(self.splits, other.splits):
-                if split1 != split2:
+                if len(split1) != len(split2):
                     return False
+                # Need to have the same splits within each group
+                for subsplit1, subsplit2 in zip(split1, split2):
+                    if subsplit1 != subsplit2:
+                        return False
         # Compare the backups
         if self.backups is not None and other.backups is not None:
             if len(self.backups) != len(other.backups):
@@ -214,8 +227,7 @@ class Lane:
 
 @dataclass(kw_only=True)
 class Heat:
-    """
-    Information describing a heat.
+    """Information describing a heat.
 
     Heat can be used for both heat information (e.g. from a start list) and for
     race results (e.g. times from a timing system). Each supported data source
@@ -232,15 +244,13 @@ class Heat:
     :param meet_id: The meet ID
     :param race: The race number
     :param time_recorded: The time the results were recorded
-    :param time_resolver: The function to resolve times for this heat
     :param lanes: The data for each lane
     :raises: ValueError if any of the parameters are invalid
     """
 
     # Heat information
     event: str | None = None
-    """
-    The an alphanumeric event number
+    """The an alphanumeric event number
 
     This is a string to handle events like '1S' or '1Z' in the case of swim-offs
     or initial splits.
@@ -279,8 +289,7 @@ class Heat:
             raise ValueError("The race number must be positive")
 
     def lane(self, lane_number: int) -> Lane:
-        """
-        Retrieve the lane object for a given lane number.
+        """Retrieve the lane object for a given lane number.
 
         :param lane_number: The lane number (1-10)
         :returns: The lane object
@@ -291,8 +300,7 @@ class Heat:
         return self._lanes[lane_number - 1]
 
     def place(self, lane_number: int) -> int | None:
-        """
-        Retrieve the place for a given lane number.
+        """Retrieve the place for a given lane number.
 
         The place is determined by the resolved time of the lane. If the lane is
         empty, disqualified, or has an indeterminate final time, None is
@@ -317,8 +325,7 @@ class Heat:
         return place
 
     def resolve_times(self, resolver: TimeResolver) -> None:
-        """
-        Resolve the times for all lanes in this heat.
+        """Resolve the times for all lanes in this heat.
 
         :param resolver: The function to resolve times for this heat
         """
@@ -326,11 +333,13 @@ class Heat:
             resolver(lane)
 
     def has_names(self) -> bool:
-        """
-        Return True if any lane has a name.
+        """Return True if any lane has a name.
 
         Examples::
         >>> heat = Heat(event="1", heat=1, lanes=[Lane(name="Alice")])
+        >>> heat.has_names()
+        True
+        >>> heat = Heat(event="1", heat=1, lanes=[Lane(), Lane(name="Bob")])
         >>> heat.has_names()
         True
         >>> heat = Heat(event="1", heat=1, lanes=[Lane()])
@@ -344,15 +353,14 @@ class Heat:
         info_from: "Heat | None" = None,
         results_from: "Heat | None" = None,
     ) -> None:
-        """
-        Merge another Heat object into this one.
+        """Merge another Heat object into this one.
 
         Merging "info" will overwrite:
         - event, heat, description
         - Lanes: name, team, seed_time, age
 
         Merging "results" will overwrite:
-        - meet_id, race, time_recorded, time_resolver
+        - meet_id, race, time_recorded
         - Lanes: times, is_dq, is_empty
 
         :param info_from: Merge the heat information into this one
@@ -374,9 +382,37 @@ class Heat:
                 dest = self.lane(lane_number)
                 dest.merge(results_from=results_from.lane(lane_number))
 
-    def __lt__(self, other: "Heat") -> bool:
+    def to_text(self) -> str:
+        """Convert the heat to a text representation.
+
+        :returns: A text representation of the heat
         """
-        Compare two Heat objects for sorting.
+        lines: list[str] = []
+        lines.append(f"Event: {self.event or '-None-'}")
+        lines.append(f"Description: {self.description or '-None-'}")
+        lines.append(f"Heat: {self.heat or '-None-'}")
+        lines.append(f"Meet ID: {self.meet_id or '-None-'}")
+        lines.append(f"Race #: {self.race or '-None-'}")
+        lines.append(f"Time Recorded: {self.time_recorded or '-None-'}")
+        for lane_number in range(1, 11):
+            lane = self.lane(lane_number)
+            lines.append(f"Lane {lane_number}:")
+            lines.append(
+                f"  N: {lane.name or '-None-'}  T: {lane.team or '-None-'}  A: {lane.age or '-None-'}  S: {lane.seed_time or '-None-'}"
+            )
+            lines.append(
+                f"  P: {lane.primary or '-None-'}  F: {lane.final_time or '-None-'}  DQ: {lane.is_dq or '-None-'}  E: {lane.is_empty or '-None-'}"
+            )
+            if lane.backups is not None:
+                lines.append(f"  Backups: {', '.join(str(b) for b in lane.backups)}")
+            if lane.splits is not None:
+                lines.append(
+                    f"  Splits: {', '.join(', '.join(str(s) for s in split) for split in lane.splits)}"
+                )
+        return "\n".join(lines)
+
+    def __lt__(self, other: "Heat") -> bool:
+        """Compare two Heat objects for sorting.
 
         Comparison is done by event number, then by heat number. For the cases
         where the event is a number followed by an optional string, the number
@@ -390,30 +426,68 @@ class Heat:
         other_event = other.event or ""
         other_heat = other.heat or 0
 
+        if self_event != other_event:
+            return self._event_lt(self_event, other_event)
+        return self_heat < other_heat
+
+    @classmethod
+    def _event_lt(cls, event1: str | None, event2: str | None) -> bool:
+        """Compare two event numbers for sorting.
+
+        Comparison is done by event number. For the cases where the event is a
+        number followed by an optional string, the number is compared first,
+        then the string. For example, '1Z' comes before '10S'. For events that
+        don't match this pattern, string comparison is used.
+
+        :param event1: The first event number
+        :param event2: The second event number
+        :returns: True if event1 is less than event2
+
+        Examples:
+        >>> Heat._event_lt("1", "2")
+        True
+        >>> Heat._event_lt("2", "1")
+        False
+        >>> Heat._event_lt("1Z", "1S")
+        False
+        >>> Heat._event_lt("1S", "1Z")
+        True
+        >>> Heat._event_lt("1Z", "2S")
+        True
+        >>> Heat._event_lt("1Z", "10")
+        True
+        >>> Heat._event_lt("abc", "bbb")
+        True
+        >>> Heat._event_lt("bbb", "abc")
+        False
+        """
+        # Treat None as empty/zero for the purposes of sorting.
+        event1 = event1 or ""
+        event2 = event2 or ""
+
         # The event number is a string, composed of a number and an optional
         # letter. Sort by the number first, then by the letter. For example,
         # '1Z' comes before '10S'
         pattern = r"^(\d+)([A-Z]*)$"
-        self_match = re.match(pattern, self_event.upper())
-        other_match = re.match(pattern, other_event.upper())
-        if not self_match or not other_match:
+        match1 = re.match(pattern, event1.upper())
+        match2 = re.match(pattern, event2.upper())
+        if not match1 or not match2:
             # Fallback to string comparison
-            return self_event.upper() < other_event.upper()
+            return event1.upper() < event2.upper()
 
-        self_number = int(self_match.group(1))
-        other_number = int(other_match.group(1))
-        if self_number != other_number:
-            return self_number < other_number
-        self_letter = self_match.group(2)
-        other_letter = other_match.group(2)
-        if self_letter != other_letter:
-            return self_letter < other_letter
-        return self_heat < other_heat
+        number1 = int(match1.group(1))
+        number2 = int(match2.group(1))
+        if number1 != number2:
+            return number1 < number2
+        letter1 = match1.group(2)
+        letter2 = match2.group(2)
+        if letter1 != letter2:
+            return letter1 < letter2
+        return event1.upper() < event2.upper()
 
 
 def truncate_hundredths(time: Time) -> Time:
-    """
-    Truncate a Time to two decimal places.
+    """Truncate a Time to two decimal places.
 
     :param time: The time to truncate
     :returns: The truncated time

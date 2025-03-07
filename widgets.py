@@ -16,6 +16,7 @@
 
 """TKinter code to display various UI widgets."""
 
+import copy
 import os
 from datetime import datetime
 from tkinter import (
@@ -147,10 +148,12 @@ class StartListTreeView(ttk.Frame):
 
     def _update_contents(self):
         self.tview.delete(*self.tview.get_children())
-        local_list = self.startlist.get()
+        program = copy.deepcopy(self.startlist.get())
+        local_list = [
+            program[event]
+            for event in sorted(program.keys(), key=lambda ev: program[ev][0])
+        ]
         for entry in local_list:
-            if not entry:
-                continue
             self.tview.insert(
                 "",
                 "end",

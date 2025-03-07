@@ -22,11 +22,12 @@ from datetime import datetime
 
 import pytest
 
-from .dolphin_do4 import parse_do4
+from .dolphin_do4 import DolphinDo4
 from .time import Time
 
 _now = datetime.now()
 _meet_seven = "007"
+_parse = DolphinDo4().decode
 
 
 class TestDolphinDo4:
@@ -162,37 +163,37 @@ class TestDolphinDo4:
 
     def test_can_parse_header(self, do4_missing_one_time: io.StringIO) -> None:
         """Ensure we can parse the event/heat header."""
-        race = parse_do4(do4_missing_one_time)
+        race = _parse(do4_missing_one_time)
         assert race.event == "69"
         assert race.heat == 1
 
     def test_invalid_header(self, do4_bad_header: io.StringIO) -> None:
         """Ensure we catch an invalid header."""
         with pytest.raises(ValueError):
-            parse_do4(do4_bad_header)
+            _parse(do4_bad_header)
 
     def test_invalid_number_of_lines(self, do4_too_few_lines: io.StringIO) -> None:
         """Ensure we catch an invalid number of lines."""
         with pytest.raises(ValueError):
-            parse_do4(do4_too_few_lines)
+            _parse(do4_too_few_lines)
 
     def test_invalid_lane_data(self, do4_corrupt_lane: io.StringIO) -> None:
         """Ensure we catch a corrupt lane."""
         with pytest.raises(ValueError):
-            parse_do4(do4_corrupt_lane)
+            _parse(do4_corrupt_lane)
 
     def test_handle_missing_times(
         self, do4_missing_one_time: io.StringIO, do4_one_time: io.StringIO
     ) -> None:
         """Ensure we can handle lanes that are missing times."""
-        missingt1l3 = parse_do4(do4_missing_one_time)
+        missingt1l3 = _parse(do4_missing_one_time)
         assert missingt1l3.lane(3).backups == [
             None,
             Time("128.21"),
             Time("128.08"),
         ]
 
-        one_time = parse_do4(do4_one_time)
+        one_time = _parse(do4_one_time)
         assert one_time.lane(1).backups == [
             None,
             Time("55.92"),
@@ -201,12 +202,12 @@ class TestDolphinDo4:
 
     def test_no_description(self, do4_one_time: io.StringIO) -> None:
         """DO4 files don't have an event description."""
-        no_desc = parse_do4(do4_one_time)
+        no_desc = _parse(do4_one_time)
         assert no_desc.description is None
 
     def test_parse_no_event(self, do4_no_event: io.StringIO) -> None:
         """Ensure we can parse a file with no event number."""
-        no_event = parse_do4(do4_no_event)
+        no_event = _parse(do4_no_event)
         # Since there's no event number, we just get an empty string
         assert no_event.event == ""
         # Ensure the rest of the data is correct
