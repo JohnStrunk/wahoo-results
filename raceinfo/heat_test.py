@@ -172,3 +172,30 @@ class TestHeat:
         e6b = Heat(event="6b", heat=1)
         assert e6a < e6b
         assert e6b > e6a
+
+    def test_similarity(self):
+        """Test similarity of Heat objects."""
+        heat1 = Heat(
+            event="1",
+            heat=1,
+            description="d1",
+            meet_id="id-one",
+            lanes=[
+                Lane(name="one", primary=Time(100.00)),
+                Lane(name="two", primary=Time(200.00)),
+            ],
+        )
+        # Identical is similar
+        heat2 = copy.deepcopy(heat1)
+        assert heat1.is_similar_to(heat2) is True
+        # Different heats are not similar
+        heat2.heat = 2
+        assert heat1.is_similar_to(heat2) is False
+        # None values are ignored during comparison
+        heat2.heat = None
+        assert heat1.is_similar_to(heat2) is True
+        heat2.lane(1).primary = None
+        assert heat1.is_similar_to(heat2) is True
+        # Different lanes are not similar
+        heat2.lane(1).primary = Time(999.00)
+        assert heat1.is_similar_to(heat2) is False

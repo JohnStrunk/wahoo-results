@@ -411,6 +411,39 @@ class Heat:
                 )
         return "\n".join(lines)
 
+    def is_similar_to(self, other: "Heat") -> bool:
+        """
+        Check if this heat is similar to another heat.
+
+        Similarity is defined as having the same values for all fields where a
+        field is not None. If a field is None, it is ignored in the comparison.
+
+        Note: This method is mainly intended for testing purposes.
+
+        :param other: The other heat to compare to
+        :returns: True if the heats are similar, False otherwise
+        """
+        # Compare the simple fields
+        for var in [
+            "event",
+            "heat",
+            "description",
+            "meet_id",
+            "race",
+            "time_recorded",
+        ]:
+            if (
+                getattr(self, var) is not None
+                and getattr(other, var) is not None
+                and getattr(other, var) != getattr(self, var)
+            ):
+                return False
+        # Compare the lanes
+        for l_num in range(1, 11):
+            if not self.lane(l_num).is_similar_to(other.lane(l_num)):
+                return False
+        return True
+
     def __lt__(self, other: "Heat") -> bool:
         """Compare two Heat objects for sorting.
 
