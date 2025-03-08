@@ -46,6 +46,7 @@ class TestDolphin:
             description="Missing times",
             meet_id="008",
             race=1,
+            round="A",
             lanes=[
                 Lane(
                     backups=[Time("25.88"), Time("25.88"), Time("25.88")],
@@ -86,6 +87,7 @@ class TestDolphin:
             description="Missing times",
             meet_id="008",
             race=2,
+            round="A",
             lanes=[
                 Lane(
                     backups=[Time("9.80"), None, None],
@@ -120,6 +122,7 @@ class TestDolphin:
             description="Empty and DQ markings",
             meet_id="008",
             race=3,
+            round="A",
             lanes=[
                 Lane(is_dq=False, is_empty=False),
                 Lane(
@@ -164,6 +167,7 @@ class TestDolphin:
             description="One intermediate split",
             meet_id="008",
             race=4,
+            round="A",
             lanes=[
                 Lane(
                     splits=[[Time("21.01"), Time("21.00"), Time("21.00")]],
@@ -199,6 +203,7 @@ class TestDolphin:
             description="Two intermediate splits",
             meet_id="008",
             race=5,
+            round="A",
             lanes=[
                 Lane(
                     splits=[
@@ -237,6 +242,7 @@ class TestDolphin:
             description="Three intermediate splits",
             meet_id="008",
             race=6,
+            round="A",
             lanes=[
                 Lane(
                     splits=[
@@ -274,6 +280,7 @@ class TestDolphin:
             description="Chars - && in event name",
             meet_id="008",
             race=7,
+            round="A",
             lanes=[
                 *unused(2),
                 Lane(
@@ -285,7 +292,7 @@ class TestDolphin:
                 *unused(7),
             ],
         )
-        do4_filename = DolphinDo4().filename(actual, round="A") or ""
+        do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
@@ -297,6 +304,7 @@ class TestDolphin:
             description="Round Prelim",
             meet_id="008",
             race=8,
+            round="P",
             lanes=[
                 Lane(
                     splits=[],
@@ -307,7 +315,7 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4_filename = DolphinDo4().filename(actual, round="P") or ""
+        do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
@@ -319,6 +327,7 @@ class TestDolphin:
             description="Round Final",
             meet_id="008",
             race=9,
+            round="F",
             lanes=[
                 Lane(
                     splits=[],
@@ -329,7 +338,7 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4_filename = DolphinDo4().filename(actual, round="F") or ""
+        do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
@@ -341,6 +350,7 @@ class TestDolphin:
             description="",
             meet_id="008",
             race=10,
+            round="A",
             lanes=[
                 Lane(
                     splits=[],
@@ -363,6 +373,7 @@ class TestDolphin:
             description="Numbering 0-9",
             meet_id="008",
             race=11,
+            round="A",
             lanes=[
                 Lane(
                     splits=[],
@@ -391,6 +402,7 @@ class TestDolphin:
             description="Numbering 0-9",
             meet_id="008",
             race=12,
+            round="A",
             lanes=[
                 Lane(
                     splits=[],
@@ -419,6 +431,7 @@ class TestDolphin:
             description="",
             meet_id="009",
             race=1,
+            round="A",
             lanes=[
                 Lane(
                     splits=[],
@@ -441,6 +454,7 @@ class TestDolphin:
             description="",
             meet_id="009",
             race=2,
+            round="A",
             lanes=[
                 Lane(
                     splits=[],
@@ -463,6 +477,7 @@ class TestDolphin:
             description="",
             meet_id="009",
             race=3,
+            round="A",
             lanes=[
                 Lane(
                     splits=[],
@@ -486,6 +501,7 @@ class TestDolphin:
             description="Extra splits",
             meet_id="009",
             race=4,
+            round="A",
             lanes=[
                 Lane(
                     splits=[[Time("11.85"), Time("11.89"), Time("11.83")]],
@@ -515,6 +531,7 @@ class TestDolphin:
             description="Extra splits",
             meet_id="009",
             race=5,
+            round="A",
             lanes=[
                 Lane(
                     splits=[[Time("3.84"), None, None]],
@@ -538,6 +555,7 @@ class TestDolphin:
             description="Extra splits",
             meet_id="009",
             race=6,
+            round="A",
             lanes=[
                 Lane(
                     splits=[[Time("8.67"), Time("16.13"), Time("16.12")]],

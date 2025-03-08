@@ -222,10 +222,9 @@ class TestDolphinDo4:
         """Ensure we can generate a filename from a heat."""
         heat = Heat(meet_id="73", event="32", heat=41, race=432)
         assert DolphinDo4().filename(heat) == "073-032-041A-0432.do4"
-        assert DolphinDo4().filename(heat, round="P") == "073-032-041P-0432.do4"
-        assert DolphinDo4().filename(heat, round="F") == "073-032-041F-0432.do4"
-        assert DolphinDo4().filename(heat, round="A") == "073-032-041A-0432.do4"
-        with pytest.raises(ValueError):
-            DolphinDo4().filename(heat, round="X")
-        with pytest.raises(ValueError):
-            DolphinDo4().filename(heat, anotherarg="blah")
+        heat.round = "P"
+        assert DolphinDo4().filename(heat) == "073-032-041P-0432.do4"
+        heat.round = "F"
+        assert DolphinDo4().filename(heat) == "073-032-041F-0432.do4"
+        heat.round = "A"
+        assert DolphinDo4().filename(heat) == "073-032-041A-0432.do4"

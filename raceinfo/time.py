@@ -221,14 +221,16 @@ class Heat:
     """The race number"""
     time_recorded: datetime | None = None
     """The time the results were recorded"""
+    type Round = Literal["A", "P", "F"]
+    round: Round | None = None
+    """The round of the event (A=All, P=Prelim, F=Final)"""
+    type NumberingMode = Literal["1-10", "0-9"]
+    numbering: NumberingMode = "1-10"
 
     # We hide the actual lane data and provide lane() to access it to avoid
     # confusion over the indexing of the array vs. the actual lane number.
     lanes: InitVar[list[Lane] | None] = field(default=None)
     """The data for each lane"""
-
-    type NumberingMode = Literal["1-10", "0-9"]
-    numbering: NumberingMode = "1-10"
 
     def __post_init__(self, lanes: list[Lane] | None):
         """Validate the heat data."""
@@ -323,7 +325,7 @@ class Heat:
         - Lanes: name, team, seed_time, age
 
         Merging "results" will overwrite:
-        - meet_id, race, time_recorded
+        - meet_id, race, time_recorded, round, numbering
         - Lanes: times, is_dq, is_empty
 
         :param info_from: Merge the heat information into this one
@@ -341,6 +343,8 @@ class Heat:
             self.meet_id = results_from.meet_id
             self.race = results_from.race
             self.time_recorded = results_from.time_recorded
+            self.round = results_from.round
+            self.numbering = results_from.numbering
             for lane_number in range(1, 11):
                 dest = self.lane(lane_number)
                 dest.merge(results_from=results_from.lane(lane_number))
@@ -357,6 +361,8 @@ class Heat:
         lines.append(f"Meet ID: {self.meet_id or '-None-'}")
         lines.append(f"Race #: {self.race or '-None-'}")
         lines.append(f"Time Recorded: {self.time_recorded or '-None-'}")
+        lines.append(f"Round: {self.round or '-None-'}")
+        lines.append(f"Numbering: {self.numbering}")
         for lane_number in range(1, 11):
             lane = self.lane(lane_number)
             lines.append(f"Lane {lane_number}:")
