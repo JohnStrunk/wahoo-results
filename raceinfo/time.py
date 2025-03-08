@@ -173,57 +173,6 @@ class Lane:
             self.is_dq = results_from.is_dq
             self.is_empty = results_from.is_empty
 
-    def is_similar_to(self, other: "Lane") -> bool:  # noqa: PLR0911
-        """
-        Check if this lane is similar to another lane.
-
-        Similarity is defined as having the same values for all fields where a
-        field is not None. If a field is None, it is ignored in the comparison.
-
-        Note: This method is mainly intended for testing purposes.
-
-        :param other: The other lane to compare to
-        :returns: True if the lanes are similar, False otherwise
-        """
-        # Compare the simple fields
-        for var in [
-            "name",
-            "team",
-            "seed_time",
-            "age",
-            "primary",
-            "final_time",
-            "is_dq",
-            "is_empty",
-        ]:
-            if (
-                getattr(self, var) is not None
-                and getattr(other, var) is not None
-                and getattr(other, var) != getattr(self, var)
-            ):
-                return False
-        # Compare the splits
-        if self.splits is not None and other.splits is not None:
-            # Need to have the same number of splits
-            if len(self.splits) != len(other.splits):
-                return False
-            # Need to have the same number of splits in each group
-            for split1, split2 in zip(self.splits, other.splits):
-                if len(split1) != len(split2):
-                    return False
-                # Need to have the same splits within each group
-                for subsplit1, subsplit2 in zip(split1, split2):
-                    if subsplit1 != subsplit2:
-                        return False
-        # Compare the backups
-        if self.backups is not None and other.backups is not None:
-            if len(self.backups) != len(other.backups):
-                return False
-            for backup1, backup2 in zip(self.backups, other.backups):
-                if backup1 != backup2:
-                    return False
-        return True
-
 
 @dataclass(kw_only=True)
 class Heat:
@@ -410,39 +359,6 @@ class Heat:
                     f"  Splits: {', '.join(', '.join(str(s) for s in split) for split in lane.splits)}"
                 )
         return "\n".join(lines)
-
-    def is_similar_to(self, other: "Heat") -> bool:
-        """
-        Check if this heat is similar to another heat.
-
-        Similarity is defined as having the same values for all fields where a
-        field is not None. If a field is None, it is ignored in the comparison.
-
-        Note: This method is mainly intended for testing purposes.
-
-        :param other: The other heat to compare to
-        :returns: True if the heats are similar, False otherwise
-        """
-        # Compare the simple fields
-        for var in [
-            "event",
-            "heat",
-            "description",
-            "meet_id",
-            "race",
-            "time_recorded",
-        ]:
-            if (
-                getattr(self, var) is not None
-                and getattr(other, var) is not None
-                and getattr(other, var) != getattr(self, var)
-            ):
-                return False
-        # Compare the lanes
-        for l_num in range(1, 11):
-            if not self.lane(l_num).is_similar_to(other.lane(l_num)):
-                return False
-        return True
 
     def __lt__(self, other: "Heat") -> bool:
         """Compare two Heat objects for sorting.
