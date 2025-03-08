@@ -245,3 +245,32 @@ class TestHeat:
         heat2.lane(1).primary = Time(999.00)
         with pytest.raises(ValueError):
             check_heat_is_similar(heat1, heat2, do_throw=True)
+
+    def test_numbering(self):
+        """Test lane numbering."""
+        heat = Heat(
+            lanes=[
+                Lane(name="first"),
+                Lane(name="second"),
+            ]
+        )
+        # Default lane numbering is 1-10
+        assert heat.lane(1).name == "first"
+        assert heat.lane(2).name == "second"
+        with pytest.raises(ValueError):
+            heat.lane(0)
+        with pytest.raises(ValueError):
+            heat.lane(11)
+        heat.numbering = "0-9"
+        assert heat.lane(0).name == "first"
+        assert heat.lane(1).name == "second"
+        with pytest.raises(ValueError):
+            heat.lane(-1)
+        with pytest.raises(ValueError):
+            heat.lane(10)
+        heat.numbering = "1-10"
+        assert heat.lane(1).name == "first"
+        assert heat.lane(2).name == "second"
+        heat.numbering = "unsupported-scheme"  # type: ignore
+        with pytest.raises(ValueError):
+            heat.lane(5)
