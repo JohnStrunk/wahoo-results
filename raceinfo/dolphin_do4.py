@@ -19,6 +19,7 @@
 https://coloradotime.com/products/dolphin-wireless-stopwatch-swim-timing
 """
 
+import copy
 import io
 import os
 import re
@@ -54,22 +55,36 @@ class DolphinDo4(TimingSystem):
 
     def decode(self, stream: io.TextIOBase) -> Heat:  # noqa: D102
         header = stream.readline()
-        match = re.match(r"^(\d*);(\d+);\w+;\w+$", header)
+        # Header is event, heat, num_splits, round
+        match = re.match(r"^(\d*);(\d+);(\d+);(\w+)$", header)
         if not match:
             raise ValueError("Unable to parse header")
-        event = match.group(1)
+        event = str(match.group(1))
         heat = int(match.group(2))
+        num_splits = int(match.group(3))
+        round_txt = str(match.group(4))
+        round: Heat.Round
+        if round_txt == "Prelim":
+            round = "P"
+        elif round_txt == "Final":
+            round = "F"
+        else:
+            round = "A"
 
         lines = stream.readlines()
-        if len(lines) != 11:  # noqa: PLR2004
+        # The number of lines in the file (w/o header) should be 1 + (num_splits * 10)
+        if len(lines) != (1 + (num_splits * 10)):
             raise ValueError("Invalid number of lines in file")
-        lanes: list[Lane] = []
-        for lane in range(10):
-            match = re.match(r"^Lane\d+;([\d\.]*);([\d\.]*);([\d\.]*)$", lines[lane])
+        lanes: list[Lane] = [Lane(splits=[]) for _ in range(10)]
+        min_lane = 1
+        for line in lines[: len(lines) - 1]:  # skip last line (it's the checksum)
+            match = re.match(r"^Lane(\d+);([\d\.]*);([\d\.]*);([\d\.]*)$", line)
             if not match:
                 raise ValueError("Unable to parse times")
+            lane_num = int(match.group(1))
+            min_lane = min(min_lane, lane_num)
             lane_times: list[Time | None] = []
-            for index in range(1, 4):
+            for index in range(2, 5):
                 time: Time | None = None
                 match_txt = match.group(index)
                 if match_txt != "":
@@ -77,8 +92,16 @@ class DolphinDo4(TimingSystem):
                     if time == ZERO_TIME:
                         time = None
                 lane_times.append(time)
-            lanes.append(Lane(backups=lane_times))
-        return Heat(event=event, heat=heat, lanes=lanes)
+            lanes[lane_num - min_lane].backups = lane_times
+            # We know the splits is a list from when it was initialized with Lane(splits=[]).
+            lanes[lane_num - min_lane].splits.append(copy.deepcopy(lane_times))  # type: ignore
+        if min_lane == 0:
+            numbering: Heat.NumberingMode = "0-9"
+        else:
+            numbering = "1-10"
+        return Heat(
+            event=event, heat=heat, lanes=lanes, round=round, numbering=numbering
+        )
 
     def encode(self, heat: Heat) -> str:  # noqa: D102
         raise NotImplementedError("encode() is not implemented")

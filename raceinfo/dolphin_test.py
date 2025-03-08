@@ -18,8 +18,6 @@
 
 import os
 
-import pytest
-
 from .dolphin_do4 import DolphinDo4
 from .heat_test import check_heat_is_similar
 from .time import Heat, Lane, Time
@@ -27,10 +25,18 @@ from .time import Heat, Lane, Time
 testdata_dir = os.path.join(os.path.dirname(__file__), "testdata-dolphin")
 
 
-def unused(num: int) -> list[Lane]:
+def unused(num: int, num_splits: int = 1) -> list[Lane]:
     """Return a list of num unused lanes."""
+    splits: list[list[Time | None]] = []
+    for _ in range(num_splits):
+        splits.append([None, None, None])
     return [
-        Lane(backups=[None, None, None], splits=[], is_dq=False, is_empty=False)
+        Lane(
+            backups=[None, None, None],
+            splits=splits,
+            is_dq=False,
+            is_empty=False,
+        )
         for _ in range(num)
     ]
 
@@ -50,25 +56,25 @@ class TestDolphin:
             lanes=[
                 Lane(
                     backups=[Time("25.88"), Time("25.88"), Time("25.88")],
-                    splits=[],
+                    splits=[[Time("25.88"), Time("25.88"), Time("25.88")]],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
                     backups=[None, Time("43.42"), Time("43.41")],
-                    splits=[],
+                    splits=[[None, Time("43.42"), Time("43.41")]],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
                     backups=[Time("50.57"), None, Time("50.58")],
-                    splits=[],
+                    splits=[[Time("50.57"), None, Time("50.58")]],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
                     backups=[Time("54.45"), Time("54.46"), None],
-                    splits=[],
+                    splits=[[Time("54.45"), Time("54.46"), None]],
                     is_dq=False,
                     is_empty=False,
                 ),
@@ -91,19 +97,19 @@ class TestDolphin:
             lanes=[
                 Lane(
                     backups=[Time("9.80"), None, None],
-                    splits=[],
+                    splits=[[Time("9.80"), None, None]],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
                     backups=[None, Time("11.52"), None],
-                    splits=[],
+                    splits=[[None, Time("11.52"), None]],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
                     backups=[None, None, Time("13.40")],
-                    splits=[],
+                    splits=[[None, None, Time("13.40")]],
                     is_dq=False,
                     is_empty=False,
                 ),
@@ -127,7 +133,7 @@ class TestDolphin:
                 Lane(is_dq=False, is_empty=False),
                 Lane(
                     backups=[None, Time("31.23"), None],
-                    splits=[],
+                    splits=[[None, Time("31.23"), None]],
                     is_dq=False,
                     is_empty=False,
                 ),
@@ -137,7 +143,7 @@ class TestDolphin:
                 ),
                 Lane(
                     backups=[Time("52.87"), Time("53.38"), Time("53.91")],
-                    splits=[],
+                    splits=[[Time("52.87"), Time("53.38"), Time("53.91")]],
                     is_dq=False,
                     is_empty=True,
                 ),
@@ -147,7 +153,7 @@ class TestDolphin:
                 ),
                 Lane(
                     backups=[Time("75.84"), Time("76.15"), Time("76.92")],
-                    splits=[],
+                    splits=[[Time("75.84"), Time("76.15"), Time("76.92")]],
                     is_dq=True,
                     is_empty=False,
                 ),
@@ -158,7 +164,6 @@ class TestDolphin:
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
-    @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
     def test_m8r4(self):
         """Meet 8, Race 4: One intermediate split."""
         actual = Heat(
@@ -170,31 +175,39 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[[Time("21.01"), Time("21.00"), Time("21.00")]],
+                    splits=[
+                        [Time("21.01"), Time("21.00"), Time("21.00")],
+                        [Time("33.35"), Time("33.43"), Time("33.35")],
+                    ],
                     backups=[Time("33.35"), Time("33.43"), Time("33.35")],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
-                    splits=[[Time("50.58"), None, Time("50.57")]],
+                    splits=[
+                        [Time("50.58"), None, Time("50.57")],
+                        [Time("61.63"), None, Time("61.62")],
+                    ],
                     backups=[Time("61.63"), None, Time("61.62")],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
-                    splits=[[Time("91.08"), Time("91.08"), None]],
+                    splits=[
+                        [Time("91.08"), Time("91.08"), None],
+                        [Time("102.89"), Time("102.88"), None],
+                    ],
                     backups=[Time("102.89"), Time("102.88"), None],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7),
+                *unused(7, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
-    @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
     def test_m8r5(self):
         """Meet 8, Race 5: Two intermediate splits."""
         actual = Heat(
@@ -209,31 +222,39 @@ class TestDolphin:
                     splits=[
                         [Time("15.42"), Time("15.46"), Time("15.41")],
                         [Time("25.41"), Time("25.44"), Time("25.43")],
+                        [Time("35.09"), Time("35.14"), Time("35.09")],
                     ],
                     backups=[Time("35.09"), Time("35.14"), Time("35.09")],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
-                    splits=[[None, None, Time("58.58")], [None, None, Time("71.42")]],
+                    splits=[
+                        [None, None, Time("58.58")],
+                        [None, None, Time("71.42")],
+                        [None, None, Time("81.47")],
+                    ],
                     backups=[None, None, Time("81.47")],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
-                    splits=[[None, Time("101.58"), None], [None, Time("112.18"), None]],
+                    splits=[
+                        [None, Time("101.58"), None],
+                        [None, Time("112.18"), None],
+                        [None, Time("123.20"), None],
+                    ],
                     backups=[None, Time("123.20"), None],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7),
+                *unused(7, num_splits=3),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
-    @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
     def test_m8r6(self):
         """Meet 8, Race 6: Three intermediate splits."""
         actual = Heat(
@@ -249,23 +270,25 @@ class TestDolphin:
                         [Time("15.20"), Time("15.19"), Time("15.18")],
                         [Time("22.98"), Time("23.01"), Time("22.99")],
                         [Time("31.43"), Time("31.45"), Time("31.42")],
+                        [Time("40.51"), Time("40.53"), Time("40.51")],
                     ],
                     backups=[Time("40.51"), Time("40.53"), Time("40.51")],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(1),
+                *unused(1, num_splits=4),
                 Lane(
                     splits=[
                         [None, Time("106.54"), None],
                         [None, Time("113.70"), None],
                         [None, Time("120.46"), None],
+                        [None, Time("127.65"), None],
                     ],
                     backups=[None, Time("127.65"), None],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7),
+                *unused(7, num_splits=4),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -284,7 +307,7 @@ class TestDolphin:
             lanes=[
                 *unused(2),
                 Lane(
-                    splits=[],
+                    splits=[[Time("15.20"), Time("15.23"), Time("15.22")]],
                     backups=[Time("15.20"), Time("15.23"), Time("15.22")],
                     is_dq=False,
                     is_empty=False,
@@ -307,7 +330,7 @@ class TestDolphin:
             round="P",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("12.29"), Time("12.28"), Time("12.28")]],
                     backups=[Time("12.29"), Time("12.28"), Time("12.28")],
                     is_dq=False,
                     is_empty=False,
@@ -330,7 +353,7 @@ class TestDolphin:
             round="F",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("11.89"), Time("11.92"), Time("11.92")]],
                     backups=[Time("11.89"), Time("11.92"), Time("11.92")],
                     is_dq=False,
                     is_empty=False,
@@ -353,7 +376,7 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("11.91"), Time("11.94"), Time("11.91")]],
                     backups=[Time("11.91"), Time("11.94"), Time("11.91")],
                     is_dq=False,
                     is_empty=False,
@@ -376,13 +399,13 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("11.35"), Time("11.35"), Time("11.36")]],
                     backups=[Time("11.35"), Time("11.35"), Time("11.36")],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
-                    splits=[],
+                    splits=[[Time("21.62"), Time("21.63"), Time("21.62")]],
                     backups=[Time("21.62"), Time("21.63"), Time("21.62")],
                     is_dq=False,
                     is_empty=False,
@@ -405,14 +428,14 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("12.16"), Time("12.18"), Time("12.15")]],
                     backups=[Time("12.16"), Time("12.18"), Time("12.15")],
                     is_dq=False,
                     is_empty=False,
                 ),
                 *unused(8),
                 Lane(
-                    splits=[],
+                    splits=[[None, None, Time("19.19")]],
                     backups=[None, None, Time("19.19")],
                     is_dq=False,
                     is_empty=False,
@@ -434,7 +457,7 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("11.16"), Time("11.17"), Time("11.16")]],
                     backups=[Time("11.16"), Time("11.17"), Time("11.16")],
                     is_dq=False,
                     is_empty=False,
@@ -457,7 +480,7 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("7.30"), Time("7.31"), Time("7.30")]],
                     backups=[Time("7.30"), Time("7.31"), Time("7.30")],
                     is_dq=False,
                     is_empty=False,
@@ -480,7 +503,7 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[],
+                    splits=[[Time("10.60"), Time("10.60"), Time("10.59")]],
                     backups=[Time("10.60"), Time("10.60"), Time("10.59")],
                     is_dq=False,
                     is_empty=False,
@@ -492,7 +515,6 @@ class TestDolphin:
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
-    @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
     def test_m9r4(self):
         """Meet 9, Race 4: Extra splits."""
         actual = Heat(
@@ -504,25 +526,30 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[[Time("11.85"), Time("11.89"), Time("11.83")]],
+                    splits=[
+                        [Time("11.85"), Time("11.89"), Time("11.83")],
+                        [Time("20.18"), Time("20.19"), Time("20.19")],
+                    ],
                     backups=[Time("20.18"), Time("20.19"), Time("20.19")],
                     is_dq=False,
                     is_empty=False,
                 ),
                 Lane(
-                    splits=[[Time("33.90"), Time("33.91"), Time("33.91")]],
+                    splits=[
+                        [Time("33.90"), Time("33.91"), Time("33.91")],
+                        [Time("50.27"), Time("50.28"), Time("50.28")],
+                    ],
                     backups=[Time("50.27"), Time("50.28"), Time("50.28")],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(8),
+                *unused(8, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
-    @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
     def test_m9r5(self):
         """Meet 9, Race 5: Extra splits."""
         actual = Heat(
@@ -534,19 +561,21 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[[Time("3.84"), None, None]],
+                    splits=[
+                        [Time("3.84"), None, None],
+                        [Time("14.99"), None, None],
+                    ],
                     backups=[Time("14.99"), None, None],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *unused(9, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
-    @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
     def test_m9r6(self):
         """Meet 9, Race 6: Extra splits."""
         actual = Heat(
@@ -558,12 +587,15 @@ class TestDolphin:
             round="A",
             lanes=[
                 Lane(
-                    splits=[[Time("8.67"), Time("16.13"), Time("16.12")]],
+                    splits=[
+                        [Time("8.67"), Time("16.13"), Time("16.12")],
+                        [Time("30.73"), Time("30.76"), Time("30.73")],
+                    ],
                     backups=[Time("30.73"), Time("30.76"), Time("30.73")],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *unused(9, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""

@@ -376,7 +376,7 @@ class Heat:
                 lines.append(f"  Backups: {', '.join(str(b) for b in lane.backups)}")
             if lane.splits is not None:
                 lines.append(
-                    f"  Splits: {', '.join(', '.join(str(s) for s in split) for split in lane.splits)}"
+                    f"  Splits: {'; '.join(', '.join(str(s) for s in split) for split in lane.splits)}"
                 )
         return "\n".join(lines)
 
