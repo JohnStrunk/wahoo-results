@@ -22,10 +22,10 @@ import copy
 import logging
 import os
 import platform
-import re
 import sys
 import threading
 import webbrowser
+from pathlib import PurePath
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
 from typing import List, Optional
@@ -217,10 +217,7 @@ def summarize_racedir(directory: str) -> List[Heat]:
     files = os.scandir(directory)
     contents: List[Heat] = []
     for file in files:
-        if any(file.name.endswith(pat) for pat in timingsystem.patterns):
-            match = re.match(r"^(\d+)-", file.name)
-            if match is None:
-                continue
+        if any(PurePath(file).match(pattern) for pattern in timingsystem.patterns):
             try:
                 result = timingsystem.read(file.path)
                 contents.append(result)
