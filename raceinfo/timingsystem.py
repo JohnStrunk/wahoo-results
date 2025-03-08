@@ -18,6 +18,7 @@
 
 import io
 from abc import ABC, abstractmethod
+from typing import Any
 
 from .time import Heat
 
@@ -83,6 +84,16 @@ class TimingSystem(ABC):
         :raises NotImplementedError: If the method is not implemented
         """
         raise NotImplementedError("encode() is not implemented")
+
+    @abstractmethod
+    def filename(self, heat: Heat, **kwargs: Any) -> str | None:
+        """Return the filename for the given Heat.
+
+        :param heat: The Heat object to get the filename for
+        :returns: The filename for the Heat object or None if a filename cannot
+            be determined from the Heat data
+        """
+        raise NotImplementedError("filename() is not implemented")
 
     @property
     @abstractmethod

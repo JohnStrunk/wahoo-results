@@ -74,7 +74,8 @@ class TestDolphin:
                 *unused(6),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-001-001A-0001.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r2(self):
@@ -107,7 +108,8 @@ class TestDolphin:
                 *unused(7),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-001-002A-0002.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r3(self):
@@ -149,7 +151,8 @@ class TestDolphin:
                 *unused(4),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-002-001A-0003.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
@@ -183,7 +186,8 @@ class TestDolphin:
                 *unused(7),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-003-001A-0004.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
@@ -220,7 +224,8 @@ class TestDolphin:
                 *unused(7),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-004-001A-0005.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
@@ -257,7 +262,8 @@ class TestDolphin:
                 *unused(7),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-005-001A-0006.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r7(self):
@@ -279,7 +285,8 @@ class TestDolphin:
                 *unused(7),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-006-001A-0007.do4"))
+        do4_filename = DolphinDo4().filename(actual, round="A") or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r8(self):
@@ -300,7 +307,8 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-007-001P-0008.do4"))
+        do4_filename = DolphinDo4().filename(actual, round="P") or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r9(self):
@@ -321,7 +329,8 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-008-001F-0009.do4"))
+        do4_filename = DolphinDo4().filename(actual, round="F") or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r10(self):
@@ -342,7 +351,8 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-000-001A-0010.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r11(self):
@@ -369,7 +379,8 @@ class TestDolphin:
                 *unused(8),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-010-001A-0011.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m8r12(self):
@@ -396,7 +407,8 @@ class TestDolphin:
                 ),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "008-010-002A-0012.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m9r1(self):
@@ -417,7 +429,8 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "009-000-001A-0001.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m9r2(self):
@@ -438,7 +451,8 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "009-000-001A-0002.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     def test_m9r3(self):
@@ -459,7 +473,8 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "009-000-004A-0003.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
@@ -487,7 +502,8 @@ class TestDolphin:
                 *unused(8),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "009-004-001A-0004.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
@@ -509,7 +525,8 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "009-000-001A-0005.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
 
     @pytest.mark.xfail(reason="Split parsing is not yet implemented for do4 files")
@@ -531,5 +548,6 @@ class TestDolphin:
                 *unused(9),
             ],
         )
-        do4 = DolphinDo4().read(os.path.join(testdata_dir, "009-000-001A-0006.do4"))
+        do4_filename = DolphinDo4().filename(actual) or ""
+        do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)

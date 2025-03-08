@@ -23,6 +23,7 @@ import io
 import os
 import re
 from datetime import datetime
+from typing import Any
 
 from .time import ZERO_TIME, Heat, Lane, Time
 from .timingsystem import TimingSystem
@@ -85,6 +86,21 @@ class DolphinDo4(TimingSystem):
 
     def write(self, filename: str, heat: Heat) -> None:  # noqa: D102
         raise NotImplementedError("write() is not implemented")
+
+    def filename(self, heat: Heat, **kwargs: Any) -> str | None:  # noqa: D102
+        round = str(kwargs.pop("round", "A"))
+        if round not in ["A", "P", "F"]:
+            raise ValueError("Invalid round identifier")
+        if len(kwargs) > 0:
+            raise ValueError("Invalid keyword arguments")
+        try:
+            # When no event is specified, the event number is 0 in the filename.
+            event = int(heat.event or 0)
+            return f"{int(heat.meet_id):03}-{event:03}-{int(heat.heat):03}{round}-{int(heat.race):04}.do4"  # type: ignore
+        except TypeError:  # Tried to convert None to int
+            return None
+        except ValueError:  # Tried to convert a non-numeric string to int
+            return None
 
     @property
     def patterns(self) -> list[str]:  # noqa: D102
