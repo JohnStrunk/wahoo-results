@@ -56,6 +56,8 @@ def check_heat_is_similar(heat1: Heat, heat2: Heat, do_throw: bool = False) -> N
         "meet_id",
         "race",
         "time_recorded",
+        "numbering",
+        "round",
     ]:
         if (
             getattr(heat1, var) is not None
@@ -64,8 +66,10 @@ def check_heat_is_similar(heat1: Heat, heat2: Heat, do_throw: bool = False) -> N
         ):
             fail(var, getattr(heat1, var), getattr(heat2, var))
     # Compare the lanes
-    for l_num in range(1, 11):
-        check_lane_is_similar(heat1.lane(l_num), heat2.lane(l_num), do_throw)
+    for i in range(10):
+        # We're directly indexing the lanes here so that we can compare the
+        # lanes regardless of the lane numbering scheme.
+        check_lane_is_similar(heat1._lanes[i], heat2._lanes[i], do_throw)  # type: ignore
 
 
 class TestHeatValidation:

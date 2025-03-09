@@ -225,7 +225,7 @@ class Heat:
     round: Round | None = None
     """The round of the event (A=All, P=Prelim, F=Final)"""
     type NumberingMode = Literal["1-10", "0-9"]
-    numbering: NumberingMode = "1-10"
+    numbering: NumberingMode | None = None
 
     # We hide the actual lane data and provide lane() to access it to avoid
     # confusion over the indexing of the array vs. the actual lane number.
@@ -254,7 +254,7 @@ class Heat:
         :returns: The lane object
         :raises: ValueError if the lane number is invalid
         """
-        if self.numbering == "1-10":
+        if self.numbering is None or self.numbering == "1-10":
             if lane_number < 1 or lane_number > 10:  # noqa: PLR2004
                 raise ValueError("Lane number must be between 1 and 10")
             return self._lanes[lane_number - 1]
