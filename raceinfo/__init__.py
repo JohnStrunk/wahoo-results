@@ -50,8 +50,8 @@ data file types:
 """
 
 from .colorado_scb import ColoradoSCB
-from .dolphin_csv import DolphinCSV
 from .dolphin_do4 import DolphinDo4
+from .dolphin_event import DolphinEvent
 from .eventprocessor import EventProcessor, FullProgram
 from .nameformat import NameMode, format_name
 from .time import ZERO_TIME, Heat, Lane, Time, TimeResolver, truncate_hundredths
@@ -60,8 +60,8 @@ from .timingsystem import TimingSystem
 __all__ = [
     "ZERO_TIME",
     "ColoradoSCB",
-    "DolphinCSV",
     "DolphinDo4",
+    "DolphinEvent",
     "EventProcessor",
     "FullProgram",
     "Heat",

@@ -102,7 +102,6 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
-        DolphinDo4().write(do4_filename, actual)
 
     def test_m8r2(self, tmp_path: pathlib.Path):
         """Meet 8, Race 2: Missing times."""

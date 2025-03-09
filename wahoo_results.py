@@ -49,7 +49,7 @@ import wh_analytics
 import wh_version
 from about import about
 from model import Model
-from raceinfo import ColoradoSCB, DolphinCSV, DolphinDo4, Heat, Time
+from raceinfo import ColoradoSCB, DolphinDo4, DolphinEvent, Heat, Time
 from resolver import standard_resolver
 from scoreboard import ScoreboardImage, waiting_screen
 from template import get_template
@@ -491,7 +491,7 @@ def main() -> None:  # noqa: PLR0915
             directory = model.dir_startlist.get()
             program = ColoradoSCB().full_program(directory)
             filename = os.path.join(directory, "dolphin_events.csv")
-            DolphinCSV().write(filename, program)
+            DolphinEvent().write(filename, program)
             wh_analytics.wrote_dolphin_csv(len(program.keys()))
         except OSError:
             pass

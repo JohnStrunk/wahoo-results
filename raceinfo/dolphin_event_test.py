@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Dolphin CSV tests."""
+"""Dolphin event CSV tests."""
 
-from .dolphin_csv import DolphinCSV
+from .dolphin_event import DolphinEvent
 from .eventprocessor import FullProgram
 from .time import Heat
 
@@ -26,7 +26,7 @@ class TestDolphinCSV:
 
     def test_csv(self):
         """Test writing a CSV file."""
-        dolphin = DolphinCSV()
+        dolphin = DolphinEvent()
         program: FullProgram = {
             "1": [
                 Heat(event="1", description="Event 1", heat=1),

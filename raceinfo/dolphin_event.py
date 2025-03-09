@@ -19,7 +19,7 @@
 from .eventprocessor import EventProcessor, FullProgram
 
 
-class DolphinCSV(EventProcessor):
+class DolphinEvent(EventProcessor):
     """Write a meet program as a CSV file for import into the Dolphin timing system."""
 
     def write(self, path: str, program: FullProgram) -> None:  # noqa: D102
