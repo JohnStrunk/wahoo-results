@@ -1,5 +1,5 @@
 # Wahoo! Results - https://github.com/JohnStrunk/wahoo-results
-# Copyright (C) 2024 - John D. Strunk
+# Copyright (C) 2025 - John D. Strunk
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published

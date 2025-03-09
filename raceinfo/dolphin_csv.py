@@ -24,7 +24,7 @@ import os
 import re
 from datetime import datetime
 
-from .time import Heat, Time, truncate_hundredths
+from .time import Heat, parse_time, truncate_hundredths
 from .timingsystem import TimingSystem
 
 
@@ -69,9 +69,9 @@ class DolphinCSV(TimingSystem):
             if len(fields) != 7:  # noqa: PLR2004
                 raise ValueError("Invalid number of fields in line")
             lane_num = int(fields[0])
-            timer_a = self._minsec_to_time(fields[1])
-            timer_b = self._minsec_to_time(fields[2])
-            timer_c = self._minsec_to_time(fields[3])
+            timer_a = parse_time(fields[1])
+            timer_b = parse_time(fields[2])
+            timer_c = parse_time(fields[3])
             heat.lane(lane_num).backups = [timer_a, timer_b, timer_c]
             heat.lane(lane_num).is_empty = fields[5].lower().startswith("true")
             heat.lane(lane_num).is_dq = fields[6].lower().startswith("true")
@@ -130,21 +130,3 @@ class DolphinCSV(TimingSystem):
     def patterns(self) -> list[str]:
         """A list of file name patterns for this timing system."""
         return ["*Event*Heat*Race*.csv"]
-
-    def _minsec_to_time(self, minsec: str) -> Time | None:
-        """Convert a minsec string to a Time object.
-
-        :param minsec: The minsec string to convert
-        :returns: A Time object representing the minsec string
-        """
-        if minsec == "":
-            return None
-        parts = minsec.split(":")
-        if len(parts) == 1:
-            # Just seconds (e.g., 1.23)
-            return Time(parts[0])
-        elif len(parts) == 2:  # noqa: PLR2004
-            # Minutes and seconds (e.g., 01:23.45)
-            return Time(parts[0]) * 60 + Time(parts[1])
-        else:
-            raise ValueError("Invalid minsec format")

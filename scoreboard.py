@@ -24,7 +24,7 @@ from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.ImageEnhance import Brightness
 
 from model import Model
-from raceinfo import Heat, NameMode, Time, format_name
+from raceinfo import Heat, NameMode, format_name, format_time
 
 
 def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
@@ -294,51 +294,6 @@ class ScoreboardImage:
             + line * self._line_height  # move down to proper line
             - (self._line_height - self._text_height) / 2
         )  # up 1/2 the inter-line space
-
-
-def format_time(seconds: Time | None) -> str:
-    """Format a time in minutes, seconds, and hundredths.
-
-    Times are formatted as follows:
-
-    - If the time is None, returns an empty string
-    - If the time is less than 1 minute, return the time in MM.SS format
-    - If the time is greater than or equal to 1 minute, return the time in
-      M:SS.SS format
-    - If the time is 100 minutes or greater, return '99:59.99'
-
-    :param seconds: The time in seconds
-    :returns: A string representation of the time
-
-    >>> format_time(None)
-    ''
-    >>> format_time(Time("0.0"))
-    '00.00'
-    >>> format_time(Time("0.01"))
-    '00.01'
-    >>> format_time(Time("15.2"))
-    '15.20'
-    >>> format_time(Time("19.87"))
-    '19.87'
-    >>> format_time(Time("50"))
-    '50.00'
-    >>> format_time(Time("120.0"))
-    '2:00.00'
-    >>> format_time(Time("1800"))
-    '30:00.00'
-    >>> format_time(Time("9000"))
-    '99:59.99'
-    """
-    if seconds is None:
-        return ""
-    sixty = Time("60")
-    minutes = seconds // sixty
-    seconds = seconds % sixty
-    if minutes >= 100:  # noqa: PLR2004
-        return "99:59.99"
-    if minutes == 0:
-        return f"{seconds:05.2f}"
-    return f"{minutes}:{seconds:05.2f}"
 
 
 def fontname_to_file(name: str) -> str:
