@@ -24,7 +24,7 @@ def get_template() -> Heat:
     """
     Return template data to create a scoreboard mockup.
 
-    >>> from scoreboard import format_time
+    >>> from raceinfo import format_time
     >>> t = get_template()
     >>> t.event
     '999'

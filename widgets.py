@@ -34,7 +34,6 @@ from typing import Any, Optional
 import PIL.Image as PILImage
 from PIL import ImageTk
 
-import scoreboard
 from model import (
     ChromecastStatusVar,
     ImageVar,
@@ -42,7 +41,7 @@ from model import (
     RaceResultVar,
     StartListVar,
 )
-from raceinfo import Time
+from raceinfo import Time, format_time
 
 TkContainer = Any
 
@@ -350,12 +349,10 @@ class RaceResultView(ttk.LabelFrame):
                 if backups is not None:
                     for i, b in enumerate(backups):
                         rawtimes[i] = b
-                timestr = [
-                    scoreboard.format_time(t) if t is not None else "" for t in rawtimes
-                ]
+                timestr = [format_time(t) if t is not None else "" for t in rawtimes]
                 final = result.lane(lane).final_time
                 if final is not None:
-                    finalstr = scoreboard.format_time(final)
+                    finalstr = format_time(final)
                 elif result.lane(lane).is_noshow:
                     finalstr = "NS"
                 elif result.lane(lane).is_dq:

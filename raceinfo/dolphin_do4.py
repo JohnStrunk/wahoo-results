@@ -82,7 +82,6 @@ class DolphinDo4(TimingSystem):
             if not match:
                 raise ValueError("Unable to parse times")
             lane_num = int(match.group(1))
-            min_lane = min(min_lane, lane_num)
             lane_times: list[Time | None] = []
             for index in range(2, 5):
                 time: Time | None = None
@@ -95,16 +94,10 @@ class DolphinDo4(TimingSystem):
             lanes[lane_num - min_lane].backups = lane_times
             # We know the splits is a list from when it was initialized with Lane(splits=[]).
             lanes[lane_num - min_lane].splits.append(copy.deepcopy(lane_times))  # type: ignore
-        if min_lane == 0:
-            numbering: Heat.NumberingMode = "0-9"
-        else:
-            numbering = "1-10"
-        return Heat(
-            event=event, heat=heat, lanes=lanes, round=round, numbering=numbering
-        )
+        return Heat(event=event, heat=heat, lanes=lanes, round=round)
 
     def encode(self, heat: Heat) -> str:  # noqa: D102
-        start_lane = 1 if heat.numbering == "1-10" else 0
+        start_lane = 0 if heat.numbering == "0-9" else 1
         # Find the number of splits in the heat as the lane with the most splits.
         num_splits = max(
             len(heat.lane(i).splits or [1]) for i in range(start_lane, start_lane + 10)
@@ -119,8 +112,11 @@ class DolphinDo4(TimingSystem):
             round_txt = "A"
         header = f"{heat.event or ''};{heat.heat or 1};{num_splits};{round_txt}"
         lines = [header]
-        for lane in range(start_lane, start_lane + 10):
-            splits = heat.lane(lane).splits or [[None, None, None]] * num_splits
+        for lane in range(1, 11):
+            splits = (
+                heat.lane(lane + start_lane - 1).splits
+                or [[None, None, None]] * num_splits
+            )
             for group in splits:
                 line = f"Lane{lane}"
                 if group == [None, None, None]:

@@ -54,7 +54,16 @@ from .dolphin_do4 import DolphinDo4
 from .dolphin_event import DolphinEvent
 from .eventprocessor import EventProcessor, FullProgram
 from .nameformat import NameMode, format_name
-from .time import ZERO_TIME, Heat, Lane, Time, TimeResolver, truncate_hundredths
+from .time import (
+    ZERO_TIME,
+    Heat,
+    Lane,
+    Time,
+    TimeResolver,
+    format_time,
+    parse_time,
+    truncate_hundredths,
+)
 from .timingsystem import TimingSystem
 
 __all__ = [
@@ -71,5 +80,7 @@ __all__ = [
     "TimeResolver",
     "TimingSystem",
     "format_name",
+    "format_time",
+    "parse_time",
     "truncate_hundredths",
 ]

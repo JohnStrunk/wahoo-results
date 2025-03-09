@@ -19,6 +19,7 @@
 import os
 import pathlib
 
+from raceinfo.dolphin_csv import DolphinCSV
 from raceinfo.timingsystem import TimingSystem
 
 from .dolphin_do4 import DolphinDo4
@@ -69,6 +70,7 @@ class TestDolphin:
             meet_id="008",
             race=1,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     backups=[Time("25.88"), Time("25.88"), Time("25.88")],
@@ -102,6 +104,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_1_Heat_1_Race_1_10_16_2024_20_2.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r2(self, tmp_path: pathlib.Path):
         """Meet 8, Race 2: Missing times."""
@@ -112,6 +119,7 @@ class TestDolphin:
             meet_id="008",
             race=2,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     backups=[Time("9.80"), None, None],
@@ -139,6 +147,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_1_Heat_2_Race_2_10_16_2024_20_2.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r3(self, tmp_path: pathlib.Path):
         """Meet 8, Race 3: Empty and DQ markings."""
@@ -149,6 +162,7 @@ class TestDolphin:
             meet_id="008",
             race=3,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(is_dq=False, is_empty=False),
                 Lane(
@@ -185,6 +199,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_2_Heat_1_Race_3_10_16_2024_20_5.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r4(self, tmp_path: pathlib.Path):
         """Meet 8, Race 4: One intermediate split."""
@@ -195,6 +214,7 @@ class TestDolphin:
             meet_id="008",
             race=4,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[
@@ -231,6 +251,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_3_Heat_1_Race_4_10_16_2024_20_7.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r5(self, tmp_path: pathlib.Path):
         """Meet 8, Race 5: Two intermediate splits."""
@@ -241,6 +266,7 @@ class TestDolphin:
             meet_id="008",
             race=5,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[
@@ -280,6 +306,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_4_Heat_1_Race_5_10_16_2024_20_10.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r6(self, tmp_path: pathlib.Path):
         """Meet 8, Race 6: Three intermediate splits."""
@@ -290,6 +321,7 @@ class TestDolphin:
             meet_id="008",
             race=6,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[
@@ -322,6 +354,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_5_Heat_1_Race_6_10_16_2024_20_13.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r7(self, tmp_path: pathlib.Path):
         """Meet 8, Race 7: Chars - && in event name."""
@@ -332,6 +369,7 @@ class TestDolphin:
             meet_id="008",
             race=7,
             round="A",
+            numbering="1-10",
             lanes=[
                 *unused(2),
                 Lane(
@@ -348,6 +386,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_6_Heat_1_Race_7_10_16_2024_20_13.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r8(self, tmp_path: pathlib.Path):
         """Meet 8, Race 8: Round Prelim."""
@@ -358,6 +401,7 @@ class TestDolphin:
             meet_id="008",
             race=8,
             round="P",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[[Time("12.29"), Time("12.28"), Time("12.28")]],
@@ -373,6 +417,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_7_Heat_1_Race_8_10_16_2024_20_14.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r9(self, tmp_path: pathlib.Path):
         """Meet 8, Race 9: Round Final."""
@@ -383,6 +432,7 @@ class TestDolphin:
             meet_id="008",
             race=9,
             round="F",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[[Time("11.89"), Time("11.92"), Time("11.92")]],
@@ -398,6 +448,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_8_Heat_1_Race_9_10_16_2024_20_15.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r10(self, tmp_path: pathlib.Path):
         """Meet 8, Race 10: No events loaded."""
@@ -408,6 +463,7 @@ class TestDolphin:
             meet_id="008",
             race=10,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[[Time("11.91"), Time("11.94"), Time("11.91")]],
@@ -423,6 +479,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event__Heat_1_Race_10_10_16_2024_20_15.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r11(self, tmp_path: pathlib.Path):
         """Meet 8, Race 11: Numbering 0-9."""
@@ -433,6 +494,7 @@ class TestDolphin:
             meet_id="008",
             race=11,
             round="A",
+            numbering="0-9",
             lanes=[
                 Lane(
                     splits=[[Time("11.35"), Time("11.35"), Time("11.36")]],
@@ -454,6 +516,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_10_Heat_1_Race_11_10_16_2024_20_19.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m8r12(self, tmp_path: pathlib.Path):
         """Meet 8, Race 12: Numbering 0-9."""
@@ -464,6 +531,7 @@ class TestDolphin:
             meet_id="008",
             race=12,
             round="A",
+            numbering="0-9",
             lanes=[
                 Lane(
                     splits=[[Time("12.16"), Time("12.18"), Time("12.15")]],
@@ -485,6 +553,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "008_Event_10_Heat_2_Race_12_10_16_2024_20_20.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m9r1(self, tmp_path: pathlib.Path):
         """Meet 9, Race 1: No events loaded."""
@@ -495,6 +568,7 @@ class TestDolphin:
             meet_id="009",
             race=1,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[[Time("11.16"), Time("11.17"), Time("11.16")]],
@@ -510,6 +584,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "009_Event__Heat_1_Race_1_10_16_2024_20_26.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m9r2(self, tmp_path: pathlib.Path):
         """Meet 9, Race 2: No events loaded."""
@@ -520,6 +599,7 @@ class TestDolphin:
             meet_id="009",
             race=2,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[[Time("7.30"), Time("7.31"), Time("7.30")]],
@@ -535,6 +615,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "009_Event__Heat_1_Race_2_10_16_2024_20_26.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m9r3(self, tmp_path: pathlib.Path):
         """Meet 9, Race 3: No events loaded."""
@@ -545,6 +630,7 @@ class TestDolphin:
             meet_id="009",
             race=3,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[[Time("10.60"), Time("10.60"), Time("10.59")]],
@@ -560,6 +646,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "009_Event__Heat_4_Race_3_10_16_2024_20_27.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m9r4(self, tmp_path: pathlib.Path):
         """Meet 9, Race 4: Extra splits."""
@@ -570,6 +661,7 @@ class TestDolphin:
             meet_id="009",
             race=4,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[
@@ -597,6 +689,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "009_Event_4_Heat_1_Race_4_10_16_2024_20_30.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m9r5(self, tmp_path: pathlib.Path):
         """Meet 9, Race 5: Extra splits."""
@@ -607,6 +704,7 @@ class TestDolphin:
             meet_id="009",
             race=5,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[
@@ -625,6 +723,11 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "009_Event__Heat_1_Race_5_10_16_2024_20_33.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)
 
     def test_m9r6(self, tmp_path: pathlib.Path):
         """Meet 9, Race 6: Extra splits."""
@@ -635,6 +738,7 @@ class TestDolphin:
             meet_id="009",
             race=6,
             round="A",
+            numbering="1-10",
             lanes=[
                 Lane(
                     splits=[
@@ -653,3 +757,8 @@ class TestDolphin:
         check_heat_is_similar(actual, do4)
         do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
         check_heat_is_similar(actual, do4_rt)
+        csv_filename = "009_Event__Heat_1_Race_6_10_16_2024_20_33.csv"
+        csv = DolphinCSV().read(os.path.join(testdata_dir, csv_filename))
+        check_heat_is_similar(actual, csv)
+        csv_rt = round_trip(actual, DolphinCSV(), tmp_path)
+        check_heat_is_similar(actual, csv_rt)

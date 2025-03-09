@@ -32,6 +32,107 @@ Time = decimal.Decimal
 
 ZERO_TIME = Time("0.00")
 
+
+def format_time(time: Time) -> str:
+    """Return a string representation of the time in mm:ss.hh format.
+
+    Times are formatted as follows:
+
+    - If the time is None, returns an empty string
+    - If the time is less than 1 minute, return the time in ss.hh format
+    - If the time is greater than or equal to 1 minute, return the time in
+      m:ss.hh format
+    - If the time is 100 minutes or greater, return '99:59.99'
+
+    :param time: The time to format
+    :returns: A string representation of the time in mm:ss.hh format
+
+    Examples:
+    >>> format_time(None)
+    ''
+    >>> format_time(Time("0.0"))
+    '00.00'
+    >>> format_time(Time("0.01"))
+    '00.01'
+    >>> format_time(Time("15.2"))
+    '15.20'
+    >>> format_time(Time("19.87"))
+    '19.87'
+    >>> format_time(Time("50"))
+    '50.00'
+    >>> format_time(Time("120.0"))
+    '2:00.00'
+    >>> format_time(Time("1800"))
+    '30:00.00'
+    >>> format_time(Time("9000"))
+    '99:59.99'
+    """
+    if time is None:
+        return ""
+    sixty = Time("60")
+    minutes = time // sixty
+    seconds = time % sixty
+    if minutes >= 100:  # noqa: PLR2004
+        return "99:59.99"
+    if minutes == 0:
+        return f"{seconds:05.2f}"
+    return f"{minutes}:{seconds:05.2f}"
+
+
+def parse_time(time_str: str) -> Time | None:
+    """Parse a string representation of a time in mm:ss.hh format.
+
+    :param time_str: A string representation of the time in mm:ss.hh format
+    :returns: A Time object representing the time
+
+    Examples:
+    >>> parse_time("")
+    >>> parse_time("0.0")
+    Decimal('0.0')
+    >>> parse_time("00.01")
+    Decimal('0.01')
+    >>> parse_time("15.20")
+    Decimal('15.20')
+    >>> parse_time("2:00.00")
+    Decimal('120.00')
+    >>> parse_time("30:00.00")
+    Decimal('1800.00')
+    >>> parse_time("99:59.99")
+    Decimal('5999.99')
+    """
+    if time_str == "":
+        return None
+    parts = time_str.split(":")
+    if len(parts) == 1:
+        # Just seconds (e.g., 1.23)
+        return Time(parts[0])
+    elif len(parts) == 2:  # noqa: PLR2004
+        # Minutes and seconds (e.g., 01:23.45)
+        return Time(parts[0]) * 60 + Time(parts[1])
+    else:
+        raise ValueError("Invalid minsec format")
+
+
+def truncate_hundredths(time: Time) -> Time:
+    """Truncate a Time to two decimal places.
+
+    :param time: The time to truncate
+    :returns: The truncated time
+
+    >>> truncate_hundredths(Time("100.00"))
+    Decimal('100.00')
+    >>> truncate_hundredths(Time("99.999"))
+    Decimal('99.99')
+    >>> truncate_hundredths(Time("10.987"))
+    Decimal('10.98')
+    >>> truncate_hundredths(Time("100.123"))
+    Decimal('100.12')
+    >>> truncate_hundredths(Time("-2.127"))
+    Decimal('-2.12')
+    """
+    return time.quantize(Time("0.01"), rounding=decimal.ROUND_DOWN)
+
+
 type TimeResolver = Callable[[Lane], None]
 """
 A function that resolves times for a `Lane`.
@@ -225,7 +326,7 @@ class Heat:
     round: Round | None = None
     """The round of the event (A=All, P=Prelim, F=Final)"""
     type NumberingMode = Literal["1-10", "0-9"]
-    numbering: NumberingMode = "1-10"
+    numbering: NumberingMode | None = None
 
     # We hide the actual lane data and provide lane() to access it to avoid
     # confusion over the indexing of the array vs. the actual lane number.
@@ -254,7 +355,7 @@ class Heat:
         :returns: The lane object
         :raises: ValueError if the lane number is invalid
         """
-        if self.numbering == "1-10":
+        if self.numbering is None or self.numbering == "1-10":
             if lane_number < 1 or lane_number > 10:  # noqa: PLR2004
                 raise ValueError("Lane number must be between 1 and 10")
             return self._lanes[lane_number - 1]
@@ -453,23 +554,3 @@ class Heat:
         if letter1 != letter2:
             return letter1 < letter2
         return event1.upper() < event2.upper()
-
-
-def truncate_hundredths(time: Time) -> Time:
-    """Truncate a Time to two decimal places.
-
-    :param time: The time to truncate
-    :returns: The truncated time
-
-    >>> truncate_hundredths(Time("100.00"))
-    Decimal('100.00')
-    >>> truncate_hundredths(Time("99.999"))
-    Decimal('99.99')
-    >>> truncate_hundredths(Time("10.987"))
-    Decimal('10.98')
-    >>> truncate_hundredths(Time("100.123"))
-    Decimal('100.12')
-    >>> truncate_hundredths(Time("-2.127"))
-    Decimal('-2.12')
-    """
-    return time.quantize(Time("0.01"), rounding=decimal.ROUND_DOWN)
