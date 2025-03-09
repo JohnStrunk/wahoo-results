@@ -104,10 +104,40 @@ class DolphinDo4(TimingSystem):
         )
 
     def encode(self, heat: Heat) -> str:  # noqa: D102
-        raise NotImplementedError("encode() is not implemented")
+        start_lane = 1 if heat.numbering == "1-10" else 0
+        # Find the number of splits in the heat as the lane with the most splits.
+        num_splits = max(
+            len(heat.lane(i).splits or [1]) for i in range(start_lane, start_lane + 10)
+        )
+        # The header is event, heat, num_splits, round
+        round_txt: str
+        if heat.round == "P":
+            round_txt = "Prelim"
+        elif heat.round == "F":
+            round_txt = "Final"
+        else:
+            round_txt = "A"
+        header = f"{heat.event or ''};{heat.heat or 1};{num_splits};{round_txt}"
+        lines = [header]
+        for lane in range(start_lane, start_lane + 10):
+            splits = heat.lane(lane).splits or [[None, None, None]] * num_splits
+            for group in splits:
+                line = f"Lane{lane}"
+                if group == [None, None, None]:
+                    line += ";0;0;0"
+                else:
+                    for time in group:
+                        if time is None:
+                            line += ";"
+                        else:
+                            line += f";{time}"
+                lines.append(line)
+        # The last line is the checksum, and we don't know how to calculate it.
+        lines.append("F" * 16)
+        return "\n".join(lines)
 
     def write(self, filename: str, heat: Heat) -> None:  # noqa: D102
-        raise NotImplementedError("write() is not implemented")
+        super().write(filename, heat)
 
     def filename(self, heat: Heat) -> str | None:  # noqa: D102
         round = heat.round or "A"

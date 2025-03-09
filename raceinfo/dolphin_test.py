@@ -17,6 +17,9 @@
 """Tests for the Dolphin file formats."""
 
 import os
+import pathlib
+
+from raceinfo.timingsystem import TimingSystem
 
 from .dolphin_do4 import DolphinDo4
 from .heat_test import check_heat_is_similar
@@ -41,10 +44,23 @@ def unused(num: int, num_splits: int = 1) -> list[Lane]:
     ]
 
 
+def round_trip(heat: Heat, system: TimingSystem, path: pathlib.Path) -> Heat:
+    """Round trip a heat, writing it to a file and reading it back.
+
+    :param heat: The heat to write
+    :param system: The timing system to use for writing & reading
+    :param path: The directory to write the file to
+    :returns: The heat read back from the file
+    """
+    filename = system.filename(heat) or "outfile"
+    system.write(str(path / filename), heat)
+    return system.read(str(path / filename))
+
+
 class TestDolphin:
     """Tests for the Dolphin file formats."""
 
-    def test_m8r1(self):
+    def test_m8r1(self, tmp_path: pathlib.Path):
         """Meet 8, Race 1: Missing times."""
         actual = Heat(
             event="1",
@@ -84,8 +100,11 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
+        DolphinDo4().write(do4_filename, actual)
 
-    def test_m8r2(self):
+    def test_m8r2(self, tmp_path: pathlib.Path):
         """Meet 8, Race 2: Missing times."""
         actual = Heat(
             event="1",
@@ -119,8 +138,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r3(self):
+    def test_m8r3(self, tmp_path: pathlib.Path):
         """Meet 8, Race 3: Empty and DQ markings."""
         actual = Heat(
             event="2",
@@ -163,8 +184,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r4(self):
+    def test_m8r4(self, tmp_path: pathlib.Path):
         """Meet 8, Race 4: One intermediate split."""
         actual = Heat(
             event="3",
@@ -207,8 +230,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r5(self):
+    def test_m8r5(self, tmp_path: pathlib.Path):
         """Meet 8, Race 5: Two intermediate splits."""
         actual = Heat(
             event="4",
@@ -254,8 +279,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r6(self):
+    def test_m8r6(self, tmp_path: pathlib.Path):
         """Meet 8, Race 6: Three intermediate splits."""
         actual = Heat(
             event="5",
@@ -294,8 +321,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r7(self):
+    def test_m8r7(self, tmp_path: pathlib.Path):
         """Meet 8, Race 7: Chars - && in event name."""
         actual = Heat(
             event="6",
@@ -318,8 +347,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r8(self):
+    def test_m8r8(self, tmp_path: pathlib.Path):
         """Meet 8, Race 8: Round Prelim."""
         actual = Heat(
             event="7",
@@ -341,8 +372,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r9(self):
+    def test_m8r9(self, tmp_path: pathlib.Path):
         """Meet 8, Race 9: Round Final."""
         actual = Heat(
             event="8",
@@ -364,8 +397,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r10(self):
+    def test_m8r10(self, tmp_path: pathlib.Path):
         """Meet 8, Race 10: No events loaded."""
         actual = Heat(
             event="",
@@ -387,8 +422,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r11(self):
+    def test_m8r11(self, tmp_path: pathlib.Path):
         """Meet 8, Race 11: Numbering 0-9."""
         actual = Heat(
             event="10",
@@ -416,8 +453,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m8r12(self):
+    def test_m8r12(self, tmp_path: pathlib.Path):
         """Meet 8, Race 12: Numbering 0-9."""
         actual = Heat(
             event="10",
@@ -445,8 +484,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m9r1(self):
+    def test_m9r1(self, tmp_path: pathlib.Path):
         """Meet 9, Race 1: No events loaded."""
         actual = Heat(
             event="",
@@ -468,8 +509,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m9r2(self):
+    def test_m9r2(self, tmp_path: pathlib.Path):
         """Meet 9, Race 2: No events loaded."""
         actual = Heat(
             event="",
@@ -491,8 +534,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m9r3(self):
+    def test_m9r3(self, tmp_path: pathlib.Path):
         """Meet 9, Race 3: No events loaded."""
         actual = Heat(
             event="",
@@ -514,8 +559,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m9r4(self):
+    def test_m9r4(self, tmp_path: pathlib.Path):
         """Meet 9, Race 4: Extra splits."""
         actual = Heat(
             event="4",
@@ -549,8 +596,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m9r5(self):
+    def test_m9r5(self, tmp_path: pathlib.Path):
         """Meet 9, Race 5: Extra splits."""
         actual = Heat(
             event="",
@@ -575,8 +624,10 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
 
-    def test_m9r6(self):
+    def test_m9r6(self, tmp_path: pathlib.Path):
         """Meet 9, Race 6: Extra splits."""
         actual = Heat(
             event="",
@@ -601,3 +652,5 @@ class TestDolphin:
         do4_filename = DolphinDo4().filename(actual) or ""
         do4 = DolphinDo4().read(os.path.join(testdata_dir, do4_filename))
         check_heat_is_similar(actual, do4)
+        do4_rt = round_trip(actual, DolphinDo4(), tmp_path)
+        check_heat_is_similar(actual, do4_rt)
