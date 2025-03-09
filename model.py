@@ -26,7 +26,7 @@ from typing import Callable, Generic, List, Optional, Set, TypeVar
 import PIL.Image as PILImage
 
 from imagecast import DeviceStatus
-from raceinfo import Heat, StartList
+from raceinfo import FullProgram, Heat
 
 CallbackFn = Callable[[], None]
 
@@ -98,7 +98,7 @@ class CallbackList:
         self._callbacks.discard(callback)
 
 
-class StartListVar(GVar[List[StartList]]):
+class StartListVar(GVar[FullProgram]):
     """An ordered list of start lists."""
 
 
@@ -172,7 +172,7 @@ class Model:
         self.appearance_preview = ImageVar(PILImage.Image())
         # Directories
         self.dir_startlist = StringVar(name="dir_startlist")
-        self.startlist_contents = StartListVar([])
+        self.startlist_contents = StartListVar({})
         self.dir_results = StringVar(name="dir_results")
         self.results_contents = RaceResultListVar([])
         # Run tab

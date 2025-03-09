@@ -26,45 +26,50 @@ The primary classes/types are:
   objects are used to represent both the start list for a heat as well as the
   results of a heat. The Heat.merge() method can be used to combine the data
   from both sources.
+- Lane: Represents a single lane in a heat, containing the swimmer's name, team,
+  and times.
 - Time: Represents a swim time
 - TimeResolver: A function that resolves the times from a Lane, integrating the
-  primary and backup times. There is a standard_resolver that can be used for
-  most cases to resolve the individual times into a single, final time.
+  primary and backup times. A TimeResolver is responsible for determining which
+  individual times are valid and which time should be used as the official time
+  (`Lane.final_time`).
 
 The package also includes a number of modules that provide support for specific
 data file types:
 
-- parse_do4_file: Parses a Colorado Dolphin Timing System do4 results file into
-  a Heat object containing the times for each lane in the heat.
-- parse_scb_file: Parses a Colorado Time Systems (CTS) start list file into a
-  list of Heat objects (StartList) containing the names and teams of the
-  swimmers in each heat.
+- TimingSystem is the base class for all timing system data file types. Current
+  implementations include:
+
+  - DolphinDo4: Colorado Dolphin Timing System do4 results files
+
+- MeetProgram is the base class for all meet program data file types. Current
+  implementations include:
+
+  - ColoradoSCB: Colorado Time Systems (CTS) start list files (read-only)
+  - DolphinCSV: Colorado Dolphin Timing System CSV start list files (write-only)
 """
 
-from .colorado_scb import load_all_scb, parse_scb, parse_scb_file
-from .dolphin_do4 import parse_do4, parse_do4_file
-from .heat import Heat
-from .lane import Lane
+from .colorado_scb import ColoradoSCB
+from .dolphin_do4 import DolphinDo4
+from .dolphin_event import DolphinEvent
+from .eventprocessor import EventProcessor, FullProgram
 from .nameformat import NameMode, format_name
-from .resolver import standard_resolver
-from .startlist import StartList, startlists_to_csv
-from .time import MIN_VALID_TIME, ZERO_TIME, Time, truncate_hundredths
+from .time import ZERO_TIME, Heat, Lane, Time, TimeResolver, truncate_hundredths
+from .timingsystem import TimingSystem
 
 __all__ = [
-    "MIN_VALID_TIME",
     "ZERO_TIME",
+    "ColoradoSCB",
+    "DolphinDo4",
+    "DolphinEvent",
+    "EventProcessor",
+    "FullProgram",
     "Heat",
     "Lane",
     "NameMode",
-    "StartList",
     "Time",
+    "TimeResolver",
+    "TimingSystem",
     "format_name",
-    "load_all_scb",
-    "parse_do4",
-    "parse_do4_file",
-    "parse_scb",
-    "parse_scb_file",
-    "standard_resolver",
-    "startlists_to_csv",
     "truncate_hundredths",
 ]

@@ -18,12 +18,54 @@
 
 import copy
 from datetime import datetime
+from typing import Any
 
 import pytest
 
-from .heat import Heat
-from .lane import Lane
-from .time import Time
+from .lane_test import check_lane_is_similar
+from .time import Heat, Lane, Time
+
+
+def check_heat_is_similar(heat1: Heat, heat2: Heat, do_throw: bool = False) -> None:
+    """
+    Check if this heat is similar to another heat.
+
+    Similarity is defined as having the same values for all fields where a
+    field is not None. If a field is None, it is ignored in the comparison.
+
+    Note: This method is mainly intended for testing purposes.
+
+    :param other: The other heat to compare to
+    :returns: True if the heats are similar, False otherwise
+    """
+    __tracebackhide__ = True
+
+    def fail(field: str, val1: Any, val2: Any) -> None:
+        __tracebackhide__ = True
+        msg = f"Heats are not similar - {field} differs: {val1} vs. {val2}"
+        if do_throw:
+            raise ValueError(msg)
+        else:
+            pytest.fail(msg)
+
+    # Compare the simple fields
+    for var in [
+        "event",
+        "heat",
+        "description",
+        "meet_id",
+        "race",
+        "time_recorded",
+    ]:
+        if (
+            getattr(heat1, var) is not None
+            and getattr(heat2, var) is not None
+            and getattr(heat2, var) != getattr(heat1, var)
+        ):
+            fail(var, getattr(heat1, var), getattr(heat2, var))
+    # Compare the lanes
+    for l_num in range(1, 11):
+        check_lane_is_similar(heat1.lane(l_num), heat2.lane(l_num), do_throw)
 
 
 class TestHeatValidation:
@@ -174,3 +216,61 @@ class TestHeat:
         e6b = Heat(event="6b", heat=1)
         assert e6a < e6b
         assert e6b > e6a
+
+    def test_similarity(self):
+        """Test similarity of Heat objects."""
+        heat1 = Heat(
+            event="1",
+            heat=1,
+            description="d1",
+            meet_id="id-one",
+            lanes=[
+                Lane(name="one", primary=Time(100.00)),
+                Lane(name="two", primary=Time(200.00)),
+            ],
+        )
+        # Identical is similar
+        heat2 = copy.deepcopy(heat1)
+        check_heat_is_similar(heat1, heat2)
+        # Different heats are not similar
+        heat2.heat = 2
+        with pytest.raises(ValueError):
+            check_heat_is_similar(heat1, heat2, do_throw=True)
+        # None values are ignored during comparison
+        heat2.heat = None
+        check_heat_is_similar(heat1, heat2)
+        heat2.lane(1).primary = None
+        check_heat_is_similar(heat1, heat2)
+        # Different lanes are not similar
+        heat2.lane(1).primary = Time(999.00)
+        with pytest.raises(ValueError):
+            check_heat_is_similar(heat1, heat2, do_throw=True)
+
+    def test_numbering(self):
+        """Test lane numbering."""
+        heat = Heat(
+            lanes=[
+                Lane(name="first"),
+                Lane(name="second"),
+            ]
+        )
+        # Default lane numbering is 1-10
+        assert heat.lane(1).name == "first"
+        assert heat.lane(2).name == "second"
+        with pytest.raises(ValueError):
+            heat.lane(0)
+        with pytest.raises(ValueError):
+            heat.lane(11)
+        heat.numbering = "0-9"
+        assert heat.lane(0).name == "first"
+        assert heat.lane(1).name == "second"
+        with pytest.raises(ValueError):
+            heat.lane(-1)
+        with pytest.raises(ValueError):
+            heat.lane(10)
+        heat.numbering = "1-10"
+        assert heat.lane(1).name == "first"
+        assert heat.lane(2).name == "second"
+        heat.numbering = "unsupported-scheme"  # type: ignore
+        with pytest.raises(ValueError):
+            heat.lane(5)

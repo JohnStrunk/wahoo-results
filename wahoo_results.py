@@ -22,10 +22,10 @@ import copy
 import logging
 import os
 import platform
-import re
 import sys
 import threading
 import webbrowser
+from pathlib import PurePath
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
 from typing import List, Optional
@@ -49,15 +49,8 @@ import wh_analytics
 import wh_version
 from about import about
 from model import Model
-from raceinfo import (
-    Heat,
-    Time,
-    load_all_scb,
-    parse_do4_file,
-    parse_scb_file,
-    standard_resolver,
-    startlists_to_csv,
-)
+from raceinfo import ColoradoSCB, DolphinDo4, DolphinEvent, Heat, Time
+from resolver import standard_resolver
 from scoreboard import ScoreboardImage, waiting_screen
 from template import get_template
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
@@ -194,7 +187,7 @@ def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
     def process_startlists() -> None:
         """Load all the startlists from the current directory and update the UI with their information."""
         directory = model.dir_startlist.get()
-        startlists = load_all_scb(directory)
+        startlists = ColoradoSCB().full_program(directory)
         model.startlist_contents.set(startlists)
 
     def scb_dir_updated() -> None:
@@ -220,15 +213,13 @@ def summarize_racedir(directory: str) -> List[Heat]:
     :param directory: The directory to process
     :returns: A list of HeatData objects
     """
+    timingsystem = DolphinDo4()
     files = os.scandir(directory)
     contents: List[Heat] = []
     for file in files:
-        if file.name.endswith(".do4"):
-            match = re.match(r"^(\d+)-", file.name)
-            if match is None:
-                continue
+        if any(PurePath(file).match(pattern) for pattern in timingsystem.patterns):
             try:
-                result = parse_do4_file(file.path)
+                result = timingsystem.read(file.path)
                 contents.append(result)
             except ValueError:
                 pass
@@ -245,6 +236,7 @@ def load_result(model: Model, filename: str) -> Optional[Heat]:
     :returns: The HeatData object representing the result if successful,
         otherwise None
     """
+    timingsystem = DolphinDo4()
     result: Optional[Heat] = None
     resolver = standard_resolver(
         model.min_times.get(), Time(str(model.time_threshold.get()))
@@ -253,7 +245,7 @@ def load_result(model: Model, filename: str) -> Optional[Heat]:
     # still being written.
     for tries in range(1, 6):
         try:
-            result = parse_do4_file(filename)
+            result = timingsystem.read(filename)
             result.resolve_times(resolver)
             break
         except ValueError:
@@ -262,11 +254,13 @@ def load_result(model: Model, filename: str) -> Optional[Heat]:
             sleep(0.05 * tries)
     if result is None:
         return None
-    efilename = f"E{result.event:0>3}.scb"
+    if result.event is None or result.heat is None:
+        return None
     try:
-        startlist = parse_scb_file(os.path.join(model.dir_startlist.get(), efilename))
-        if result.heat is not None and len(startlist) >= result.heat:
-            result.merge(info_from=startlist[result.heat - 1])
+        heatinfo = ColoradoSCB().find(
+            model.dir_startlist.get(), result.event, result.heat
+        )
+        result.merge(info_from=heatinfo)
     except OSError:
         pass
     except ValueError:
@@ -493,14 +487,14 @@ def main() -> None:  # noqa: PLR0915
     setup_do4_watcher(model, do4_observer)
 
     def write_dolphin_csv():
-        directory = model.dir_startlist.get()
-        slists = load_all_scb(directory)
-        csv = startlists_to_csv(slists)
-        filename = os.path.join(directory, "dolphin_events.csv")
-        with open(filename, "w", encoding="cp1252") as file:
-            file.writelines(csv)
-        num_events = len(csv)
-        wh_analytics.wrote_dolphin_csv(num_events)
+        try:
+            directory = model.dir_startlist.get()
+            program = ColoradoSCB().full_program(directory)
+            filename = os.path.join(directory, "dolphin_events.csv")
+            DolphinEvent().write(filename, program)
+            wh_analytics.wrote_dolphin_csv(len(program.keys()))
+        except OSError:
+            pass
 
     model.dolphin_export.add(write_dolphin_csv)
 

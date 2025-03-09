@@ -42,8 +42,7 @@ class NameMode(Enum):
 
 
 def arrange_name(how: NameMode, name: str) -> str:  # noqa: PLR0911
-    """
-    Change the format of a name from a start list.
+    """Change the format of a name from a start list.
 
     >>> arrange_name(NameMode.NONE, "Last, First M       ")
     'Last, First M'
@@ -100,8 +99,7 @@ def arrange_name(how: NameMode, name: str) -> str:  # noqa: PLR0911
 
 
 def format_name(how: NameMode, name: str) -> List[str]:
-    """
-    Return a name formatted according to "how", along w/ shorter variants in case the requested format doesn't fit in the alloted space on the scoreboard.
+    """Return a name formatted according to "how", along w/ shorter variants in case the requested format doesn't fit in the alloted space on the scoreboard.
 
     :param how: The desired format for the name
     :param name: The name to format
@@ -133,8 +131,7 @@ def format_name(how: NameMode, name: str) -> List[str]:
 
 
 def _shorter_strings(string: str) -> List[str]:
-    """
-    Generate shorter variants of a string.
+    """Generate shorter variants of a string.
 
     :param string: The string to shorten
     :returns: A list of shorter variants of the string

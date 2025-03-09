@@ -25,7 +25,6 @@ from PIL.ImageEnhance import Brightness
 
 from model import Model
 from raceinfo import Heat, NameMode, Time, format_name
-from raceinfo.time import MIN_VALID_TIME
 
 
 def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
@@ -302,7 +301,7 @@ def format_time(seconds: Time | None) -> str:
 
     Times are formatted as follows:
 
-    - If the time is None or less than MIN_VALID_TIME, return an empty string
+    - If the time is None, returns an empty string
     - If the time is less than 1 minute, return the time in MM.SS format
     - If the time is greater than or equal to 1 minute, return the time in
       M:SS.SS format
@@ -314,9 +313,9 @@ def format_time(seconds: Time | None) -> str:
     >>> format_time(None)
     ''
     >>> format_time(Time("0.0"))
-    ''
+    '00.00'
     >>> format_time(Time("0.01"))
-    ''
+    '00.01'
     >>> format_time(Time("15.2"))
     '15.20'
     >>> format_time(Time("19.87"))
@@ -330,7 +329,7 @@ def format_time(seconds: Time | None) -> str:
     >>> format_time(Time("9000"))
     '99:59.99'
     """
-    if seconds is None or seconds < MIN_VALID_TIME:
+    if seconds is None:
         return ""
     sixty = Time("60")
     minutes = seconds // sixty

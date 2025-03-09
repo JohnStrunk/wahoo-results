@@ -16,8 +16,8 @@
 
 """A scoreboard template for previews and theming."""
 
-from raceinfo import Heat, Lane, Time, standard_resolver
-from raceinfo.time import MIN_VALID_TIME
+from raceinfo import Heat, Lane, Time
+from resolver import standard_resolver
 
 
 def get_template() -> Heat:
@@ -55,7 +55,7 @@ def get_template() -> Heat:
                 backups=[lt[0]],
             ),
             Lane(name="English, Cheryl M", team="TEAM"),
-            Lane(name="Brady, June A", team="TEAM", backups=[MIN_VALID_TIME]),
+            Lane(name="Brady, June A", team="TEAM", backups=[lt[2]]),
             Lane(name="Sloan, Michelle T", team="TEAM", primary=lt[3], backups=[lt[3]]),
             Lane(name="Downing, Doreen S", team="TEAM", primary=lt[4], backups=[lt[4]]),
             Lane(name="Collier, Julie G", team="TEAM", primary=lt[5], backups=[lt[5]]),

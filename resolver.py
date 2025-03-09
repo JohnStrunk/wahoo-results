@@ -16,44 +16,54 @@
 
 """Time resolver(s)."""
 
-from typing import Callable, Literal
+from typing import Literal
 
-from .lane import Lane
-from .time import MIN_VALID_TIME, Time, truncate_hundredths
-
-type TimeResolver = Callable[[Lane], None]
-"""
-A function that resolves times for a `Lane`.
-
-The resolver should use a combination of the `primary`, `backups`, and `splits`
-attributes to determine a final time for the lane. That final time should be set in
-the `final_time` attribute of the `Lane`.
-"""
+from raceinfo import Lane, Time, TimeResolver, truncate_hundredths
 
 
-def standard_resolver(min_times: int, threshold: Time) -> TimeResolver:
+def standard_resolver(
+    min_times: int, threshold: Time, min_valid_time: Time = Time("10.00")
+) -> TimeResolver:
     """
     Get a standard time resolver for a lane.
 
     The standard resolver will:
-    1. Use the primary time if it is present and supported (within the threshold) by at least one backup time.
-    2. If there is no primary, it will use a composite of the backup times (average or median) as long as all backups are within the threshold of the calculated time.
 
-    :param min_times: The minimum number of backup times required for them to be used to generate a final time
-    :param threshold: The threshold for validating a final time against its backup times and/or its components
+    1. Remove all times that are less than the minimum valid time.
+    2. Use the primary time if it is present and supported (within the
+       threshold) by at least one backup time.
+    3. If there is no primary, it will use a composite of the backup times
+       (average or median) as long as all backups are within the threshold of
+       the calculated time.
+
+    :param min_times: The minimum number of backup times required for them to be
+        used to generate a final time
+    :param threshold: The threshold for validating a final time against its
+        backup times and/or its components
+    :param min_valid_time: The minimum valid time for a time to be considered
+        valid. This is used to filter out invalid times.
     """
 
-    def resolve(lane: Lane) -> None:
+    def strip_invalid_times(lane: Lane) -> None:
+        if lane.primary is not None and lane.primary < min_valid_time:
+            lane.primary = None
+        if lane.backups is not None:
+            for i, backup in enumerate(lane.backups):
+                if backup is not None and backup < min_valid_time:
+                    lane.backups[i] = None
+        if lane.splits is not None:
+            for i, splitgroup in enumerate(lane.splits):
+                for j, split in enumerate(splitgroup):
+                    if split is not None and split < min_valid_time:
+                        lane.splits[i][j] = None
+
+    def resolve_final_time(lane: Lane) -> None:
         lane.final_time = None
         if lane.backups is None:  # No backups, so we can't do anything
             return
-        valid_backups = [
-            backup
-            for backup in lane.backups
-            if backup is not None and backup >= MIN_VALID_TIME
-        ]
+        valid_backups = [backup for backup in lane.backups if backup is not None]
         # See if we can use the primary time
-        if lane.primary is not None and lane.primary >= MIN_VALID_TIME:
+        if lane.primary is not None:
             # Check if the primary is supported by at least one backup time
             if _is_supported_by(lane.primary, valid_backups, threshold, "any"):
                 lane.final_time = lane.primary
@@ -64,7 +74,10 @@ def standard_resolver(min_times: int, threshold: Time) -> TimeResolver:
             if candidate is not None:
                 if _is_supported_by(candidate, valid_backups, threshold, "all"):
                     lane.final_time = candidate
-        return
+
+    def resolve(lane: Lane) -> None:
+        strip_invalid_times(lane)
+        resolve_final_time(lane)
 
     return resolve
 
@@ -145,6 +158,6 @@ def _get_candidate(raw_times: list[Time]) -> Time | None:
     else:
         candidate = sorted_times[num_times // 2]
 
-    if candidate is not None and candidate >= MIN_VALID_TIME:
+    if candidate is not None:
         return truncate_hundredths(candidate)
     return None
