@@ -337,12 +337,16 @@ class RaceResultView(ttk.LabelFrame):
     def _update(self) -> None:
         self.tview.delete(*self.tview.get_children())
         result = self._resultvar.get()
-        for lane in range(1, 11):
+        for l_index in range(1, 11):
             if result is None:
                 self.tview.insert(
-                    "", "end", id=str(lane), values=[str(lane), "", "", "", "", ""]
+                    "",
+                    "end",
+                    id=str(l_index),
+                    values=[str(l_index), "", "", "", "", ""],
                 )
             else:
+                lane = l_index - 1 if result.numbering == "0-9" else l_index
                 padtime = result.lane(lane).primary or ""
                 rawtimes: list[Time | None] = [None, None, None]
                 backups = result.lane(lane).backups
