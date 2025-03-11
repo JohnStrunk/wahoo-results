@@ -22,6 +22,7 @@ from tkinter import FALSE, HORIZONTAL, Menu, StringVar, TclError, Tk, Widget, fo
 
 from PIL import ImageTk
 
+import raceinfo
 import widgets
 from model import Model
 from tooltip import ToolTip
@@ -95,6 +96,7 @@ class View(ttk.Frame):
 
         style = ttk.Style()
         style.configure("TCombobox", padding=_TXT_PAD)  # Font drop-downs
+        style.configure("TMenuButton", padding=_TXT_PAD)  # OptionMenu
         style.configure("TLabel", padding=_TXT_PAD)
         style.configure("TEntry", padding=_TXT_PAD)
         style.configure("TSpinbox", padding=_TXT_PAD)
@@ -407,11 +409,24 @@ class _dirsTab(ttk.Frame):
 
     def _race_results(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Race results")
+        res_fmt_frame = ttk.Frame(frame, padding=_PADDING)
+        res_fmt_frame.grid(column=0, row=0, sticky="news", padx=1, pady=1)
+        res_fmt_label = ttk.Label(res_fmt_frame, text="Data format:", anchor="e")
+        res_fmt_label.grid(column=0, row=0, sticky="news", padx=1, pady=1)
+        res_fmt = ttk.OptionMenu(
+            res_fmt_frame,
+            self._vm.result_format,
+            self._vm.result_format.get(),
+            *sorted(raceinfo.timing_systems.keys()),
+        )
+        ToolTip(res_fmt, "Select the race result file format")
+        res_fmt.grid(column=1, row=0, sticky="news", padx=1, pady=1)
+        res_fmt_frame.columnconfigure(1, weight=1)
         widgets.DirSelection(frame, self._vm.dir_results).grid(
-            column=0, row=0, sticky="news", padx=1, pady=1
+            column=0, row=1, sticky="news", padx=1, pady=1
         )
         widgets.RaceResultTreeView(frame, self._vm.results_contents).grid(
-            column=0, row=1, sticky="news", padx=1, pady=1
+            column=0, row=2, sticky="news", padx=1, pady=1
         )
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(1, weight=1)
