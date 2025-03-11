@@ -45,16 +45,18 @@ from watchdog.observers.api import BaseObserver
 import autotest
 import imagecast
 import main_window
+import raceinfo
 import wh_analytics
 import wh_version
 from about import about
 from model import Model
-from raceinfo import ColoradoSCB, DolphinDo4, DolphinEvent, Heat, Time
+from raceinfo import ColoradoSCB, DolphinEvent, Heat, Time
+from raceinfo.timingsystem import TimingSystem
 from resolver import standard_resolver
 from scoreboard import ScoreboardImage, waiting_screen
 from template import get_template
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
-from watcher import DO4Watcher, SCBWatcher
+from watcher import ResultWatcher, SCBWatcher
 
 CONFIG_FILE = "wahoo-results.ini"
 logger = logging.getLogger(__name__)
@@ -207,19 +209,19 @@ def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
     scb_dir_updated()
 
 
-def summarize_racedir(directory: str) -> List[Heat]:
+def summarize_racedir(directory: str, timing_system: TimingSystem) -> List[Heat]:
     """Summarize all race results in a directory.
 
     :param directory: The directory to process
+    :param timing_system: The timing system to use for reading results
     :returns: A list of HeatData objects
     """
-    timingsystem = DolphinDo4()
     files = os.scandir(directory)
     contents: List[Heat] = []
     for file in files:
-        if any(PurePath(file).match(pattern) for pattern in timingsystem.patterns):
+        if any(PurePath(file).match(pattern) for pattern in timing_system.patterns):
             try:
-                result = timingsystem.read(file.path)
+                result = timing_system.read(file.path)
                 contents.append(result)
             except ValueError:
                 pass
@@ -232,11 +234,10 @@ def load_result(model: Model, filename: str) -> Optional[Heat]:
     """Load a result file and corresponding startlist.
 
     :param model: The application model
-    :param filename: The .do4 result file to load
+    :param filename: The result file to load
     :returns: The HeatData object representing the result if successful,
         otherwise None
     """
-    timingsystem = DolphinDo4()
     result: Optional[Heat] = None
     resolver = standard_resolver(
         model.min_times.get(), Time(str(model.time_threshold.get()))
@@ -245,7 +246,7 @@ def load_result(model: Model, filename: str) -> Optional[Heat]:
     # still being written.
     for tries in range(1, 6):
         try:
-            result = timingsystem.read(filename)
+            result = model.timing_system.read(filename)
             result.resolve_times(resolver)
             break
         except ValueError:
@@ -268,12 +269,18 @@ def load_result(model: Model, filename: str) -> Optional[Heat]:
     return result
 
 
-def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
+def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
     """Set up watches for files/directories and connect to model.
 
     :param model: The application model
-    :param observer: The watcher for do4 files
+    :param observer: The watcher for result files
     """
+
+    def update_timing_system() -> None:
+        format = model.result_format.get()
+        system = raceinfo.timing_systems.get(format)
+        if system is not None:
+            model.timing_system = system()
 
     def process_racedir() -> None:
         """Load all the race resultsand update the UI."""
@@ -281,7 +288,7 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
             op="update_race_ui", description="Update race summaries in UI"
         ) as span:
             directory = model.dir_results.get()
-            contents = summarize_racedir(directory)
+            contents = summarize_racedir(directory, model.timing_system)
             span.set_tag("race_files", len(contents))
             model.results_contents.set(contents)
 
@@ -301,22 +308,27 @@ def setup_do4_watcher(model: Model, observer: BaseObserver) -> None:
             wh_analytics.results_received(result.has_names(), num_cc)
             process_racedir()  # update the UI
 
-    def do4_dir_updated() -> None:
+    def result_dir_updated() -> None:
         """When the raceresult directory is changed, update the watch to look at the new directory and trigger processing of the results."""
         path = model.dir_results.get()
         if not os.path.exists(path):
             return
         observer.unschedule_all()
+        update_timing_system()
 
         def async_process(file: str) -> None:
             model.enqueue(lambda: process_new_result(file))
 
-        observer.schedule(DO4Watcher(async_process), path)
-        logger.debug("do4 watcher updated to %s", path)
+        observer.schedule(ResultWatcher(async_process, model.timing_system), path)
+        logger.debug("result watcher updated to %s", path)
         process_racedir()
 
-    model.dir_results.trace_add("write", lambda *_: do4_dir_updated())
-    do4_dir_updated()
+    # Need to update the result dir both when the directory changes and when the
+    # result format changes, since the format is used to determine the timing
+    # system
+    model.dir_results.trace_add("write", lambda *_: result_dir_updated())
+    model.result_format.trace_add("write", lambda *_: result_dir_updated())
+    result_dir_updated()
 
 
 def check_for_update(model: Model) -> None:
@@ -482,9 +494,9 @@ def main() -> None:  # noqa: PLR0915
     scb_observer.start()
     setup_scb_watcher(model, scb_observer)
 
-    do4_observer = Observer()
-    do4_observer.start()
-    setup_do4_watcher(model, do4_observer)
+    result_observer = Observer()
+    result_observer.start()
+    setup_result_watcher(model, result_observer)
 
     def write_dolphin_csv():
         try:
@@ -513,7 +525,7 @@ def main() -> None:  # noqa: PLR0915
         "write", lambda *_: wh_analytics.set_cts_directory(True)
     )
     model.dir_results.trace_add(
-        "write", lambda *_: wh_analytics.set_do4_directory(True)
+        "write", lambda *_: wh_analytics.set_result_directory(True)
     )
 
     # Allow the root window to build, then close the splash screen if it's up
@@ -544,9 +556,9 @@ def main() -> None:  # noqa: PLR0915
     scb_observer.unschedule_all()
     scb_observer.stop()
     # scb_observer.join()  # This causes an intermittent hang
-    do4_observer.unschedule_all()
-    do4_observer.stop()
-    # do4_observer.join()  # This causes an intermittent hang
+    result_observer.unschedule_all()
+    result_observer.stop()
+    # result_observer.join()  # This causes an intermittent hang
     logger.debug("Watchers stopped")
     icast.stop()
     root.update()

@@ -136,7 +136,7 @@ def wrote_dolphin_csv(num_events: int) -> None:
     )
 
 
-def set_do4_directory(changed: bool) -> None:
+def set_result_directory(changed: bool) -> None:
     """Set directory to watch for do4 files.
 
     :param changed: True if the directory was changed

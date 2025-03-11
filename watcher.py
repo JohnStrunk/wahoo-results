@@ -21,8 +21,7 @@ from typing import Callable
 
 import watchdog.events
 
-from raceinfo.colorado_scb import ColoradoSCB
-from raceinfo.dolphin_do4 import DolphinDo4
+from raceinfo import ColoradoSCB, TimingSystem
 
 CallbackFn = Callable[[], None]
 CreatedCallbackFn = Callable[[str], None]
@@ -60,24 +59,25 @@ class SCBWatcher(watchdog.events.PatternMatchingEventHandler):
             self._callback()
 
 
-class DO4Watcher(watchdog.events.PatternMatchingEventHandler):
-    """Monitor a directory for new .do4 race result files."""
+class ResultWatcher(watchdog.events.PatternMatchingEventHandler):
+    """Monitor a directory for new timing system race result files."""
 
-    def __init__(self, callback: CreatedCallbackFn):
-        """Monitor a directory for new .do4 result files.
+    def __init__(self, callback: CreatedCallbackFn, timing_system: TimingSystem):
+        """Monitor a directory for new timing system result files.
 
-        :param callback: The function to call when a new .do4 file is created.
+        :param callback: The function to call when a new result file is created.
+        :param timing_system: The timing system to monitor for results.
         """
-        super().__init__(patterns=DolphinDo4().patterns, ignore_directories=True)
+        super().__init__(patterns=timing_system.patterns, ignore_directories=True)
         self._callback = callback
 
     def on_created(self, event: watchdog.events.FileSystemEvent):
-        """Handle a new .do4 file creation event by invoking the callback.
+        """Handle a new result file creation event by invoking the callback.
 
         :param event: The creation event
         """
         logger.debug(
-            "DO4Watcher: operation=%s, path=%s", event.event_type, event.src_path
+            "ResultWatcher: operation=%s, path=%s", event.event_type, event.src_path
         )
         path = event.src_path
         if isinstance(path, bytes):

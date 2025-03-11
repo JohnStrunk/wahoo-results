@@ -27,6 +27,8 @@ import PIL.Image as PILImage
 
 from imagecast import DeviceStatus
 from raceinfo import FullProgram, Heat
+from raceinfo.dolphin_do4 import DolphinDo4
+from raceinfo.timingsystem import TimingSystem
 
 CallbackFn = Callable[[], None]
 
@@ -173,6 +175,9 @@ class Model:
         # Directories
         self.dir_startlist = StringVar(name="dir_startlist")
         self.startlist_contents = StartListVar({})
+        self.result_format = StringVar(name="result_format")
+        # The timing system will get updated/set properly before use
+        self.timing_system: TimingSystem = DolphinDo4()
         self.dir_results = StringVar(name="dir_results")
         self.results_contents = RaceResultListVar([])
         # Run tab
@@ -218,6 +223,7 @@ class Model:
         self.min_times.set(data.getint("min_times", 2))
         self.time_threshold.set(data.getfloat("time_threshold", 0.30))
         self.dir_startlist.set(data.get("dir_startlist", "C:\\swmeets8"))
+        self.result_format.set(data.get("result_format", "Dolphin - do4"))
         self.dir_results.set(data.get("dir_results", "C:\\CTSDolphin"))
         client_id = data.get("client_id")
         if client_id is None or len(client_id) == 0:
@@ -254,6 +260,7 @@ class Model:
             "min_times": str(self.min_times.get()),
             "time_threshold": str(self.time_threshold.get()),
             "dir_startlist": self.dir_startlist.get(),
+            "result_format": self.result_format.get(),
             "dir_results": self.dir_results.get(),
             "client_id": self.client_id.get(),
             "analytics": str(self.analytics.get()),

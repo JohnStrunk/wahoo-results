@@ -50,6 +50,7 @@ data file types:
 """
 
 from .colorado_scb import ColoradoSCB
+from .dolphin_csv import DolphinCSV
 from .dolphin_do4 import DolphinDo4
 from .dolphin_event import DolphinEvent
 from .eventprocessor import EventProcessor, FullProgram
@@ -66,9 +67,16 @@ from .time import (
 )
 from .timingsystem import TimingSystem
 
+timing_systems: dict[str, type[TimingSystem]] = {
+    "Dolphin - do4": DolphinDo4,
+    "Dolphin - csv": DolphinCSV,
+}
+"""A dictionary of timing system classes, keyed by their friendly names."""
+
 __all__ = [
     "ZERO_TIME",
     "ColoradoSCB",
+    "DolphinCSV",
     "DolphinDo4",
     "DolphinEvent",
     "EventProcessor",
@@ -82,5 +90,6 @@ __all__ = [
     "format_name",
     "format_time",
     "parse_time",
+    "timing_systems",
     "truncate_hundredths",
 ]
