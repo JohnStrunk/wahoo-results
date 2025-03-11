@@ -224,6 +224,7 @@ class ScoreboardImage:
 
         # Lane data
         for i in range(1, self._lanes + 1):
+            lane_num = i - 1 if self._race.numbering == "0-9" else i
             color = (
                 self._model.color_odd.get() if i % 2 else self._model.color_even.get()
             )
@@ -231,13 +232,13 @@ class ScoreboardImage:
             # Lane
             draw.text(
                 (edge_l + idx_width / 2, self._baseline(line_num)),
-                f"{i}",
+                f"{lane_num}",
                 font=self._normal_font,
                 anchor="ms",
                 fill=color,
             )
             # Place
-            pl_num = self._race.place(i)
+            pl_num = self._race.place(lane_num)
             pl_color = color
             if pl_num == 1:
                 pl_color = self._model.color_first.get()
@@ -254,7 +255,7 @@ class ScoreboardImage:
                 fill=pl_color,
             )
             # Name
-            raw_name = self._race.lane(i).name or ""
+            raw_name = self._race.lane(lane_num).name or ""
             name_variants = format_name(NameMode.NONE, raw_name)
             while draw.textlength(name_variants[0], self._normal_font) > name_width:
                 name_variants.pop(0)
@@ -269,7 +270,7 @@ class ScoreboardImage:
             # Time
             draw.text(
                 (edge_r, self._baseline(line_num)),
-                self._time_text(i),
+                self._time_text(lane_num),
                 font=self._time_font,
                 anchor="rs",
                 fill=color,
