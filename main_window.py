@@ -24,7 +24,7 @@ from PIL import ImageTk
 
 import raceinfo
 import widgets
-from model import Model
+from model import DQMode, Model
 from tooltip import ToolTip
 
 _PADDING = 2
@@ -361,6 +361,21 @@ class _configTab(ttk.Frame):
             thresh,
             "Lanes with any raw times that differ from the final"
             + " time more than this amount will display dashes",
+        )
+
+        ttk.Label(opt_frame, text="DQ:", anchor="e").grid(
+            column=3, row=0, sticky="news", padx=(15 * _PADDING, 0)
+        )
+        dq_dd = ttk.OptionMenu(
+            opt_frame,
+            self._vm.dq_mode,
+            self._vm.dq_mode.get(),
+            *DQMode.__members__.values(),
+        )
+        dq_dd.grid(column=4, row=0, sticky="news", pady=_PADDING)
+        ToolTip(
+            dq_dd,
+            "Whether and how to display DQs on scoreboard",
         )
 
         return opt_frame

@@ -20,6 +20,7 @@ import logging
 import queue
 import uuid
 from configparser import ConfigParser
+from enum import StrEnum, unique
 from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Tk, Variable
 from typing import Callable, Generic, List, Optional, Set, TypeVar
 
@@ -112,6 +113,15 @@ class RaceResultVar(GVar[Optional[Heat]]):
     """A race result."""
 
 
+@unique
+class DQMode(StrEnum):
+    """DQ mode for the scoreboard."""
+
+    IGNORE = "Ignore"
+    DQ_TIME = "DQ w/ time"
+    DQ_NOTIME = "DQ hides time"
+
+
 class Model:
     """Defines the state variables (model) for the main UI."""
 
@@ -170,6 +180,7 @@ class Model:
         self.num_lanes = IntVar(name="num_lanes")
         self.min_times = IntVar(name="min_times")
         self.time_threshold = DoubleVar(name="time_threshold")
+        self.dq_mode = StringVar(name="dq_mode")
         # Preview
         self.appearance_preview = ImageVar(PILImage.Image())
         # Directories
@@ -222,6 +233,7 @@ class Model:
         self.num_lanes.set(data.getint("num_lanes", 10))
         self.min_times.set(data.getint("min_times", 2))
         self.time_threshold.set(data.getfloat("time_threshold", 0.30))
+        self.dq_mode.set(data.get("dq_mode", DQMode.IGNORE))
         self.dir_startlist.set(data.get("dir_startlist", "C:\\swmeets8"))
         self.result_format.set(data.get("result_format", "Dolphin - do4"))
         self.dir_results.set(data.get("dir_results", "C:\\CTSDolphin"))
@@ -259,6 +271,7 @@ class Model:
             "num_lanes": str(self.num_lanes.get()),
             "min_times": str(self.min_times.get()),
             "time_threshold": str(self.time_threshold.get()),
+            "dq_mode": self.dq_mode.get(),
             "dir_startlist": self.dir_startlist.get(),
             "result_format": self.result_format.get(),
             "dir_results": self.dir_results.get(),

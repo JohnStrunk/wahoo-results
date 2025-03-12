@@ -23,7 +23,7 @@ from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.ImageEnhance import Brightness
 
-from model import Model
+from model import DQMode, Model
 from raceinfo import Heat, NameMode, format_name, format_time
 
 
@@ -247,6 +247,9 @@ class ScoreboardImage:
             if pl_num == 3:  # noqa: PLR2004
                 pl_color = self._model.color_third.get()
             ptxt = format_place(pl_num)
+            if self._race.lane(lane_num).is_dq:
+                if self._model.dq_mode.get() == DQMode.DQ_TIME:
+                    ptxt = "DQ"
             draw.text(
                 (edge_l + idx_width + pl_width / 2, self._baseline(line_num)),
                 ptxt,
@@ -268,9 +271,13 @@ class ScoreboardImage:
                 fill=color,
             )
             # Time
+            time_text = self._time_text(lane_num)
+            if self._race.lane(lane_num).is_dq:
+                if self._model.dq_mode.get() == DQMode.DQ_NOTIME:
+                    time_text = "DQ"
             draw.text(
                 (edge_r, self._baseline(line_num)),
-                self._time_text(lane_num),
+                time_text,
                 font=self._time_font,
                 anchor="rs",
                 fill=color,
