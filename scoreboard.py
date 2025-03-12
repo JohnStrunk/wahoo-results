@@ -196,6 +196,7 @@ class ScoreboardImage:
         idx_width = draw.textlength("L", self._normal_font)
         pl_width = draw.textlength("MMM", self._normal_font)
         name_width = width - time_width - idx_width - pl_width
+        dq_mode = DQMode(self._model.dq_mode.get())
 
         # Lane title
         baseline = self._baseline(3)
@@ -238,7 +239,7 @@ class ScoreboardImage:
                 fill=color,
             )
             # Place
-            pl_num = self._race.place(lane_num)
+            pl_num = self._race.place(lane_num, dq_mode == DQMode.IGNORE)
             pl_color = color
             if pl_num == 1:
                 pl_color = self._model.color_first.get()
@@ -247,9 +248,8 @@ class ScoreboardImage:
             if pl_num == 3:  # noqa: PLR2004
                 pl_color = self._model.color_third.get()
             ptxt = format_place(pl_num)
-            if self._race.lane(lane_num).is_dq:
-                if self._model.dq_mode.get() == DQMode.DQ_TIME:
-                    ptxt = "DQ"
+            if self._race.lane(lane_num).is_dq and dq_mode == DQMode.DQ_TIME:
+                ptxt = "DQ"
             draw.text(
                 (edge_l + idx_width + pl_width / 2, self._baseline(line_num)),
                 ptxt,
@@ -272,9 +272,8 @@ class ScoreboardImage:
             )
             # Time
             time_text = self._time_text(lane_num)
-            if self._race.lane(lane_num).is_dq:
-                if self._model.dq_mode.get() == DQMode.DQ_NOTIME:
-                    time_text = "DQ"
+            if self._race.lane(lane_num).is_dq and dq_mode == DQMode.DQ_NOTIME:
+                time_text = "DQ"
             draw.text(
                 (edge_r, self._baseline(line_num)),
                 time_text,
