@@ -15,6 +15,7 @@ repos:
         exclude: |
           (?x)^(
                 chromecast-receiver/cc-receiver-logo\.png|
+                docs/chromecast-receiver/cc-receiver-logo\.png|
                 media/cc-receiver-logo\.svg|
                 testdata/.*|
                 raceinfo/testdata-dolphin/.*
