@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://wahoo-results.com/sitemap-custom.xml
+Sitemap: https://wahoo-results.com/sitemap.xml
