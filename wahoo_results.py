@@ -161,6 +161,7 @@ def setup_appearance(model: Model) -> None:
         model.color_bg,
         model.brightness_bg,
         model.num_lanes,
+        model.dq_mode,
     ]:
         element.trace_add("write", lambda *_: update_preview())
     update_preview()

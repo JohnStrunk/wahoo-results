@@ -365,7 +365,7 @@ class Heat:
             return self._lanes[lane_number]
         raise ValueError("Invalid lane numbering scheme")
 
-    def place(self, lane_number: int) -> int | None:
+    def place(self, lane_number: int, ignore_dq: bool = False) -> int | None:
         """Retrieve the place for a given lane number.
 
         The place is determined by the resolved time of the lane. If the lane is
@@ -375,16 +375,21 @@ class Heat:
         **Note:** Times must be resolved before calling this method.
 
         :param lane_number: The lane number (1-10)
+        :param ignore_dq: If True, disqualified lanes are assigned places
         :returns: The place for the lane or None
         :raises: ValueError if the lane number is invalid
         """
         lane = self.lane(lane_number)
-        if lane.is_dq or lane.is_empty or lane.final_time is None:
+        if (lane.is_dq and not ignore_dq) or lane.is_empty or lane.final_time is None:
             return None
         place = 1
         for other_lane in self._lanes:
             other_time = other_lane.final_time
-            if other_lane.is_empty or other_lane.is_dq or other_time is None:
+            if (
+                other_lane.is_empty
+                or (other_lane.is_dq and not ignore_dq)
+                or other_time is None
+            ):
                 continue
             if other_time < lane.final_time:
                 place += 1

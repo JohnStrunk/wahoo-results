@@ -131,6 +131,14 @@ class TestHeat:
         assert heat.place(5) is None
         assert heat.place(6) == 1
 
+        # Ignore DQs
+        assert heat.place(1, ignore_dq=True) == 3  # noqa: PLR2004
+        assert heat.place(2, ignore_dq=True) == 5  # noqa: PLR2004
+        assert heat.place(3, ignore_dq=True) == 3  # noqa: PLR2004
+        assert heat.place(4, ignore_dq=True) is None
+        assert heat.place(5, ignore_dq=True) == 1
+        assert heat.place(6, ignore_dq=True) == 2  # noqa: PLR2004
+
     def test_names(self):
         """Test the has_names method."""
         heat = Heat(lanes=[Lane(name="one"), Lane(name="two")])

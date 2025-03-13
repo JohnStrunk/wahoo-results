@@ -54,11 +54,20 @@ def get_template() -> Heat:
                 primary=lt[0],
                 backups=[lt[0]],
             ),
+            # Lane 2 is a no-show
             Lane(name="English, Cheryl M", team="TEAM"),
+            # Lane 3 has less than min_times (--:--.--)
             Lane(name="Brady, June A", team="TEAM", backups=[lt[2]]),
             Lane(name="Sloan, Michelle T", team="TEAM", primary=lt[3], backups=[lt[3]]),
             Lane(name="Downing, Doreen S", team="TEAM", primary=lt[4], backups=[lt[4]]),
-            Lane(name="Collier, Julie G", team="TEAM", primary=lt[5], backups=[lt[5]]),
+            # Lane 6 is a DQ
+            Lane(
+                name="Collier, Julie G",
+                team="TEAM",
+                primary=lt[5],
+                backups=[lt[5]],
+                is_dq=True,
+            ),
             Lane(
                 name="Chase, Constance H", team="TEAM", primary=lt[6], backups=[lt[6]]
             ),

@@ -118,8 +118,11 @@ class DQMode(StrEnum):
     """DQ mode for the scoreboard."""
 
     IGNORE = "Ignore"
+    """Ignore DQs, treating them as normal results."""
     DQ_TIME = "DQ w/ time"
+    """Show DQs, but still show the time."""
     DQ_NOTIME = "DQ hides time"
+    """Show DQs, but hide the time."""
 
 
 class Model:

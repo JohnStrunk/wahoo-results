@@ -81,6 +81,8 @@ def application_stop(model: Model) -> None:
             "bg_image": model.image_bg.get() != "",
             "normal_font": model.font_normal.get(),
             "time_font": model.font_time.get(),
+            "dq_mode": model.dq_mode.get(),
+            "result_format": model.result_format.get(),
         },
     )
     analytics.shutdown()
