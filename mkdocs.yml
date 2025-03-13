@@ -7,7 +7,7 @@ site_description: >-
   to any Chromecast device.
 site_url: https://wahoo-results.com
 copyright: >-
-  Documentation &copy; 2020 &ndash; 2024 by John Strunk is licensed
+  Documentation &copy; 2020 &ndash; 2025 by John Strunk is licensed
   under <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA
   4.0</a>
 repo_name: JohnStrunk/wahoo-results
@@ -63,9 +63,6 @@ extra:
     - icon: fontawesome/brands/mastodon
       link: https://fosstodon.org/@JohnStrunk
       name: "Mastodon: @JohnStrunk@fosstodon.org"
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/TheJohnStrunk
-      name: "Twitter: @TheJohnStrunk"
   # Macro definitions
   WR: >-
     Wahoo! Results

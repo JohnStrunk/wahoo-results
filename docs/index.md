@@ -98,6 +98,6 @@ enhancements](https://github.com/JohnStrunk/wahoo-results/pulls)
 {{ WR }} is free, open-source software that you can download, use, and modify.
 It is licensed under the [GNU Affero General Public License, version
 3](https://www.gnu.org/licenses/agpl-3.0.en.html).  
-The documentation &copy; 2020 &ndash; 2024 by John Strunk is licensed under
+The documentation &copy; 2020 &ndash; 2025 by John Strunk is licensed under
 [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA
 4.0)](http://creativecommons.org/licenses/by-sa/4.0/)
