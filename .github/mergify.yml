@@ -1,28 +1,17 @@
 ---
 pull_request_rules:
-  - name: Automatic merge on approval
-    conditions:
-      - "#approved-reviews-by>=1"
-      - "#changes-requested-reviews-by=0"
-      - label!=do-not-merge
-      - check-success="Successful CI"
-      - check-success=DCO
-      - check-success=docs/readthedocs.org:wahoo-results
-    actions:
-      merge:
-        method: merge
-
-  - name: Automatic merge trusted PRs
+  - name: Automatic merge
     conditions:
       - and:
           - or:
+              - "#approved-reviews-by>=1"
               - author=JohnStrunk
               - author=renovate-bot
       - "#changes-requested-reviews-by=0"
       - label!=do-not-merge
       - check-success="Successful CI"
       - check-success=DCO
-      - check-success=docs/readthedocs.org:wahoo-results
+      - check-success="Build docs"
     actions:
       merge:
         method: merge
