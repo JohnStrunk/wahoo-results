@@ -50,7 +50,7 @@ repos:
         args: ["--strict", "-c", ".github/yamllint-config.yml"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.9.10"
+    rev: "v0.10.0"
     hooks:
       # Note: lint/fix before format
       - id: ruff # Run the linter.
