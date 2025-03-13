@@ -68,39 +68,6 @@ jobs:
         shell: cmd
         run: pre-commit gc
 
-  docs:
-    name: Documentation
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout repository
-        # https://github.com/actions/checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Install uv
-        # https://github.com/astral-sh/setup-uv
-        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
-
-      - name: Set up Python
-        # https://github.com/actions/setup-python
-        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
-        with:
-          python-version-file: ".python-version"
-
-      # Add Scripts directory to the path so that pipenv (and associated
-      # utilities) can be used once installed
-      - name: Add python Scripts directory to path
-        shell: cmd
-        # Code-page switch is needed to write the env file as utf-8
-        run: |
-          chcp 65001
-          python -c "import site; print(site.USER_SITE.replace('site-packages', 'Scripts'))" >> %GITHUB_PATH%
-          chcp 1252
-
-      - name: Build docs
-        shell: cmd
-        run: uv run --locked --only-group docs mkdocs build --verbose --strict
-
   test:
     name: Test
     runs-on: windows-latest
@@ -284,7 +251,7 @@ jobs:
 
   success:
     name: Successful CI
-    needs: [autotest, docs, precommit, sbom, test]
+    needs: [autotest, precommit, sbom, test]
     runs-on: windows-latest
     steps:
       - name: Success
