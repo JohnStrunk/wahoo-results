@@ -14,11 +14,12 @@ repo_name: JohnStrunk/wahoo-results
 repo_url: https://github.com/JohnStrunk/wahoo-results
 nav:
   - Home: index.md
-  - download.md
   - quickstart.md
+  - download.md
   - configuration.md
   - cc-compat.md
   - faq.md
+  - in-action.md
   - blog/index.md
 theme:
   name: material
