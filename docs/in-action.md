@@ -18,13 +18,12 @@ Email <thanks@wahoo-results.com> with:
 ... and I'll add it here!
 </div>
 
-<!--
+<!-- markdownlint-disable MD013 -->
 <div class="mycard" markdown>
 <figure markdown>
-![The alt text](images/cc-gen1.jpg){ width=320 height=240 }
-<figcaption markdown>The [figcaption](https://google.com)</figcaption>
+![Hedingham Sharks &ndash; Raleigh, NC](images/users/hedingham-sharks.jpeg){ width=4032 height=3024 }
+<figcaption markdown>[Hedingham Sharks](https://www.hedinghamsharks.com/) &ndash; Raleigh, NC</figcaption>
 </figure>
 </div>
--->
 
 </div>

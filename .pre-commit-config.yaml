@@ -16,6 +16,7 @@ repos:
           (?x)^(
                 chromecast-receiver/cc-receiver-logo\.png|
                 docs/chromecast-receiver/cc-receiver-logo\.png|
+                docs/images/.*|
                 media/cc-receiver-logo\.svg|
                 testdata/.*|
                 raceinfo/testdata-dolphin/.*
