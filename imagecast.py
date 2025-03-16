@@ -32,6 +32,8 @@ from PIL import Image
 from pychromecast.controllers.media import BaseMediaPlayer
 from pychromecast.error import NotConnected
 
+from wh_analytics import image_sent
+
 # Resolution of images for the Chromecast
 IMAGE_SIZE = (1280, 720)
 
@@ -241,6 +243,8 @@ class ImageCast:
             def do_GET(self):
                 """Respond to CC w/ the current image."""
                 with sentry_sdk.start_transaction(op="http", name="GET"):
+                    user_agent = self.headers.get("User-Agent", "unknown")
+                    image_sent(user_agent)
                     self.send_response(200)
                     self.send_header("Content-type", "image/png")
                     self.end_headers()

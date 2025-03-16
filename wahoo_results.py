@@ -457,7 +457,11 @@ def main() -> None:  # noqa: PLR0915
     initialize_sentry(model)
 
     screen_size = (root.winfo_screenwidth(), root.winfo_screenheight())
-    wh_analytics.application_start(model, screen_size)
+    wh_analytics.application_start(
+        analytics_enabled=model.analytics.get(),
+        client_id=model.client_id.get(),
+        screen_size=screen_size,
+    )
     sentry_sdk.set_context(
         "display",
         {
@@ -563,7 +567,16 @@ def main() -> None:  # noqa: PLR0915
     logger.debug("Watchers stopped")
     icast.stop()
     root.update()
-    wh_analytics.application_stop(model)
+    wh_analytics.application_stop(
+        num_lanes=model.num_lanes.get(),
+        has_bg_image=(model.image_bg.get() != ""),
+        dq_mode=model.dq_mode.get(),
+        result_format=model.result_format.get(),
+        time_threshold=model.time_threshold.get(),
+        min_times=model.min_times.get(),
+        normal_font=model.font_normal.get(),
+        time_font=model.font_time.get(),
+    )
     root.update()
 
     # Sentry v2 has deprecated Hub, so we can't manually close the client

@@ -31,26 +31,27 @@ from segment import analytics
 
 import autotest
 import version
-from model import Model
 
 _CONTEXT: Dict[str, Any] = {}
 
 
-def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
+def application_start(
+    analytics_enabled: bool, client_id: str, screen_size: Tuple[int, int]
+) -> None:
     """Event for application startup.
 
     :param model: Application model object
     :param screen_size: Screen size in pixels
     """
     analytics.write_key = version.SEGMENT_WRITE_KEY
-    analytics.send = model.analytics.get()
+    analytics.send = analytics_enabled
     global _CONTEXT  # noqa: PLW0603
     _CONTEXT = {
         "context": _setup_context(screen_size),
         "race_count": 0,
         "race_count_with_names": 0,
         "session_start": time.time(),
-        "user_id": model.client_id.get(),
+        "user_id": client_id,
     }
 
     if autotest.TESTING:  # Don't send analytics during testing
@@ -64,7 +65,16 @@ def application_start(model: Model, screen_size: Tuple[int, int]) -> None:
     _send_event("Scoreboard started")
 
 
-def application_stop(model: Model) -> None:
+def application_stop(  # noqa: PLR0913
+    num_lanes: int,
+    time_threshold: float,
+    min_times: int,
+    has_bg_image: bool,
+    normal_font: str,
+    time_font: str,
+    dq_mode: str,
+    result_format: str,
+) -> None:
     """Event for application shutdown.
 
     :param model: Application model object
@@ -75,14 +85,14 @@ def application_stop(model: Model) -> None:
             "runtime": time.time() - _CONTEXT["session_start"],
             "race_count": _CONTEXT["race_count"],
             "race_count_with_names": _CONTEXT["race_count_with_names"],
-            "lane_count": model.num_lanes.get(),
-            "time_threshold": model.time_threshold.get(),
-            "min_times": model.min_times.get(),
-            "bg_image": model.image_bg.get() != "",
-            "normal_font": model.font_normal.get(),
-            "time_font": model.font_time.get(),
-            "dq_mode": model.dq_mode.get(),
-            "result_format": model.result_format.get(),
+            "lane_count": num_lanes,
+            "time_threshold": time_threshold,
+            "min_times": min_times,
+            "bg_image": has_bg_image,
+            "normal_font": normal_font,
+            "time_font": time_font,
+            "dq_mode": dq_mode,
+            "result_format": result_format,
         },
     )
     analytics.shutdown()
@@ -99,6 +109,19 @@ def results_received(has_names: bool, chromecasts: int) -> None:
         _CONTEXT["race_count_with_names"] += 1
     _send_event(
         "Results received", {"has_names": has_names, "chromecast_count": chromecasts}
+    )
+
+
+def image_sent(user_agent: str) -> None:
+    """Event for image sent to Chromecast.
+
+    :param user_agent: User agent string of the Chromecast
+    """
+    _send_event(
+        "Image sent",
+        {
+            "user_agent": user_agent,
+        },
     )
 
 
