@@ -1,3 +1,6 @@
+---
+description: Chromecast compatibility with the Wahoo! Results scoreboard
+---
 # Chromecast compatibility
 
 Google has made several different versions of it's Chromecast line of devices.

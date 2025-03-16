@@ -1,3 +1,6 @@
+---
+description: Download the latest version of Wahoo! Results
+---
 # Download
 
 !!! success "Latest version: v1.2.1 - 12/03/2023"

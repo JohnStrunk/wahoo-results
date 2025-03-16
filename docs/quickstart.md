@@ -1,3 +1,6 @@
+---
+description: Get up and running quickly with the Wahoo! Results scoreboard
+---
 # Quickstart
 
 Follow this quickstart guide to get started with the scoreboard. It covers

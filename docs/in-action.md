@@ -1,3 +1,6 @@
+---
+description: Some of the teams using Wahoo! Results
+---
 # {{ WR }} in action
 
 <div class="mygrid" markdown>

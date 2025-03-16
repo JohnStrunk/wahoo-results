@@ -1,3 +1,6 @@
+---
+description: Troubleshooting tips for Whahoo! Results and Chromecast devices
+---
 # FAQ/Troubleshooting
 
 ## I'm not getting any results

@@ -1,3 +1,6 @@
+---
+description: Configuration options for setting up Wahoo! Results to work with your swimming timing system
+---
 # Configuration
 
 This page provides detailed information about how to configure {{ WR }}. If you
@@ -99,8 +102,9 @@ DQ
     is still shown.  
     **`DQ hides time`:** "DQ" is shown instead of the swimmer's time and no
     place is awarded.  
-    **Note:** Only some result formats (e.g., Dolphin CSV) record the presence of
-    a DQ.
+    **Note:** To use a setting other than `Ignore`, it is necessary to use a
+    result format that contains DQ information. Currently, only Dolphin CSV and
+    Generic record the presence of a DQs.
 
 {{ CLEARFLOAT }}
 
@@ -126,8 +130,10 @@ The right pane is for race result files. {{ WR }} can read several timing
 system file formats. Use the `Data format` dropdown to select the desired
 format. Available options include:
 
-- Dolphin CSV: Dolphin timing system CSV files.
-- Dolphin DO4: Dolphin timing system DO4 files. (default)
+- **Dolphin CSV:** Dolphin timing system CSV files.
+- **Dolphin DO4:** Dolphin timing system DO4 files. (default)
+- **Generic:** {{ GEN }} is used by a number of different timing systems such
+  as the Colorado Gen7.
 
 Use the ++"Browse..."++ button to select the directory where the race result
 files will be written by the timing software. Any race result files that are
