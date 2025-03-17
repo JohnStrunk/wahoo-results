@@ -1124,16 +1124,16 @@ wheels = [
 
 [[package]]
 name = "pychromecast"
-version = "14.0.5"
+version = "14.0.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "casttube" },
     { name = "protobuf" },
     { name = "zeroconf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a2/21/9c1ba37839a605dd048b3b7d6d36162562f89f86f4bfa248a7b0655551fd/PyChromecast-14.0.5.tar.gz", hash = "sha256:a8671ee4ea4a7095e2e0670e2215145ec1e3e0aa0737ff74d648ae4dc268b2b1", size = 60934 }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/23/aac7b91aef8129108029b1d5682c742246c872a608be3835e9e0af61e2a6/pychromecast-14.0.6.tar.gz", hash = "sha256:8af91af4fb62d9d6e4df1832c6503dda74afb14c7726ede1ff863e178deb3f9a", size = 61402 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/0a/ff82969e5ea0dfff5bd00bac505114bb356f64b309c502d39b26c9dc525b/PyChromecast-14.0.5-py2.py3-none-any.whl", hash = "sha256:f1ec3858e4659422f0afbd37775f26551a6fc2d66f18a7bc44d66c0b1f59fc97", size = 76650 },
+    { url = "https://files.pythonhosted.org/packages/57/44/3b7420e6466c2056f6006225140f1ecb7d7d4bb9e9e12b0adbbe030f87bb/pychromecast-14.0.6-py2.py3-none-any.whl", hash = "sha256:30d141947d2d285546d5acd24a27a8bb0f2bf0f0776a6b8cc83ca30eec07b712", size = 77214 },
 ]
 
 [[package]]
@@ -1525,7 +1525,7 @@ requires-dist = [
     { name = "ipinfo", specifier = "==5.1.1" },
     { name = "matplotlib", specifier = "==3.10.1" },
     { name = "pillow", specifier = "==11.1.0" },
-    { name = "pychromecast", specifier = "==14.0.5" },
+    { name = "pychromecast", specifier = "==14.0.6" },
     { name = "pyinstaller", specifier = "==6.12.0" },
     { name = "python-dateutil", specifier = "==2.9.0.post0" },
     { name = "requests", specifier = "==2.32.3" },
