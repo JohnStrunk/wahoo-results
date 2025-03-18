@@ -18,7 +18,8 @@ repos:
                 docs/chromecast-receiver/cc-receiver-logo\.png|
                 media/cc-receiver-logo\.svg|
                 testdata/.*|
-                raceinfo/testdata-dolphin/.*
+                raceinfo/testdata-dolphin/.*|
+                raceinfo/testdata-generic/.*
             )$
       - id: check-merge-conflict # Check for merge conflict strings
       - id: fix-byte-order-marker # Forbid utf-8 byte order marker

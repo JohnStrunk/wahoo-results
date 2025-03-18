@@ -29,7 +29,7 @@ from .time import Heat, Lane, Time
 testdata_dir = os.path.join(os.path.dirname(__file__), "testdata-dolphin")
 
 
-def unused(num: int, num_splits: int = 1) -> list[Lane]:
+def _unused(num: int, num_splits: int = 1) -> list[Lane]:
     """Return a list of num unused lanes."""
     splits: list[list[Time | None]] = []
     for _ in range(num_splits):
@@ -96,7 +96,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(6),
+                *_unused(6),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -139,7 +139,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7),
+                *_unused(7),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -191,7 +191,7 @@ class TestDolphin:
                     is_dq=True,
                     is_empty=False,
                 ),
-                *unused(4),
+                *_unused(4),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -243,7 +243,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7, num_splits=2),
+                *_unused(7, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -298,7 +298,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7, num_splits=3),
+                *_unused(7, num_splits=3),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -334,7 +334,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(1, num_splits=4),
+                *_unused(1, num_splits=4),
                 Lane(
                     splits=[
                         [None, Time("106.54"), None],
@@ -346,7 +346,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7, num_splits=4),
+                *_unused(7, num_splits=4),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -371,14 +371,14 @@ class TestDolphin:
             round="A",
             numbering="1-10",
             lanes=[
-                *unused(2),
+                *_unused(2),
                 Lane(
                     splits=[[Time("15.20"), Time("15.23"), Time("15.22")]],
                     backups=[Time("15.20"), Time("15.23"), Time("15.22")],
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(7),
+                *_unused(7),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -409,7 +409,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *_unused(9),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -440,7 +440,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *_unused(9),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -471,7 +471,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *_unused(9),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -508,7 +508,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(8),
+                *_unused(8),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -539,7 +539,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(8),
+                *_unused(8),
                 Lane(
                     splits=[[None, None, Time("19.19")]],
                     backups=[None, None, Time("19.19")],
@@ -576,7 +576,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *_unused(9),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -607,7 +607,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *_unused(9),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -638,7 +638,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9),
+                *_unused(9),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -681,7 +681,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(8, num_splits=2),
+                *_unused(8, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -715,7 +715,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9, num_splits=2),
+                *_unused(9, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""
@@ -749,7 +749,7 @@ class TestDolphin:
                     is_dq=False,
                     is_empty=False,
                 ),
-                *unused(9, num_splits=2),
+                *_unused(9, num_splits=2),
             ],
         )
         do4_filename = DolphinDo4().filename(actual) or ""

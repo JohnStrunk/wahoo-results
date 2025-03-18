@@ -33,7 +33,7 @@ Time = decimal.Decimal
 ZERO_TIME = Time("0.00")
 
 
-def format_time(time: Time) -> str:
+def format_time(time: Time | None) -> str:
     """Return a string representation of the time in mm:ss.hh format.
 
     Times are formatted as follows:
@@ -131,6 +131,53 @@ def truncate_hundredths(time: Time) -> Time:
     Decimal('-2.12')
     """
     return time.quantize(Time("0.01"), rounding=decimal.ROUND_DOWN)
+
+
+def combine_times(times: list[Time | None]) -> Time | None:
+    """Combine a list of times into a single time.
+
+    The times will be combined in the following way:
+    - None values are ignored
+    - If the list is empty, return None
+    - If the list contains only one value, return that value
+    - If the list contains two values, return the average of the two
+    - If the list contains three or more values, return the median of the values
+
+    :param times: The individual times
+    :returns: The combined time or None if no times are present
+
+    Examples::
+    >>> combine_times([])
+    >>> combine_times([None])
+    >>> combine_times([None, Time(100)])
+    Decimal('100.00')
+    >>> combine_times([Time(100)])
+    Decimal('100.00')
+    >>> combine_times([Time(100), Time(200)])
+    Decimal('150.00')
+    >>> combine_times([Time(200), Time(100), Time(300)])
+    Decimal('200.00')
+    >>> combine_times([Time(300), Time(100), Time(200), Time(400)])
+    Decimal('250.00')
+    >>> combine_times([Time(10.25), Time(10.00)])
+    Decimal('10.12')
+    """
+    valid_times = [time for time in times if time is not None]
+    num_times = len(valid_times)
+    if num_times == 0:
+        return None
+
+    sorted_times = sorted(valid_times)
+    if num_times % 2 == 0:
+        candidate = (
+            sorted_times[num_times // 2 - 1] + sorted_times[num_times // 2]
+        ) / 2
+    else:
+        candidate = sorted_times[num_times // 2]
+
+    if candidate is not None:
+        return truncate_hundredths(candidate)
+    return None
 
 
 type TimeResolver = Callable[[Lane], None]
@@ -322,7 +369,7 @@ class Heat:
     """The race number"""
     time_recorded: datetime | None = None
     """The time the results were recorded"""
-    type Round = Literal["A", "P", "F"]
+    type Round = Literal["A", "P", "F", "S"]
     round: Round | None = None
     """The round of the event (A=All, P=Prelim, F=Final)"""
     type NumberingMode = Literal["1-10", "0-9"]
@@ -347,6 +394,27 @@ class Heat:
             raise ValueError("Heat number must be positive")
         if self.race is not None and self.race < 1:
             raise ValueError("The race number must be positive")
+
+    @property
+    def event_num(self) -> int | None:
+        """Return the numeric part of the event identifier."""
+        pattern = r"^(\d+)[A-Z]*$"
+        match = re.match(pattern, self.event or "")
+        if not match:
+            return None
+        return int(match.group(1))
+
+    @property
+    def event_alpha(self) -> str | None:
+        """Return the alpha part of the event identifier.
+
+        This is the part after the numeric part of the event identifier.
+        """
+        pattern = r"^\d+([A-Z]*)$"
+        match = re.match(pattern, self.event or "")
+        if not match:
+            return None
+        return match.group(1)
 
     def lane(self, lane_number: int) -> Lane:
         """Retrieve the lane object for a given lane number.

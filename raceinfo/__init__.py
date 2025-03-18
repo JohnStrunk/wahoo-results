@@ -54,6 +54,7 @@ from .dolphin_csv import DolphinCSV
 from .dolphin_do4 import DolphinDo4
 from .dolphin_event import DolphinEvent
 from .eventprocessor import EventProcessor, FullProgram
+from .generic import Generic
 from .nameformat import NameMode, format_name
 from .time import (
     ZERO_TIME,
@@ -70,6 +71,7 @@ from .timingsystem import TimingSystem
 timing_systems: dict[str, type[TimingSystem]] = {
     "Dolphin - do4": DolphinDo4,
     "Dolphin - csv": DolphinCSV,
+    "Generic": Generic,
 }
 """A dictionary of timing system classes, keyed by their friendly names."""
 
@@ -81,6 +83,7 @@ __all__ = [
     "DolphinEvent",
     "EventProcessor",
     "FullProgram",
+    "Generic",
     "Heat",
     "Lane",
     "NameMode",
