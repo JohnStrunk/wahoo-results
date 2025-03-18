@@ -20,16 +20,13 @@ import io
 import os
 import pathlib
 import textwrap
-from datetime import datetime
 
 import pytest
 
 from .dolphin_test import check_heat_is_similar, round_trip
 from .generic import Generic
-from .time import Heat, Lane, Time
+from .time import Heat, Lane, Time, parse_time
 
-_now = datetime.now()
-_meet_seven = "007"
 _parse = Generic().decode
 _testdata_dir = os.path.join(os.path.dirname(__file__), "testdata-generic")
 
@@ -179,6 +176,245 @@ class TestGeneric:
             ],
         )
         filename = Generic().filename(actual) or ""
+        assert filename == "005-021-03F0002.gen"
+        gen = Generic().read(os.path.join(_testdata_dir, filename))
+        check_heat_is_similar(actual, gen)
+        gen_rt = round_trip(actual, Generic(), tmp_path)
+        check_heat_is_similar(actual, gen_rt)
+
+
+class TestGenericSamples:
+    """Tests for Generic using sample data files."""
+
+    def test_024_0008(self, tmp_path: pathlib.Path) -> None:
+        """Test parsing the sample file."""
+        actual = Heat(
+            event="102",
+            heat=6,
+            meet_id="24",
+            race=8,
+            round="F",
+            description="Mixed 200 Meter Freestyle Finals",
+            lanes=[
+                *_unused(1, num_splits=2),
+                Lane(
+                    splits=[
+                        [parse_time("1:19.33")],
+                        [parse_time("2:45.05")],
+                    ],
+                    backups=[
+                        parse_time("2:45.13"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:12.48")],
+                        [parse_time("2:34.96")],
+                    ],
+                    backups=[
+                        parse_time("2:35.05"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:14.08")],
+                        [parse_time("2:40.15")],
+                    ],
+                    backups=[
+                        parse_time("2:40.15"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:15.57")],
+                        [parse_time("2:37.88")],
+                    ],
+                    backups=[
+                        parse_time("2:37.98"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                *_unused(2, num_splits=2),
+                Lane(
+                    splits=[
+                        [parse_time("1:19.18")],
+                        [parse_time("2:48.42")],
+                    ],
+                    backups=[
+                        parse_time("2:48.44"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:18.49")],
+                        [parse_time("2:43.47")],
+                    ],
+                    backups=[
+                        parse_time("2:43.47"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:24.29")],
+                        [parse_time("2:54.78")],
+                    ],
+                    backups=[
+                        parse_time("2:54.78"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+            ],
+        )
+        filename = Generic().filename(actual) or ""
+        assert filename == "024-102-06F0008.gen"
+        gen = Generic().read(os.path.join(_testdata_dir, filename))
+        check_heat_is_similar(actual, gen)
+        gen_rt = round_trip(actual, Generic(), tmp_path)
+        check_heat_is_similar(actual, gen_rt)
+
+    def test_024_0019(self, tmp_path: pathlib.Path) -> None:
+        """Test parsing the sample file."""
+        actual = Heat(
+            event="103",
+            heat=1,
+            meet_id="24",
+            race=19,
+            round="F",
+            description="Mixed 100 Meter Backstroke Finals",
+            lanes=[
+                Lane(
+                    splits=[
+                        [parse_time("1:12.88")],
+                    ],
+                    backups=[
+                        parse_time("1:12.98"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:13.06")],
+                    ],
+                    backups=[
+                        None,
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:06.68")],
+                    ],
+                    backups=[
+                        parse_time("1:06.68"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:06.44")],
+                    ],
+                    backups=[
+                        parse_time("1:06.44"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:02.55")],
+                    ],
+                    backups=[
+                        parse_time("1:02.56"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:04.39")],
+                    ],
+                    backups=[
+                        parse_time("1:04.54"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:08.85")],
+                    ],
+                    backups=[
+                        parse_time("1:08.77"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:08.79")],
+                    ],
+                    backups=[
+                        parse_time("1:09.00"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:11.40")],
+                    ],
+                    backups=[
+                        parse_time("1:11.54"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+                Lane(
+                    splits=[
+                        [parse_time("1:12.25")],
+                    ],
+                    backups=[
+                        parse_time("1:12.34"),
+                        None,
+                        None,
+                    ],
+                    is_dq=False,
+                ),
+            ],
+        )
+        filename = Generic().filename(actual) or ""
+        assert filename == "024-103-01F0019.gen"
         gen = Generic().read(os.path.join(_testdata_dir, filename))
         check_heat_is_similar(actual, gen)
         gen_rt = round_trip(actual, Generic(), tmp_path)
