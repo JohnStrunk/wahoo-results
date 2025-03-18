@@ -85,6 +85,7 @@ class Generic(TimingSystem):
                     time = None
                 else:
                     time = Time(split)
+                lanes[i].primary = time  # Final split is the primary
                 lanes[i].splits.append([time])  # type: ignore
             # The next 3 fields are the backups
             lanes[i].backups = []

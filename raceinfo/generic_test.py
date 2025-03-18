@@ -105,6 +105,7 @@ class TestGeneric:
                         [Time("95.67")],
                         [Time("126.83")],
                     ],
+                    primary=Time("126.83"),
                     is_dq=False,
                 ),
                 Lane(
@@ -115,11 +116,13 @@ class TestGeneric:
                         [Time("97.36")],
                         [Time("125.72")],
                     ],
+                    primary=Time("125.72"),
                     is_dq=False,
                 ),
                 Lane(
                     backups=[Time("126.03"), Time("126.12"), Time("126.20")],
                     splits=[[Time("31.36")], [Time("77.13")], [None], [Time("126.11")]],
+                    primary=Time("126.11"),
                     is_dq=False,
                 ),
                 Lane(
@@ -130,6 +133,7 @@ class TestGeneric:
                         [Time("97.81")],
                         [Time("125.35")],
                     ],
+                    primary=Time("125.35"),
                     is_dq=False,
                 ),
                 Lane(
@@ -140,6 +144,7 @@ class TestGeneric:
                         [Time("96.22")],
                         [Time("126.45")],
                     ],
+                    primary=Time("126.45"),
                     is_dq=False,
                 ),
                 Lane(
@@ -150,6 +155,7 @@ class TestGeneric:
                         [Time("98.22")],
                         [Time("124.96")],
                     ],
+                    primary=Time("124.96"),
                     is_dq=False,
                 ),
                 Lane(
@@ -160,6 +166,7 @@ class TestGeneric:
                         [Time("95.16")],
                         [Time("127.18")],
                     ],
+                    primary=Time("127.18"),
                     is_dq=True,
                 ),
                 Lane(
@@ -170,6 +177,7 @@ class TestGeneric:
                         [Time("98.54")],
                         [Time("124.58")],
                     ],
+                    primary=Time("124.58"),
                     is_dq=False,
                 ),
                 *_unused(2, num_splits=4),
@@ -198,6 +206,7 @@ class TestGenericSamples:
             lanes=[
                 *_unused(1, num_splits=2),
                 Lane(
+                    primary=parse_time("2:45.05"),
                     splits=[
                         [parse_time("1:19.33")],
                         [parse_time("2:45.05")],
@@ -210,6 +219,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("2:34.96"),
                     splits=[
                         [parse_time("1:12.48")],
                         [parse_time("2:34.96")],
@@ -222,6 +232,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("2:40.15"),
                     splits=[
                         [parse_time("1:14.08")],
                         [parse_time("2:40.15")],
@@ -234,6 +245,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("2:37.88"),
                     splits=[
                         [parse_time("1:15.57")],
                         [parse_time("2:37.88")],
@@ -247,6 +259,7 @@ class TestGenericSamples:
                 ),
                 *_unused(2, num_splits=2),
                 Lane(
+                    primary=parse_time("2:48.42"),
                     splits=[
                         [parse_time("1:19.18")],
                         [parse_time("2:48.42")],
@@ -259,6 +272,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("2:43.47"),
                     splits=[
                         [parse_time("1:18.49")],
                         [parse_time("2:43.47")],
@@ -271,6 +285,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("2:54.78"),
                     splits=[
                         [parse_time("1:24.29")],
                         [parse_time("2:54.78")],
@@ -302,6 +317,7 @@ class TestGenericSamples:
             description="Mixed 100 Meter Backstroke Finals",
             lanes=[
                 Lane(
+                    primary=parse_time("1:12.88"),
                     splits=[
                         [parse_time("1:12.88")],
                     ],
@@ -313,6 +329,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:13.06"),
                     splits=[
                         [parse_time("1:13.06")],
                     ],
@@ -324,6 +341,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:06.68"),
                     splits=[
                         [parse_time("1:06.68")],
                     ],
@@ -335,6 +353,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:06.44"),
                     splits=[
                         [parse_time("1:06.44")],
                     ],
@@ -346,6 +365,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:02.55"),
                     splits=[
                         [parse_time("1:02.55")],
                     ],
@@ -357,6 +377,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:04.39"),
                     splits=[
                         [parse_time("1:04.39")],
                     ],
@@ -368,6 +389,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:08.85"),
                     splits=[
                         [parse_time("1:08.85")],
                     ],
@@ -379,6 +401,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:08.79"),
                     splits=[
                         [parse_time("1:08.79")],
                     ],
@@ -390,6 +413,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:11.40"),
                     splits=[
                         [parse_time("1:11.40")],
                     ],
@@ -401,6 +425,7 @@ class TestGenericSamples:
                     is_dq=False,
                 ),
                 Lane(
+                    primary=parse_time("1:12.25"),
                     splits=[
                         [parse_time("1:12.25")],
                     ],

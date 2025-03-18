@@ -347,7 +347,7 @@ class RaceResultView(ttk.LabelFrame):
                 )
             else:
                 lane = l_index - 1 if result.numbering == "0-9" else l_index
-                padtime = result.lane(lane).primary or ""
+                padtime = format_time(result.lane(lane).primary)
                 rawtimes: list[Time | None] = [None, None, None]
                 backups = result.lane(lane).backups
                 if backups is not None:
