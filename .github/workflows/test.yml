@@ -225,7 +225,7 @@ jobs:
           fetch-depth: 0
 
       - name: Load executable artifact
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4.2.0
         with:
           name: wahoo-results.exe
 
@@ -291,7 +291,7 @@ jobs:
         run: python -m pip install --user sentry-cli
 
       - name: Download executable as artifact
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4.2.0
         with:
           name: wahoo-results.exe
 
