@@ -14,11 +14,12 @@ repo_name: JohnStrunk/wahoo-results
 repo_url: https://github.com/JohnStrunk/wahoo-results
 nav:
   - Home: index.md
-  - download.md
   - quickstart.md
+  - download.md
   - configuration.md
   - cc-compat.md
   - faq.md
+  - in-action.md
   - blog/index.md
 theme:
   name: material
@@ -71,6 +72,9 @@ extra:
   CD: >-
     [Colorado Dolphin wireless timing
     system](https://www.coloradotime.com/dolphin-wireless-swim-timing/)
+  GEN: >-
+    [Generic results file
+    format](images/Swim%20File%20Sharing%20of%20Results%20format.pdf)
   HMM: >-
     [HyTek Meet Manager](https://hytek.active.com/swim-meet-software.html)
   SMM: >-
