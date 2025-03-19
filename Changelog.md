@@ -7,6 +7,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### [Unreleased]
 
+### [1.3.0] - 2025-03-19
+
+#### Added
+
+- :sparkles: Added support for Dolphin CSV files
+- :sparkles: Added ability to display DQs on the scoreboard
+- :sparkles: Added support for "Generic network file sharing" file format
+  (Colorado Gen7 and others)
+
+#### Changed
+
+- :information_source: Changed internal representation of event and timing
+  system data to be independent of the underlying data source so that it can
+  be used with other data sources.
+
+#### Fixed
+
+- :bug: Increase timeout when sending to Chromecast to be more robust against
+  network issues.
+- :bug: Handle `.do4` files with no event number
+
 ### [1.2.1] - 2023-12-03
 
 #### Changed
@@ -211,7 +232,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Initial release
 
-[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/JohnStrunk/wahoo-results/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/JohnStrunk/wahoo-results/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/JohnStrunk/wahoo-results/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/JohnStrunk/wahoo-results/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/JohnStrunk/wahoo-results/compare/v1.0.1...v1.1.0
