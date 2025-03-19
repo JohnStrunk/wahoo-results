@@ -1,14 +1,17 @@
+---
+description: Troubleshooting tips for Whahoo! Results and Chromecast devices
+---
 # FAQ/Troubleshooting
 
 ## I'm not getting any results
 
-The scoreboard displays race results when a new `DO4` file appears in the
-configured log directory.
+The scoreboard displays race results when a new result file appears in the
+configured result directory.
 
 1. Ensure the Dolphin software is [configured to
-   generate](quickstart.md#configure-result-files) `DO4` files in addition to
-   any other type of log file you may be using.
-1. Ensure {{ WR }} is configured to [watch the correct log
+   generate](quickstart.md#configure-result-files) the same type of result
+   files that you have selected in the "Directories" tab.
+1. Ensure {{ WR }} is configured to [watch the correct result file
    directory](quickstart.md#set-the-results-directory).
 
 ## I get results, but none of the swimmer's names are displayed
@@ -22,7 +25,7 @@ event/heat.
 
 ## The event and heat number are wrong
 
-The event and heat number are read from the `DO4` result file. Ensure the
+The event and heat number are read from the race result file. Ensure the
 Dolphin software displays the correct event and heat number for each race.
 
 ## My Chromecast devices aren't being discovered

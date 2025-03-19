@@ -1,3 +1,6 @@
+---
+description: Configuration options for setting up Wahoo! Results to work with your swimming timing system
+---
 # Configuration
 
 This page provides detailed information about how to configure {{ WR }}. If you
@@ -90,6 +93,19 @@ Time threshold
 The "Minimum times" and "Time threshold" settings are designed to prevent
 potentially unreliable or incorrect times from being shown to spectators.
 
+DQ
+
+:   This setting determines how disqualifications are shown on the scoreboard.
+    The available options are:  
+    **`Ignore`:** DQ is ignored and not shown on the scoreboard.  
+    **`DQ w/ time`:** "DQ" is shown in the "place" column and the swimmer's time
+    is still shown.  
+    **`DQ hides time`:** "DQ" is shown instead of the swimmer's time and no
+    place is awarded.  
+    **Note:** To use a setting other than `Ignore`, it is necessary to use a
+    result format that contains DQ information. Currently, only Dolphin CSV and
+    Generic record the presence of a DQs.
+
 {{ CLEARFLOAT }}
 
 ## Directories tab
@@ -100,7 +116,7 @@ potentially unreliable or incorrect times from being shown to spectators.
 </figure>
 
 The Directories tab configures where the scoreboard will search for start list
-(`*.ECB`) files and race result (`*.DO4`) files.
+(`*.ECB`) files and race result files.
 
 The left pane is for the start list files. Use the ++"Browse..."++ button to
 select the directory where the start lists reside. The start list files will be
@@ -110,10 +126,18 @@ The ++"Export events to Dolphin..."++ button will generate a
 `dolphin_events.csv` file in the start list directory that is suitable for
 import into the Dolphin software.
 
-The right pane is for race result files. Use the ++"Browse..."++ button to
-select the directory where the race result files will be written by the Dolphin
-software. Any race result files that are found will be displayed in the table,
-ordered by their timestamp.
+The right pane is for race result files. {{ WR }} can read several timing
+system file formats. Use the `Data format` dropdown to select the desired
+format. Available options include:
+
+- **Dolphin CSV:** Dolphin timing system CSV files.
+- **Dolphin DO4:** Dolphin timing system DO4 files. (default)
+- **Generic:** {{ GEN }} is used by a number of different timing systems such
+  as the Colorado Gen7.
+
+Use the ++"Browse..."++ button to select the directory where the race result
+files will be written by the timing software. Any race result files that are
+found will be displayed in the table, ordered by their timestamp.
 
 {{ CLEARFLOAT }}
 

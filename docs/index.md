@@ -19,11 +19,14 @@ title: Wahoo! Results swimming scoreboard
 
 ![Example scoreboard](images/demo1.png){ width=1280 height=720 .rfloat }
 
-{{ WR }} is a free swimming scoreboard to display race results at your meets. It
-combines start list data from your meet management software (e.g., {{ HMM }} or
-{{ SMM }}) with timing data from a {{ CD }} to produce an attractive scoreboard
-that keeps swimmers, coaches, and spectators informed of race results in
-real-time.
+{{ WR }} is a free swimming scoreboard to display race results at your meets.
+It combines start list data from your meet management software (e.g., {{ HMM
+}} or {{ SMM }}) with timing data from your timing system to produce an
+attractive scoreboard that keeps swimmers, coaches, and spectators informed of
+race results in real-time.
+
+{{ WR }} currently supports receiving race data from either a {{ CD }} or any
+system that uses the "{{ GEN }}".[^1]
 
 The scoreboard is transmitted to Chromecast devices, allowing the results to be
 available on many displays at your facility.
@@ -55,7 +58,8 @@ The {{ WR }} scoreboard is customizable to meet the needs of your swim team.
 - Configurable number of lanes (6 &ndash; 10)
 - Use custom text fonts, sizes, and colors plus a background image or solid
   color to fit your team's theme
-- Final times are calculated based on multiple Dolphin watches
+- Final times are calculated based on multiple Dolphin watches or pad + backup
+  times
 - Results are transmitted to your {{ CC }} devices
 
 </div>
@@ -63,7 +67,7 @@ The {{ WR }} scoreboard is customizable to meet the needs of your swim team.
 
 ## Requirements
 
-- {{ CD }}
+- {{ CD }} or a timing system that can generate "{{ GEN }}" files[^1]
 - {{ HMM }}, {{ SMM }}, or other meet management software that can generate
   scoreboard "CTS start list" files
 - Windows 10/11 PC to run {{ WR }} (It can be shared with either of the above.)
@@ -72,6 +76,12 @@ The {{ WR }} scoreboard is customizable to meet the needs of your swim team.
 </div>
 
 </div>
+
+[^1]:
+  The {{ GEN }} is used by a number of different timing systems. This is the
+  same file format used by {{ HMM }} when "Generic Network File Sharing" is
+  selected as the timing system. These files typically have a `*.gen`
+  extension.
 
 ## Contributing
 

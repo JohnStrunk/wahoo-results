@@ -1,3 +1,6 @@
+---
+description: Get up and running quickly with the Wahoo! Results scoreboard
+---
 # Quickstart
 
 Follow this quickstart guide to get started with the scoreboard. It covers
@@ -133,8 +136,8 @@ Still in the Dolphin software, switch to the "Settings" screen. Here, you will
 configure the location and type of race results the Dolphin software will
 generate.
 
-{{ WR }} reads race results from Dolphin `DO4` files, so ensure that format is
-enabled. It's fine to enable other formats as well.
+By default, {{ WR }} looks for race results in the Dolphin `DO4` file format,
+so ensure that format is enabled. It's fine to enable other formats as well.
 
 Make a note of the log directory that is being used. This is where the result
 files will be written. You will configure {{ WR }} with this directory in the
