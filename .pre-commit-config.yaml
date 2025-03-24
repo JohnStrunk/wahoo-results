@@ -70,7 +70,7 @@ repos:
       - id: markdownlint
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: "39.205.1"
+    rev: "39.212.0"
     hooks:
       - id: renovate-config-validator
         language_version: lts # Use the LTS version of Node.js
