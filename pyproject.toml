@@ -8,7 +8,7 @@ dependencies = [
     "datetime==5.5",
     "ipinfo==5.1.1",
     "matplotlib==3.10.1",
-    "pillow==11.1.0",
+    "pillow==11.2.0",
     "pychromecast==14.0.5",
     "pyinstaller==6.12.0",
     "python-dateutil==2.9.0.post0",
