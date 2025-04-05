@@ -29,8 +29,11 @@ import pychromecast
 import sentry_sdk
 import zeroconf
 from PIL import Image
+from pychromecast.const import CAST_TYPE_CHROMECAST
 from pychromecast.controllers.media import BaseMediaPlayer
+from pychromecast.discovery import CastBrowser
 from pychromecast.error import NotConnected
+from pychromecast.models import CastInfo
 
 from wh_analytics import image_sent
 
@@ -94,7 +97,7 @@ class ImageCast:
     _refresh_thread: Optional[threading.Thread]
     image: Optional[Image.Image]
     callback_fn: Optional[DiscoveryCallbackFn]
-    browser: Optional[pychromecast.CastBrowser]
+    browser: Optional[CastBrowser]
     zconf: Optional[zeroconf.Zeroconf]
 
     def __init__(self, server_port: int) -> None:
@@ -290,9 +293,7 @@ class ImageCast:
                 # We don't trigger the callback here because update_cast will do
                 # it for us.
 
-            def remove_cast(
-                self, uuid: UUID, service: str, cast_info: pychromecast.CastInfo
-            ):
+            def remove_cast(self, uuid: UUID, service: str, cast_info: CastInfo):
                 logger.debug("Got remove cast: %s", str(uuid))
                 try:
                     del parent.devices[uuid]
@@ -318,10 +319,7 @@ class ImageCast:
                         cast.wait(timeout=2)
                         # We only care about devices that we can cast to (i.e., not
                         # audio devices)
-                        if (
-                            cast.cast_info.cast_type
-                            != pychromecast.CAST_TYPE_CHROMECAST
-                        ):
+                        if cast.cast_info.cast_type != CAST_TYPE_CHROMECAST:
                             logger.debug("Not cast-able. Ignoring: %s", cast.name)
                             try:
                                 cast.disconnect(timeout=0)  # don't block

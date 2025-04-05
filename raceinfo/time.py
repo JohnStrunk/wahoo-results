@@ -175,9 +175,7 @@ def combine_times(times: list[Time | None]) -> Time | None:
     else:
         candidate = sorted_times[num_times // 2]
 
-    if candidate is not None:
-        return truncate_hundredths(candidate)
-    return None
+    return truncate_hundredths(candidate)
 
 
 type TimeResolver = Callable[[Lane], None]
