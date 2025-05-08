@@ -7,7 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "datetime==5.5",
     "ipinfo==5.1.1",
-    "matplotlib==3.10.1",
+    "matplotlib==3.10.3",
     "pillow==11.2.1",
     "pychromecast==14.0.7",
     "pyinstaller==6.13.0",
