@@ -299,7 +299,7 @@ jobs:
         shell: cmd
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: wahoo-results
+          SENTRY_ORG: jstrunk-sentry
           SENTRY_PROJECT: wahoo-results
         run: |
           sentry-cli releases new --finalize wahoo-results@${{ github.ref_name }}
