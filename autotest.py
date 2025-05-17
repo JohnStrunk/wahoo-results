@@ -833,9 +833,18 @@ class GenDolphinCSV(Scenario):
         # Trigger event CSV export
         self._model.enqueue(self._model.dolphin_export.run)
         _FlushQueue(self._model).run()  # Ensure the queue is serviced before checking
-        num_startlists = len(
-            list(filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir)))
+        # Only count SCB files that have at least 1 heat
+        num_startlists = 0
+        files = list(
+            filter(lambda f: f.endswith(".scb"), os.listdir(self._startlistdir))
         )
+        for file in files:
+            file_path = os.path.join(self._startlistdir, file)
+            with open(file_path, "r", encoding="cp1252") as scb_file:
+                lines = scb_file.readlines()
+                if len(lines) > 10:  # noqa: PLR2004
+                    num_startlists += 1
+
         assert eventually(lambda: num_startlists == len(self._read_csv()), 0.1, 100), (
             "The CSV file does not contain the expected number of events"
         )
