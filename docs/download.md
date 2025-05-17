@@ -3,12 +3,12 @@ description: Download the latest version of Wahoo! Results
 ---
 # Download
 
-!!! success "Latest version: v1.3.0 - 2025-03-19"
+!!! success "Latest version: v1.3.1 - 2025-05-17"
 
     <!-- markdownlint-disable-line MD046 -->
     <div style="text-align:center" markdown>
     [:material-download:{style="vertical-align:middle"}
-    wahoo-results.exe](https://github.com/JohnStrunk/wahoo-results/releases/download/v1.3.0/wahoo-results.exe){ .md-button .md-button--primary style="margin:1em"}
+    wahoo-results.exe](https://github.com/JohnStrunk/wahoo-results/releases/download/v1.3.1/wahoo-results.exe){ .md-button .md-button--primary style="margin:1em"}
     </div>
 
     See it (and previous releases) on the [GitHub releases
