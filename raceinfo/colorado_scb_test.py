@@ -96,6 +96,16 @@ class TestColoradoSCB:
         )
 
     @pytest.fixture()
+    def scb_zero_heats(self):
+        """SCB data with no heats."""
+        return io.StringIO(
+            textwrap.dedent(
+                """\
+                #10 BOYS 8&U 50 FLY"""
+            )
+        )
+
+    @pytest.fixture()
     def scb_one_heat(self):
         """SCB data with one heat."""
         return io.StringIO(
@@ -259,3 +269,8 @@ class TestColoradoSCB:
         assert lane6.team == "LONGLONGLONGLONG"
         lane2 = heatlist[0].lane(2)
         assert lane2.is_empty is None
+
+    def test_can_read_zero_heats(self, scb_zero_heats: io.StringIO):
+        """Make sure we can read a file with no heats."""
+        heatlist = _parse(scb_zero_heats)
+        assert len(heatlist) == 0

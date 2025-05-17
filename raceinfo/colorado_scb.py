@@ -52,6 +52,8 @@ class ColoradoSCB(EventProcessor):
                 try:
                     with open(file.path, "r", encoding="cp1252") as f:
                         heats = self._parse_scb(f)
+                        if len(heats) == 0:  # No heats in the file, ignore the event
+                            continue
                         if heats[0].event is not None:
                             program[heats[0].event] = heats
                 except ValueError:  # Problem parsing the file
