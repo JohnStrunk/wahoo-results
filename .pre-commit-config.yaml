@@ -60,7 +60,7 @@ repos:
       - id: ruff-format # Run the formatter.
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: "0.7.5"
+    rev: "0.7.6"
     hooks:
       - id: uv-lock
 
