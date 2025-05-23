@@ -70,10 +70,12 @@ output = "coverage.xml"
 
 [tool.pyright]
 # https://microsoft.github.io/pyright/#/configuration
+deprecateTypingAliases = true
+enableReachabilityAnalysis = true
 include = ["."]
 reportUnnecessaryTypeIgnoreComment = true
 strict = ["./raceinfo"]
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
 verboseOutput = true
 

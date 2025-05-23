@@ -18,10 +18,9 @@
 
 import datetime
 import re
-from typing import List, Optional
+from typing import Any
 
 import dateutil.parser
-import dateutil.tz
 import requests
 import semver.version
 
@@ -36,7 +35,7 @@ class ReleaseInfo:
     published: datetime.datetime  # When the release was published
     semver: str  # The version corresponding to the tag
 
-    def __init__(self, release_json: dict):
+    def __init__(self, release_json: dict[str, Any]):
         """Construct a ReleaseInfo object from a JSON dictionary.
 
         :param release_json: The JSON dictionary from the GitHub API
@@ -52,7 +51,7 @@ class ReleaseInfo:
             self.semver = match.group(1)
 
 
-def releases(user_repo: str) -> List[ReleaseInfo]:
+def releases(user_repo: str) -> list[ReleaseInfo]:
     """Retrieve the list of releases for the provided repo.
 
     user_repo should be of the form "user/repo" (i.e.,
@@ -74,7 +73,7 @@ def releases(user_repo: str) -> List[ReleaseInfo]:
     return list(map(ReleaseInfo, body))
 
 
-def highest_semver(rlist: List[ReleaseInfo]) -> ReleaseInfo:
+def highest_semver(rlist: list[ReleaseInfo]) -> ReleaseInfo:
     """Take a list of releases and return the one with the highest semantic version tag.
 
     Assumes the tag is the semver string with an optional leading "v" (e.g.,
@@ -139,7 +138,7 @@ def git_semver(wrv: str) -> str:
     return str(version_info)
 
 
-def latest() -> Optional[ReleaseInfo]:
+def latest() -> ReleaseInfo | None:
     """Retrieve the latest release info."""
     rlist = releases("JohnStrunk/wahoo-results")
     if len(rlist) == 0:
@@ -147,7 +146,7 @@ def latest() -> Optional[ReleaseInfo]:
     return highest_semver(rlist)
 
 
-def is_latest_version(latest_version: Optional[ReleaseInfo], wrv: str) -> bool:
+def is_latest_version(latest_version: ReleaseInfo | None, wrv: str) -> bool:
     """Return true if the running version is the most recent.
 
     >>> rdict = {

@@ -29,7 +29,7 @@ from tkinter import (
     filedialog,
     ttk,
 )
-from typing import Any, Optional
+from typing import Any
 
 import PIL.Image as PILImage
 from PIL import ImageTk
@@ -74,7 +74,7 @@ class ColorButton2(ttk.Button):
         super().__init__(parent, command=self._btn_cb, image=self._img, padding=0)
         self._color_var = color_var
 
-        def _on_change(_a, _b, _c):
+        def _on_change(var: str, idx: str, op: str) -> None:
             try:
                 self._img = swatch(self.SWATCH_SIZE, self.SWATCH_SIZE, color_var.get())
                 self.configure(image=self._img)
@@ -102,9 +102,11 @@ class Preview(Canvas):
         :param image_var: Variable to hold the associated image
         """
         super().__init__(parent, width=self.WIDTH, height=self.HEIGHT)
-        self._pimage: Optional[ImageTk.PhotoImage] = None
+        self._pimage: ImageTk.PhotoImage | None = None
         self._image_var = image_var
-        image_var.trace_add("write", lambda *_: self._set_image(self._image_var.get()))
+        image_var.trace_add(
+            "write", lambda var, idx, op: self._set_image(self._image_var.get())
+        )
 
     def _set_image(self, image: PILImage.Image) -> None:
         """Set the preview image."""
@@ -114,7 +116,7 @@ class Preview(Canvas):
         # keep a reference to it, so it gets assigned to _pimage even though
         # it's not used anywhere else.
         self._pimage = ImageTk.PhotoImage(scaled)
-        self.create_image(0, 0, image=self._pimage, anchor="nw")
+        self.create_image(0, 0, image=self._pimage, anchor="nw")  # type:ignore
 
 
 class StartListTreeView(ttk.Frame):
@@ -131,7 +133,7 @@ class StartListTreeView(ttk.Frame):
         self.rowconfigure(0, weight=1)
         self.tview = ttk.Treeview(self, columns=["event", "desc", "heats"])
         self.tview.grid(column=0, row=0, sticky="news")
-        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)
+        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)  # type: ignore
         self.scroll.grid(column=1, row=0, sticky="news")
         self.tview.configure(
             selectmode="none", show="headings", yscrollcommand=self.scroll.set
@@ -143,7 +145,7 @@ class StartListTreeView(ttk.Frame):
         self.tview.column("heats", anchor="w", minwidth=40, width=40)
         self.tview.heading("heats", anchor="w", text="Heats")
         self.startlist = startlist
-        startlist.trace_add("write", lambda *_: self._update_contents())
+        startlist.trace_add("write", lambda var, idx, op: self._update_contents())
 
     def _update_contents(self):
         self.tview.delete(*self.tview.get_children())
@@ -181,7 +183,9 @@ class DirSelection(ttk.Frame):
         )
         self.dir.trace_add(
             "write",
-            lambda *_: self.dir_label.set(os.path.basename(self.dir.get())[-20:]),
+            lambda var, idx, op: self.dir_label.set(
+                os.path.basename(self.dir.get())[-20:]
+            ),
         )
         self.dir.set(self.dir.get())
 
@@ -207,7 +211,7 @@ class RaceResultTreeView(ttk.Frame):
         self.rowconfigure(0, weight=1)
         self.tview = ttk.Treeview(self, columns=["meet", "event", "heat", "time"])
         self.tview.grid(column=0, row=0, sticky="news")
-        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)
+        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)  # type: ignore
         self.scroll.grid(column=1, row=0, sticky="news")
         self.tview.configure(
             selectmode="none", show="headings", yscrollcommand=self.scroll.set
@@ -221,7 +225,7 @@ class RaceResultTreeView(ttk.Frame):
         self.tview.column("time", anchor="w", minwidth=140, width=140)
         self.tview.heading("time", anchor="w", text="Time")
         self.racelist = racelist
-        racelist.trace_add("write", lambda *_: self._update_contents())
+        racelist.trace_add("write", lambda var, idx, op: self._update_contents())
 
     def _update_contents(self):
         self.tview.delete(*self.tview.get_children())
@@ -259,7 +263,7 @@ class ChromcastSelector(ttk.Frame):
         self.rowconfigure(0, weight=1)
         self.tview = ttk.Treeview(self, columns=["enabled", "cc_name"])
         self.tview.grid(column=0, row=0, sticky="news")
-        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)
+        self.scroll = ttk.Scrollbar(self, orient=VERTICAL, command=self.tview.yview)  # type: ignore
         self.scroll.grid(column=1, row=0, sticky="news")
         self.tview.configure(
             selectmode="none", show="headings", yscrollcommand=self.scroll.set
@@ -269,7 +273,7 @@ class ChromcastSelector(ttk.Frame):
         self.tview.column("cc_name", anchor="w", minwidth=100)
         self.tview.heading("cc_name", anchor="w", text="Chromecast name")
         self.devstatus = statusvar
-        self.devstatus.trace_add("write", lambda *_: self._update_contents())
+        self.devstatus.trace_add("write", lambda var, idx, op: self._update_contents())
         # Needs to be the ButtonRelease event because the Button event happens
         # before the focus is actually set/changed.
         self.tview.bind("<ButtonRelease-1>", self._item_clicked)
@@ -286,7 +290,7 @@ class ChromcastSelector(ttk.Frame):
                 "", "end", id=str(dev.uuid), values=[txt_status, dev.name]
             )
 
-    def _item_clicked(self, _event) -> None:
+    def _item_clicked(self, _event: Any) -> None:
         item = self.tview.focus()
         if len(item) == 0:
             return
@@ -308,7 +312,7 @@ class RaceResultView(ttk.LabelFrame):
         """
         super().__init__(parent, text="Latest result")
         self._resultvar = resultvar
-        self._resultvar.trace_add("write", lambda *_: self._update())
+        self._resultvar.trace_add("write", lambda var, idx, op: self._update())
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.tview = ttk.Treeview(

@@ -12,12 +12,13 @@ Modified to include a delay time by Victor Zaccardo, 25mar16
 """
 
 import tkinter as tk
+from typing import Any
 
 
 class ToolTip:
     """Create a tooltip for a given widget."""
 
-    def __init__(self, widget, text="widget info"):
+    def __init__(self, widget: tk.Misc, text: str = "widget info"):
         """Create a tooltip for a given widget.
 
         :param widget: The widget to bind the tooltip to.
@@ -33,10 +34,10 @@ class ToolTip:
         self._id = None
         self._tip_win = None
 
-    def _enter(self, _=None):
+    def _enter(self, event: Any = None) -> None:
         self._schedule()
 
-    def _leave(self, _=None):
+    def _leave(self, event: Any = None) -> None:
         self._unschedule()
         self._hidetip()
 
@@ -50,11 +51,9 @@ class ToolTip:
         if my_id:
             self.widget.after_cancel(my_id)
 
-    def _showtip(self, _=None):
-        x = y = 0
-        x, y, _, _ = self.widget.bbox("insert")
-        x += self.widget.winfo_rootx() + 25
-        y += self.widget.winfo_rooty() + 20
+    def _showtip(self, _: object = None) -> None:
+        x = self.widget.winfo_pointerx() + 20
+        y = self.widget.winfo_pointery() + 10
         # creates a toplevel window
         self._tip_win = tk.Toplevel(self.widget)
         # Leaves only the label and removes the app window

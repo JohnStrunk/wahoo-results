@@ -27,21 +27,21 @@ import string
 import threading
 import time
 import tkinter
+from collections.abc import Callable
 from functools import reduce
 from tkinter import DoubleVar, IntVar, StringVar
-from typing import Callable, List
 
 from model import Model
 
-TESTING = False
+testing = False
 
 logger = logging.getLogger(__name__)
 
 
 def set_test_mode() -> None:
     """Set the application to test mode."""
-    global TESTING  # noqa: PLW0603
-    TESTING = True
+    global testing  # noqa: PLW0603
+    testing = True
 
 
 class Scenario(abc.ABC):
@@ -57,8 +57,8 @@ def run_scenario(scenario: Scenario) -> None:
     # Cause the application to exit if an exception occurs in the test thread
     old_hook = threading.excepthook
 
-    def new_hook(*args, **kwargs):
-        old_hook(*args, **kwargs)
+    def new_hook(args: threading.ExceptHookArgs) -> None:
+        old_hook(args)
         os.kill(os.getpid(), signal.SIGABRT)
 
     threading.excepthook = new_hook
@@ -345,8 +345,8 @@ def _build_random_scenario(
     :returns: The test scenario
     """
     # Prepare test data directories & result scenarios
-    startlist_scenarios: List[Scenario] = []
-    result_scenarios: List[Scenario] = []
+    startlist_scenarios: list[Scenario] = []
+    result_scenarios: list[Scenario] = []
     testdatadir = os.path.join(os.curdir, "testdata")
     testdata_exists = os.path.exists(testdatadir)
     tmp_startlist = os.path.join(testdatadir, "tmp_startlists")
@@ -372,13 +372,13 @@ def _build_random_scenario(
             RemoveRandomDO4(tmp_result),
         ]
 
-    appearance_scenarios: List[Scenario] = [
+    appearance_scenarios: list[Scenario] = [
         SetInt(model, model.num_lanes, 6, 10),
         SetDouble(model, model.text_spacing, 0.8, 2.0),
         SetString(model, model.title, 0, 20),
     ]
 
-    calculation_scenarios: List[Scenario] = [
+    calculation_scenarios: list[Scenario] = [
         SetInt(model, model.min_times, 1, 3),
         SetDouble(model, model.time_threshold, 0.01, 3.0),
     ]
@@ -433,7 +433,7 @@ class Counter:
         def update() -> None:
             self._value += 1
 
-        self._cbname = var.trace_add("write", lambda *_: update())
+        self._cbname = var.trace_add("write", lambda var, idx, op: update())
 
     def __del__(self) -> None:
         """Remove the trace callback."""
@@ -504,7 +504,7 @@ class Repeatedly(Scenario):
 class Sequentially(Scenario):
     """Run each item in a list of actions."""
 
-    def __init__(self, actions: List[Scenario]) -> None:
+    def __init__(self, actions: list[Scenario]) -> None:
         """Create a scenario that runs each action in a list.
 
         :param actions: The list of actions to run
@@ -521,7 +521,7 @@ class Sequentially(Scenario):
 class OneOf(Scenario):
     """Randomly choose one of a list of actions to run."""
 
-    def __init__(self, actions: List[Scenario]) -> None:
+    def __init__(self, actions: list[Scenario]) -> None:
         """Create a scenario that randomly chooses one of the actions to run.
 
         :param actions: The list of actions to choose from
@@ -721,7 +721,7 @@ class AddDO4(Scenario):
     """Copy a specific do4 file into the do4 directory."""
 
     def __init__(
-        self, testdatadir: str, do4dir: str, do4: str, counters: List[Counter]
+        self, testdatadir: str, do4dir: str, do4: str, counters: list[Counter]
     ) -> None:
         """Copy a do4 file into the do4 directory.
 
@@ -746,7 +746,7 @@ class AddDO4(Scenario):
     def run(self) -> None:
         """Perform the copy."""
         logger.info("Adding do4 %s", self._do4)
-        prev_count = []
+        prev_count: list[int] = []
         for counter in self._counters:
             prev_count.append(counter.get())
         shutil.copy(os.path.join(self._testdatadir, self._do4), self._do4dir)
@@ -762,7 +762,7 @@ class AddDO4(Scenario):
 class AddRandomDO4(Scenario):
     """Copy a random do4 file into the do4 directory."""
 
-    def __init__(self, testdatadir: str, do4dir: str, counters: List[Counter]) -> None:
+    def __init__(self, testdatadir: str, do4dir: str, counters: list[Counter]) -> None:
         """Copy a random do4 file into the do4 directory.
 
         :param testdatadir: the directory containing the main test data
@@ -849,7 +849,7 @@ class GenDolphinCSV(Scenario):
             "The CSV file does not contain the expected number of events"
         )
 
-    def _read_csv(self) -> List[str]:
+    def _read_csv(self) -> list[str]:
         filename = os.path.join(self._startlistdir, "dolphin_events.csv")
         try:
             with open(filename, "r", encoding="cp1252") as file:

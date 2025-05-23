@@ -158,6 +158,4 @@ def _get_candidate(raw_times: list[Time]) -> Time | None:
     else:
         candidate = sorted_times[num_times // 2]
 
-    if candidate is not None:
-        return truncate_hundredths(candidate)
-    return None
+    return truncate_hundredths(candidate)

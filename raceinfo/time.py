@@ -19,9 +19,10 @@
 import copy
 import decimal
 import re
+from collections.abc import Callable
 from dataclasses import InitVar, dataclass, field
 from datetime import datetime
-from typing import Callable, Literal
+from typing import Literal
 
 # https://docs.python.org/3/library/decimal.html#signals
 # Raise decimal.FloatOperation when Decimal and float are improperly mixed
