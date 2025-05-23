@@ -52,7 +52,7 @@ repos:
         args: ["--strict", "-c", ".github/yamllint-config.yml"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.11.10"
+    rev: "v0.11.11"
     hooks:
       # Note: lint/fix before format
       - id: ruff # Run the linter.
@@ -60,7 +60,7 @@ repos:
       - id: ruff-format # Run the formatter.
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: "0.7.6"
+    rev: "0.7.7"
     hooks:
       - id: uv-lock
 
