@@ -18,10 +18,11 @@
 
 import os
 import sys
-from tkinter import FALSE, HORIZONTAL, Menu, StringVar, TclError, Tk, Widget, font, ttk
+from tkinter import FALSE, HORIZONTAL, Menu, StringVar, TclError, Tk, Widget, ttk
 
 from PIL import ImageTk
 
+import fonts
 import raceinfo
 import widgets
 from model import DQMode, Model
@@ -157,7 +158,9 @@ class _configTab(ttk.Frame):
             column=0, row=0, sticky="news"
         )
         main_dd = ttk.Combobox(
-            txt_frame, textvariable=self._vm.font_normal, values=sorted(font.families())
+            txt_frame,
+            textvariable=self._vm.font_normal,
+            values=sorted(fonts.font_names()),
         )
         main_dd.grid(column=1, row=0, sticky="news", pady=_PADDING)
         ToolTip(main_dd, "Main font used for scoreboard text")
@@ -172,7 +175,9 @@ class _configTab(ttk.Frame):
             column=0, row=1, sticky="news"
         )
         time_dd = ttk.Combobox(
-            txt_frame, textvariable=self._vm.font_time, values=sorted(font.families())
+            txt_frame,
+            textvariable=self._vm.font_time,
+            values=sorted(fonts.font_names()),
         )
         time_dd.grid(column=1, row=1, sticky="news", pady=_PADDING)
         ToolTip(
