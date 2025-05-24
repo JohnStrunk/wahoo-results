@@ -1,62 +1,57 @@
 {
-  // JSON5 spec: https://json5.org/
-  // Renovate docs: https://docs.renovatebot.com/configuration-options/
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices", // Use Renovate best-practices
-    ":enablePreCommit", // Enable updates to pre-commit repos
-    ":gitSignOff" // Add Signed-off-by line to commit messages
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    ':enablePreCommit',
+    ':gitSignOff',
   ],
-  "ignorePaths": [
-    "docs/requirements.txt" // requirements.txt is managed by CI
+  ignorePaths: [
+    'docs/requirements.txt',
   ],
-  "labels": [
-    "dependencies"
+  labels: [
+    'dependencies',
   ],
-  "lockFileMaintenance": { // Update uv.lock
-    "enabled": true
+  lockFileMaintenance: {
+    enabled: true,
   },
-  "packageRules": [
+  packageRules: [
     {
-      "description": "Devcontainer 'features' don't support digest pinning",
-      "matchManagers": [
-        "devcontainer"
+      description: "Devcontainer 'features' don't support digest pinning",
+      matchManagers: [
+        'devcontainer',
       ],
-      "matchDepTypes": [
-        "feature"
+      matchDepTypes: [
+        'feature',
       ],
-      "pinDigests": false
+      pinDigests: false,
     },
     {
-      "description": "Update renovatebot/pre-commit-hooks weekly to decrease noise",
-      "matchPackageNames": [
-        "renovatebot/pre-commit-hooks"
+      description: 'Update renovatebot/pre-commit-hooks weekly to decrease noise',
+      matchPackageNames: [
+        'renovatebot/pre-commit-hooks',
       ],
-      "schedule": [
-        "before 9am on monday"
-      ]
-    }
+      schedule: [
+        'before 9am on monday',
+      ],
+    },
   ],
-  "customManagers": [
+  customManagers: [
     {
-      "customType": "regex",
-      "description": "UPX version updates",
-      "fileMatch": [
-        "^.github/(?:workflows|actions)/.+\\.ya?ml$",
-        "\\.md$"
+      customType: 'regex',
+      description: 'UPX version updates',
+      managerFilePatterns: [
+        '/^.github/(?:workflows|actions)/.+\\.ya?ml$/',
+        '/\\.md$/',
       ],
-      "matchStrings": [
-        "UPX_VERSION: \"(?<currentValue>.+?)\"",
-        "upx --version (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      matchStrings: [
+        'UPX_VERSION: "(?<currentValue>.+?)"',
+        'upx --version (?<currentValue>\\d+\\.\\d+\\.\\d+)',
       ],
-      "depNameTemplate": "upx/upx",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$"
-    }
+      depNameTemplate: 'upx/upx',
+      datasourceTemplate: 'github-releases',
+      extractVersionTemplate: '^v(?<version>.*)$',
+    },
   ],
-  // "schedule": [
-  //   "before 7am on Thursday" // Update weekly
-  // ],
-  "semanticCommits": "disabled",
-  "timezone": "America/New_York"
+  semanticCommits: 'disabled',
+  timezone: 'America/New_York',
 }
