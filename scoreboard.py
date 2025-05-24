@@ -17,10 +17,10 @@
 """Generate an image of the scoreboard from a RaceTimes object."""
 
 import sentry_sdk
-from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.ImageEnhance import Brightness
 
+import fonts
 from model import DQMode, Model
 from raceinfo import Heat, NameMode, format_name, format_time
 
@@ -34,7 +34,7 @@ def waiting_screen(size: tuple[int, int], model: Model) -> Image.Image:
     """
     img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
     center = (int(size[0] * 0.5), int(size[1] * 0.8))
-    normal = fontname_to_file(model.font_normal.get())
+    normal = fonts.font_to_path(model.font_normal.get(), "Bold") or ""
     font_size = 72
     fnt = ImageFont.truetype(normal, font_size)
     draw = ImageDraw.Draw(img)
@@ -104,7 +104,7 @@ class ScoreboardImage:
         try:
             bg_image = Image.open(bg_image_filename)
             # Ensure the size matches
-            bg_image = bg_image.resize(self.size, Image.Resampling.BICUBIC)
+            bg_image = bg_image.resize(self.size, Image.Resampling.BICUBIC)  # type: ignore
             # Make sure the image modes match
             bg_image = bg_image.convert("RGBA")
             # Adjust the image brightness
@@ -128,8 +128,8 @@ class ScoreboardImage:
         lines += 1  # Name, team, time header
         self._line_height = int(usable_height / lines)
         scaled_height = self._line_height / self._model.text_spacing.get()
-        normal_f_file = fontname_to_file(self._model.font_normal.get())
-        time_f_file = fontname_to_file(self._model.font_time.get())
+        normal_f_file = fonts.font_to_path(self._model.font_normal.get(), "Bold") or ""
+        time_f_file = fonts.font_to_path(self._model.font_time.get(), "Bold") or ""
         self._normal_font = ImageFont.truetype(normal_f_file, int(scaled_height))
         self._time_font = ImageFont.truetype(time_f_file, int(scaled_height))
         draw = ImageDraw.Draw(self._img)
@@ -299,17 +299,6 @@ class ScoreboardImage:
             + line * self._line_height  # move down to proper line
             - (self._line_height - self._text_height) / 2
         )  # up 1/2 the inter-line space
-
-
-def fontname_to_file(name: str) -> str:
-    """Convert a font name (Roboto) to its corresponding filename.
-
-    :param name: The name of the font
-    :returns: The filename of the font
-    """
-    properties = font_manager.FontProperties(family=name, weight="bold")
-    filename = font_manager.findfont(properties)
-    return filename
 
 
 def format_place(place: int | None) -> str:

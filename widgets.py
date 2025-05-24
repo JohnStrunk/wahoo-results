@@ -111,7 +111,7 @@ class Preview(Canvas):
     def _set_image(self, image: PILImage.Image) -> None:
         """Set the preview image."""
         self.delete("all")
-        scaled = image.resize((self.WIDTH, self.HEIGHT))
+        scaled = image.resize((self.WIDTH, self.HEIGHT))  # type:ignore
         # Note: In order for the image to display on the canvas, we need to
         # keep a reference to it, so it gets assigned to _pimage even though
         # it's not used anywhere else.
