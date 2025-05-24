@@ -20,9 +20,10 @@ import logging
 import threading
 import time
 import typing
+from collections.abc import Callable
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 import pychromecast
@@ -92,13 +93,13 @@ class ImageCast:
     # _devices maps the chromecast uuid to a map of:
     #    "cast" -> its chromecast object
     #    "enabled" -> boolean indicating whether we should cast to this device
-    devices: Dict[UUID, Dict[str, Any]]
-    _webserver_thread: Optional[threading.Thread]
-    _refresh_thread: Optional[threading.Thread]
-    image: Optional[Image.Image]
-    callback_fn: Optional[DiscoveryCallbackFn]
-    browser: Optional[CastBrowser]
-    zconf: Optional[zeroconf.Zeroconf]
+    devices: dict[UUID, dict[str, Any]]
+    _webserver_thread: threading.Thread | None
+    _refresh_thread: threading.Thread | None
+    image: Image.Image | None
+    callback_fn: DiscoveryCallbackFn | None
+    browser: CastBrowser | None
+    zconf: zeroconf.Zeroconf | None
 
     def __init__(self, server_port: int) -> None:
         """
@@ -165,7 +166,7 @@ class ImageCast:
         with sentry_sdk.start_transaction(
             op="enable_cc", name="Enable/disable Chromecast"
         ):
-            if self.devices[uuid] is not None:
+            if uuid in self.devices:
                 previous = self.devices[uuid]["enabled"]
                 self.devices[uuid]["enabled"] = enabled
                 if enabled and not previous:  # enabling: send the latest image
@@ -175,12 +176,12 @@ class ImageCast:
                     logger.debug("Disabling %s", self.devices[uuid]["cast"].name)
                     self._disconnect(self.devices[uuid]["cast"])
 
-    def get_devices(self) -> List[DeviceStatus]:
+    def get_devices(self) -> list[DeviceStatus]:
         """Get the current list of known Chromecast devices and whether they are currently enabled.
 
         :returns: A list of DeviceStatus objects
         """
-        devs: List[DeviceStatus] = []
+        devs: list[DeviceStatus] = []
         for uuid, state in self.devices.items():
             devs.append(
                 DeviceStatus(
@@ -257,7 +258,7 @@ class ImageCast:
                         fp = typing.cast(typing.IO[bytes], self.wfile)
                         parent.image.save(fp, "PNG", optimize=True)
 
-            def log_message(self, format, *args):
+            def log_message(self, format: str, *args: Any):
                 logger.debug(format, *args)
 
         def _webserver_run():

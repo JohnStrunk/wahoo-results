@@ -56,7 +56,7 @@ class View(ttk.Frame):
         icon_file = os.path.abspath(os.path.join(bundle_dir, "media", "wr-icon.ico"))
         root.iconphoto(True, ImageTk.PhotoImage(file=icon_file))  # type: ignore
         try:
-            root.iconbitmap(icon_file)
+            root.iconbitmap(icon_file)  # type: ignore
         except TclError:  # On linux, we can't set a Windows icon file
             pass
         # Insert ourselves into the main window
@@ -92,20 +92,21 @@ class View(ttk.Frame):
             foreground="blue",
         )
         statustext.grid(column=0, row=0, sticky="news")
-        statustext.bind("<Button-1>", lambda *_: self._vm.statusclick.run())
+        statustext.bind("<Button-1>", lambda event: self._vm.statusclick.run())
 
         style = ttk.Style()
-        style.configure("TCombobox", padding=_TXT_PAD)  # Font drop-downs
-        style.configure("TMenuButton", padding=_TXT_PAD)  # OptionMenu
-        style.configure("TLabel", padding=_TXT_PAD)
-        style.configure("TEntry", padding=_TXT_PAD)
-        style.configure("TSpinbox", padding=_TXT_PAD)
-        style.configure("TButton", padding=_PADDING)
-        style.configure("TLabelframe", padding=_PADDING)
+        style.configure("TCombobox", padding=_TXT_PAD)  # type: ignore
+        style.configure("TMenuButton", padding=_TXT_PAD)  # type: ignore
+        style.configure("TLabel", padding=_TXT_PAD)  # type: ignore
+        style.configure("TEntry", padding=_TXT_PAD)  # type: ignore
+        style.configure("TSpinbox", padding=_TXT_PAD)  # type: ignore
+        style.configure("TButton", padding=_PADDING)  # type: ignore
+        style.configure("TLabelframe", padding=_PADDING)  # type: ignore
 
     def _build_menu(self) -> None:
         """Create the dropdown menus."""
-        self._root.option_add("*tearOff", FALSE)  # We don't use tear-off menus
+        # We don't use tear-off menus
+        self._root.option_add("*tearOff", FALSE)  # type: ignore
         menubar = Menu(self)
         self._root["menu"] = menubar
         # File menu
@@ -162,7 +163,7 @@ class _configTab(ttk.Frame):
         ToolTip(main_dd, "Main font used for scoreboard text")
         # Update dropdown if textvar is changed
         self._vm.font_normal.trace_add(
-            "write", lambda *_: main_dd.set(self._vm.font_normal.get())
+            "write", lambda var, idx, op: main_dd.set(self._vm.font_normal.get())
         )
         # Set initial value
         main_dd.set(self._vm.font_normal.get())
@@ -179,7 +180,7 @@ class _configTab(ttk.Frame):
         )
         # Update dropdown if textvar is changed
         self._vm.font_time.trace_add(
-            "write", lambda *_: time_dd.set(self._vm.font_time.get())
+            "write", lambda var, idx, op: time_dd.set(self._vm.font_time.get())
         )
         # Set initial value
         time_dd.set(self._vm.font_time.get())
@@ -294,7 +295,7 @@ class _configTab(ttk.Frame):
         ToolTip(bg_img_label, "Scoreboard background image - Recommended: 1280x720")
         self._vm.image_bg.trace_add(
             "write",
-            lambda *_: self._bg_img_label.set(
+            lambda var, idx, op: self._bg_img_label.set(
                 os.path.basename(self._vm.image_bg.get())[-20:]
             ),
         )

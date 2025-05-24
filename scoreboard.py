@@ -16,8 +16,6 @@
 
 """Generate an image of the scoreboard from a RaceTimes object."""
 
-from typing import Optional, Tuple
-
 import sentry_sdk
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
@@ -27,7 +25,7 @@ from model import DQMode, Model
 from raceinfo import Heat, NameMode, format_name, format_time
 
 
-def waiting_screen(size: Tuple[int, int], model: Model) -> Image.Image:
+def waiting_screen(size: tuple[int, int], model: Model) -> Image.Image:
     """Generate a "waiting" image to display on the scoreboard.
 
     :param size: The size of the image in pixels
@@ -60,7 +58,7 @@ class ScoreboardImage:
 
     def __init__(
         self,
-        size: Tuple[int, int],
+        size: tuple[int, int],
         race: Heat,
         model: Model,
         background: bool = True,
@@ -314,7 +312,7 @@ def fontname_to_file(name: str) -> str:
     return filename
 
 
-def format_place(place: Optional[int]) -> str:
+def format_place(place: int | None) -> str:
     """
     Turn a numerical place into the printable string representation.
 

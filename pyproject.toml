@@ -21,11 +21,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "mdx-truly-sane-lists==1.3",
-    "mkdocs-glightbox==0.4.0",
-    "mkdocs-macros-plugin==1.3.7",
-    "mkdocs-material==9.6.14",
-    "pyright>=1.1.395",
+    { include-group = "docs" },
+    "pyright==1.1.400",
     "pytest==8.3.5",
     "pytest-cov==6.1.1",
 ]
@@ -70,10 +67,12 @@ output = "coverage.xml"
 
 [tool.pyright]
 # https://microsoft.github.io/pyright/#/configuration
+deprecateTypingAliases = true
+enableReachabilityAnalysis = true
 include = ["."]
 reportUnnecessaryTypeIgnoreComment = true
 strict = ["./raceinfo"]
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
 verboseOutput = true
 

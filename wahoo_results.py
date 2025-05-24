@@ -28,10 +28,8 @@ import webbrowser
 from pathlib import PurePath
 from time import sleep
 from tkinter import Tk, filedialog, messagebox
-from typing import List, Optional
 
 import sentry_sdk
-import sentry_sdk.scope
 from requests.exceptions import RequestException
 from sentry_sdk.integrations.socket import SocketIntegration
 from sentry_sdk.integrations.threading import ThreadingIntegration
@@ -76,7 +74,7 @@ def setup_exit(root: Tk, model: Model) -> None:
             model.save(CONFIG_FILE)
         except PermissionError as err:
             logger.debug("Error saving configuration")
-            messagebox.showerror(
+            messagebox.showerror(  # type: ignore
                 title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.",
@@ -163,7 +161,7 @@ def setup_appearance(model: Model) -> None:
         model.num_lanes,
         model.dq_mode,
     ]:
-        element.trace_add("write", lambda *_: update_preview())
+        element.trace_add("write", lambda var, idx, op: update_preview())
     update_preview()
 
     def handle_bg_import() -> None:
@@ -206,11 +204,11 @@ def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
         logger.debug("scb watcher updated to %s", path)
         process_startlists()
 
-    model.dir_startlist.trace_add("write", lambda *_: scb_dir_updated())
+    model.dir_startlist.trace_add("write", lambda var, idx, op: scb_dir_updated())
     scb_dir_updated()
 
 
-def summarize_racedir(directory: str, timing_system: TimingSystem) -> List[Heat]:
+def summarize_racedir(directory: str, timing_system: TimingSystem) -> list[Heat]:
     """Summarize all race results in a directory.
 
     :param directory: The directory to process
@@ -218,7 +216,7 @@ def summarize_racedir(directory: str, timing_system: TimingSystem) -> List[Heat]
     :returns: A list of HeatData objects
     """
     files = os.scandir(directory)
-    contents: List[Heat] = []
+    contents: list[Heat] = []
     for file in files:
         if any(PurePath(file).match(pattern) for pattern in timing_system.patterns):
             try:
@@ -231,7 +229,7 @@ def summarize_racedir(directory: str, timing_system: TimingSystem) -> List[Heat]
     return contents
 
 
-def load_result(model: Model, filename: str) -> Optional[Heat]:
+def load_result(model: Model, filename: str) -> Heat | None:
     """Load a result file and corresponding startlist.
 
     :param model: The application model
@@ -239,11 +237,10 @@ def load_result(model: Model, filename: str) -> Optional[Heat]:
     :returns: The HeatData object representing the result if successful,
         otherwise None
     """
-    result: Optional[Heat] = None
+    result: Heat | None = None
     resolver = standard_resolver(
         model.min_times.get(), Time(str(model.time_threshold.get()))
     )
-    # Retry mechanism since we get errors if we try to read while it's
     # still being written.
     for tries in range(1, 6):
         try:
@@ -327,8 +324,8 @@ def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
     # Need to update the result dir both when the directory changes and when the
     # result format changes, since the format is used to determine the timing
     # system
-    model.dir_results.trace_add("write", lambda *_: result_dir_updated())
-    model.result_format.trace_add("write", lambda *_: result_dir_updated())
+    model.dir_results.trace_add("write", lambda var, idx, op: result_dir_updated())
+    model.result_format.trace_add("write", lambda var, idx, op: result_dir_updated())
     result_dir_updated()
 
 
@@ -346,7 +343,9 @@ def check_for_update(model: Model) -> None:
             model.statustext.set(
                 f"New version available. Click to download: {latest_version.tag}"
             )
-            model.statusclick.add(lambda: webbrowser.open(latest_version.url))
+            model.statusclick.add(
+                lambda: (webbrowser.open(latest_version.url), None)[1]
+            )
     except RequestException as ex:
         logger.warning("Error checking for update: %s", ex)
 
@@ -369,12 +368,12 @@ def setup_run(model: Model, icast: imagecast.ImageCast) -> None:
         for dev in dev_list:
             icast.enable(dev.uuid, dev.enabled)
 
-    model.cc_status.trace_add("write", lambda *_: update_cc_list())
+    model.cc_status.trace_add("write", lambda var, idx, op: update_cc_list())
     icast.set_discovery_callback(cast_discovery)
 
     # Link Chromecast contents to the UI preview
     model.scoreboard.trace_add(
-        "write", lambda *_: icast.publish(model.scoreboard.get())
+        "write", lambda var, idx, op: icast.publish(model.scoreboard.get())
     )
 
 
@@ -386,7 +385,7 @@ def initialize_sentry(model: Model) -> None:
     execution_environment = "source"
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         execution_environment = "executable"
-    if autotest.TESTING:
+    if autotest.testing:
         execution_environment = "test"
 
     # Initialize Sentry crash reporting
@@ -527,10 +526,10 @@ def main() -> None:  # noqa: PLR0915
     model.menu_docs.add(wh_analytics.documentation_link)
     model.statusclick.add(wh_analytics.update_link)
     model.dir_startlist.trace_add(
-        "write", lambda *_: wh_analytics.set_cts_directory(True)
+        "write", lambda var, idx, op: wh_analytics.set_cts_directory(True)
     )
     model.dir_results.trace_add(
-        "write", lambda *_: wh_analytics.set_result_directory(True)
+        "write", lambda var, idx, op: wh_analytics.set_result_directory(True)
     )
 
     # Allow the root window to build, then close the splash screen if it's up

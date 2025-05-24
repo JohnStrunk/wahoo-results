@@ -18,11 +18,13 @@
 
 import logging
 import queue
+import tkinter
 import uuid
+from collections.abc import Callable
 from configparser import ConfigParser
 from enum import StrEnum, unique
 from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Tk, Variable
-from typing import Callable, Generic, List, Optional, Set, TypeVar
+from typing import Generic, TypeVar
 
 import PIL.Image as PILImage
 
@@ -43,7 +45,7 @@ logger = logging.getLogger(__name__)
 class GVar(Variable, Generic[_T]):
     """A generic variable in the flavor of StringVar, IntVar, etc."""
 
-    def __init__(self, value: _T, master=None):
+    def __init__(self, value: _T, master: "tkinter.Misc | None" = None):
         """
         Create a generic variable in the flavor of StringVar, IntVar, etc.
 
@@ -55,16 +57,17 @@ class GVar(Variable, Generic[_T]):
 
     def get(self) -> _T:
         """Return the value of the variable."""
-        _x = super().get()
+        # We call get() to ensure that variable watches get triggered
+        _x = super().get()  # type: ignore
         return self._value
 
     def set(self, value: _T) -> None:
         """Set the variable to a new value."""
         self._value = value
-        super().set(super().get() + 1)
+        super().set(super().get() + 1)  # type: ignore
 
 
-class ChromecastStatusVar(GVar[List[DeviceStatus]]):
+class ChromecastStatusVar(GVar[list[DeviceStatus]]):
     """A list of Chromecast devices and whether they are enabled."""
 
 
@@ -75,7 +78,7 @@ class ImageVar(GVar[PILImage.Image]):
 class CallbackList:
     """A list of callback functions."""
 
-    _callbacks: Set[CallbackFn]
+    _callbacks: set[CallbackFn]
 
     def __init__(self):
         """Initialize a set of callback functions."""
@@ -86,14 +89,14 @@ class CallbackList:
         for func in self._callbacks:
             func()
 
-    def add(self, callback) -> None:
+    def add(self, callback: CallbackFn) -> None:
         """Add a callback function to the set.
 
         :param callback: the function to add
         """
         self._callbacks.add(callback)
 
-    def remove(self, callback) -> None:
+    def remove(self, callback: CallbackFn) -> None:
         """Remove a callback function from the set.
 
         :param callback: the function to remove
@@ -105,11 +108,11 @@ class StartListVar(GVar[FullProgram]):
     """An ordered list of start lists."""
 
 
-class RaceResultListVar(GVar[List[Heat]]):
+class RaceResultListVar(GVar[list[Heat]]):
     """Holds an ordered list of race results."""
 
 
-class RaceResultVar(GVar[Optional[Heat]]):
+class RaceResultVar(GVar[Heat | None]):
     """A race result."""
 
 
