@@ -20,7 +20,6 @@ import datetime
 import re
 from typing import Any
 
-import dateutil.parser
 import requests
 import semver.version
 
@@ -44,7 +43,7 @@ class ReleaseInfo:
         self.url = release_json["html_url"]
         self.draft = release_json["draft"]
         self.prerelease = release_json["prerelease"]
-        self.published = dateutil.parser.isoparse(release_json["published_at"])
+        self.published = datetime.datetime.fromisoformat(release_json["published_at"])
         match = re.match(r"^v?(.*)$", self.tag)
         self.semver = ""
         if match is not None:
@@ -167,3 +166,15 @@ def is_latest_version(latest_version: ReleaseInfo | None, wrv: str) -> bool:
     if wrv == "unreleased":
         return False
     return semver.version.Version.parse(latest_version.semver).compare(wrv) <= 0
+
+
+def _main():
+    release_list = releases("JohnStrunk/wahoo-results")
+    for release in release_list:
+        print(
+            f"Release: {release.tag}, Version: {release.semver}, Published: {release.published}"
+        )
+
+
+if __name__ == "__main__":
+    _main()

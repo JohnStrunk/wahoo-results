@@ -5,13 +5,12 @@ description = "A scoreboard for swimming using results from a CTS Dolphin timing
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "datetime==5.5",
+    # "datetime==5.5",
     "fonttools==4.58.0",
     "ipinfo==5.1.1",
     "pillow==11.2.1",
     "pychromecast==14.0.7",
     "pyinstaller==6.13.0",
-    "python-dateutil==2.9.0.post0",
     "requests==2.32.3",
     "segment-analytics-python==2.3.4",
     "semver==3.0.4",
