@@ -143,7 +143,7 @@ def _get_candidate(raw_times: list[Time]) -> Time | None:
     Decimal('200.00')
     >>> _get_candidate([Time(300), Time(100), Time(200), Time(400)])
     Decimal('250.00')
-    >>> _get_candidate([Time(10.25), Time(10.00)])
+    >>> _get_candidate([Time("10.25"), Time("10.00")])
     Decimal('10.12')
     """
     num_times = len(raw_times)
