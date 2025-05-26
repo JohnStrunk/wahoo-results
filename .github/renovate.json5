@@ -41,9 +41,9 @@
     {
       "customType": "regex",
       "description": "UPX version updates",
-      "fileMatch": [
-        "^.github/(?:workflows|actions)/.+\\.ya?ml$",
-        "\\.md$"
+      "managerFilePatterns": [
+        "/^.github/(?:workflows|actions)/.+\\.ya?ml$/",
+        "/\\.md$/"
       ],
       "matchStrings": [
         "UPX_VERSION: \"(?<currentValue>.+?)\"",
@@ -54,9 +54,6 @@
       "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
-  // "schedule": [
-  //   "before 7am on Thursday" // Update weekly
-  // ],
   "semanticCommits": "disabled",
   "timezone": "America/New_York"
 }
