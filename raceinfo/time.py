@@ -14,7 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Fundamental timing types."""
+"""Fundamental timing types.
+
+Times are represented as the `Time` type, which is an alias for `decimal.Decimal`. This allows for precise representation of times, including hundredths of a second. When creating instances of `Time`, you should use strings to avoid floating-point inaccuracies. Use of a float in the constructor will raise a `decimal.FloatOperation` exception.
+
+>>> Time(1)  # int - ok
+Decimal('1')
+>>> Time("1.0")  # string - ok
+Decimal('1.0')
+>>> Time(1.0)  # float - raises decimal.FloatOperation
+Traceback (most recent call last):
+   ...
+decimal.FloatOperation: [<class 'decimal.FloatOperation'>]
+"""
 
 import copy
 import decimal
@@ -26,7 +38,7 @@ from typing import Literal
 
 # https://docs.python.org/3/library/decimal.html#signals
 # Raise decimal.FloatOperation when Decimal and float are improperly mixed
-decimal.DefaultContext.traps[decimal.FloatOperation] = True
+decimal.getcontext().traps[decimal.FloatOperation] = True
 
 Time = decimal.Decimal
 """A Time in seconds and hundredths of a second"""
@@ -160,7 +172,7 @@ def combine_times(times: list[Time | None]) -> Time | None:
     Decimal('200.00')
     >>> combine_times([Time(300), Time(100), Time(200), Time(400)])
     Decimal('250.00')
-    >>> combine_times([Time(10.25), Time(10.00)])
+    >>> combine_times([Time("10.25"), Time("10.00")])
     Decimal('10.12')
     """
     valid_times = [time for time in times if time is not None]

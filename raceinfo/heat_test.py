@@ -116,12 +116,12 @@ class TestHeat:
         """Test the place method."""
         heat = Heat(
             lanes=[
-                Lane(final_time=Time(150)),
-                Lane(final_time=Time(200)),
-                Lane(final_time=Time(150)),
+                Lane(final_time=Time("150")),
+                Lane(final_time=Time("200")),
+                Lane(final_time=Time("150")),
                 Lane(final_time=None),
-                Lane(final_time=Time(50), is_dq=True),
-                Lane(final_time=Time(100)),
+                Lane(final_time=Time("50"), is_dq=True),
+                Lane(final_time=Time("100")),
             ]
         )
         assert heat.place(1) == 2  # noqa: PLR2004
@@ -152,8 +152,8 @@ class TestHeat:
         """Test the resolve_times method."""
         heat = Heat(
             lanes=[
-                Lane(primary=Time(1.0)),
-                Lane(primary=Time(4.0)),
+                Lane(primary=Time("1.0")),
+                Lane(primary=Time("4.0")),
             ]
         )
 
@@ -161,8 +161,8 @@ class TestHeat:
             lane.final_time = lane.primary
 
         heat.resolve_times(assign_final_time)
-        assert heat.lane(1).final_time == Time(1.0)
-        assert heat.lane(2).final_time == Time(4.0)
+        assert heat.lane(1).final_time == Time("1.0")
+        assert heat.lane(2).final_time == Time("4.0")
         assert heat.lane(3).final_time is None
 
     def test_merge(self):
@@ -174,7 +174,7 @@ class TestHeat:
             meet_id="id-one",
             race=11,
             time_recorded=datetime.strptime("2025-01-01", "%Y-%m-%d"),
-            lanes=[Lane(name="one", primary=Time(100.00))],
+            lanes=[Lane(name="one", primary=Time("100.00"))],
         )
         heat2 = Heat(
             event="2",
@@ -183,7 +183,7 @@ class TestHeat:
             meet_id="id-two",
             race=12,
             time_recorded=datetime.strptime("2025-02-02", "%Y-%m-%d"),
-            lanes=[Lane(name="two", primary=Time(200.00))],
+            lanes=[Lane(name="two", primary=Time("200.00"))],
         )
         m1 = copy.deepcopy(heat1)
         m1.merge(heat2)
@@ -194,7 +194,7 @@ class TestHeat:
         assert m1.race == 11  # noqa: PLR2004
         assert m1.time_recorded == datetime.strptime("2025-01-01", "%Y-%m-%d")
         assert m1.lane(1).name == "two"
-        assert m1.lane(1).primary == Time(100.00)
+        assert m1.lane(1).primary == Time("100.00")
 
         m2 = copy.deepcopy(heat1)
         m2.merge(results_from=heat2)
@@ -205,7 +205,7 @@ class TestHeat:
         assert m2.race == 12  # noqa: PLR2004
         assert m2.time_recorded == datetime.strptime("2025-02-02", "%Y-%m-%d")
         assert m2.lane(1).name == "one"
-        assert m2.lane(1).primary == Time(200.00)
+        assert m2.lane(1).primary == Time("200.00")
 
     def test_sorting(self):
         """Test sorting of Heat objects."""
@@ -237,8 +237,8 @@ class TestHeat:
             description="d1",
             meet_id="id-one",
             lanes=[
-                Lane(name="one", primary=Time(100.00)),
-                Lane(name="two", primary=Time(200.00)),
+                Lane(name="one", primary=Time("100.00")),
+                Lane(name="two", primary=Time("200.00")),
             ],
         )
         # Identical is similar
@@ -254,7 +254,7 @@ class TestHeat:
         heat2.lane(1).primary = None
         check_heat_is_similar(heat1, heat2)
         # Different lanes are not similar
-        heat2.lane(1).primary = Time(999.00)
+        heat2.lane(1).primary = Time("999.00")
         with pytest.raises(ValueError):
             check_heat_is_similar(heat1, heat2, do_throw=True)
 

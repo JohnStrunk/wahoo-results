@@ -88,7 +88,7 @@ class TestLaneValidation:
     def test_invalid_seed_time(self):
         """Invalid seed time raises ValueError."""
         with pytest.raises(ValueError):
-            Lane(seed_time=Time(-1.0))
+            Lane(seed_time=Time("-1.0"))
 
     def test_invalid_age(self):
         """Invalid age raises ValueError."""
@@ -98,22 +98,22 @@ class TestLaneValidation:
     def test_invalid_primary(self):
         """Invalid primary time raises ValueError."""
         with pytest.raises(ValueError):
-            Lane(primary=Time(-1.0))
+            Lane(primary=Time("-1.0"))
 
     def test_invalid_final_time(self):
         """Invalid final time raises ValueError."""
         with pytest.raises(ValueError):
-            Lane(primary=Time(1.0), final_time=Time(-1.0))
+            Lane(primary=Time("1.0"), final_time=Time("-1.0"))
 
     def test_invalid_backups(self):
         """Invalid backups raise ValueError."""
         with pytest.raises(ValueError):
-            Lane(backups=[Time(-1.0)])
+            Lane(backups=[Time("-1.0")])
 
     def test_invalid_splits(self):
         """Invalid splits raise ValueError."""
         with pytest.raises(ValueError):
-            Lane(splits=[[Time(-1.0)]])
+            Lane(splits=[[Time("-1.0")]])
 
 
 class TestLaneMerge:
@@ -125,12 +125,12 @@ class TestLaneMerge:
         return Lane(
             name="Alice",
             team="Apples",
-            seed_time=Time(1.0),
+            seed_time=Time("1.0"),
             age=7,
-            primary=Time(54.32),
-            final_time=Time(54.54),
-            backups=[Time(1.0), Time(2.0), Time(3.0)],
-            splits=[[Time(14.0)], [Time(15.0), Time(16.0)]],
+            primary=Time("54.32"),
+            final_time=Time("54.54"),
+            backups=[Time("1.0"), Time("2.0"), Time("3.0")],
+            splits=[[Time("14.0")], [Time("15.0"), Time("16.0")]],
             is_dq=True,
             is_empty=False,
         )
@@ -141,12 +141,12 @@ class TestLaneMerge:
         return Lane(
             name="Bob",
             team="Bananas",
-            seed_time=Time(2.0),
+            seed_time=Time("2.0"),
             age=8,
-            primary=Time(64.32),
-            final_time=Time(64.54),
-            backups=[Time(5.0), Time(6.0), Time(7.0)],
-            splits=[[Time(24.0)], [Time(25.0), Time(26.0)]],
+            primary=Time("64.32"),
+            final_time=Time("64.54"),
+            backups=[Time("5.0"), Time("6.0"), Time("7.0")],
+            splits=[[Time("24.0")], [Time("25.0"), Time("26.0")]],
             is_dq=False,
             is_empty=False,
         )
@@ -157,13 +157,13 @@ class TestLaneMerge:
         # Info from lane2
         assert lane1.name == "Bob"
         assert lane1.team == "Bananas"
-        assert lane1.seed_time == Time(2.0)
+        assert lane1.seed_time == Time("2.0")
         assert lane1.age == 8  # noqa: PLR2004
         # Results from lane1
-        assert lane1.primary == Time(54.32)
-        assert lane1.final_time == Time(54.54)
-        assert lane1.backups == [Time(1.0), Time(2.0), Time(3.0)]
-        assert lane1.splits == [[Time(14.0)], [Time(15.0), Time(16.0)]]
+        assert lane1.primary == Time("54.32")
+        assert lane1.final_time == Time("54.54")
+        assert lane1.backups == [Time("1.0"), Time("2.0"), Time("3.0")]
+        assert lane1.splits == [[Time("14.0")], [Time("15.0"), Time("16.0")]]
         assert lane1.is_dq is True
         assert lane1.is_empty is False
         # None values are merged
@@ -177,13 +177,13 @@ class TestLaneMerge:
         # Info from lane1
         assert lane1.name == "Alice"
         assert lane1.team == "Apples"
-        assert lane1.seed_time == Time(1.0)
+        assert lane1.seed_time == Time("1.0")
         assert lane1.age == 7  # noqa: PLR2004
         # Results from lane2
-        assert lane1.primary == Time(64.32)
-        assert lane1.final_time == Time(64.54)
-        assert lane1.backups == [Time(5.0), Time(6.0), Time(7.0)]
-        assert lane1.splits == [[Time(24.0)], [Time(25.0), Time(26.0)]]
+        assert lane1.primary == Time("64.32")
+        assert lane1.final_time == Time("64.54")
+        assert lane1.backups == [Time("5.0"), Time("6.0"), Time("7.0")]
+        assert lane1.splits == [[Time("24.0")], [Time("25.0"), Time("26.0")]]
         assert lane1.is_dq is False
         assert lane1.is_empty is False
         # None values are merged
@@ -206,20 +206,20 @@ class TestLaneSimilarity:
         lane1 = Lane(
             name="A",
             team="B",
-            seed_time=Time(1.0),
+            seed_time=Time("1.0"),
             age=7,
-            primary=Time(4.32),
-            final_time=Time(4.54),
+            primary=Time("4.32"),
+            final_time=Time("4.54"),
             is_dq=True,
             is_empty=False,
         )
         lane2 = Lane(
             name="A",
             team="B",
-            seed_time=Time(1.0),
+            seed_time=Time("1.0"),
             age=7,
-            primary=Time(4.32),
-            final_time=Time(4.54),
+            primary=Time("4.32"),
+            final_time=Time("4.54"),
             is_dq=True,
             is_empty=False,
         )
@@ -237,23 +237,23 @@ class TestLaneSimilarity:
     def test_similar_checks_splits(self):
         """Similarity checks splits."""
         # matching splits are similar
-        lane1 = Lane(splits=[[Time(1.0)], [Time(2.0), Time(3.0)]])
-        lane2 = Lane(splits=[[Time(1.0)], [Time(2.0), Time(3.0)]])
+        lane1 = Lane(splits=[[Time("1.0")], [Time("2.0"), Time("3.0")]])
+        lane2 = Lane(splits=[[Time("1.0")], [Time("2.0"), Time("3.0")]])
         check_lane_is_similar(lane1, lane2)
         check_lane_is_similar(lane2, lane1)
         # different splits are not similar
-        lane2.splits = [[Time(1.0)], [Time(2.0), Time(4.0)]]
+        lane2.splits = [[Time("1.0")], [Time("2.0"), Time("4.0")]]
         with pytest.raises(ValueError):
             check_lane_is_similar(lane1, lane2, do_throw=True)
         with pytest.raises(ValueError):
             check_lane_is_similar(lane2, lane1, do_throw=True)
         # different number of splits are not similar
-        lane2.splits = [[Time(1.0)], [Time(2.0)]]
+        lane2.splits = [[Time("1.0")], [Time("2.0")]]
         with pytest.raises(ValueError):
             check_lane_is_similar(lane1, lane2, do_throw=True)
         with pytest.raises(ValueError):
             check_lane_is_similar(lane2, lane1, do_throw=True)
-        lane2.splits = [[Time(1.0)], [Time(2.0), None]]
+        lane2.splits = [[Time("1.0")], [Time("2.0"), None]]
         with pytest.raises(ValueError):
             check_lane_is_similar(lane1, lane2, do_throw=True)
         with pytest.raises(ValueError):
@@ -272,18 +272,18 @@ class TestLaneSimilarity:
     def test_similar_checks_backups(self):
         """Similarity checks backups."""
         # matching backups are similar
-        lane1 = Lane(backups=[Time(1.0), Time(2.0), Time(3.0)])
-        lane2 = Lane(backups=[Time(1.0), Time(2.0), Time(3.0)])
+        lane1 = Lane(backups=[Time("1.0"), Time("2.0"), Time("3.0")])
+        lane2 = Lane(backups=[Time("1.0"), Time("2.0"), Time("3.0")])
         check_lane_is_similar(lane1, lane2)
         check_lane_is_similar(lane2, lane1)
         # different backups are not similar
-        lane2.backups = [Time(1.0), Time(2.0), Time(4.0)]
+        lane2.backups = [Time("1.0"), Time("2.0"), Time("4.0")]
         with pytest.raises(ValueError):
             check_lane_is_similar(lane1, lane2, do_throw=True)
         with pytest.raises(ValueError):
             check_lane_is_similar(lane2, lane1, do_throw=True)
         # different number of backups are not similar
-        lane2.backups = [Time(1.0), Time(2.0)]
+        lane2.backups = [Time("1.0"), Time("2.0")]
         with pytest.raises(ValueError):
             check_lane_is_similar(lane1, lane2, do_throw=True)
         with pytest.raises(ValueError):
