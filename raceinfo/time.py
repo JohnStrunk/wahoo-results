@@ -14,7 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Fundamental timing types."""
+"""Fundamental timing types.
+
+Times are represented as the `Time` type, which is an alias for `decimal.Decimal`. This allows for precise representation of times, including hundredths of a second. When creating instances of `Time`, you should use strings to avoid floating-point inaccuracies. Use of a float in the constructor will raise a `decimal.FloatOperation` exception.
+
+>>> Time(1)  # int - ok
+Decimal('1')
+>>> Time("1.0")  # string - ok
+Decimal('1.0')
+>>> Time(1.0)  # float - raises decimal.FloatOperation
+Traceback (most recent call last):
+   ...
+decimal.FloatOperation: [<class 'decimal.FloatOperation'>]
+"""
 
 import copy
 import decimal
