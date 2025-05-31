@@ -167,6 +167,7 @@ class Model:
         self.dolphin_export = CallbackList()
         self.show_scoreboard_window = CallbackList()
         self.scoreboard_window: Toplevel | None = None
+        self.clear_scoreboard = CallbackList()
         ########################################
         ## Entry fields
         self.font_normal = StringVar(name="font_normal")

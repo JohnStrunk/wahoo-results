@@ -474,6 +474,14 @@ class _runTab(ttk.Frame):
         latestres = widgets.RaceResultView(frame, self._vm.latest_result)
         latestres.grid(column=0, row=0, sticky="news")
         ToolTip(latestres, "Raw data from the latest race result")
+        self._lcolumn_buttonrow(frame).grid(column=0, row=1, sticky="news")
+        return frame
+
+    def _lcolumn_buttonrow(self, parent: Widget) -> Widget:
+        frame = ttk.Frame(parent)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=1)
         swindow_btn = ttk.Button(
             frame,
             text="Scoreboard window",
@@ -481,6 +489,13 @@ class _runTab(ttk.Frame):
         )
         swindow_btn.grid(column=0, row=1, padx=1, pady=1)
         ToolTip(swindow_btn, "Toggle the visibility of the scoreboard window")
+        clear_btn = ttk.Button(
+            frame,
+            text="Clear scoreboard",
+            command=self._vm.clear_scoreboard.run,
+        )
+        clear_btn.grid(column=1, row=1, padx=1, pady=1)
+        ToolTip(clear_btn, "Clear the scoreboard")
         return frame
 
     def _rcolumn(self, parent: Widget) -> Widget:
