@@ -153,6 +153,11 @@ The Run tab shows live results as the scoreboard is updated.
 On the left is a table showing the individual watch times and calculated final
 time for each lane.
 
+The ++"Scoreboard window"++ button opens a new window that displays the
+current scoreboard. This window can be resized and moved to a second monitor.
+Double-clicking inside the scoreboard window will toggle between full-screen
+and windowed mode.
+
 On the right the Chromecast selector that shows a list of all Chromecasts that
 have been discovered on the network. Clicking on a row toggles whether the
 scoreboard will send results to that Chromecast (enabled).
