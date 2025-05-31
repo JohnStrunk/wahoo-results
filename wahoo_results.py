@@ -201,6 +201,20 @@ def setup_ext_scoreboard(model: Model) -> None:
     model.show_scoreboard_window.add(ensure_sb_window)
 
 
+def setup_clear_scoreboard(model: Model) -> None:
+    """Set up the handler for clearing the scoreboard.
+
+    :param model: The application model
+    """
+
+    def clear_scoreboard() -> None:
+        """Clear the scoreboard image."""
+        model.scoreboard.set(waiting_screen(imagecast_types.IMAGE_SIZE, model))
+        model.latest_result.set(None)
+
+    model.clear_scoreboard.add(clear_scoreboard)
+
+
 def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
     """Set up handlers for when new scb files are detected.
 
@@ -545,6 +559,7 @@ def main() -> None:  # noqa: PLR0915
     # Set initial scoreboard image
     model.scoreboard.set(waiting_screen(imagecast_types.IMAGE_SIZE, model))
     setup_ext_scoreboard(model)
+    setup_clear_scoreboard(model)
 
     # Analytics triggers
     model.menu_docs.add(wh_analytics.documentation_link)

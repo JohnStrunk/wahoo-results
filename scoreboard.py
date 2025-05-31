@@ -33,13 +33,13 @@ def waiting_screen(size: tuple[int, int], model: Model) -> Image.Image:
     :returns: An image to display on the scoreboard
     """
     img = Image.new(mode="RGBA", size=size, color=model.color_bg.get())
-    center = (int(size[0] * 0.5), int(size[1] * 0.8))
-    normal = fonts.font_to_path(model.font_normal.get(), "Bold") or ""
-    font_size = 72
-    fnt = ImageFont.truetype(normal, font_size)
+    text_anchor = (int(size[0] * 0.9), int(size[1] * 0.9))
+    font_path = fonts.font_to_path(model.font_normal.get(), "Bold") or ""
+    font_size = 36
+    fnt = ImageFont.truetype(font_path, font_size)
     draw = ImageDraw.Draw(img)
     color = model.color_event.get()
-    draw.text(center, "Waiting for results...", font=fnt, fill=color, anchor="ms")
+    draw.text(text_anchor, "Waiting for results...", font=fnt, fill=color, anchor="rs")
     return img
 
 

@@ -158,6 +158,9 @@ current scoreboard. This window can be resized and moved to a second monitor.
 Double-clicking inside the scoreboard window will toggle between full-screen
 and windowed mode.
 
+The ++"Clear scoreboard"++ button will clear the current results from
+scoreboard and return to the waiting screen.
+
 On the right the Chromecast selector that shows a list of all Chromecasts that
 have been discovered on the network. Clicking on a row toggles whether the
 scoreboard will send results to that Chromecast (enabled).
