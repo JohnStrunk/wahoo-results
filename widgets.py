@@ -22,9 +22,9 @@ from datetime import datetime
 from tkinter import (
     VERTICAL,
     Canvas,
+    Misc,
     StringVar,
     TclError,
-    Widget,
     colorchooser,
     filedialog,
     ttk,
@@ -62,7 +62,7 @@ class ColorButton2(ttk.Button):
 
     SWATCH_SIZE = 12
 
-    def __init__(self, parent: Widget, color_var: StringVar):
+    def __init__(self, parent: Misc, color_var: StringVar):
         """Create a Button that allows choosing a color.
 
         :param parent: Parent widget
@@ -89,40 +89,53 @@ class ColorButton2(ttk.Button):
             self._color_var.set(rgb)
 
 
-class Preview(Canvas):
-    """A widget that displays a scoreboard preview image."""
+class ImageView(Canvas):
+    """A widget that displays an image."""
 
-    WIDTH = 320
-    HEIGHT = 180
-
-    def __init__(self, parent: Widget, image_var: ImageVar):
+    def __init__(self, parent: Misc, image_var: ImageVar):
         """Create a preview widget for a scoreboard image.
 
         :param parent: Parent widget
         :param image_var: Variable to hold the associated image
         """
-        super().__init__(parent, width=self.WIDTH, height=self.HEIGHT)
-        self._pimage: ImageTk.PhotoImage | None = None
+        super().__init__(parent)
+        self._img: ImageTk.PhotoImage | None = None
         self._image_var = image_var
-        image_var.trace_add(
-            "write", lambda var, idx, op: self._set_image(self._image_var.get())
-        )
+        # Watch for changes to the image and redraw the canvas
+        image_var.trace_add("write", lambda var, idx, op: self._draw())
+        # Configure event is triggered when the widget is resized
+        self.bind("<Configure>", lambda event: self._draw())
 
-    def _set_image(self, image: PILImage.Image) -> None:
-        """Set the preview image."""
-        self.delete("all")
-        scaled = image.resize((self.WIDTH, self.HEIGHT))  # type:ignore
+    def _draw(self) -> None:
+        image = self._image_var.get()
+        # Calculate scale to fit image within canvas, preserving aspect ratio
+        canvas_width = self.winfo_width()
+        canvas_height = self.winfo_height()
+        img_width, img_height = image.size
+        scale = min(canvas_width / img_width, canvas_height / img_height)
+        new_width = int(img_width * scale)
+        new_height = int(img_height * scale)
+        if new_width <= 0 or new_height <= 0:
+            return
+        scaled = image.resize((new_width, new_height), PILImage.Resampling.BICUBIC)  # type:ignore
+
         # Note: In order for the image to display on the canvas, we need to
-        # keep a reference to it, so it gets assigned to _pimage even though
+        # keep a reference to it, so it gets assigned to _img even though
         # it's not used anywhere else.
-        self._pimage = ImageTk.PhotoImage(scaled)
-        self.create_image(0, 0, image=self._pimage, anchor="nw")  # type:ignore
+        self._img = ImageTk.PhotoImage(scaled)
+        self.delete("all")
+        self.create_image(  # type:ignore
+            canvas_width // 2,
+            canvas_height // 2,
+            image=self._img,
+            anchor="center",
+        )
 
 
 class StartListTreeView(ttk.Frame):
     """Widget to display a set of startlists."""
 
-    def __init__(self, parent: Widget, startlist: StartListVar):
+    def __init__(self, parent: Misc, startlist: StartListVar):
         """Widget to display a set of startlists.
 
         :param parent: Parent widget
@@ -166,7 +179,7 @@ class StartListTreeView(ttk.Frame):
 class DirSelection(ttk.Frame):
     """Directory selector widget."""
 
-    def __init__(self, parent: Widget, directory: StringVar):
+    def __init__(self, parent: Misc, directory: StringVar):
         """Directory selector widget.
 
         :param parent: Parent widget
@@ -200,7 +213,7 @@ class DirSelection(ttk.Frame):
 class RaceResultTreeView(ttk.Frame):
     """Widget that displays a table of completed races."""
 
-    def __init__(self, parent: Widget, racelist: RaceResultListVar):
+    def __init__(self, parent: Misc, racelist: RaceResultListVar):
         """Widget that displays a table of completed races.
 
         :param parent: Parent widget
@@ -252,7 +265,7 @@ class RaceResultTreeView(ttk.Frame):
 class ChromcastSelector(ttk.Frame):
     """Widget that allows enabling/disabling a set of Chromecast devices."""
 
-    def __init__(self, parent: Widget, statusvar: ChromecastStatusVar) -> None:
+    def __init__(self, parent: Misc, statusvar: ChromecastStatusVar) -> None:
         """Widget that allows enabling/disabling a set of Chromecast devices.
 
         :param parent: Parent widget
@@ -304,7 +317,7 @@ class ChromcastSelector(ttk.Frame):
 class RaceResultView(ttk.LabelFrame):
     """Widget that displays a RaceResult."""
 
-    def __init__(self, parent: Widget, resultvar: RaceResultVar) -> None:
+    def __init__(self, parent: Misc, resultvar: RaceResultVar) -> None:
         """Widget that displays a RaceResult.
 
         :param parent: Parent widget
@@ -323,16 +336,16 @@ class RaceResultView(ttk.LabelFrame):
         )
         self.tview.grid(column=0, row=0, sticky="news")
         # Column configuration
-        time_width = 60
+        time_width = 55
         self.tview.heading("lane", anchor="e", text="Lane")
         self.tview.column("lane", anchor="e", width=35)
         self.tview.heading("pad", anchor="e", text="Pad")
         self.tview.column("pad", anchor="e", width=time_width)
-        self.tview.heading("t1", anchor="e", text="Timer #1")
+        self.tview.heading("t1", anchor="e", text="Time #1")
         self.tview.column("t1", anchor="e", width=time_width)
-        self.tview.heading("t2", anchor="e", text="Timer #2")
+        self.tview.heading("t2", anchor="e", text="Time #2")
         self.tview.column("t2", anchor="e", width=time_width)
-        self.tview.heading("t3", anchor="e", text="Timer #3")
+        self.tview.heading("t3", anchor="e", text="Time #3")
         self.tview.column("t3", anchor="e", width=time_width)
         self.tview.heading("final", anchor="e", text="Final")
         self.tview.column("final", anchor="e", width=time_width)

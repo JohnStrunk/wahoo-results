@@ -23,12 +23,12 @@ import uuid
 from collections.abc import Callable
 from configparser import ConfigParser
 from enum import StrEnum, unique
-from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Tk, Variable
+from tkinter import BooleanVar, DoubleVar, IntVar, StringVar, Tk, Toplevel, Variable
 from typing import Generic, TypeVar
 
 import PIL.Image as PILImage
 
-from imagecast import DeviceStatus
+from imagecast_types import DeviceStatus
 from raceinfo import FullProgram, Heat
 from raceinfo.dolphin_do4 import DolphinDo4
 from raceinfo.timingsystem import TimingSystem
@@ -165,6 +165,8 @@ class Model:
         self.bg_import = CallbackList()
         self.bg_clear = CallbackList()
         self.dolphin_export = CallbackList()
+        self.show_scoreboard_window = CallbackList()
+        self.scoreboard_window: Toplevel | None = None
         ########################################
         ## Entry fields
         self.font_normal = StringVar(name="font_normal")

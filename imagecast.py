@@ -21,7 +21,6 @@ import threading
 import time
 import typing
 from collections.abc import Callable
-from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
 from uuid import UUID
@@ -36,10 +35,8 @@ from pychromecast.discovery import CastBrowser
 from pychromecast.error import NotConnected
 from pychromecast.models import CastInfo
 
+from imagecast_types import DeviceStatus as _DeviceStatus
 from wh_analytics import image_sent
-
-# Resolution of images for the Chromecast
-IMAGE_SIZE = (1280, 720)
 
 # Chromecast image refresh interval (seconds)
 # Newer versions of the Chromecast firmware seem to have a 10 minute timeout
@@ -49,15 +46,6 @@ _REFRESH_INTERVAL = 7 * 60
 _WAHOO_RESULTS_APP_ID = "34B218B6"
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class DeviceStatus:
-    """The status of a Chromecast device."""
-
-    uuid: UUID  # UUID for the device
-    name: str  # Friendly name for the device
-    enabled: bool  # Whether the device is enabled
 
 
 DiscoveryCallbackFn = Callable[[], None]
@@ -176,15 +164,15 @@ class ImageCast:
                     logger.debug("Disabling %s", self.devices[uuid]["cast"].name)
                     self._disconnect(self.devices[uuid]["cast"])
 
-    def get_devices(self) -> list[DeviceStatus]:
+    def get_devices(self) -> list[_DeviceStatus]:
         """Get the current list of known Chromecast devices and whether they are currently enabled.
 
         :returns: A list of DeviceStatus objects
         """
-        devs: list[DeviceStatus] = []
+        devs: list[_DeviceStatus] = []
         for uuid, state in self.devices.items():
             devs.append(
-                DeviceStatus(
+                _DeviceStatus(
                     uuid, state["cast"].cast_info.friendly_name, state["enabled"]
                 )
             )

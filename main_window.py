@@ -50,7 +50,7 @@ class View(ttk.Frame):
         # Common screen sizes: HD=1366x768 FHD=1920x1080
         # Fix the window to 1/2 the size of the screen so that it's manageable
         root.resizable(False, False)
-        root.geometry(f"{1366 // 2}x{768 // 2}")
+        root.geometry(f"{int(1366 * 0.5)}x{int(768 * 0.5)}")
         bundle_dir = getattr(
             sys, "_MEIPASS", os.path.abspath(os.path.dirname(__file__))
         )
@@ -142,7 +142,8 @@ class _configTab(ttk.Frame):
         self._vm = vm
         self.columnconfigure(0, weight=1, uniform="same1")
         self.columnconfigure(1, weight=1, uniform="same1")
-        self.rowconfigure(0, weight=1)
+        # self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
         self._appearance(self).grid(column=0, row=0, rowspan=2, sticky="news")
         self._options_frame(self).grid(column=1, row=0, sticky="news")
         self._preview(self).grid(column=1, row=1, sticky="news")
@@ -389,7 +390,8 @@ class _configTab(ttk.Frame):
     def _preview(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
-        widgets.Preview(frame, self._vm.appearance_preview).grid(column=0, row=0)
+        frame.rowconfigure(0, weight=1)
+        widgets.ImageView(frame, self._vm.appearance_preview).grid(column=0, row=0)
         ToolTip(frame, "Mockup of how the scoreboard will look")
         return frame
 
@@ -458,14 +460,37 @@ class _runTab(ttk.Frame):
     def __init__(self, parent: Widget, vm: Model) -> None:
         super().__init__(parent)
         self._vm = vm
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(0, uniform="same1", weight=1)
+        self.columnconfigure(1, uniform="same1", weight=1)
         self.rowconfigure(0, weight=1)
-        self._cc_selector(self).grid(column=1, row=0, sticky="news")
-        self._preview(self).grid(column=1, row=1, sticky="news")
-        latestres = widgets.RaceResultView(self, self._vm.latest_result)
-        latestres.grid(column=0, row=0, rowspan=2, sticky="news")
+        self._lcolumn(self).grid(column=0, row=0, sticky="news")
+        self._rcolumn(self).grid(column=1, row=0, sticky="news")
+
+    def _lcolumn(self, parent: Widget) -> Widget:
+        frame = ttk.Frame(parent)
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=0)
+        frame.columnconfigure(0, weight=1)
+        latestres = widgets.RaceResultView(frame, self._vm.latest_result)
+        latestres.grid(column=0, row=0, sticky="news")
         ToolTip(latestres, "Raw data from the latest race result")
+        swindow_btn = ttk.Button(
+            frame,
+            text="Scoreboard window",
+            command=self._vm.show_scoreboard_window.run,
+        )
+        swindow_btn.grid(column=0, row=1, padx=1, pady=1)
+        ToolTip(swindow_btn, "Toggle the visibility of the scoreboard window")
+        return frame
+
+    def _rcolumn(self, parent: Widget) -> Widget:
+        frame = ttk.Frame(parent)
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
+        frame.columnconfigure(0, weight=1)
+        self._cc_selector(frame).grid(column=0, row=0, sticky="news")
+        self._preview(frame).grid(column=0, row=1, sticky="news")
+        return frame
 
     def _cc_selector(self, parent: Widget) -> Widget:
         frame = ttk.LabelFrame(parent, text="Available Chromecasts")
@@ -480,6 +505,6 @@ class _runTab(ttk.Frame):
         frame = ttk.LabelFrame(parent, text="Scoreboard preview")
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(0, weight=1)
-        widgets.Preview(frame, self._vm.scoreboard).grid(column=0, row=0)
+        widgets.ImageView(frame, self._vm.scoreboard).grid(column=0, row=0)
         ToolTip(frame, "Current contents of the scoreboard")
         return frame
