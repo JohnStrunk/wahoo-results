@@ -55,9 +55,9 @@ repos:
     rev: "v0.11.12"
     hooks:
       # Note: lint/fix before format
-      - id: ruff # Run the linter.
+      - id: ruff-check
       # args: [ --fix ]
-      - id: ruff-format # Run the formatter.
+      - id: ruff-format
 
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: "0.7.8"
