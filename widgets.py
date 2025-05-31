@@ -102,9 +102,17 @@ class ImageView(Canvas):
         self._img: ImageTk.PhotoImage | None = None
         self._image_var = image_var
         # Watch for changes to the image and redraw the canvas
-        image_var.trace_add("write", lambda var, idx, op: self._draw())
+        self._trace_name = image_var.trace_add(
+            "write", lambda var, idx, op: self._draw()
+        )
         # Configure event is triggered when the widget is resized
         self.bind("<Configure>", lambda event: self._draw())
+        self.bind("<Destroy>", self._on_destroy)  # type:ignore
+
+    def _on_destroy(self, event):  # type:ignore
+        if event.widget is not self:  # type:ignore
+            return
+        self._image_var.trace_remove("write", self._trace_name)
 
     def _draw(self) -> None:
         image = self._image_var.get()
