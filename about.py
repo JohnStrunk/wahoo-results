@@ -62,11 +62,12 @@ def _set_contents(txt: Text) -> None:
     contents = textwrap.dedent(
         f"""\
         Wahoo! Results
-        Copyright (c) 2022 - John Strunk
+        Copyright (c) 2022-2025 - John Strunk
 
         This is free software, licensed under the
         GNU Affero General Public License v3 or later
 
+        https://wahoo-results.com
         https://github.com/JohnStrunk/wahoo-results
 
         Version: {WAHOO_RESULTS_VERSION}
@@ -91,7 +92,7 @@ def _set_contents(txt: Text) -> None:
     )
     txt.insert("1.0", contents, ("all"))
     txt.tag_configure(
-        "all", foreground="black", font=f"TktextFont {txtsize}", justify="center"
+        "all", foreground="black", font=f"TkTextFont {txtsize}", justify="center"
     )
 
     # Set the style for the application title text line

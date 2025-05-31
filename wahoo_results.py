@@ -42,6 +42,7 @@ from watchdog.observers.api import BaseObserver
 
 import autotest
 import imagecast
+import imagecast_types
 import main_window
 import raceinfo
 import wh_analytics
@@ -52,6 +53,7 @@ from raceinfo import ColoradoSCB, DolphinEvent, Heat, Time
 from raceinfo.timingsystem import TimingSystem
 from resolver import standard_resolver
 from scoreboard import ScoreboardImage, waiting_screen
+from scoreboard_window import make_sb_window
 from template import get_template
 from version import SENTRY_DSN, WAHOO_RESULTS_VERSION
 from watcher import ResultWatcher, SCBWatcher
@@ -104,7 +106,9 @@ def setup_template(model: Model) -> None:
         )
         if len(filename) == 0:
             return
-        template = ScoreboardImage(imagecast.IMAGE_SIZE, get_template(), model, True)
+        template = ScoreboardImage(
+            imagecast_types.IMAGE_SIZE, get_template(), model, True
+        )
         template.image.save(filename)
 
     model.menu_export_template.add(do_export)
@@ -140,7 +144,7 @@ def setup_appearance(model: Model) -> None:
 
     def update_preview() -> None:
         """Update the appearance preview with the current settings."""
-        preview = ScoreboardImage(imagecast.IMAGE_SIZE, get_template(), model)
+        preview = ScoreboardImage(imagecast_types.IMAGE_SIZE, get_template(), model)
         model.appearance_preview.set(preview.image)
 
     for element in [
@@ -176,6 +180,25 @@ def setup_appearance(model: Model) -> None:
 
     model.bg_import.add(handle_bg_import)
     model.bg_clear.add(lambda: model.image_bg.set(""))
+
+
+def setup_ext_scoreboard(model: Model) -> None:
+    """Set up the external scoreboard functionality.
+
+    :param model: The application model
+    """
+
+    def ensure_sb_window() -> None:
+        if (
+            model.scoreboard_window is not None
+            and model.scoreboard_window.winfo_exists()
+        ):
+            model.scoreboard_window.destroy()
+            model.scoreboard_window = None
+        else:
+            model.scoreboard_window = make_sb_window(model.root, model.scoreboard)
+
+    model.show_scoreboard_window.add(ensure_sb_window)
 
 
 def setup_scb_watcher(model: Model, observer: BaseObserver) -> None:
@@ -299,7 +322,7 @@ def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
             result = load_result(model, file)
             if result is None:
                 return
-            scoreboard = ScoreboardImage(imagecast.IMAGE_SIZE, result, model)
+            scoreboard = ScoreboardImage(imagecast_types.IMAGE_SIZE, result, model)
             model.scoreboard.set(scoreboard.image)
             model.latest_result.set(result)
             num_cc = len([x for x in model.cc_status.get() if x.enabled])
@@ -520,7 +543,8 @@ def main() -> None:  # noqa: PLR0915
     icast.start()
 
     # Set initial scoreboard image
-    model.scoreboard.set(waiting_screen(imagecast.IMAGE_SIZE, model))
+    model.scoreboard.set(waiting_screen(imagecast_types.IMAGE_SIZE, model))
+    setup_ext_scoreboard(model)
 
     # Analytics triggers
     model.menu_docs.add(wh_analytics.documentation_link)
