@@ -52,7 +52,7 @@ class GVar(Variable, Generic[_T]):
         :param value: the initial value for the variable
         :param master: the master widget
         """
-        super().__init__(master=master, value=0)
+        super().__init__(master=master, value=0)  # type: ignore
         self._value = value
 
     def get(self) -> _T:

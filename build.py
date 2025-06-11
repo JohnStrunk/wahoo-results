@@ -83,32 +83,32 @@ v = vinfo.VSVersionInfo(
         subtype=0x0,
     ),
     kids=[
-        vinfo.StringFileInfo(  # type: ignore
+        vinfo.StringFileInfo(
             [
-                vinfo.StringTable(  # type: ignore
+                vinfo.StringTable(
                     "040904e4",
                     [
                         # https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
                         # Required fields:
-                        vinfo.StringStruct("CompanyName", "John D. Strunk"),  # type: ignore
-                        vinfo.StringStruct("FileDescription", "Wahoo! Results"),  # type: ignore
-                        vinfo.StringStruct("FileVersion", wr_version),  # type: ignore
-                        vinfo.StringStruct("InternalName", "wahoo_results"),  # type: ignore
-                        vinfo.StringStruct("ProductName", "Wahoo! Results"),  # type: ignore
-                        vinfo.StringStruct("ProductVersion", wr_version),  # type: ignore
-                        vinfo.StringStruct("OriginalFilename", "wahoo-results.exe"),  # type: ignore
+                        vinfo.StringStruct("CompanyName", "John D. Strunk"),
+                        vinfo.StringStruct("FileDescription", "Wahoo! Results"),
+                        vinfo.StringStruct("FileVersion", wr_version),
+                        vinfo.StringStruct("InternalName", "wahoo_results"),
+                        vinfo.StringStruct("ProductName", "Wahoo! Results"),
+                        vinfo.StringStruct("ProductVersion", wr_version),
+                        vinfo.StringStruct("OriginalFilename", "wahoo-results.exe"),
                         # Optional fields
-                        vinfo.StringStruct(  # type: ignore
+                        vinfo.StringStruct(
                             "LegalCopyright", "(c) John D. Strunk - AGPL-3.0-or-later"
                         ),
                     ],
                 )
             ]
         ),
-        vinfo.VarFileInfo(  # type: ignore
+        vinfo.VarFileInfo(
             [
                 # 1033 -> Engligh; 1252 -> charsetID
-                vinfo.VarStruct("Translation", [1033, 1252])  # type: ignore
+                vinfo.VarStruct("Translation", [1033, 1252])
             ]
         ),
     ],
