@@ -1,11 +1,14 @@
 """Font management utilities for installed system fonts using fontTools."""
 
+import logging
 import os
 import sys
 import threading
 from dataclasses import dataclass
 
-from fontTools.ttLib import TTFont  # type: ignore
+from fontTools.ttLib import TTCollection, TTFont  # type: ignore
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -36,46 +39,65 @@ else:
     ]
 
 
-def _scan_fonts() -> dict[tuple[str, str], FontInfo]:
+def _scan_fonts() -> dict[tuple[str, str], FontInfo]:  # noqa: PLR0912
     fonts: dict[tuple[str, str], FontInfo] = {}
     for font_dir in _FONT_DIRS:
         if not os.path.isdir(font_dir):
             continue
         for file in os.listdir(font_dir):
-            if file.lower().endswith(".ttf"):
+            if file.lower().endswith((".ttf", ".ttc", ".otf", ".otc")):
                 path = os.path.join(font_dir, file)
+                fonts_to_process = []
+                collection = None  # To ensure TTCollection is closed
+
                 try:
-                    font = TTFont(path, fontNumber=0)
-                    name_table = font["name"]  # type: ignore
-                    family = None
-                    subfamily = None
-                    for record in name_table.names:  # type: ignore
-                        # Record 1 is the Font Family name
-                        if getattr(record, "nameID", None) == 1:  # type: ignore
-                            try:
-                                family = record.string.decode(  # type: ignore
-                                    record.getEncoding(),  # type: ignore
-                                    errors="ignore",
-                                )
-                            except Exception:
-                                continue
-                        elif (
-                            # Record 2 is the Font Subfamily name
-                            getattr(record, "nameID", None) == 2  # type: ignore  # noqa: PLR2004
-                        ):  # Font Subfamily name
-                            try:
-                                subfamily = record.string.decode(  # type: ignore
-                                    record.getEncoding(),  # type: ignore
-                                    errors="ignore",
-                                )
-                            except Exception:
-                                continue
-                    if family:
-                        key = (family, subfamily or "Regular")  # type: ignore
-                        if key not in fonts:
-                            fonts[key] = FontInfo(name=family, ttf_path=path)  # type: ignore
-                except Exception:
+                    if file.lower().endswith((".ttc", ".otc")):
+                        # It's a font collection, use TTCollection
+                        collection = TTCollection(path)
+                        fonts_to_process.extend(collection.fonts)  # type: ignore
+                    else:
+                        # It's a single font file
+                        fonts_to_process.append(TTFont(path))  # type: ignore
+
+                    for font in fonts_to_process:  # type: ignore
+                        try:
+                            name_table = font["name"]  # type: ignore
+                            family = None
+                            subfamily = None
+
+                            for record in name_table.names:  # type: ignore
+                                # nameID 1: Font Family name
+                                if record.nameID == 1:  # type: ignore
+                                    family = record.string.decode(  # type: ignore
+                                        record.getEncoding(),  # type: ignore
+                                        errors="ignore",
+                                    )
+                                # nameID 2: Font Subfamily name
+                                elif record.nameID == 2:  # type: ignore  # noqa: PLR2004
+                                    subfamily = record.string.decode(  # type: ignore
+                                        record.getEncoding(),  # type: ignore
+                                        errors="ignore",
+                                    )
+
+                            if family:
+                                key = (family, subfamily or "Regular")  # type: ignore
+                                if key not in fonts:
+                                    fonts[key] = FontInfo(name=family, ttf_path=path)  # type: ignore
+                        except Exception as inner_e:
+                            logger.debug(
+                                "Failed to process font info for %s (from %s): %s",
+                                font,  # type: ignore
+                                path,
+                                inner_e,
+                            )
+                        finally:
+                            font.close()  # Ensure each font object is closed # type: ignore
+                except Exception as e:
+                    logger.debug("Failed to process font file %s: %s", path, e)
                     continue
+                finally:
+                    if collection:
+                        collection.close()  # Ensure TTCollection is closed
     return fonts
 
 
