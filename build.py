@@ -19,10 +19,13 @@
 import os
 import shutil
 import subprocess
+import sys
 
 import PyInstaller.__main__
-import PyInstaller.utils.win32.versioninfo as vinfo
 import semver
+
+if sys.platform == "win32":
+    import PyInstaller.utils.win32.versioninfo as vinfo
 
 import wh_version
 
@@ -71,52 +74,57 @@ with open("version.py", "w") as f:
     f.flush()
     f.close()
 
-# Create file info to embed in executable
-v = vinfo.VSVersionInfo(
-    ffi=vinfo.FixedFileInfo(
-        filevers=(version.major, version.minor, version.patch, 0),
-        prodvers=(version.major, version.minor, version.patch, 0),
-        mask=0x3F,
-        flags=0x0,
-        OS=0x4,
-        fileType=0x1,
-        subtype=0x0,
-    ),
-    kids=[
-        vinfo.StringFileInfo(
-            [
-                vinfo.StringTable(
-                    "040904e4",
-                    [
-                        # https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
-                        # Required fields:
-                        vinfo.StringStruct("CompanyName", "John D. Strunk"),
-                        vinfo.StringStruct("FileDescription", "Wahoo! Results"),
-                        vinfo.StringStruct("FileVersion", wr_version),
-                        vinfo.StringStruct("InternalName", "wahoo_results"),
-                        vinfo.StringStruct("ProductName", "Wahoo! Results"),
-                        vinfo.StringStruct("ProductVersion", wr_version),
-                        vinfo.StringStruct("OriginalFilename", "wahoo-results.exe"),
-                        # Optional fields
-                        vinfo.StringStruct(
-                            "LegalCopyright", "(c) John D. Strunk - AGPL-3.0-or-later"
-                        ),
-                    ],
-                )
-            ]
+if sys.platform == "win32":
+    # Create file info to embed in executable
+    v = vinfo.VSVersionInfo(
+        ffi=vinfo.FixedFileInfo(
+            filevers=(version.major, version.minor, version.patch, 0),
+            prodvers=(version.major, version.minor, version.patch, 0),
+            mask=0x3F,
+            flags=0x0,
+            OS=0x4,
+            fileType=0x1,
+            subtype=0x0,
         ),
-        vinfo.VarFileInfo(
-            [
-                # 1033 -> Engligh; 1252 -> charsetID
-                vinfo.VarStruct("Translation", [1033, 1252])
-            ]
-        ),
-    ],
-)
-with open("wahoo-results.fileinfo", "w") as f:
-    f.write(str(v))
-    f.flush()
-    f.close()
+        kids=[
+            vinfo.StringFileInfo(
+                [
+                    vinfo.StringTable(
+                        "040904e4",
+                        [
+                            # https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
+                            # Required fields:
+                            vinfo.StringStruct("CompanyName", "John D. Strunk"),
+                            vinfo.StringStruct("FileDescription", "Wahoo! Results"),
+                            vinfo.StringStruct("FileVersion", wr_version),
+                            vinfo.StringStruct("InternalName", "wahoo_results"),
+                            vinfo.StringStruct("ProductName", "Wahoo! Results"),
+                            vinfo.StringStruct("ProductVersion", wr_version),
+                            vinfo.StringStruct("OriginalFilename", "wahoo-results.exe"),
+                            # Optional fields
+                            vinfo.StringStruct(
+                                "LegalCopyright",
+                                "(c) John D. Strunk - AGPL-3.0-or-later",
+                            ),
+                        ],
+                    )
+                ]
+            ),
+            vinfo.VarFileInfo(
+                [
+                    # 1033 -> Engligh; 1252 -> charsetID
+                    vinfo.VarStruct("Translation", [1033, 1252])
+                ]
+            ),
+        ],
+    )
+    with open("wahoo-results.fileinfo", "w") as f:
+        f.write(str(v))
+        f.flush()
+        f.close()
+
+# Ensure the build directory exists
+os.makedirs("build", exist_ok=True)
 
 print("Invoking PyInstaller to generate executable...\n")
 
