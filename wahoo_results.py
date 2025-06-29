@@ -584,6 +584,8 @@ def main() -> None:  # noqa: PLR0915
     except RuntimeError:
         pass
 
+    root.resizable(True, True)  # Allow resizing of the main window
+
     if args.test is not None:
         scenario = autotest.build_scenario(model, args.test)
         autotest.run_scenario(scenario)
