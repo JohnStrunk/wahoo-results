@@ -3,7 +3,7 @@ name = "wahoo-results"
 version = "0.1.0"
 description = "A scoreboard for swimming using results from a CTS Dolphin timing system"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "fonttools==4.58.4",
     "ipinfo==5.1.1",
@@ -94,9 +94,6 @@ filterwarnings = [
     # Need updates to pytest-pylint for the following:
     "ignore:Using the __implements__ inheritance pattern for BaseReporter is no longer supported.",
 ]
-
-[tool.ruff]
-target-version = "py311"
 
 [tool.ruff.format]
 docstring-code-format = true
