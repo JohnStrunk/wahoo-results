@@ -593,7 +593,7 @@ def main() -> None:  # noqa: PLR0915
     # and we're running in exe mode
     try:
         root.update()
-        import pyi_splash  # type: ignore
+        import pyi_splash  # noqa: PLC0415
 
         if pyi_splash.is_alive():
             pyi_splash.close()

@@ -22,6 +22,7 @@ from datetime import datetime
 from tkinter import (
     VERTICAL,
     Canvas,
+    DoubleVar,
     Misc,
     StringVar,
     TclError,
@@ -325,15 +326,20 @@ class ChromcastSelector(ttk.Frame):
 class RaceResultView(ttk.LabelFrame):
     """Widget that displays a RaceResult."""
 
-    def __init__(self, parent: Misc, resultvar: RaceResultVar) -> None:
+    def __init__(
+        self, parent: Misc, resultvar: RaceResultVar, time_threshold_var: DoubleVar
+    ) -> None:
         """Widget that displays a RaceResult.
 
         :param parent: Parent widget
         :param resultvar: Variable containing the result of a race
+        :param time_threshold_var: Variable containing the time threshold for highlighting inconsistent times.
         """
         super().__init__(parent, text="Latest result")
         self._resultvar = resultvar
+        self._time_threshold_var = time_threshold_var
         self._resultvar.trace_add("write", lambda var, idx, op: self._update())
+        self._time_threshold_var.trace_add("write", lambda var, idx, op: self._update())
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.tview = ttk.Treeview(
@@ -357,6 +363,7 @@ class RaceResultView(ttk.LabelFrame):
         self.tview.column("t3", anchor="e", width=time_width)
         self.tview.heading("final", anchor="e", text="Final")
         self.tview.column("final", anchor="e", width=time_width)
+        self.tview.tag_configure("inconsistent", foreground="red")
         self._update()
 
     def _update(self) -> None:
@@ -364,13 +371,16 @@ class RaceResultView(ttk.LabelFrame):
         result = self._resultvar.get()
         for l_index in range(1, 11):
             if result is None:
+                tags = ()
                 self.tview.insert(
                     "",
                     "end",
                     id=str(l_index),
                     values=[str(l_index), "", "", "", "", ""],
+                    tags=tags,
                 )
             else:
+                tags = ()
                 lane = l_index - 1 if result.numbering == "0-9" else l_index
                 padtime = format_time(result.lane(lane).primary)
                 rawtimes: list[Time | None] = [None, None, None]
@@ -378,7 +388,14 @@ class RaceResultView(ttk.LabelFrame):
                 if backups is not None:
                     for i, b in enumerate(backups):
                         rawtimes[i] = b
+                valid_times = [t for t in rawtimes if t is not None]
+                if len(valid_times) >= 2:  # noqa: PLR2004
+                    if max(valid_times) - min(valid_times) > Time(
+                        str(self._time_threshold_var.get())
+                    ):
+                        tags = ("inconsistent",)
                 timestr = [format_time(t) if t is not None else "" for t in rawtimes]
+
                 final = result.lane(lane).final_time
                 if final is not None:
                     finalstr = format_time(final)
@@ -400,4 +417,5 @@ class RaceResultView(ttk.LabelFrame):
                         timestr[2],
                         finalstr,
                     ],
+                    tags=tags,
                 )
