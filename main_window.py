@@ -398,6 +398,13 @@ class _configTab(ttk.Frame):
             "Automatically save the scoreboard image when a new result is processed",
         )
 
+        ttk.Label(opt_frame, text="Autosave directory:", anchor="e").grid(
+            column=0, row=4, sticky="news"
+        )
+        dirsel = widgets.DirSelection(opt_frame, self._vm.dir_autosave)
+        dirsel.grid(column=1, row=4, columnspan=4, sticky="news", pady=_PADDING)
+        ToolTip(dirsel, "Directory to automatically save scoreboard images to")
+
         return opt_frame
 
     def _preview(self, parent: Widget) -> Widget:
@@ -466,16 +473,6 @@ class _dirsTab(ttk.Frame):
             column=0, row=2, sticky="news", padx=1, pady=1
         )
         ToolTip(frame, "List of completed races found in the results directory")
-
-        autosave_frame = ttk.Frame(frame, padding=_PADDING)
-        autosave_frame.grid(column=0, row=3, sticky="news")
-        autosave_frame.columnconfigure(1, weight=1)
-        ttk.Label(autosave_frame, text="Autosave directory:", anchor="e").grid(
-            column=0, row=0, sticky="news"
-        )
-        dirsel = widgets.DirSelection(autosave_frame, self._vm.dir_autosave)
-        dirsel.grid(column=1, row=0, sticky="news")
-        ToolTip(dirsel, "Directory to automatically save scoreboard images to")
 
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(2, weight=1)
