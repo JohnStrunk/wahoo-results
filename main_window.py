@@ -471,7 +471,9 @@ class _runTab(ttk.Frame):
         frame.rowconfigure(0, weight=1)
         frame.rowconfigure(1, weight=0)
         frame.columnconfigure(0, weight=1)
-        latestres = widgets.RaceResultView(frame, self._vm.latest_result)
+        latestres = widgets.RaceResultView(
+            frame, self._vm.latest_result, time_threshold_var=self._vm.time_threshold
+        )
         latestres.grid(column=0, row=0, sticky="news")
         ToolTip(latestres, "Raw data from the latest race result")
         self._lcolumn_buttonrow(frame).grid(column=0, row=1, sticky="news")
