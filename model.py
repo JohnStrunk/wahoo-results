@@ -17,6 +17,7 @@
 """Wahoo! Results data model."""
 
 import logging
+import os
 import queue
 import tkinter
 import uuid
@@ -249,7 +250,7 @@ class Model:
         self.dir_startlist.set(data.get("dir_startlist", "C:\\swmeets8"))
         self.result_format.set(data.get("result_format", "Dolphin - do4"))
         self.dir_results.set(data.get("dir_results", "C:\\CTSDolphin"))
-        self.dir_autosave.set(data.get("dir_autosave", "C:\\wahoo-results-images"))
+        self.dir_autosave.set(data.get("dir_autosave", os.getcwd()))
         client_id = data.get("client_id")
         if client_id is None or len(client_id) == 0:
             client_id = str(uuid.uuid4())

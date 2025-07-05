@@ -340,11 +340,22 @@ def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
             model.scoreboard.set(scoreboard.image)
             if model.autosave_scoreboard.get():
                 autosave_dir = model.dir_autosave.get()
-                if not os.path.exists(autosave_dir):
-                    os.makedirs(autosave_dir)
-                filename = f"E{result.event or 0}-H{result.heat or 0}-scoreboard.png"
-                filepath = os.path.join(autosave_dir, filename)
-                scoreboard.image.save(filepath)
+                try:
+                    if not os.path.exists(autosave_dir):
+                        os.makedirs(autosave_dir)
+                    filename = f"E{int(result.event or 0):03d}-H{int(result.heat or 0):02d}-scoreboard.png"
+                    filepath = os.path.join(autosave_dir, filename)
+                    scoreboard.image.save(filepath)
+                except (OSError, IOError) as e:
+                    logger.error(
+                        "Error autosaving scoreboard to %s: %s", autosave_dir, e
+                    )
+                    model.enqueue(
+                        lambda e=e: messagebox.showerror(  # type: ignore
+                            "Autosave Error",
+                            f"Could not save scoreboard image to '{autosave_dir}':\n{e}",
+                        )
+                    )
             model.latest_result.set(result)
             num_cc = len([x for x in model.cc_status.get() if x.enabled])
             wh_analytics.results_received(result.has_names(), num_cc)
