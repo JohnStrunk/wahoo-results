@@ -18,6 +18,7 @@
 
 import logging
 import queue
+import sys
 import tkinter
 import uuid
 from collections.abc import Callable
@@ -224,9 +225,25 @@ class Model:
         # Calibri (sans serif) is standard since Vista
         # It's also part of USA-S visual identity standards
         # https://www.usaswimming.org/docs/default-source/marketingdocuments/usa-swimming-logo-standards-manual.pdf
-        self.font_normal.set(data.get("font_normal", "Calibri"))
+        # macos doesn't have Calibri installed by default, so we use Helvetica
+        default_font_normal = ""
+        if sys.platform == "win32":
+            default_font_normal = "Calibri"
+        elif sys.platform == "darwin":
+            default_font_normal = "Helvetica"
+        else:
+            default_font_normal = "Times"
+        self.font_normal.set(data.get("font_normal", default_font_normal))
         # Consolas (monospace) is standard since Vista
-        self.font_time.set(data.get("font_time", "Consolas"))
+        # macos doesn't have Consolas installed by default, so we use Courier
+        default_font_time = ""
+        if sys.platform == "win32":
+            default_font_time = "Consolas"
+        elif sys.platform == "darwin":
+            default_font_time = "Courier"
+        else:
+            default_font_time = "Arial"
+        self.font_time.set(data.get("font_time", default_font_time))
         self.text_spacing.set(data.getfloat("text_spacing", 1.1))
         self.title.set(data.get("title", "Wahoo! Results"))
         self.image_bg.set(data.get("image_bg", ""))
