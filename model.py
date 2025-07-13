@@ -17,6 +17,7 @@
 """Wahoo! Results data model."""
 
 import logging
+import os
 import queue
 import sys
 import tkinter
@@ -191,6 +192,7 @@ class Model:
         self.min_times = IntVar(name="min_times")
         self.time_threshold = DoubleVar(name="time_threshold")
         self.dq_mode = StringVar(name="dq_mode")
+        self.autosave_scoreboard = BooleanVar(name="autosave_scoreboard")
         # Preview
         self.appearance_preview = ImageVar(PILImage.Image())
         # Directories
@@ -200,6 +202,7 @@ class Model:
         # The timing system will get updated/set properly before use
         self.timing_system: TimingSystem = DolphinDo4()
         self.dir_results = StringVar(name="dir_results")
+        self.dir_autosave = StringVar(name="dir_autosave")
         self.results_contents = RaceResultListVar([])
         # Run tab
         self.cc_status = ChromecastStatusVar([])
@@ -260,9 +263,11 @@ class Model:
         self.min_times.set(data.getint("min_times", 2))
         self.time_threshold.set(data.getfloat("time_threshold", 0.30))
         self.dq_mode.set(data.get("dq_mode", DQMode.IGNORE))
+        self.autosave_scoreboard.set(data.getboolean("autosave_scoreboard", False))
         self.dir_startlist.set(data.get("dir_startlist", "C:\\swmeets8"))
         self.result_format.set(data.get("result_format", "Dolphin - do4"))
         self.dir_results.set(data.get("dir_results", "C:\\CTSDolphin"))
+        self.dir_autosave.set(data.get("dir_autosave", os.getcwd()))
         client_id = data.get("client_id")
         if client_id is None or len(client_id) == 0:
             client_id = str(uuid.uuid4())
@@ -298,9 +303,11 @@ class Model:
             "min_times": str(self.min_times.get()),
             "time_threshold": str(self.time_threshold.get()),
             "dq_mode": self.dq_mode.get(),
+            "autosave_scoreboard": str(self.autosave_scoreboard.get()),
             "dir_startlist": self.dir_startlist.get(),
             "result_format": self.result_format.get(),
             "dir_results": self.dir_results.get(),
+            "dir_autosave": self.dir_autosave.get(),
             "client_id": self.client_id.get(),
             "analytics": str(self.analytics.get()),
         }

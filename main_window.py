@@ -385,6 +385,26 @@ class _configTab(ttk.Frame):
             "Whether and how to display DQs on scoreboard",
         )
 
+        ttk.Label(opt_frame, text="Autosave scoreboard:", anchor="e").grid(
+            column=0, row=3, sticky="news"
+        )
+        as_cb = ttk.Checkbutton(
+            opt_frame,
+            variable=self._vm.autosave_scoreboard,
+        )
+        as_cb.grid(column=1, row=3, sticky="nws", pady=_PADDING)
+        ToolTip(
+            as_cb,
+            "Automatically save the scoreboard image when a new result is processed",
+        )
+
+        ttk.Label(opt_frame, text="Autosave directory:", anchor="e").grid(
+            column=0, row=4, sticky="news"
+        )
+        dirsel = widgets.DirSelection(opt_frame, self._vm.dir_autosave)
+        dirsel.grid(column=1, row=4, columnspan=4, sticky="news", pady=_PADDING)
+        ToolTip(dirsel, "Directory to automatically save scoreboard images to")
+
         return opt_frame
 
     def _preview(self, parent: Widget) -> Widget:
@@ -448,11 +468,14 @@ class _dirsTab(ttk.Frame):
         widgets.DirSelection(frame, self._vm.dir_results).grid(
             column=0, row=1, sticky="news", padx=1, pady=1
         )
+        ToolTip(frame, "Directory where race result files are located")
         widgets.RaceResultTreeView(frame, self._vm.results_contents).grid(
             column=0, row=2, sticky="news", padx=1, pady=1
         )
+        ToolTip(frame, "List of completed races found in the results directory")
+
         frame.columnconfigure(0, weight=1)
-        frame.rowconfigure(1, weight=1)
+        frame.rowconfigure(2, weight=1)
         return frame
 
 
