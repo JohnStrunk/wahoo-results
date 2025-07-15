@@ -48,9 +48,19 @@ class View(ttk.Frame):
         self._vm = vm
         root.title("Wahoo! Results")
         # Common screen sizes: HD=1366x768 FHD=1920x1080
-        # Fix the window to 1/2 the size of the screen so that it's manageable
         root.resizable(False, False)
-        root.geometry(f"{int(1366 * 0.5)}x{int(768 * 0.5)}")
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+
+        # Set window to a reasonable size to show all UI elements while not going off-screen
+        width = min(screen_width, 850)
+        height = min(screen_height, 500)
+
+        # Center the window on the screen
+        x_coord = (screen_width // 2) - (width // 2)
+        y_coord = (screen_height // 2) - (height // 2)
+        root.geometry(f"{width}x{height}+{x_coord}+{y_coord}")
+
         bundle_dir = getattr(
             sys, "_MEIPASS", os.path.abspath(os.path.dirname(__file__))
         )
