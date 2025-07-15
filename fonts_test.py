@@ -4,6 +4,8 @@ import pytest
 
 from fonts import font_names, font_to_path
 
+VALID_FONT_EXTENSIONS = (".ttf", ".ttc", ".otf", ".otc")
+
 
 def test_get_all_font_names_returns_list():
     """Test that get_all_font_names returns a non-empty list of strings."""
@@ -19,7 +21,9 @@ def test_get_ttf_path_for_font_regular():
     names = font_names()
     # Try to get a ttf path for the first font (default to Regular)
     ttf = font_to_path(names[0])
-    assert ttf is None or (isinstance(ttf, str) and ttf.lower().endswith(".ttf"))
+    assert ttf is None or (
+        isinstance(ttf, str) and ttf.lower().endswith(VALID_FONT_EXTENSIONS)
+    )
 
 
 def test_get_ttf_path_for_font_with_subfamily():
@@ -30,10 +34,11 @@ def test_get_ttf_path_for_font_with_subfamily():
     ttf_italic = font_to_path(names[0], "Italic")
     # Should be None or a .ttf path
     assert ttf_bold is None or (
-        isinstance(ttf_bold, str) and ttf_bold.lower().endswith(".ttf")
+        isinstance(ttf_bold, str) and ttf_bold.lower().endswith(VALID_FONT_EXTENSIONS)
     )
     assert ttf_italic is None or (
-        isinstance(ttf_italic, str) and ttf_italic.lower().endswith(".ttf")
+        isinstance(ttf_italic, str)
+        and ttf_italic.lower().endswith(VALID_FONT_EXTENSIONS)
     )
 
 
@@ -52,4 +57,6 @@ def test_get_ttf_path_for_font_fallback_to_any_subfamily():
     # Use a subfamily that is very unlikely to exist
     ttf = font_to_path(font_name, "NonexistentSubfamily")
     # If the font exists at all, should return a .ttf path (fallback to any subfamily)
-    assert ttf is None or (isinstance(ttf, str) and ttf.lower().endswith(".ttf"))
+    assert ttf is None or (
+        isinstance(ttf, str) and ttf.lower().endswith(VALID_FONT_EXTENSIONS)
+    )
