@@ -215,7 +215,7 @@ class Model:
         self.statustext = StringVar(name="statustext")
         self.statusclick = CallbackList()
 
-    def load(self, filename: str) -> None:
+    def load(self, filename: str) -> None:  # noqa: PLR0915
         """Load the user's preferences.
 
         :param filename: the name of the file to load
