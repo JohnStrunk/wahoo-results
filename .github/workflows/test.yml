@@ -210,7 +210,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: uv run --locked --no-dev python build.py
 
-      - name: Save executable as artifact
+      - name: Save executable (macOS) as artifact
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -218,7 +218,7 @@ jobs:
           path: wahoo-results
           if-no-files-found: error
 
-      - name: Save executable as artifact
+      - name: Save executable (Windows) as artifact
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -226,19 +226,20 @@ jobs:
           path: wahoo-results.exe
           if-no-files-found: error
 
-      - name: Grab screenshot
-        run: |
-          if [ "${{ runner.os }}" == "Windows" ]; then
-            wahoo-results.exe --test screencap
-          else
-            ./wahoo-results --test screencap
-          fi
+      - name: Grab screenshot (macOS)
+        if: runner.os == 'macOS'
+        run: ./wahoo-results --test screenshot
+
+      - name: Grab screenshot (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: wahoo-results.exe --test screenshot
 
       - name: Upload screenshot
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: build-screenshot-${{ runner.os }}
-          path: screencap.png
+          path: screenshot-*.png
           if-no-files-found: error
 
   autotest:

@@ -78,7 +78,7 @@ class View(ttk.Frame):
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        book = ttk.Notebook(self)
+        book = ttk.Notebook(self, name="tabs")
         book.grid(column=0, row=0, sticky="news")
         book.add(
             _configTab(book, self._vm), text="Configuration", underline=0, sticky="news"

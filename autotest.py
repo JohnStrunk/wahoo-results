@@ -29,7 +29,7 @@ import time
 import tkinter
 from collections.abc import Callable
 from functools import reduce
-from tkinter import DoubleVar, IntVar, StringVar
+from tkinter import DoubleVar, IntVar, StringVar, ttk
 
 import PIL.Image
 import PIL.ImageGrab
@@ -61,6 +61,23 @@ def capture_widget(widget: tkinter.Misc) -> PIL.Image.Image:
     print(f"Capturing widget at ({x}, {y}) with size {width}x{height}")
     image = PIL.ImageGrab.grab(bbox=(x, y, x + width, y + height))
     return image
+
+
+def _find_widget_by_name(widget: tkinter.Misc, name: str) -> tkinter.Misc | None:
+    """
+    Recursively search for a widget with the given name.
+
+    :param widget: The root widget to start searching from
+    :param name: The name of the widget to find
+    :returns: The widget if found, otherwise None
+    """
+    if widget.winfo_name() == name:
+        return widget
+    for child in widget.children.values():
+        result = _find_widget_by_name(child, name)
+        if result is not None:
+            return result
+    return None
 
 
 class Scenario(abc.ABC):
@@ -105,13 +122,20 @@ def build_scenario(model: Model, test: str) -> Scenario:
         return _build_random_scenario(
             model, float(delay), float(seconds), int(operations)
         )
-    if test_name == "screencap":
-        return Sequentially(
-            [
-                CaptureWindow(model, "screencap.png"),
-                Enqueue(model, model.menu_exit.run),
-            ]
-        )
+    if test_name == "screenshot":
+        widget = _find_widget_by_name(model.root, "tabs")
+        assert isinstance(widget, ttk.Notebook), "Tabs widget is not a ttk.Notebook"
+        tabs_widget: ttk.Notebook = widget
+
+        tabs = tabs_widget.children
+        print(f"Found {len(tabs)} tabs")
+        actions: list[Scenario] = []
+        for idx in range(len(tabs)):
+            actions.append(Enqueue(model, lambda index=idx: tabs_widget.select(index)))  # type: ignore
+            actions.append(_FlushQueue(model))
+            actions.append(CaptureWindow(model, f"screenshot-{idx}.png"))
+        actions.append(Enqueue(model, model.menu_exit.run))
+        return Sequentially(actions)
     raise ValueError(f"Unknown test: {test}")
 
 
