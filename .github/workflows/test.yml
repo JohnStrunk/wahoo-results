@@ -165,7 +165,10 @@ jobs:
 
   build:
     name: Build
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
@@ -187,6 +190,7 @@ jobs:
       # Add Scripts directory to the path so that pipenv (and associated
       # utilities) can be used once installed
       - name: Add python Scripts directory to path
+        if: runner.os == 'Windows'
         shell: cmd
         # Code-page switch is needed to write the env file as utf-8
         run: |
@@ -195,22 +199,47 @@ jobs:
           chcp 1252
 
       - name: Install UPX
+        if: runner.os == 'Windows'
         shell: cmd
         run: choco install -y upx --version ${{ env.UPX_VERSION }}
 
       - name: Build executable
-        shell: cmd
         env:
           IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
           SEGMENT_WRITE_KEY: ${{ secrets.SEGMENT_WRITE_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: uv run --locked --no-dev python build.py
 
-      - name: Save executable as artifact
+      - name: Save executable (macOS) as artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: wahoo-results-macos
+          path: wahoo-results
+          if-no-files-found: error
+
+      - name: Save executable (Windows) as artifact
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: wahoo-results.exe
           path: wahoo-results.exe
+          if-no-files-found: error
+
+      - name: Grab screenshot (macOS)
+        if: runner.os == 'macOS'
+        run: ./wahoo-results --test screenshot
+
+      - name: Grab screenshot (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: wahoo-results.exe --test screenshot
+
+      - name: Upload screenshot
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: build-screenshot-${{ runner.os }}
+          path: screenshot-*.png
           if-no-files-found: error
 
   autotest:

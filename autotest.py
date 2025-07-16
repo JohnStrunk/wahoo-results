@@ -29,7 +29,10 @@ import time
 import tkinter
 from collections.abc import Callable
 from functools import reduce
-from tkinter import DoubleVar, IntVar, StringVar
+from tkinter import DoubleVar, IntVar, StringVar, ttk
+
+import PIL.Image
+import PIL.ImageGrab
 
 from model import Model
 
@@ -42,6 +45,39 @@ def set_test_mode() -> None:
     """Set the application to test mode."""
     global testing  # noqa: PLW0603
     testing = True
+
+
+# https://stackoverflow.com/questions/76534878/saving-tkinter-window-as-an-image
+def capture_widget(widget: tkinter.Misc) -> PIL.Image.Image:
+    """Capture a screenshot of the specified Tkinter widget.
+
+    :param widget: The Tkinter widget to capture.
+    :returns: An image object containing the screenshot of the widget.
+    """
+    x = widget.winfo_rootx()
+    y = widget.winfo_rooty()
+    width = widget.winfo_width()
+    height = widget.winfo_height()
+    print(f"Capturing widget at ({x}, {y}) with size {width}x{height}")
+    image = PIL.ImageGrab.grab(bbox=(x, y, x + width, y + height))
+    return image
+
+
+def _find_widget_by_name(widget: tkinter.Misc, name: str) -> tkinter.Misc | None:
+    """
+    Recursively search for a widget with the given name.
+
+    :param widget: The root widget to start searching from
+    :param name: The name of the widget to find
+    :returns: The widget if found, otherwise None
+    """
+    if widget.winfo_name() == name:
+        return widget
+    for child in widget.children.values():
+        result = _find_widget_by_name(child, name)
+        if result is not None:
+            return result
+    return None
 
 
 class Scenario(abc.ABC):
@@ -86,6 +122,20 @@ def build_scenario(model: Model, test: str) -> Scenario:
         return _build_random_scenario(
             model, float(delay), float(seconds), int(operations)
         )
+    if test_name == "screenshot":
+        widget = _find_widget_by_name(model.root, "tabs")
+        assert isinstance(widget, ttk.Notebook), "Tabs widget is not a ttk.Notebook"
+        tabs_widget: ttk.Notebook = widget
+
+        tabs = tabs_widget.children
+        print(f"Found {len(tabs)} tabs")
+        actions: list[Scenario] = []
+        for idx in range(len(tabs)):
+            actions.append(Enqueue(model, lambda index=idx: tabs_widget.select(index)))  # type: ignore
+            actions.append(_FlushQueue(model))
+            actions.append(CaptureWindow(model, f"screenshot-{idx}.png"))
+        actions.append(Enqueue(model, model.menu_exit.run))
+        return Sequentially(actions)
     raise ValueError(f"Unknown test: {test}")
 
 
@@ -994,3 +1044,28 @@ class _FlushQueue(Scenario):
         self._model.enqueue(_set_flushed)
         logger.debug("Waiting for event queue to be serviced: id=%d", id(self))
         assert eventually(lambda: self._flushed, 0.1, 100), "Ensure queue is serviced"
+
+
+class CaptureWindow(Scenario):
+    """Capture a screenshot of the application window."""
+
+    def __init__(self, model: Model, filename: str) -> None:
+        """Capture a screenshot of the application window.
+
+        :param model: the application model
+        :param filename: the file to save the screenshot to
+        """
+        super().__init__()
+        self._model = model
+        self._filename = filename
+
+    def run(self) -> None:
+        """Capture the screenshot."""
+        logger.info("Capturing window to %s", self._filename)
+
+        def steps():
+            img = capture_widget(self._model.root)
+            img.save(self._filename)
+
+        self._model.enqueue(steps)
+        _FlushQueue(self._model).run()  # Ensure the queue is serviced before returning
