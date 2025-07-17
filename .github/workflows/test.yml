@@ -107,6 +107,7 @@ jobs:
 
   sbom:
     name: Software Bill of Materials
+    if: github.event_name != 'pull_request'
     permissions:
       actions: read
       contents: write
@@ -280,7 +281,7 @@ jobs:
 
   success:
     name: Successful CI
-    needs: [autotest, precommit, sbom, test]
+    needs: [autotest, precommit, test]
     runs-on: windows-latest
     steps:
       - name: Success

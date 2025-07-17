@@ -76,7 +76,7 @@ def setup_exit(root: Tk, model: Model) -> None:
             model.save(CONFIG_FILE)
         except PermissionError as err:
             logger.debug("Error saving configuration")
-            messagebox.showerror(  # type: ignore
+            messagebox.showerror(
                 title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.",
@@ -593,7 +593,7 @@ def main() -> None:  # noqa: PLR0915
     # and we're running in exe mode
     try:
         root.update()
-        import pyi_splash  # noqa: PLC0415
+        import pyi_splash  # noqa: PLC0415 # type: ignore
 
         if pyi_splash.is_alive():
             pyi_splash.close()
