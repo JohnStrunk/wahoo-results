@@ -52,7 +52,7 @@ repos:
         args: ["--strict", "-c", ".github/yamllint-config.yml"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.12.7"
+    rev: "v0.12.8"
     hooks:
       # Note: lint/fix before format
       - id: ruff-check
