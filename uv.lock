@@ -563,7 +563,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs-macros-plugin"
-version = "1.3.7"
+version = "1.3.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hjson" },
@@ -576,9 +576,9 @@ dependencies = [
     { name = "super-collections" },
     { name = "termcolor" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/43/65/61a746c56788867221aebf07fe4b6b4c08ac99cf341fd51d728c89d1456e/mkdocs_macros_plugin-1.3.7.tar.gz", hash = "sha256:17c7fd1a49b94defcdb502fd453d17a1e730f8836523379d21292eb2be4cb523", size = 33466, upload-time = "2024-10-26T15:15:54.925Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/4f/c1c0b258d39739d25d9259d7379fdd016a893e4370734b1843cef6c90f2d/mkdocs_macros_plugin-1.3.9.tar.gz", hash = "sha256:01b6003fbe9b55fdc97c0abb66f811d65abfd291dcf70f277990165553faa99a", size = 33990, upload-time = "2025-08-12T13:08:02.116Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/55/cf/f03331298ee50a4da6fb72ccec79078041158c1f8b5fc24835c1be42232e/mkdocs_macros_plugin-1.3.7-py3-none-any.whl", hash = "sha256:02432033a5b77fb247d6ec7924e72fc4ceec264165b1644ab8d0dc159c22ce59", size = 37799, upload-time = "2024-10-26T15:15:53.31Z" },
+    { url = "https://files.pythonhosted.org/packages/75/d6/18f19261f44813be207c46fb80da9ca13cb397aae5944b2b30c9eb1ebe3f/mkdocs_macros_plugin-1.3.9-py3-none-any.whl", hash = "sha256:c52351295efdbdbb37a9f0ea639719055ddb64a00115457289940e85696a81d9", size = 38219, upload-time = "2025-08-12T13:08:00.676Z" },
 ]
 
 [[package]]
@@ -1224,7 +1224,7 @@ requires-dist = [
 dev = [
     { name = "mdx-truly-sane-lists", specifier = "==1.3" },
     { name = "mkdocs-glightbox", specifier = "==0.4.0" },
-    { name = "mkdocs-macros-plugin", specifier = "==1.3.7" },
+    { name = "mkdocs-macros-plugin", specifier = "==1.3.9" },
     { name = "mkdocs-material", specifier = "==9.6.16" },
     { name = "pyright", specifier = "==1.1.403" },
     { name = "pytest", specifier = "==8.4.1" },
@@ -1233,7 +1233,7 @@ dev = [
 docs = [
     { name = "mdx-truly-sane-lists", specifier = "==1.3" },
     { name = "mkdocs-glightbox", specifier = "==0.4.0" },
-    { name = "mkdocs-macros-plugin", specifier = "==1.3.7" },
+    { name = "mkdocs-macros-plugin", specifier = "==1.3.9" },
     { name = "mkdocs-material", specifier = "==9.6.16" },
 ]
 
