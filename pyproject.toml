@@ -8,7 +8,7 @@ dependencies = [
     "fonttools==4.59.1",
     "ipinfo==5.2.0",
     "pillow==11.3.0",
-    "pychromecast==14.0.7",
+    "pychromecast==14.0.9",
     "pyinstaller==6.15.0",
     "requests==2.32.5",
     "segment-analytics-python==2.3.4",
