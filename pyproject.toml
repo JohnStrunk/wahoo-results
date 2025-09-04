@@ -21,7 +21,7 @@ dependencies = [
 dev = [
     { include-group = "docs" },
     "pyright==1.1.405",
-    "pytest==8.4.1",
+    "pytest==8.4.2",
     "pytest-cov==6.2.1",
 ]
 docs = [
