@@ -20,7 +20,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     { include-group = "docs" },
-    "pyright==1.1.404",
+    "pyright==1.1.405",
     "pytest==8.4.1",
     "pytest-cov==6.2.1",
 ]
