@@ -9,7 +9,7 @@ dependencies = [
     "ipinfo==5.2.1",
     "pillow==11.3.0",
     "pychromecast==14.0.9",
-    "pyinstaller==6.15.0",
+    "pyinstaller==6.16.0",
     "requests==2.32.5",
     "segment-analytics-python==2.3.4",
     "semver==3.0.4",
