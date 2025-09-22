@@ -589,7 +589,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs-macros-plugin"
-version = "1.3.9"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hjson" },
@@ -602,9 +602,9 @@ dependencies = [
     { name = "super-collections" },
     { name = "termcolor" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f0/4f/c1c0b258d39739d25d9259d7379fdd016a893e4370734b1843cef6c90f2d/mkdocs_macros_plugin-1.3.9.tar.gz", hash = "sha256:01b6003fbe9b55fdc97c0abb66f811d65abfd291dcf70f277990165553faa99a", size = 33990, upload-time = "2025-08-12T13:08:02.116Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f2/8a/1be9f663fff066d68598762e91a9a9e9e4ff901ef1a49fea506847b3b1f5/mkdocs_macros_plugin-1.4.0.tar.gz", hash = "sha256:687e710988736731d1a059633fc34cf66d21e57a07801bdd1991419199e0677c", size = 34758, upload-time = "2025-09-22T14:18:07.258Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/75/d6/18f19261f44813be207c46fb80da9ca13cb397aae5944b2b30c9eb1ebe3f/mkdocs_macros_plugin-1.3.9-py3-none-any.whl", hash = "sha256:c52351295efdbdbb37a9f0ea639719055ddb64a00115457289940e85696a81d9", size = 38219, upload-time = "2025-08-12T13:08:00.676Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/88/d20e962f7fddf46094e0e9365bf8167a82a32e3086851b32ef25978ac6cf/mkdocs_macros_plugin-1.4.0-py3-none-any.whl", hash = "sha256:630de99fe14d39c26c7915725b39bb7730058c622f547226432eb371cabff33c", size = 39593, upload-time = "2025-09-22T14:18:06.058Z" },
 ]
 
 [[package]]
@@ -1190,14 +1190,14 @@ wheels = [
 
 [[package]]
 name = "super-collections"
-version = "0.5.5"
+version = "0.5.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hjson" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/c9/a4f5d8784e4603d63fc5b04cb5e809786117029d68117720a906a0c8937c/super_collections-0.5.5.tar.gz", hash = "sha256:dfb3a03b5cdf47337b61bd7aaf28f8241bdadb61c936e65608d6e44c113f9bd6", size = 17408, upload-time = "2025-09-12T21:45:19.679Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/1a/e52a23e9f382dd1cdc72de3b8f429bd6d8a40457f0343b1cfe5d358e4431/super_collections-0.5.7.tar.gz", hash = "sha256:796a9ab231487e488b2a8588c9bb6ca0dc719d66abf775ca67177e34de8f3bc0", size = 21239, upload-time = "2025-09-19T14:41:24.267Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e1/95/57f12251452b6a8f1f7bd837c98f21a6f6893d234efa6c7c5258d9bc1c6d/super_collections-0.5.5-py3-none-any.whl", hash = "sha256:2b8edab86ada80a2efbacf6a326c33f24ced143a1e882a73a9caa64e81e45967", size = 9025, upload-time = "2025-09-12T21:45:18.582Z" },
+    { url = "https://files.pythonhosted.org/packages/15/74/443a48d7a4f1dcb98ecb0292cdc6b8c501dc6a4ac763b37779040305530a/super_collections-0.5.7-py3-none-any.whl", hash = "sha256:fa9b1653d5fed9e435df3edf3b43ed6c8d5af32ff7ff83fe00b589173990f07b", size = 10700, upload-time = "2025-09-19T14:41:23.066Z" },
 ]
 
 [[package]]
@@ -1279,7 +1279,7 @@ requires-dist = [
 dev = [
     { name = "mdx-truly-sane-lists", specifier = "==1.3" },
     { name = "mkdocs-glightbox", specifier = "==0.5.1" },
-    { name = "mkdocs-macros-plugin", specifier = "==1.3.9" },
+    { name = "mkdocs-macros-plugin", specifier = "==1.4.0" },
     { name = "mkdocs-material", specifier = "==9.6.20" },
     { name = "pyright", specifier = "==1.1.405" },
     { name = "pytest", specifier = "==8.4.2" },
@@ -1288,7 +1288,7 @@ dev = [
 docs = [
     { name = "mdx-truly-sane-lists", specifier = "==1.3" },
     { name = "mkdocs-glightbox", specifier = "==0.5.1" },
-    { name = "mkdocs-macros-plugin", specifier = "==1.3.9" },
+    { name = "mkdocs-macros-plugin", specifier = "==1.4.0" },
     { name = "mkdocs-material", specifier = "==9.6.20" },
 ]
 
