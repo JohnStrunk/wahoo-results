@@ -28,7 +28,7 @@ docs = [
     "mdx-truly-sane-lists==1.3",
     "mkdocs-glightbox==0.5.1",
     "mkdocs-macros-plugin==1.4.0",
-    "mkdocs-material==9.6.20",
+    "mkdocs-material==9.6.21",
 ]
 
 [tool.coverage.html]
