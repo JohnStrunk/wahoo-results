@@ -106,13 +106,13 @@ class View(ttk.Frame):
         statustext.bind("<Button-1>", lambda event: self._vm.statusclick.run())
 
         style = ttk.Style()
-        style.configure("TCombobox", padding=_TXT_PAD)  # type: ignore
-        style.configure("TMenuButton", padding=_TXT_PAD)  # type: ignore
-        style.configure("TLabel", padding=_TXT_PAD)  # type: ignore
-        style.configure("TEntry", padding=_TXT_PAD)  # type: ignore
-        style.configure("TSpinbox", padding=_TXT_PAD)  # type: ignore
-        style.configure("TButton", padding=_PADDING)  # type: ignore
-        style.configure("TLabelframe", padding=_PADDING)  # type: ignore
+        style.configure("TCombobox", padding=_TXT_PAD)
+        style.configure("TMenuButton", padding=_TXT_PAD)
+        style.configure("TLabel", padding=_TXT_PAD)
+        style.configure("TEntry", padding=_TXT_PAD)
+        style.configure("TSpinbox", padding=_TXT_PAD)
+        style.configure("TButton", padding=_PADDING)
+        style.configure("TLabelframe", padding=_PADDING)
 
     def _build_menu(self) -> None:
         """Create the dropdown menus."""
