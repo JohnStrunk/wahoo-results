@@ -1,0 +1,59 @@
+---
+# yamllint disable rule:line-length
+name: "Copilot Setup Steps"
+
+# The Copilot setup steps workflow initializes the environment that GitHub
+# Copilot will use for the coding agent's sessions. It runs before the agent
+# starts, and it can be used to install dependencies, set up tools, or perform
+# any other necessary configuration.
+
+on:  # yamllint disable-line rule:truthy
+  # Automatically run the setup steps when they are changed to allow for easy
+  # validation, and allow manual testing through the repository's "Actions" tab
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  workflow_dispatch:
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up
+  # by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    # Set the permissions to the lowest permissions possible needed for your
+    # steps. Copilot will be given its own token for its operations.
+    permissions:
+      # If you want to clone the repository as part of your setup steps, for
+      # example to install dependencies, you'll need the `contents: read`
+      # permission. If you don't clone the repository in your setup steps,
+      # Copilot will do this for you automatically after the steps complete.
+      contents: read
+
+    # You can define any steps you want, and they will run before the agent
+    # starts. If you do not check out your code, Copilot will do this for you.
+    steps:
+      - name: Checkout repository
+        # https://github.com/actions/checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      # Copilot has strict firewall rules, so it can't access the internet
+      # during its sessions. We need to download any dependencies during
+      # the setup steps.
+      - name: Install uv
+        # https://github.com/astral-sh/setup-uv
+        uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
+        with:
+          save-cache: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Set up Python
+        # https://github.com/actions/setup-python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install packages
+        run: uv sync --all-groups
