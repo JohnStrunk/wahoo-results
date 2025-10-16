@@ -39,15 +39,15 @@ class TestColoradoSCB:
             textwrap.dedent(
                 """\
                 INVALID HEADER
-                                    --                
-                                    --                
-                                    --                
-                PERSON, JUST A      --TEAM            
-                                    --                
+                                    --
+                                    --
+                                    --
+                PERSON, JUST A      --TEAM
+                                    --
                 BIGBIGBIGLY, NAMENAM--LONGLONGLONGLONG
-                                    --                
-                                    --                
-                                    --                
+                                    --
+                                    --
+                                    --
                                     --                """
             )
         )
@@ -59,18 +59,18 @@ class TestColoradoSCB:
             textwrap.dedent(
                 """\
                 #10 BOYS 8&U 50 FLY
-                                    --                
-                                    --                
-                                    --                
-                PERSON, JUST A      --TEAM            
-                                    --                
+                                    --
+                                    --
+                                    --
+                PERSON, JUST A      --TEAM
+                                    --
                 BIGBIGBIGLY, NAMENAM--LONGLONGLONGLONG
-                                    --                
-                                    --                
-                                    --                
-                                    --                
-                                    --                
-                                    --                
+                                    --
+                                    --
+                                    --
+                                    --
+                                    --
+                                    --
                                     --                """
             )
         )
@@ -82,15 +82,15 @@ class TestColoradoSCB:
             textwrap.dedent(
                 """\
                 #10 BOYS 8&U 50 FLY
-                                    --                
+                                    --
                 INVALID LINE
-                                    --                
-                PERSON, JUST A      --TEAM            
-                                    --                
+                                    --
+                PERSON, JUST A      --TEAM
+                                    --
                 BIGBIGBIGLY, NAMENAM--LONGLONGLONGLONG
-                                    --                
-                                    --                
-                                    --                
+                                    --
+                                    --
+                                    --
                                     --                """
             )
         )
@@ -112,15 +112,15 @@ class TestColoradoSCB:
             textwrap.dedent(
                 """\
                 #10 BOYS 8&U 50 FLY
-                                    --                
-                                    --                
-                                    --                
-                PERSON, JUST A      --TEAM            
-                                    --                
+                                    --
+                                    --
+                                    --
+                PERSON, JUST A      --TEAM
+                                    --
                 BIGBIGBIGLY, NAMENAM--LONGLONGLONGLONG
-                                    --                
-                                    --                
-                                    --                
+                                    --
+                                    --
+                                    --
                                     --                """
             )
         )
@@ -132,25 +132,25 @@ class TestColoradoSCB:
             textwrap.dedent(
                 """\
                 #18 BOYS 10&U 50 FLY
-                                    --                
-                                    --                
-                                    --                
-                PERSON, JUST A      --TEAM            
-                                    --                
+                                    --
+                                    --
+                                    --
+                PERSON, JUST A      --TEAM
+                                    --
                 BIGBIGBIGLY, NAMENAM--LONGLONGLONGLONG
-                                    --                
-                                    --                
-                                    --                
-                                    --                
-                                    --                
-                                    --                
-                                    --                
-                XXXXXXX, YYYYYY Z   --                
-                                    --                
-                AAAAA, B            --X               
-                                    --                
-                                    --                
-                                    --                
+                                    --
+                                    --
+                                    --
+                                    --
+                                    --
+                                    --
+                                    --
+                XXXXXXX, YYYYYY Z   --
+                                    --
+                AAAAA, B            --X
+                                    --
+                                    --
+                                    --
                                     --                """
             )
         )
@@ -162,65 +162,65 @@ class TestColoradoSCB:
             textwrap.dedent(
                 """\
                 #34 GIRLS 15&O 50 BACK
-                                    --                
-                                    --                
-                SANTIAGO, LINDSEY 0 --BLUE            
-                BROWN, LORRAINE 0   --BLUE            
-                HARRISON, JOSEPHINE --GREEN           
-                DRAKE, MELISSA 0    --RED             
-                                    --                
-                                    --                
-                                    --                
-                                    --                
-                LOWE, DOREEN 1      --GREEN           
-                BRYAN, MARIA 1      --GREEN           
-                PATTON, MOLLY 0     --GREEN           
-                SUTTON, SARA 0      --GREEN           
-                PARKS, SONYA 0      --RED             
-                HANSEN, JANE 1      --RED             
-                WADE, CHARLOTTE 0   --GREEN           
-                WELCH, ALBERTA 0    --GREEN           
-                                    --                
-                                    --                
-                FLOYD, PHYLLIS 0    --BLUE            
-                HENRY, SOPHIA 0     --RED             
-                PEREZ, EDNA 0       --RED             
-                GREER, JENNA 0      --RED             
-                ALVAREZ, FREDA 0    --RED             
-                WASHINGTON, LYNDA 1 --GREEN           
-                MILLS, JASMINE 0    --GREEN           
-                DELGADO, BESSIE 0   --RED             
-                                    --                
-                                    --                
-                COLEMAN, RENEE 0    --BLUE            
-                TURNER, TAMARA 0    --RED             
-                THORNTON, NAOMI 1   --GREEN           
-                INGRAM, LESLIE 1    --BLUE            
-                LARSON, EDNA 0      --GREEN           
-                INGRAM, LOLA 1      --RED             
-                CARPENTER, ERMA 0   --BLUE            
-                HARRINGTON, STACY 0 --BLUE            
-                                    --                
-                                    --                
-                ESTRADA, KRISTINA 0 --GREEN           
-                ZIMMERMAN, LYDIA 0  --BLUE            
-                HARVEY, SILVIA 0    --BLUE            
-                PATTERSON, PATTI 1  --BLUE            
-                DAVIS, MYRTLE 1     --RED             
-                CRAIG, KRYSTAL 0    --RED             
-                WILKINS, VICKIE 0   --RED             
-                SINGLETON, LORENE 1 --RED             
-                                    --                
-                                    --                
-                COLE, CYNTHIA 1     --BLUE            
-                HARDY, LAVERNE 0    --RED             
-                KELLER, LATOYA 1    --GREEN           
-                WATERS, ROBIN 0     --GREEN           
-                PADILLA, ESSIE 0    --BLUE            
-                SCHMIDT, KATHY 0    --GREEN           
-                WASHINGTON, TRACEY 1--RED             
-                MCDANIEL, SUZANNE 1 --GREEN           
-                                    --                
+                                    --
+                                    --
+                SANTIAGO, LINDSEY 0 --BLUE
+                BROWN, LORRAINE 0   --BLUE
+                HARRISON, JOSEPHINE --GREEN
+                DRAKE, MELISSA 0    --RED
+                                    --
+                                    --
+                                    --
+                                    --
+                LOWE, DOREEN 1      --GREEN
+                BRYAN, MARIA 1      --GREEN
+                PATTON, MOLLY 0     --GREEN
+                SUTTON, SARA 0      --GREEN
+                PARKS, SONYA 0      --RED
+                HANSEN, JANE 1      --RED
+                WADE, CHARLOTTE 0   --GREEN
+                WELCH, ALBERTA 0    --GREEN
+                                    --
+                                    --
+                FLOYD, PHYLLIS 0    --BLUE
+                HENRY, SOPHIA 0     --RED
+                PEREZ, EDNA 0       --RED
+                GREER, JENNA 0      --RED
+                ALVAREZ, FREDA 0    --RED
+                WASHINGTON, LYNDA 1 --GREEN
+                MILLS, JASMINE 0    --GREEN
+                DELGADO, BESSIE 0   --RED
+                                    --
+                                    --
+                COLEMAN, RENEE 0    --BLUE
+                TURNER, TAMARA 0    --RED
+                THORNTON, NAOMI 1   --GREEN
+                INGRAM, LESLIE 1    --BLUE
+                LARSON, EDNA 0      --GREEN
+                INGRAM, LOLA 1      --RED
+                CARPENTER, ERMA 0   --BLUE
+                HARRINGTON, STACY 0 --BLUE
+                                    --
+                                    --
+                ESTRADA, KRISTINA 0 --GREEN
+                ZIMMERMAN, LYDIA 0  --BLUE
+                HARVEY, SILVIA 0    --BLUE
+                PATTERSON, PATTI 1  --BLUE
+                DAVIS, MYRTLE 1     --RED
+                CRAIG, KRYSTAL 0    --RED
+                WILKINS, VICKIE 0   --RED
+                SINGLETON, LORENE 1 --RED
+                                    --
+                                    --
+                COLE, CYNTHIA 1     --BLUE
+                HARDY, LAVERNE 0    --RED
+                KELLER, LATOYA 1    --GREEN
+                WATERS, ROBIN 0     --GREEN
+                PADILLA, ESSIE 0    --BLUE
+                SCHMIDT, KATHY 0    --GREEN
+                WASHINGTON, TRACEY 1--RED
+                MCDANIEL, SUZANNE 1 --GREEN
+                                    --
                                     --                """
             )
         )

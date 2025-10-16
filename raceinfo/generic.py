@@ -80,7 +80,7 @@ class Generic(TimingSystem):
             lanes[i].is_dq = fields[0] == "Q"
             # The next num_splits fields are the splits
             lanes[i].splits = []
-            for split in fields[1 : num_splits + 1]:
+            for split in fields[1: num_splits + 1]:
                 if split == "":
                     time = None
                 else:
@@ -89,7 +89,7 @@ class Generic(TimingSystem):
                 lanes[i].splits.append([time])  # type: ignore
             # The next 3 fields are the backups
             lanes[i].backups = []
-            for backup in fields[num_splits + 1 : num_splits + 4]:
+            for backup in fields[num_splits + 1: num_splits + 4]:
                 if backup == "":
                     time = None
                 else:

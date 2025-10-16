@@ -133,7 +133,7 @@ class DQMode(StrEnum):
 class Model:
     """Defines the state variables (model) for the main UI."""
 
-    ## Colors from USA-S visual identity standards
+    # Colors from USA-S visual identity standards
     PANTONE282_DKBLUE = "#041e42"  # Primary
     PANTONE200_RED = "#ba0c2f"  # Primary
     BLACK = "#000000"  # Secondary
@@ -156,14 +156,14 @@ class Model:
         root.after_idle(self._dispatch_event)
 
         ########################################
-        ## Dropdown menu items
+        # Dropdown menu items
         self.menu_export_template = CallbackList()
         self.menu_save_scoreboard = CallbackList()
         self.menu_exit = CallbackList()
         self.menu_docs = CallbackList()
         self.menu_about = CallbackList()
         ########################################
-        ## Buttons
+        # Buttons
         self.bg_import = CallbackList()
         self.bg_clear = CallbackList()
         self.dolphin_export = CallbackList()
@@ -171,7 +171,7 @@ class Model:
         self.scoreboard_window: Toplevel | None = None
         self.clear_scoreboard = CallbackList()
         ########################################
-        ## Entry fields
+        # Entry fields
         self.font_normal = StringVar(name="font_normal")
         self.font_time = StringVar(name="font_time")
         self.text_spacing = DoubleVar(name="text_spacing")

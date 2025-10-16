@@ -199,7 +199,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
         [
             Delay(2),  # Wait for the application to start
             ############################################################
-            ## Set configuration for the tests
+            # Set configuration for the tests
             Enqueue(model, lambda: model.title.set("Test Title")),  # Set the title
             Enqueue(model, lambda: model.text_spacing.set(1.1)),  # Set the text spacing
             Enqueue(model, lambda: model.num_lanes.set(6)),  # Set the number of lanes
@@ -209,11 +209,11 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 lambda: model.time_threshold.set(0.30),  # Set the time threshold
             ),
             ############################################################
-            ## Validate creation of event CSV file
+            # Validate creation of event CSV file
             LoadAllSCB(testdatadir, tmp_startlist),  # Make all startlists available
             GenDolphinCSV(model, tmp_startlist),  # Generate the Dolphin CSV file
             ############################################################
-            ## Test specific scenarios
+            # Test specific scenarios
             # Race w/ 6 lanes, names, all valid times
             AddDO4(
                 testdatadir,
@@ -359,7 +359,7 @@ def _build_scripted_scenario(model: Model, seconds: float) -> Scenario:
                 "Lane 2 should have a valid time",
             ),
             ############################################################
-            ## Perform some random actions
+            # Perform some random actions
             Repeatedly(  # Add a bunch of results
                 OneOf(
                     [
