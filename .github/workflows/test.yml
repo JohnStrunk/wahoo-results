@@ -150,7 +150,7 @@ jobs:
 
       - name: Generate & upload SBOM
         # https://github.com/anchore/sbom-action
-        uses: anchore/sbom-action@d8a2c0130026bf585de5c176ab8f7ce62d75bf04 # v0.20.7
+        uses: anchore/sbom-action@8e94d75ddd33f69f691467e42275782e4bfefe84 # v0.20.9
         with:
           artifact-name: sbom-spdx.json
           dependency-snapshot: true
