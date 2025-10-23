@@ -690,14 +690,14 @@ wheels = [
 
 [[package]]
 name = "mkdocs-glightbox"
-version = "0.5.1"
+version = "0.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "selectolax" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8b/72/c03e9d8d2dbe098d7ce5d51309933a1d3aea268965ed097ab16f4b54de15/mkdocs_glightbox-0.5.1.tar.gz", hash = "sha256:7d78a5b045f2479f61b0bbb17742ba701755c56b013e70ac189c9d87a91e80bf", size = 480028, upload-time = "2025-09-04T13:10:29.679Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/26/c793459622da8e31f954c6f5fb51e8f098143fdfc147b1e3c25bf686f4aa/mkdocs_glightbox-0.5.2.tar.gz", hash = "sha256:c7622799347c32310878e01ccf14f70648445561010911c80590cec0353370ac", size = 510586, upload-time = "2025-10-23T14:55:18.909Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/30/cf/e9a0ce9da269746906fdc595c030f6df66793dad1487abd1699af2ba44f1/mkdocs_glightbox-0.5.1-py3-none-any.whl", hash = "sha256:f47af0daff164edf8d36e553338425be3aab6e34b987d9cbbc2ae7819a98cb01", size = 26431, upload-time = "2025-09-04T13:10:27.933Z" },
+    { url = "https://files.pythonhosted.org/packages/4e/ca/03624e017e5ee2d7ce8a08d89f81c1e535eb3c30d7b2dc4a435ea3fbbeae/mkdocs_glightbox-0.5.2-py3-none-any.whl", hash = "sha256:23a431ea802b60b1030c73323db2eed6ba859df1a0822ce575afa43e0ea3f47e", size = 26458, upload-time = "2025-10-23T14:55:17.43Z" },
 ]
 
 [[package]]
@@ -1477,7 +1477,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mdx-truly-sane-lists", specifier = "==1.3" },
-    { name = "mkdocs-glightbox", specifier = "==0.5.1" },
+    { name = "mkdocs-glightbox", specifier = "==0.5.2" },
     { name = "mkdocs-macros-plugin", specifier = "==1.4.0" },
     { name = "mkdocs-material", specifier = "==9.6.22" },
     { name = "pyright", specifier = "==1.1.406" },
@@ -1486,7 +1486,7 @@ dev = [
 ]
 docs = [
     { name = "mdx-truly-sane-lists", specifier = "==1.3" },
-    { name = "mkdocs-glightbox", specifier = "==0.5.1" },
+    { name = "mkdocs-glightbox", specifier = "==0.5.2" },
     { name = "mkdocs-macros-plugin", specifier = "==1.4.0" },
     { name = "mkdocs-material", specifier = "==9.6.22" },
 ]
