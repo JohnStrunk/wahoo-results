@@ -1307,7 +1307,7 @@ wheels = [
 
 [[package]]
 name = "segment-analytics-python"
-version = "2.3.4"
+version = "2.3.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backoff" },
@@ -1315,9 +1315,9 @@ dependencies = [
     { name = "python-dateutil" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/66/89/17a69db0da866488462685159c29859d71a2994e7644140f2e05716eb4f8/segment_analytics_python-2.3.4.tar.gz", hash = "sha256:f188e864cc0fed9fb141aff73c21bfaab783a1dd1b97ab1eff44340aed68f50b", size = 35571, upload-time = "2025-02-24T16:40:06.892Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/81/a2/e0e3df581c10e400ac1026fbc28047ca00b6abc190f8b7df44c653c768b3/segment_analytics_python-2.3.5.tar.gz", hash = "sha256:eedaf6290e95025adf11cb73769dac662370ca2187fecdc6c66ddd96c508255a", size = 35950, upload-time = "2025-12-02T19:56:56.34Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4b/96/c9508caecf4dcfd6ce0bba63a9fd3546edddcc24070040239c4468aad408/segment_analytics_python-2.3.4-py2.py3-none-any.whl", hash = "sha256:ea2b6432bef1c017d24f69bf5f778e45c2385ec9df527242e2b42ee6cefd7367", size = 33335, upload-time = "2025-02-24T16:40:04.195Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/ba/2b4873bc72240e6d59285147e3e1f32e00b55af81040dd30899bdb65b438/segment_analytics_python-2.3.5-py2.py3-none-any.whl", hash = "sha256:139f111ce0d6f5ec04ac881014f62ac238b8a74d8dacb81ab69822d428f8219e", size = 33478, upload-time = "2025-12-02T19:56:55.372Z" },
 ]
 
 [[package]]
@@ -1485,7 +1485,7 @@ requires-dist = [
     { name = "pychromecast", specifier = "==14.0.9" },
     { name = "pyinstaller", specifier = "==6.17.0" },
     { name = "requests", specifier = "==2.32.5" },
-    { name = "segment-analytics-python", specifier = "==2.3.4" },
+    { name = "segment-analytics-python", specifier = "==2.3.5" },
     { name = "semver", specifier = "==3.0.4" },
     { name = "sentry-sdk", specifier = "==2.46.0" },
     { name = "watchdog", specifier = "==6.0.0" },
