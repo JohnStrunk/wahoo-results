@@ -45,7 +45,7 @@ The goal of these scenarios is to cover the variations that are possible in the
 results to ensure we can correctly parse the data.
 
 | Description | Meet | Race(s) |
-|-------------|-----:|--------:|
+| ------------- | -----: | --------: |
 | Races w/ missing times | 8 | 1-2 |
 | Lanes marked empty or DQ | 8 | 3 |
 | Races with (missing) splits | 8 | 4-6 |
