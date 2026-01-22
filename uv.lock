@@ -521,16 +521,16 @@ wheels = [
 
 [[package]]
 name = "ipinfo"
-version = "5.3.0"
+version = "5.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "cachetools" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/02/21/dff8f9d35b51b3c2d68c365870a4b5bed76f5b2ed84fe31d84ea8903dc86/ipinfo-5.3.0.tar.gz", hash = "sha256:7953f66a4fd28a8f2808b353402e595d8310a455008f954e1a878cce7b4e7133", size = 28273, upload-time = "2025-11-20T17:36:10.3Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/79/ada301773524bbd461735b9886a308fcae5d8832ef971a316ac17462e569/ipinfo-5.4.0.tar.gz", hash = "sha256:72193e7606a6d875ae77a9b6eb3ab5f3a425beb72b3cce4cf5ece9e7b04a02e0", size = 28798, upload-time = "2026-01-22T16:27:21.989Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/51/c7c7f4cbb7c1f24a32193065300a362fe666573e764469f1425950769200/ipinfo-5.3.0-py3-none-any.whl", hash = "sha256:01eb0b589132565d33e554058dd17cbf11ba870a1d2b7296a9ab89608746bcbd", size = 42242, upload-time = "2025-11-20T17:36:09Z" },
+    { url = "https://files.pythonhosted.org/packages/94/3a/af26c846e88843cf12290f7a5e9c436c1c1ec481c3bad0e70df04581d8ad/ipinfo-5.4.0-py3-none-any.whl", hash = "sha256:0d13b5c8166dd42680e4d13ca22205994d21abed94a47834b9fd77110cf67088", size = 42863, upload-time = "2026-01-22T16:27:20.888Z" },
 ]
 
 [[package]]
@@ -1480,7 +1480,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "fonttools", specifier = "==4.61.1" },
-    { name = "ipinfo", specifier = "==5.3.0" },
+    { name = "ipinfo", specifier = "==5.4.0" },
     { name = "pillow", specifier = "==12.1.0" },
     { name = "pychromecast", specifier = "==14.0.9" },
     { name = "pyinstaller", specifier = "==6.18.0" },
