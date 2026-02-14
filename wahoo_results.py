@@ -76,7 +76,7 @@ def setup_exit(root: Tk, model: Model) -> None:
             model.save(CONFIG_FILE)
         except PermissionError as err:
             logger.debug("Error saving configuration")
-            messagebox.showerror(
+            messagebox.showerror(  # type: ignore
                 title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.",
@@ -266,22 +266,29 @@ def summarize_racedir(directory: str, timing_system: TimingSystem) -> list[Heat]
     return contents
 
 
-def load_result(model: Model, filename: str) -> Heat | None:
+def load_result(
+    timing_system: TimingSystem,
+    startlist_dir: str,
+    min_times: int,
+    time_threshold: float,
+    filename: str,
+) -> Heat | None:
     """Load a result file and corresponding startlist.
 
-    :param model: The application model
+    :param timing_system: The timing system to use
+    :param startlist_dir: The directory containing startlists
+    :param min_times: Minimum number of times required
+    :param time_threshold: Threshold for time validity
     :param filename: The result file to load
     :returns: The HeatData object representing the result if successful,
         otherwise None
     """
     result: Heat | None = None
-    resolver = standard_resolver(
-        model.min_times.get(), Time(str(model.time_threshold.get()))
-    )
+    resolver = standard_resolver(min_times, Time(str(time_threshold)))
     # still being written.
     for tries in range(1, 6):
         try:
-            result = model.timing_system.read(filename)
+            result = timing_system.read(filename)
             result.resolve_times(resolver)
             break
         except ValueError:
@@ -293,9 +300,7 @@ def load_result(model: Model, filename: str) -> Heat | None:
     if result.event is None or result.heat is None:
         return None
     try:
-        heatinfo = ColoradoSCB().find(
-            model.dir_startlist.get(), result.event, result.heat
-        )
+        heatinfo = ColoradoSCB().find(startlist_dir, result.event, result.heat)
         result.merge(info_from=heatinfo)
     except OSError:
         pass
@@ -319,47 +324,80 @@ def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
 
     def process_racedir() -> None:
         """Load all the race resultsand update the UI."""
-        with sentry_sdk.start_span(
-            op="update_race_ui", description="Update race summaries in UI"
-        ) as span:
-            directory = model.dir_results.get()
-            contents = summarize_racedir(directory, model.timing_system)
-            span.set_tag("race_files", len(contents))
-            model.results_contents.set(contents)
+        # Capture variables on the main thread
+        directory = model.dir_results.get()
+        timing_system = model.timing_system
+
+        def _bg_process_racedir() -> None:
+            with sentry_sdk.start_span(
+                op="update_race_ui", description="Update race summaries in UI"
+            ) as span:
+                contents = summarize_racedir(directory, timing_system)
+                span.set_tag("race_files", len(contents))
+                model.enqueue(lambda: model.results_contents.set(contents))
+
+        threading.Thread(target=_bg_process_racedir, daemon=True).start()
 
     def process_new_result(file: str) -> None:
         """Process a new race result that has been detected.
 
         :param file: The new result file to process
         """
-        with sentry_sdk.start_transaction(op="new_result", name="New race result"):
-            result = load_result(model, file)
-            if result is None:
-                return
-            scoreboard = ScoreboardImage(imagecast_types.IMAGE_SIZE, result, model)
-            model.scoreboard.set(scoreboard.image)
-            if model.autosave_scoreboard.get():
-                autosave_dir = model.dir_autosave.get()
-                try:
-                    if not os.path.exists(autosave_dir):
-                        os.makedirs(autosave_dir)
-                    filename = f"E{int(result.event or 0):03d}-H{int(result.heat or 0):02d}-scoreboard.png"
-                    filepath = os.path.join(autosave_dir, filename)
-                    scoreboard.image.save(filepath)
-                except (OSError, IOError) as e:
-                    logger.error(
-                        "Error autosaving scoreboard to %s: %s", autosave_dir, e
+        # Capture variables on the main thread
+        timing_system = model.timing_system
+        startlist_dir = model.dir_startlist.get()
+        min_times = model.min_times.get()
+        time_threshold = model.time_threshold.get()
+        autosave_enabled = model.autosave_scoreboard.get()
+        dir_autosave = model.dir_autosave.get()
+        # Num active chromecasts for analytics
+        num_cc = len([x for x in model.cc_status.get() if x.enabled])
+
+        def _bg_process_new_result() -> None:
+            with sentry_sdk.start_transaction(op="new_result", name="New race result"):
+                result = load_result(
+                    timing_system, startlist_dir, min_times, time_threshold, file
+                )
+                if result is None:
+                    return
+
+                def _ui_update() -> None:
+                    scoreboard = ScoreboardImage(
+                        imagecast_types.IMAGE_SIZE, result, model
                     )
-                    model.enqueue(
-                        lambda e=e: messagebox.showerror(  # type: ignore
-                            "Autosave Error",
-                            f"Could not save scoreboard image to '{autosave_dir}':\n{e}",
-                        )
-                    )
-            model.latest_result.set(result)
-            num_cc = len([x for x in model.cc_status.get() if x.enabled])
-            wh_analytics.results_received(result.has_names(), num_cc)
-            process_racedir()  # update the UI
+                    model.scoreboard.set(scoreboard.image)
+                    model.latest_result.set(result)
+
+                    if autosave_enabled:
+
+                        def _bg_save() -> None:
+                            try:
+                                if not os.path.exists(dir_autosave):
+                                    os.makedirs(dir_autosave)
+                                filename = f"E{int(result.event or 0):03d}-H{int(result.heat or 0):02d}-scoreboard.png"
+                                filepath = os.path.join(dir_autosave, filename)
+                                scoreboard.image.save(filepath)
+                            except (OSError, IOError) as e:
+                                logger.error(
+                                    "Error autosaving scoreboard to %s: %s",
+                                    dir_autosave,
+                                    e,
+                                )
+                                model.enqueue(
+                                    lambda e=e: messagebox.showerror(  # type: ignore
+                                        "Autosave Error",
+                                        f"Could not save scoreboard image to '{dir_autosave}':\n{e}",
+                                    )
+                                )
+
+                        threading.Thread(target=_bg_save, daemon=True).start()
+
+                    wh_analytics.results_received(result.has_names(), num_cc)
+                    process_racedir()  # update the UI
+
+                model.enqueue(_ui_update)
+
+        threading.Thread(target=_bg_process_new_result, daemon=True).start()
 
     def result_dir_updated() -> None:
         """When the raceresult directory is changed, update the watch to look at the new directory and trigger processing of the results."""
@@ -601,6 +639,8 @@ def main() -> None:  # noqa: PLR0915
         pass
     except RuntimeError:
         pass
+
+    root.resizable(True, True)  # Allow resizing of the main window
 
     if args.test is not None:
         scenario = autotest.build_scenario(model, args.test)
