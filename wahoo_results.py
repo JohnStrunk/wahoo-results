@@ -76,7 +76,7 @@ def setup_exit(root: Tk, model: Model) -> None:
             model.save(CONFIG_FILE)
         except PermissionError as err:
             logger.debug("Error saving configuration")
-            messagebox.showerror(  # type: ignore
+            messagebox.showerror(
                 title="Error saving configuration",
                 message=f'Unable to write configuration file "{err.filename}". {err.strerror}',
                 detail="Please ensure the working directory is writable.",
@@ -309,6 +309,80 @@ def load_result(
     return result
 
 
+def _process_racedir(model: Model) -> None:
+    """Load all the race results and update the UI."""
+    directory = model.dir_results.get()
+    timing_system = model.timing_system
+
+    def _bg_process_racedir() -> None:
+        with sentry_sdk.start_span(
+            op="update_race_ui", description="Update race summaries in UI"
+        ) as span:
+            contents = summarize_racedir(directory, timing_system)
+            span.set_tag("race_files", len(contents))
+            model.enqueue(lambda: model.results_contents.set(contents))
+
+    threading.Thread(target=_bg_process_racedir, daemon=True).start()
+
+
+def _process_new_result(model: Model, file: str) -> None:
+    """Process a new race result that has been detected."""
+    timing_system = model.timing_system
+    startlist_dir = model.dir_startlist.get()
+    min_times = model.min_times.get()
+    time_threshold = model.time_threshold.get()
+    autosave_enabled = model.autosave_scoreboard.get()
+    dir_autosave = model.dir_autosave.get()
+    num_cc = len([x for x in model.cc_status.get() if x.enabled])
+
+    def _bg_process_new_result() -> None:
+        with sentry_sdk.start_transaction(op="new_result", name="New race result"):
+            result = load_result(
+                timing_system, startlist_dir, min_times, time_threshold, file
+            )
+            if result is None:
+                return
+
+            def _ui_update() -> None:
+                scoreboard = ScoreboardImage(imagecast_types.IMAGE_SIZE, result, model)
+                model.scoreboard.set(scoreboard.image)
+                model.latest_result.set(result)
+
+                if autosave_enabled:
+
+                    def _bg_save() -> None:
+                        try:
+                            if not os.path.exists(dir_autosave):
+                                os.makedirs(dir_autosave)
+                            filename = f"E{int(result.event or 0):03d}-H{int(result.heat or 0):02d}-scoreboard.png"
+                            filepath = os.path.join(dir_autosave, filename)
+                            scoreboard.image.save(filepath)
+                        except (OSError, IOError) as e:
+                            logger.error(
+                                "Error autosaving scoreboard to %s: %s",
+                                dir_autosave,
+                                e,
+                            )
+                            model.enqueue(
+                                lambda e=e: (
+                                    messagebox.showerror(
+                                        "Autosave Error",
+                                        f"Could not save scoreboard image to '{dir_autosave}':\n{e}",
+                                    ),
+                                    None,
+                                )[1]
+                            )
+
+                    threading.Thread(target=_bg_save, daemon=True).start()
+
+                wh_analytics.results_received(result.has_names(), num_cc)
+                _process_racedir(model)  # update the UI
+
+            model.enqueue(_ui_update)
+
+    threading.Thread(target=_bg_process_new_result, daemon=True).start()
+
+
 def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
     """Set up watches for files/directories and connect to model.
 
@@ -322,83 +396,6 @@ def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
         if system is not None:
             model.timing_system = system()
 
-    def process_racedir() -> None:
-        """Load all the race resultsand update the UI."""
-        # Capture variables on the main thread
-        directory = model.dir_results.get()
-        timing_system = model.timing_system
-
-        def _bg_process_racedir() -> None:
-            with sentry_sdk.start_span(
-                op="update_race_ui", description="Update race summaries in UI"
-            ) as span:
-                contents = summarize_racedir(directory, timing_system)
-                span.set_tag("race_files", len(contents))
-                model.enqueue(lambda: model.results_contents.set(contents))
-
-        threading.Thread(target=_bg_process_racedir, daemon=True).start()
-
-    def process_new_result(file: str) -> None:
-        """Process a new race result that has been detected.
-
-        :param file: The new result file to process
-        """
-        # Capture variables on the main thread
-        timing_system = model.timing_system
-        startlist_dir = model.dir_startlist.get()
-        min_times = model.min_times.get()
-        time_threshold = model.time_threshold.get()
-        autosave_enabled = model.autosave_scoreboard.get()
-        dir_autosave = model.dir_autosave.get()
-        # Num active chromecasts for analytics
-        num_cc = len([x for x in model.cc_status.get() if x.enabled])
-
-        def _bg_process_new_result() -> None:
-            with sentry_sdk.start_transaction(op="new_result", name="New race result"):
-                result = load_result(
-                    timing_system, startlist_dir, min_times, time_threshold, file
-                )
-                if result is None:
-                    return
-
-                def _ui_update() -> None:
-                    scoreboard = ScoreboardImage(
-                        imagecast_types.IMAGE_SIZE, result, model
-                    )
-                    model.scoreboard.set(scoreboard.image)
-                    model.latest_result.set(result)
-
-                    if autosave_enabled:
-
-                        def _bg_save() -> None:
-                            try:
-                                if not os.path.exists(dir_autosave):
-                                    os.makedirs(dir_autosave)
-                                filename = f"E{int(result.event or 0):03d}-H{int(result.heat or 0):02d}-scoreboard.png"
-                                filepath = os.path.join(dir_autosave, filename)
-                                scoreboard.image.save(filepath)
-                            except (OSError, IOError) as e:
-                                logger.error(
-                                    "Error autosaving scoreboard to %s: %s",
-                                    dir_autosave,
-                                    e,
-                                )
-                                model.enqueue(
-                                    lambda e=e: messagebox.showerror(  # type: ignore
-                                        "Autosave Error",
-                                        f"Could not save scoreboard image to '{dir_autosave}':\n{e}",
-                                    )
-                                )
-
-                        threading.Thread(target=_bg_save, daemon=True).start()
-
-                    wh_analytics.results_received(result.has_names(), num_cc)
-                    process_racedir()  # update the UI
-
-                model.enqueue(_ui_update)
-
-        threading.Thread(target=_bg_process_new_result, daemon=True).start()
-
     def result_dir_updated() -> None:
         """When the raceresult directory is changed, update the watch to look at the new directory and trigger processing of the results."""
         path = model.dir_results.get()
@@ -408,11 +405,11 @@ def setup_result_watcher(model: Model, observer: BaseObserver) -> None:
         update_timing_system()
 
         def async_process(file: str) -> None:
-            model.enqueue(lambda: process_new_result(file))
+            model.enqueue(lambda: _process_new_result(model, file))
 
         observer.schedule(ResultWatcher(async_process, model.timing_system), path)
         logger.debug("result watcher updated to %s", path)
-        process_racedir()
+        _process_racedir(model)
 
     # Need to update the result dir both when the directory changes and when the
     # result format changes, since the format is used to determine the timing
@@ -639,8 +636,6 @@ def main() -> None:  # noqa: PLR0915
         pass
     except RuntimeError:
         pass
-
-    root.resizable(True, True)  # Allow resizing of the main window
 
     if args.test is not None:
         scenario = autotest.build_scenario(model, args.test)
