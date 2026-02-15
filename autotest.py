@@ -110,7 +110,7 @@ def build_scenario(model: Model, test: str) -> Scenario:
     :param model: The application model
     :param test: The test description
     """
-    test_name = test.split(":")[0]
+    test_name = test.split(":", maxsplit=1)[0]
     if test_name == "chromecast":
         [delay, seconds, operations] = test.split(":")[1:]
         return _build_cc_scenario(model, float(delay), float(seconds), int(operations))

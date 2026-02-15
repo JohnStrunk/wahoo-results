@@ -305,7 +305,7 @@ class ChromcastSelector(ttk.Frame):
         self.tview.delete(*self.tview.get_children())
         local_list = self.devstatus.get()
         # Sort them by name for display
-        local_list.sort(key=lambda d: (d.name))
+        local_list.sort(key=lambda d: d.name)
         for dev in local_list:
             txt_status = "Yes" if dev.enabled else "No"
             self.tview.insert(
