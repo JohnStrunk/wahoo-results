@@ -1094,16 +1094,16 @@ wheels = [
 
 [[package]]
 name = "pychromecast"
-version = "14.0.9"
+version = "14.0.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "casttube" },
     { name = "protobuf" },
     { name = "zeroconf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0d/8d/8ff8f1e114dcf8f7ed00e4d1472b5b6c2dc1c895cadadd7942ea1ec6ddd6/pychromecast-14.0.9.tar.gz", hash = "sha256:fe78841b0b04aa107d08aed216e91ab9cfb54b11d089d382be4e987e3631d4a6", size = 61484, upload-time = "2025-08-20T11:03:07.392Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/1f/d78497441334d24740cce0a92394c33972a9d6a17b607d0ec976f0f48a35/pychromecast-14.0.10.tar.gz", hash = "sha256:f05a1c8d727d4f104c8c731688053033e05157f2ab81bc8eef50ec0c62f9373c", size = 61588, upload-time = "2026-03-07T16:37:42.833Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8d/28/bdcde91d9644ea7d358cd5ff0ff95e9528ef1ee86eaa9e89b312bff74173/pychromecast-14.0.9-py2.py3-none-any.whl", hash = "sha256:77955c622a002f25e44a17536bd08916a7515d7f9c0878f1f94cac97af1c2a55", size = 77368, upload-time = "2025-08-20T11:03:06.285Z" },
+    { url = "https://files.pythonhosted.org/packages/1f/61/f0f176622e2b4df06318a3abb2a27cc4c2fee8d40d7a0db8d60034785c09/pychromecast-14.0.10-py2.py3-none-any.whl", hash = "sha256:f5ea52b1db0edc3019ec72c9f5354c7e77c2564ecd44f809a6d2f4f518a02e67", size = 77467, upload-time = "2026-03-07T16:37:41.527Z" },
 ]
 
 [[package]]
@@ -1492,7 +1492,7 @@ requires-dist = [
     { name = "fonttools", specifier = "==4.61.1" },
     { name = "ipinfo", specifier = "==5.4.1" },
     { name = "pillow", specifier = "==12.1.1" },
-    { name = "pychromecast", specifier = "==14.0.9" },
+    { name = "pychromecast", specifier = "==14.0.10" },
     { name = "pyinstaller", specifier = "==6.19.0" },
     { name = "requests", specifier = "==2.32.5" },
     { name = "segment-analytics-python", specifier = "==2.3.5" },
