@@ -39,7 +39,7 @@ testing.
 
 - To run the app (for development): `uv run wahoo_results.py`
 - To build the executable version:
-  - Install UPX: `choco install upx --version 5.1.0`
+  - Install UPX: `choco install upx --version 5.1.1`
   - Run the build script: `uv run python build.py`
 
 ### Testing
