@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fonttools==4.62.1",
-    "ipinfo==5.4.1",
+    "ipinfo==5.5.0",
     "pillow==12.1.1",
     "pychromecast==14.0.10",
     "pyinstaller==6.19.0",
