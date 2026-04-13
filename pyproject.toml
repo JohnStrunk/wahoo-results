@@ -13,7 +13,7 @@ dependencies = [
     "requests==2.33.1",
     "segment-analytics-python==2.3.6",
     "semver==3.0.4",
-    "sentry-sdk==2.56.0",
+    "sentry-sdk==2.58.0",
     "watchdog==6.0.0",
 ]
 
