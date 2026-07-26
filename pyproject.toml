@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fonttools==4.63.0",
     "ipinfo==5.6.0",
-    "pillow==12.2.0",
+    "pillow==12.3.0",
     "pychromecast==14.0.10",
     "pyinstaller==6.20.0",
     "requests==2.34.2",
