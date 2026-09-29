@@ -11,7 +11,7 @@ dependencies = [
     "pychromecast==14.0.10",
     "pyinstaller==6.22.3",
     "requests==2.34.2",
-    "segment-analytics-python==2.3.6",
+    "segment-analytics-python==2.4.0",
     "semver==3.1.0",
     "sentry-sdk==2.71.0",
     "watchdog==6.0.0",
